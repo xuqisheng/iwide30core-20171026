@@ -1,0 +1,280 @@
+<?php
+
+namespace App\services\soma;
+
+use App\services\BaseService;
+use App\models\soma\SeparateBilling;
+
+/**
+ * Class LedgerAccountService
+ * @package    App\services\soma
+ *
+ * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+ */
+class SeparateBillingService extends BaseService
+{
+    /**
+     * Gets the instance.
+     *
+     * @return     ConsumerService
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     */
+    public static function getInstance()
+    {
+        return self::init(self::class);
+    }
+
+    /**
+     * 下单成功写入分账记录
+     *
+     * @param      string  $order_id  订单ID
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     */
+    public function writeOrderSeparateBilling($order_id)
+    {
+        try {
+            $separate_model = new SeparateBilling();
+            $info = $separate_model->getOrderBillingInfo($order_id);    
+
+            // 订单没有分账信息才写入，避免重复回调或重复重建写入错误信息
+            if (empty($info)) {
+                $this->getCI()->load->model('soma/sales_order_model');
+                if ($order = $this->getCI()->sales_order_model->load($order_id)) {
+                    $inter_id = $order->m_get('inter_id');
+                    $business = $order->m_get('business');
+                    $items    = $order->get_order_items($business, $inter_id);      
+
+                    // 通票商品下单成功暂时不写入分账信息
+                    if($items[0]['hotel_id'] != SeparateBilling::MULITPLE_HOTEL_ID) {
+                        $data['order_id']       = $order_id;
+                        $data['inter_id']       = $inter_id;
+                        $data['hotel_id']       = $items[0]['hotel_id'];
+                        $data['order_qty']      = $items[0]['qty'];
+                        $data['bill_hotel']     = $data['hotel_id'];
+                        $data['bill_qty']       = $data['order_qty'];
+                        $data['can_auto_check'] = SeparateBilling::CAN_AUTO_CHECK_NO;
+                        $data['payment_time']   = $order->m_get('payment_time');
+                        $data['create_time']    = date('Y-m-d H:i:s');
+                        $data['bill_time']      = $data['create_time'];
+                        $data['status']         = SeparateBilling::STATUS_CAN_PAY_YES;
+
+                        // 可退款的订单状态更改为 STATUS_WAITING_CHECK
+                        // 7天退款的订单 can_auto_check 改为 CAN_AUTO_CHECK_YES
+                        if ($items[0]['can_refund'] != \MY_Model_Soma::CAN_REFUND_STATUS_FAIL) {
+                            unset($data['bill_time']);
+                            $data['status'] = SeparateBilling::STATUS_WAITING_CHECK;
+                            if($items[0]['can_refund'] == \MY_Model_Soma::CAN_REFUND_STATUS_SEVEN) {
+                                $data['can_auto_check'] = SeparateBilling::CAN_AUTO_CHECK_YES;
+                            }
+                        }   
+
+                        return $separate_model->saveBilling($data);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // 
+        }
+
+        return false;
+    }
+
+    /**
+     * 核销成功写入分账记录
+     *
+     * @param      string  $order_id        订单号
+     * @param      string  $consumer_id     核销id
+     * @param      string  $consumer_hotel  核销酒店
+     * @param      string  $consumer_qty    核销数量
+     *
+     * @return     boolean  操作成功返回true, 失败返回false.
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     */
+    public function writeConsumerSeparateBilling(
+        $order_id,
+        $consumer_id = -1,
+        $consumer_hotel = null,
+        $consumer_qty = null)
+    {
+        try {
+            $this->getCI()->load->model('soma/sales_order_model');  
+
+            if ($order = $this->getCI()->sales_order_model->load($order_id)) {
+                $inter_id = $order->m_get('inter_id');
+                $business = $order->m_get('business');
+                $items    = $order->get_order_items($business, $inter_id);  
+
+                if ($consumer_hotel == null) {
+                    $consumer_hotel = $items[0]['hotel_id'];
+                }   
+
+                if ($consumer_qty == null) {
+                    $consumer_hotel = $items[0]['qty'];
+                }   
+
+                // 存在核销酒店时才记录分账信息，单店时，核销酒店要与单店id一致
+                if ($consumer_hotel != SeparateBilling::MULITPLE_HOTEL_ID
+                    && ($items[0]['hotel_id'] == $consumer_hotel
+                    || $items[0]['hotel_id'] == SeparateBilling::MULITPLE_HOTEL_ID)) {
+                    // 单店订单核销时，整单确认分账，通票按核销信息插入新数据，核销的一定是可发放的
+                    $data['order_id']       = $order_id;
+                    $data['inter_id']       = $inter_id;
+                    $data['hotel_id']       = $items[0]['hotel_id'];
+                    $data['order_qty']      = $items[0]['qty'];
+                    $data['bill_hotel']     = $consumer_hotel;
+                    $data['bill_qty']       = $consumer_qty;
+                    $data['can_auto_check'] = SeparateBilling::CAN_AUTO_CHECK_NO;
+                    $data['payment_time']   = $order->m_get('payment_time');
+                    $data['create_time']    = date('Y-m-d H:i:s');
+                    $data['bill_time']      = $data['create_time'];
+                    $data['status']         = SeparateBilling::STATUS_CAN_PAY_YES;
+                    $data['consumer_id']    = $consumer_id;
+
+
+                    $separate_model = new SeparateBilling();
+                    if ($items[0]['hotel_id'] != SeparateBilling::MULITPLE_HOTEL_ID) {
+                        // 单店订单在核销时直接确认整单分账信息，数量和酒店均为细单中的数据
+                        $data['bill_hotel']  = $data['hotel_id'];
+                        $data['bill_qty']    = $data['order_qty'];
+                        $data['consumer_id'] = -1;
+
+                        // 已存在分账信息的更新分账信息，单店订单只能有1条分账记录，代码维护
+                        // 不存在分账信息的订单，证明此订单是漏单或上线之前的订单，直接插入可发放分账信息
+                        $info = $separate_model->getOrderBillingInfo($order_id);
+                        if (!empty($info)) {
+                            $data['bill_id'] = $info[0]['bill_id'];
+                        }
+                    }   
+
+                    return $separate_model->saveBilling($data);
+                }   
+
+            }
+        } catch (\Exception $e) {
+            // 
+        }
+
+        return false;
+    }
+
+    /**
+     * 自动审核7天未退款的订单分账信息（单店）
+     *
+     * @return     boolean  分账审核成功返回true，失败返回false.
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     */
+    public function autoCheckSeparateBillingInfo()
+    {
+        $separate_model = new SeparateBilling();
+        $info = $separate_model->getWattingCheckBilling();
+
+        $update = array();
+        $pk = $separate_model->table_primary_key();
+        foreach ($info as $item) {
+            $tmp[ $pk ]         = $item[ $pk ];
+            $tmp[ 'status' ]    = SeparateBilling::STATUS_CAN_PAY_YES;
+            $tmp[ 'bill_time' ] = date('Y-m-d H:i:s');
+            $update[]           = $tmp;
+        }
+        return $separate_model->batchSaveBilling($update);
+    }
+
+    /**
+     * 取消一个订单的分账信息，存在已确认信息的的不能取消
+     *
+     * @param      string   $order_id  订单id
+     *
+     * @return     boolean  更新成功返回true，失败返回false.
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     */
+    public function cancleSeparateBilling($order_id)
+    {
+        $separate_model = new SeparateBilling();
+        $info           = $separate_model->getOrderBillingInfo($order_id);
+
+        $update = array();
+        $pk     = $separate_model->table_primary_key();
+        foreach ($info as $item) {
+            if($item['status'] == SeparateBilling::STATUS_CAN_PAY_YES) {
+                return false;
+            }
+            $tmp[ $pk ]    = $item[ $pk ];
+            $tmp['status'] = SeparateBilling::STATUS_CAN_PAY_NO;
+            $update[]      = $tmp;
+        }
+        return $separate_model->batchSaveBilling($update);
+    }
+
+    /**
+     * 获取可以划款的订单分账信息，对于没有查询到信息的订单重建数据
+     *
+     * @param      array   $order_id     订单id
+     * @param      string  $check_point  开始检查时间点
+     *
+     * @return     array   可以划款订单分账信息
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     */
+    public function getCanPaySeparateBilling($order_ids, $check_point = null)
+    {
+        $this->rebuildOrderSeparateBilling($order_ids);
+
+        $separate_model = new SeparateBilling();
+        $db_conn_active = $this->getCI()->soma_db_conn_read;
+        $separate_model->setActiveDb($db_conn_active);
+
+        $status = SeparateBilling::STATUS_CAN_PAY_YES;
+        return $separate_model->getOrderBillingInfo($order_ids, $check_point, $status);
+    }
+
+    /**
+     * 重建订单分账信息
+     *
+     * @param      array    $order_ids  订单id
+     *
+     * @return     boolean  重建成功返回true, 失败返回false.
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     */
+    public function rebuildOrderSeparateBilling($order_ids)
+    {
+        $none_info_ids  = array_flip($order_ids);
+        $separate_model = new SeparateBilling();
+        $bill_info      = $separate_model->getOrderBillingInfo($order_ids);
+
+        foreach ($bill_info as $info) {
+            if(isset($none_info_ids[ $info['order_id'] ])) {
+                unset($none_info_ids[ $info['order_id'] ]);
+            }
+        }
+
+        $separate_model->getActviveDb()->trans_start();
+        $res = true;
+        foreach ($none_info_ids as $order_id => $value) {
+            $res = $res && $this->writeOrderSeparateBilling($order_id);
+        }
+
+        if ($res) {
+            $separate_model->getActviveDb()->trans_complete();
+        }
+        return $res;
+    }
+
+    /**
+     * 根据核销记录重建订单分账信息
+     *
+     * @param      <type>  $order_ids  The order identifiers
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     */
+    public function rebulidConsumerSeparateBilling($order_ids)
+    {
+
+    }
+
+}

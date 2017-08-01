@@ -1,0 +1,53 @@
+{
+	"data":
+	[{
+	 "msg_id":1001,
+		"name" : 1,
+		"msg" : "SONG送出了大虾！",
+	 	"msg_type":"system",
+	},
+	{
+	 "msg_id":1001,
+		"name" : "金宝宝2号",
+		"msg" : "好吃啊！",
+	 	"msg_type":"user",
+	},
+	{
+	 "msg_id":1001,
+		"name" : 1,
+		"msg" : "SONG送出了大虾！",
+	 	"msg_type":"system",
+	},
+	{
+	 "msg_id":1001,
+		"name" : "金宝宝2号",
+		"msg" : "好吃啊！",
+	 	"msg_type":"user",
+	},
+	{
+	 "msg_id":1001,
+		"name" : 1,
+		"msg" : "SONG送出了大虾！",
+	 	"msg_type":"system",
+	},
+	{
+	 "msg_id":1001,
+		"name" : "金宝宝2号",
+		"msg" : "好吃啊！",
+	 	"msg_type":"user",
+	},
+	{
+	 "msg_id":1001,
+		"name" : 1,
+		"msg" : "SONG送出了大虾！",
+	 	"msg_type":"system",
+	},
+	{
+	 "msg_id":1001,
+		"name" : "金宝宝2号",
+		"msg" : "好吃啊！",
+	 	"msg_type":"user",
+	}],
+ 	"msg":"",
+	"status":1
+}

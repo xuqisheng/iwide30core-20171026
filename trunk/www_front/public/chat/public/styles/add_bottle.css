@@ -1,0 +1,23 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+body,html,.poster_edit{background:#f7f7f7; text-align:justify}
+.poster_edit .poster_edit_box{background:#fff; padding:3%;overflow:hidden; border-bottom:1px solid #c8c7cc;}
+.poster_edit .poster_edit_box .poster_edit_input textarea{width:100%; line-height:1.5}
+.poster_edit .poster_edit_box .img_add_box{ background:url(../images/ico/ico05.png) no-repeat; background-size:100% 100%;}
+.poster_edit .poster_edit_box .ui_img_auto_cut{float:left; margin-right:2%; margin-top:2%;}
+.poster_edit .poster_edit_box .img_add_box img{width:3rem; height:3rem;}
+.poster_edit .poster_edit_box .img_isadd{ background:none}
+.poster_edit .poster_foot_btn{ padding:3%}
+.poster_edit .poster_foot_btn .ui_btn{ margin-right:5%;}
+.poster_edit .poster_foot_btn .send_btn{ float:right; padding:0 3%; margin-right:0}
+
+.user_diy{  border-top: 1px #c8c7cc solid; padding: 3%;}
+.user_diy > div{margin:5% 0}
+.user_diy > .user_diy_name input{ border-bottom:2px solid #b5b8bd; padding-bottom:1%; width:8em;}
+.user_diy > .user_diy_img{display:inline-block; border:3px solid #b5b8bd; border-radius:0.2rem; height:3rem; width:3rem;}
+.user_diy .save_btn{ border-radius:0.3rem; background:#43a939; color:#fff; display:block; margin:5% auto; padding:4% 0; width:80%; text-align:center}
+
+
+

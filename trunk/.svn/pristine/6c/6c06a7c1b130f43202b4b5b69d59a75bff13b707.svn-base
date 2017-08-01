@@ -1,0 +1,357 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Priv_node extends MY_Model {
+
+/***** 以下为必填函数信息  *****/
+	public function get_resource_name()
+	{
+		return '后台节点';
+	}
+	
+	public static function model($className=__CLASS__)
+	{
+		return parent::model($className);
+	}
+	/**
+	 * @return string the associated database table name
+	 */
+	public function table_name()
+	{
+		return 'core_node';
+	}
+
+	public function table_primary_key()
+	{
+	    return 'node_id';
+	}
+	
+	/**
+	 * 定义字段标签名称，数组的key一定要严格按照实际数据库字段
+	 */
+	public function attribute_labels()
+	{
+	    return array(
+	        'node_id' => 'ID',
+	        'module' => '所属模块',
+	        'project' => '菜单分组',
+	        'parent' => '父节点',
+	        'p_href' => 'Href属性',
+	        'p_label' => 'Label属性',
+	        'p_title' => 'Title属性',
+	        'p_target' => 'Target属性',
+	        'p_icon' => 'Icon属性',
+	        'sort' => '排序',
+	        'status' => '状态',
+	    );
+	}
+
+	/**
+	 * 后台管理的表格中要显示哪些字段
+	 */
+	public function grid_fields()
+	{
+	    return array('node_id', 'project', 'p_href', 'p_label', 'p_title', 'p_icon', 'sort', 'status');
+	}
+	
+	/**
+	 * 在EasyUI grid中的 date-option 定义，包括宽度，是否排序等等
+	 *   type: grid中的表头类型定义 
+	 *   form_type: form中的元素类型定义
+	 *   form_ui: form中的属性补充定义，如加disabled 在<input “disabled” /> 使元素禁用
+	 *   form_tips: form中的label信息提示
+	 *   form_default: form中的默认值，请用字符类型，不要用数字
+	 *   select: form中的类型为 combobox时，定义其下来列表
+	 */
+	public function attribute_ui()
+	{
+	    //tp: numberbox数字框|combobox下拉框|text不写时默认|datebox
+	    $base_util= EA_base::inst();
+	    $projects= $this->array_to_hash($this->get_project_mapping(), 'label' );
+	    
+	    $parents= array('0'=> '==二级==') + $this->get_node_tree_option();
+	    
+	    $modules= config_item('admin_panels')? config_item('admin_panels'): array();
+	    return array(
+	        'node_id' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '5%',
+	            'form_ui'=> '',
+	            'type'=>'text',
+	            //'form_type'=> 'hidden',
+	        ),
+	        'module' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '10%',
+	            'form_ui'=> '',
+	            'type'=>'combobox',
+	            'select'=> $modules,
+	        ),
+	        'project' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '12%',
+	            'form_ui'=> '',
+	            'form_tips'=> '',
+	            'type'=>'combobox',
+	            'select'=> $projects,
+	        ),
+	        'parent' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '12%',
+	            'form_ui'=> '',
+	            'form_tips'=> '',
+	            'type'=>'combobox',
+	            'select'=> $parents,
+	        ),
+	        'p_title' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '15%',
+	            'form_ui'=> '',
+	            'form_tips'=> '',
+	            'type'=>'text',
+	        ),
+	        'p_label' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '15%',
+	            'form_ui'=> '',
+	            'form_tips'=> '',
+	            'type'=>'text',
+	        ),
+	        'p_href' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '12%',
+	            'form_ui'=> '',
+	            'form_tips'=> '定义菜单点击目标地址，如 "module/controller/action"',
+	            'type'=>'text',
+	        ),
+	        'p_target' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '12%',
+	            'form_ui'=> '',
+	            'form_tips'=> '定义新窗口打开',
+	            'type'=>'combobox',
+	            'select'=> array(''=> '原窗口打开','_blank'=> '新窗口打开'),
+	        ),
+	        'p_icon' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '10%',
+	            'form_ui'=> '',
+	            'form_default'=> 'fa-folder-open',
+	            'form_tips'=> '定义菜单左边小图标，如 "fa-home"',
+	            'type'=>'text',
+	        ),
+	        'sort' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '10%',
+	            'form_ui'=> '',
+	            'form_default'=> '0',
+	            'type'=>'text',
+	        ),
+	        'status' => array(
+	            'grid_ui'=> '',
+	            'grid_width'=> '10%',
+	            'form_ui'=> '',
+	            // label,text,textarea,checkbox,numberbox,validatebox,datebox,combobox,combotree
+	            'type'=>'combobox',
+	            'select'=> $base_util::get_status_options(),
+	        ),
+	    );
+	}
+
+	/**
+	 * grid表格中默认哪个字段排序，排序方向
+	 */
+	public static function default_sort_field()
+	{
+	    return array('field'=>'node_id', 'sort'=>'desc');
+	}
+
+	/**
+	 * grid表格中的过滤器匹配方式数组
+	 */
+
+	
+/***** 以下上为必填函数信息  *****/
+
+	/**
+	 * 取节点的一级导航
+	 * @param string $id
+	 * @return multitype:multitype:string  |string
+	 */
+	public function get_project_mapping($id=false )
+	{
+		$map= array(
+			2 => array( 'name'=> 'wx_base','label'=> '基础功能','href'=> '#','icon'=> 'fa-gears',),
+			3 => array( 'name'=> 'hotel_order','label'=> '酒店订房','href'=> '#','icon'=> 'fa-building',),
+			5 => array( 'name'=> 'social_mall','label'=> '商城套票','href'=> '#','icon'=> 'fa-group',),
+			// 14 => array( 'name'=> 'center','label'=> '中心平台','href'=> '#','icon'=> 'fa-group',),
+			// 6 => array( 'name'=> 'ec_social','label'=> '社交商城','href'=> '#','icon'=> 'fa-shopping-cart',),
+		 	// 4 => array( 'name'=> 'mooncake','label'=> '月饼说','href'=> '#','icon'=> 'fa-birthday-cake',),
+			7 => array( 'name'=> 'member','label'=> '会员中心','href'=> '#','icon'=> 'fa-openid',),
+			13 => array( 'name'=> 'membervip','label'=> '会员中心4.0','href'=> '#','icon'=> 'fa-gears',),
+			12=> array( 'name'=> 'sales','label'=> '营销中心','href'=> '#','icon'=> 'fa-line-chart',),
+			8 => array( 'name'=> 'payment','label'=> '快乐付','href'=> '#','icon'=> 'fa-credit-card',),
+			15 => array( 'name'=> 'payment','label'=> '客房点餐','href'=> '#','icon'=> 'fa-credit-card',),
+			18 => array( 'name'=> 'payment','label'=> '餐厅点餐','href'=> '#','icon'=> 'fa-credit-card',),
+			19 => array( 'name'=> 'payment','label'=> '外卖送餐','href'=> '#','icon'=> 'fa-credit-card',),
+            16=> array( 'name'=> 'appointment','label'=> '预约订座','href'=> '#','icon'=> 'fa-list-alt',),
+            17=> array( 'name'=> 'ticket','label'=> '预约核销','href'=> '#','icon'=> 'fa-list-alt',),
+			9 => array( 'name'=> 'fenxiao','label'=> '全员分销','href'=> '#','icon'=> 'fa-users',),
+			11=> array( 'name'=> 'statistics','label'=> '数据统计','href'=> '#','icon'=> 'fa-bar-chart',),
+			10=> array( 'name'=> 'pay_config','label'=> '支付配置','href'=> '#','icon'=> 'fa-money',),
+			1 => array( 'name'=> 'system','label'=> '系统管理','href'=> '#','icon'=> 'fa-gears',),
+		);
+		if( $id && isset($map[$id]) ) return $map[$id]['label'];
+		else if($id===false ) return $map;
+		else return '';
+	}
+	public function get_project_hash()
+	{
+	    $project= $this->get_project_mapping();
+	    return $this->array_to_hash($project, 'label');
+	}
+	
+	/**
+	 * 取所有的节点数组
+	 * @param string $module
+	 * @return Ambigous <multitype:multitype: , multitype:multitype: unknown >
+	 */
+	public function get_node_tree_array($module='adminhtml')
+	{
+		$table = $this->table_name();
+		//$query = $this->_db()->get($table);//->where("`module`='{$module}'")
+		$where= array(
+			'module'=> $module,
+			'status'=> EA_base::STATUS_TRUE,
+		);
+		$query= $this->_db()->select('*')
+			->order_by('sort', 'DESC')
+			//->order_by('node_id', 'ASC')
+			//->limit(10, 20)  10 record perpage
+			->get_where($table, $where);
+		$result= $query->result_array();
+		//print_r($result);die;
+		
+		$data= array();
+		foreach($result as $v){
+			//node_id=> node record.
+			$data[$v['node_id']]= $v;
+		}
+		//print_r($data);die;
+		
+		//use to find 'level 2 ID' => 'level 1 ID'
+		$top_level_mapping= array();
+		$project_mapping= $this->get_project_mapping();
+//print_r($project_mapping);die;  //显示一级菜单
+		foreach ($data as $k=> $v) {
+			//must be sort by parent ASC by first.
+			$new= array(
+				'target'=> $v['p_target'],
+				'title'=> $v['p_title'],
+				'href'=> $v['p_href'],
+				'label'=> $v['p_label'],
+				'icon'=> $v['p_icon'],
+				'child'=> array(),
+			);
+			
+			if($v['parent']==0 && array_key_exists($v['project'], $project_mapping ) ){
+				//deal with level 2 node, it's parent=0
+				$project_mapping[$v['project']]['child'][$v['node_id']]= $new;
+				$top_level_mapping[$v['node_id']] = $v['project'];
+				
+			}
+		}
+/* 必须先循环获取一级，二级菜单，再循环第三级 */
+		foreach ($data as $k=> $v) {
+			//must be sort by parent ASC by first.
+			$new= array(
+				'target'=> $v['p_target'],
+				'title'=> $v['p_title'],
+				'href'=> $v['p_href'],
+				'label'=> $v['p_label'],
+				'icon'=> $v['p_icon'],
+				'child'=> array(),
+			);
+			if( array_key_exists($v['parent'], $top_level_mapping) ) {
+//print_r($project_mapping);die;
+				//} elseif( array_key_exists($v['parent'], $top_level_mapping) && array_key_exists($v['parent'], $data)) {
+				//deal with level 3 node
+				$level1Id= $top_level_mapping[$v['parent']];
+				$project_mapping[$level1Id]['child'][$v['parent']]['child'][$v['node_id']]= $new;
+			}
+		}
+		//print_r($project_mapping);die;
+		return $project_mapping;
+	}
+	
+	/**
+	 * 获取菜单目录树select option（限定2级，不做选中状态）
+	 * @return string
+	 */
+	public function get_node_tree_option()
+	{
+	    $array= '';
+	    $top= $this->get_project_mapping();
+	    foreach ($top as $k=>$v ){
+	        //$array['_'. $k]= '+'. $v['label'];
+	        $tmp= $this->get_data_filter(array('parent'=> '0', 'project'=> $k));
+	        //print_r($tmp);die;
+	        foreach ($tmp as $sv){
+	            $array[$sv['node_id']]= '+---'. $sv['p_label'];
+	            $tmp2= $this->get_data_filter(array('parent'=> $sv['node_id']));
+	            //print_r($array);die;
+	            foreach ($tmp2 as $ssv) {
+	                $array[$ssv['node_id']]= '+-----'. $ssv['p_label'];
+	            }
+	        }
+	    }
+	    //print_r($array);die;
+	    return $array;
+	}
+
+	/**
+	 * 与 get_node_tree_option类似，获取菜单目录树select option（递归调用不限级别，做选中状态）
+	 * @return string
+	 */
+	public function get_node_options_hash($my_id=null, $level=false, $pid=0, $hide_not_active=false, $margin=0)
+	{
+		if ($level>=0 || $level===false) {
+			$filer= array('parent'=>$pid);
+			if ($hide_not_active===true) {
+				$filer = array_merge($filer, array('status'=>1 ) );
+			}
+
+			$table = $this->table_name();
+			$select= implode(',', array_keys($filer) );
+			$query= $this->_db()->select("*")->get_where($table, $filer );
+			$result= $query->result();
+			
+			if (count($result)>0) {
+				$options= array();
+				foreach ($result as $v) {
+					$key= (int) $v->node_id;
+					//can not select some ID
+					if( $my_id && $my_id== $key ){
+						continue;
+					}
+					$options[$key] = str_repeat('|---', (int) $margin ). $v->p_label;
+					$_level = $level===false? $level: $level-1;
+					$_pid = $v->node_id;
+					$tmp = $this->get_node_options_hash($my_id, $_level, $_pid, $hide_not_active, $margin+1);
+					if ( count($tmp) >0 ) {
+						$options= $options+ $tmp;
+					}
+				}
+				return $options;
+			}
+			else {
+				return array();
+			}
+		} else {
+			return array();
+		}
+	}
+	
+	
+
+}

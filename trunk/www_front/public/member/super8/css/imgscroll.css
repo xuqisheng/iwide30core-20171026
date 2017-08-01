@@ -1,0 +1,18 @@
+@charset "utf-8";
+/* CSS Document */
+
+/*大图滚动*/
+.headers{width:100%;height:6rem;overflow: hidden;position: relative;}
+.headerslide{width:5000px;height: 100%;position:relative;}
+
+.slideson,.slideson img{ height:100%;display:block; width:100%;text-align:center}
+.slideson.imgshow,.slideson.imgshow img{float: left; }
+.slideson p{position:absolute;width:100%; height:100%; color:#fff;top:35%; text-shadow:1px 1px 3px #000; text-align:center}
+.slideson p span{display:block;}
+
+.banner{position: absolute;bottom: 0;padding: 2% 4%;width: 92%;color: white;overflow: hidden;}
+
+.circle{overflow: hidden; text-align:center}
+.circle span{display:inline-block;width:0.4rem;height:0.4rem;border-radius: 0.4rem;background:#fff;opacity: 0.4; margin-right:2%;}
+.circle span.disc_show{opacity:0.9}
+/*end*/

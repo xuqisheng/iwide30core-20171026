@@ -1,0 +1,28 @@
+@charset "utf-8";
+/* CSS Document */
+
+.content{ margin-bottom:4%}
+.wipe{overflow:hidden}
+.content .item {position:relative}
+.content .item .delete{position:absolute; width:6em; height:100%; background:#f00; color:#fff; text-align:center; left:100%; top:0; display:table-cell; vertical-align:middle;}
+
+.footbtn{ position:fixed; bottom:0; width:100%; background:#fff; border-top:1px solid #e4e4e4;}
+.footbtn .choosebtn{ float:none; line-height:normal;  vertical-align: middle;}
+.footbtn .chooseall{ margin-left:4%;}
+.footbtn > div { display:inline-block; min-width:30%; padding:3.5% 0}
+.footbtn > div.float_r { text-align:center; padding:4.1% 0}
+.footbtn .paybtn{ width:100%;}
+
+
+.addcount{float:right; text-align:right; font-size:0; margin-top:2%; width:5.5rem;}
+.addcount > div{ display:inline-block;text-align:center;padding:0.2rem 0.5rem; font-size:0}
+.addcount input{ width:0.8rem; font-size:0.6rem;text-align:center;vertical-align:middle; color:#fe4e00}
+.addcount img{width:auto; height:0.6rem; vertical-align:middle;}
+.addcount .num{ border-left:1px solid #999999;border-right:1px solid #999999; }
+.addcount .add{}
+.addcount .down{  opacity:0.6 ;}
+
+
+
+
+

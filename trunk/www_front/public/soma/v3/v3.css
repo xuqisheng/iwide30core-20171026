@@ -1,0 +1,14 @@
+@charset "utf-8";
+/* CSS Document */
+body,html{background:#e5e5e5 !important;}
+
+.headers .circle span{background:none !important; border-radius:0 !important; border:1px solid rgba(255,255,255,0.5); width:10px !important; height:3px !important;}
+.headers .circle span.disc_show{border:1px solid #ff9900;}
+.tp_list .item{width:100%; margin:0;margin-bottom:2%; float:none}
+.tab_menus > *{padding:8px}
+.tp_list .img{ padding-bottom:41%;}
+.tp_list img{height:auto; min-height:100%}
+.tab_menus div.cur{border-bottom:0; color:inherit}
+.tab_menus em{ width:25px; max-width:25px; height:25px; margin-right:5px; color:#fff; background:#4e4e4e; border-radius:50%; line-height:25px}
+.tab_menus span{text-align:left; line-height:1}
+.s_select:after{ content:""}

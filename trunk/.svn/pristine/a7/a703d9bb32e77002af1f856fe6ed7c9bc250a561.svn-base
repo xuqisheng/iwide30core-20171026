@@ -1,0 +1,14 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;}
+header{padding:3%}
+header .order_status{text-align:center}
+header ul,.book_intro ul,.notic{ margin-top:3%}
+header li,.book_intro li {margin-top:1%;}
+header li span:first-child,.book_intro li span:first-child{ opacity:0.6;}
+header li span:first-child,.block_contet span:first-child,.block_content span:first-child{ width:20%; display:inline-block;}
+
+.block_title,.block_content{padding:2% 2.5%;}
+.block_content{ background:#fff; border-top:1px solid; border-bottom:1px solid; border-color:#e4e4e4;}
+.notic *{ margin-bottom:1%; text-align:justify}

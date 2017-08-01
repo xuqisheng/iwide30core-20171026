@@ -1,0 +1,116 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;}
+
+header .ui_ico{width:2.2em; height:2.2em;}
+header .allimg,header .hotelname,header .addlike,header .blackbg{position:absolute; color:#f8f8f8;}
+header .allimg{ top:5%; right:10%; background:rgba(0,0,0,0.5); padding:1% 2%}
+.headers .hotelname{ bottom:3%; left:3%; width:70%; font-size:14px;}
+.headers .tag{padding-top:1%}
+header .addlike{ bottom:3%; right:3%; z-index:99}
+header .addlike span:before,header .addlike.islike span:before{ font-family:'iconfont'; font-size:1.1em;content:"\2a"; margin-right:0.3em;}
+header .addlike.islike span:before{content:"\29";color:#d21527}
+header .blackbg{ bottom:0; padding-top:15%; width:100%; background:url(../images/bg02.png) repeat-x bottom left; background-size:auto 100%; opacity:0.9}
+
+.inrto_list,.list_head,.room_list .item,.hotel_rule,.vote_spread{background:#fff; border-width:0 0 1px 0; border-image:url(border.gif) 2 stretch;}
+.inrto_list{padding-left:3%; border-top:0}
+.inrto_list>div{display:-webkit-box;-webkit-box-align:center;}
+.inrto_list>div>*{ display:block; min-width:2.5em}
+.inrto_list .ui_btn_block{-webkit-box-flex:1;border-width:0 0 1px 0; border-image:url(border.gif) 2 stretch; padding-top:3%; padding-bottom:3%; background-size:auto 30%;}
+.inrto_list .ui_btn_block span{ display:inline-block; overflow:hidden }
+.inrto_list>div:last-child .ui_btn_block{border-width:0}
+.inrto_list .txtclip{}
+.inrto_list .ui_ico{width:2em; height:2em; margin-right:2%}
+.inrto_list span:last-child{ float:right}
+
+.room_list .item,.vote_spread .item,.list_head,.now_pay,.pre_pay,.room_list .item_left {overflow:hidden; }
+
+.headfixed,.hotel_list .item,.hotel_rule .title,.vote_spread .title,.item_foot .pay_way{border-width:0 0 1px 0; border-image:url(border.gif) 2 stretch;}
+
+.list_head{margin-top:3%; border-top:1px;}
+.list_head div span{margin-right:1.5%}
+.checkdate{padding-top:3%; padding-bottom:3%; padding-left:3%; width:92%; float:left}
+.checkdate .checkin_time{float:right;}
+.guest{float:right;width:23%; display:block; text-align:right; padding-top:3%; padding-right:3%;}
+.guest .ui_ico{ width:2.4em; height:2.4em}
+.guest .iconfont{font-size:2.9em;}
+.guest span{vertical-align:middle}
+
+.vote_spread .item{margin-bottom:3%}
+.room_list{margin-top:3%}
+.room_list .item,.vote_spread .item{ position:relative; display:block; overflow:hidden}
+.room_list .item_left,.vote_spread  .item_left{padding:1.5% 3%;width:70%;}
+.room_list .item:last-child,.vote_spread .item:last-child{ margin-bottom:0}
+.room_list .item:first-child{border-top:1px}
+.room_list .room_img,.vote_spread .room_img{ float:left; width:75px; height:60px; margin-right:3%; position:relative; overflow:hidden;}
+.room_list .room_img img,.vote_spread .room_img img{ position:absolute; min-height:100%;}
+.room_list .backvote,.vote_spread .sever{ margin-top:1%}
+.room_list .room_name span{ background:#d40f20; padding:0 0.1em; color:#fff; margin-left:1%; font-size:0.8em; border-radius:0.2em;}
+
+.item_right{ position:absolute; right:3%; top:20%; width:50%; text-align:right}
+.item_right>div{display:inline-block; vertical-align:middle}
+.item_right .backvote{margin-right:2em}
+.item_right .iconfont{font-size:1em}
+
+.room_list_many .item_right{ top:2.5em; padding:3% 0;}
+.room_list_many .item_right .ui_ico{width:2.9em; height:2.9em; background-size:100% auto;}
+.room_list_many .item_right .ui_price{ padding-right:0.4em}
+
+.item_foot{background:#f8f8f8; padding-bottom:3%}
+.vote_spread .item{padding:2% 4%}
+
+.viplist{background:#fff; text-align:center;display:-webkit-box; border:1px solid #e4e4e4; border-radius:5px; overflow:hidden; width:90%; margin:auto; margin-top:3%;padding:2%}
+.vip{display:block; min-width:62px; margin-left:10px; text-align:center;-webkit-box-flex:1; border:1px solid #d49dc5; border-radius:5px; overflow:hidden}
+.item_foot .vip:first-child{ margin:0}
+.vip > *{padding:5px 0;}
+.vip > *:first-child{ background:#d49dc5; color:#fff;}
+.vip:nth-of-type(2){ border-color:#fe9c53;}
+.vip:nth-of-type(3){ border-color:#d2b976;}
+.vip:nth-of-type(4){ border-color:#23a2d9;}
+.vip:nth-of-type(2) > *:first-child{ background:#fe9c53}
+.vip:nth-of-type(3) > *:first-child{ background:#d2b976}
+.vip:nth-of-type(4) > *:first-child{ background:#23a2d9}
+
+.item_foot .room_book .item_right{top:15%; padding:0}
+.item_foot .pay_way{position:relative; margin-left:3%; padding:3%;}
+.item_foot .pay_way:last-child{border-bottom:0; padding-bottom:0}
+
+.now_pay,.pre_pay,.no_pay{border-width:1px; border-style:solid;border-radius:0.5em;text-align:center; width:7em; display:inline-block; vertical-align:middle}
+.pre_pay p{padding:0.2em 0}
+.pre_pay p:last-child{ background:#fff;}
+.now_pay p,.no_pay p{padding:0.5em 0}
+.item_right .ui_price{ padding-right:0.7em}
+.no_pay{background-color:#999;border-color:#999;}
+.hotel_rule,.vote_spread{margin-top:3%}
+.hotel_rule .content{ background:#fafafa}
+.hotel_rule .title,.hotel_rule .content,.vote_spread .title{padding:3%}
+
+.full_room,.full_room span{position:absolute; top:0; right:0; display:block; }
+.full_room span:last-child{ top:0.2em; right:0.2em;}
+.full_room{font-size:2.4em; color:#fff;}
+.topright{width: 0; height: 0;border-top: 2.5em solid #999;border-left: 2.5em solid transparent; }
+.full_room.ag_price{width:7em;}
+.full_room.ag_price .topright{border-top:7em solid #ff1307;}
+
+.room_list .isfull,.room_list .isfull .ui_price{ color:#999 !important} 
+
+.ui_price:before,.ui_price tt{ font-size:0.7em;}
+.tag > * {display: inline-block; width:auto; height:13px}
+._c{padding-right:35px}
+._c:before{content:'\32'; font-family:iconfont2; font-size:20px}
+
+.pull_result{width:100%; position:fixed; top:35%; left:0; z-index:99; text-align:center; color:#fff;}
+.pull_result div{background:rgba(0,0,0,0.7); border-radius:10px; display:inline-block; min-width:30%; padding:4% 2%}
+.pull_result p{font-size:15px; line-height:1.5}
+.pull_result .iconfont{font-size:24px}
+.detail_pull .content{padding-top:0}
+.detail_pull .content ul{ text-align:left; padding:0;border-width:0 0 1px 0; border-image:url(border.gif) 2 stretch; margin-bottom:3%;}
+.detail_pull .content li{ width:48%; display:inline-block; padding:0 0 3% 0}
+.detail_pull .close{bottom:5px}
+
+.new_store{position:absolute; -webkit-transform:rotate(45deg); background:#d61b2b;font-size:8px; width:70px; text-align:center; padding-top:20px; padding-bottom:2px;color:#fff; right:-31px; top:-11px; z-index:99}
+
+
+
+

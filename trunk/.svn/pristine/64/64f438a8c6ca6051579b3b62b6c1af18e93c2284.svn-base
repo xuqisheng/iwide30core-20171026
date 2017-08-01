@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * User: renshuai <renshuai@mofly.cn>
+ * Date: 2017/5/5
+ * Time: 11:25
+ */
+class MY_Input extends CI_Input
+{
+    /**
+     * @param null $index
+     * @param null $xss_clean
+     * @param null $default
+     * @return mixed|null
+     * @author renshuai  <renshuai@mofly.cn>
+     */
+    public function get($index = NULL, $xss_clean = NULL, $default = null)
+    {
+        $value = parent::get($index, $xss_clean);
+        if ( empty($value) && !empty($default) ) {
+            $value = $default;
+        }
+        return $value;
+    }
+}

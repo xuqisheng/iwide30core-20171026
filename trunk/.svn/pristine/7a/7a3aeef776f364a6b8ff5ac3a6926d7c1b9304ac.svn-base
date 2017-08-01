@@ -1,0 +1,692 @@
+<?php
+/**
+ * 分销接口模块
+ * 
+ * 注：
+ * 酒店分销与泛分销接口存在大量相同的代码，
+ * 但是由于接口是不一样的，可能会进行修改，保持接口相互独立
+ *
+ * @author     F.oris <fengzhongcheng@mofly.com>
+ */
+class Api_idistribute extends Soma_base {
+
+	const REQUEST_TYPE_NATIVE  = 'navite';
+	const GRADE_TABLE_DEFAULT  = 'iwide_soma_sales_order:';
+	const GRADE_TABLE_MOONCAKE = 'iwide_soma_mooncake_order:';
+
+	public function __construct() {
+		$CI = &get_instance();
+		$CI->load->model('soma/Sales_order_model', 'order_model');
+		$CI->load->model('soma/Reward_rule_model', 'rule_model');
+		$CI->load->model('soma/Reward_benefit_model', 'reward_model');
+
+		$this->order_model  = $CI->order_model;
+		$this->rule_model   = $CI->rule_model;
+		$this->reward_model = $CI->reward_model;
+	}
+
+	/**
+	 * 获取获取分销业绩状态与订单状态转换数组
+	 *
+	 * @param      string  $groupon  拼团标识
+	 *
+	 * @return     array   分销业绩状态与订单状态转化数组
+	 */
+	protected function _get_status_translate_info($groupon = null) {
+		
+		// 拼团订单状态转换
+		if($groupon == 'groupon') {
+			return array(
+				Reward_benefit_model::REWARD_STATUS_1  => Sales_order_model::STATUS_PAYMENT,
+				Reward_benefit_model::REWARD_STATUS_11 => Sales_order_model::STATUS_PAYMENT,
+				Reward_benefit_model::REWARD_STATUS_5  => Sales_order_model::STATUS_CANCLE,
+				Reward_benefit_model::REWARD_STATUS_6  => Sales_order_model::STATUS_GROUPING,
+				Reward_benefit_model::REWARD_STATUS_16 => Sales_order_model::STATUS_PAYMENT,
+			);
+		}
+
+		// 普通订单状态转换
+		return array(
+			Reward_benefit_model::REWARD_STATUS_1  => Sales_order_model::STATUS_PAYMENT,
+			Reward_benefit_model::REWARD_STATUS_11 => Sales_order_model::STATUS_PAYMENT,
+			Reward_benefit_model::REWARD_STATUS_5  => Sales_order_model::STATUS_CANCLE,
+			Reward_benefit_model::REWARD_STATUS_6  => Sales_order_model::STATUS_PAYMENT,
+			Reward_benefit_model::REWARD_STATUS_16 => Sales_order_model::STATUS_PAYMENT,
+		);
+	}
+
+	/**
+	 * 日志记录
+	 *
+	 * @param      string  $content  日志内容
+	 * @param      string  $type     日志类型
+	 * @param      <type>  $file     日志文件
+	 */
+	protected function _write_log($content, $type='request', $file = NULL) {
+
+		if (ENVIRONMENT == 'dev') return;
+
+		if($file==NULL) $file= date('Y-m-d_H'). '.txt';
+		$path= APPPATH. 'logs'. DS. 'soma'. DS. 'idistribute'. DS;
+		if( !file_exists($path) ) { @mkdir($path, 0777, TRUE); }
+
+		$CI = & get_instance();
+		$ip= $CI->input->ip_address();
+		$fp = fopen( $path. $file, 'a');
+		$content= str_repeat('-', 40). "\n[". $type. ' : '
+			. date('Y-m-d H:i:s'). ' : '. $ip. ']'. "\n". $content. "\n";
+
+		fwrite($fp, $content);
+		fclose($fp);
+	}
+
+	/**
+	 * 发起一个接口请求
+	 *
+	 * @param      array 	$params  接口参数
+	 * @param      array 	$extra   额外信息
+	 *
+	 * @return     mix		成功返回接口调用结果，失败返回False.
+	 */
+	protected function _post_request($params, $extra) {
+
+		if (ENVIRONMENT == 'dev') {
+			return false; // for dev
+		}
+
+		try {
+			$this->_write_log("extra:\r\n" . var_export($extra, true) 
+				. "\r\n" . "params:\r\n" . var_export($params, true));
+			if(isset($extra['type']) 
+				&& $extra['type'] == self::REQUEST_TYPE_NATIVE) {
+				return $this->_navite_request($params, $extra['model'], $extra['method']);
+			}
+		} catch (Exception $e) {
+			$this->_write_log('request exception:' . $e->getMessage());
+		}
+		return false;
+	}
+
+	/**
+	 * 本地调用
+	 *
+	 * @param      array    $params  接口参数
+	 * @param      string   $model   本地调用的模型
+	 * @param      string   $method  本地调用模型的方法
+	 *
+	 * @return     mix		调用结果
+	 */
+	protected function _navite_request($params, $model, $method) {
+		$arr = explode('/', $model);
+		$class = end($arr);
+		if(!$class || $class == '') { return false; }
+		$CI = &get_instance();
+		$CI->load->model($model);
+		return call_user_func_array(array($CI->$class, $method), $params);
+	}
+
+	/**
+	 * 解析结果
+	 *
+	 * @param      mix		$result  接口请求返回的原始结果
+	 * @param      array 	$extra   额外信息
+	 * 
+	 * @return     mix		解析后的结果
+	 */
+	protected function _handle_result($result, $extra, $params) {
+		try {
+			$this->_write_log("extra:\r\n" . var_export($extra, true) 
+				. "\r\n" . "params:\r\n" . var_export($params, true)
+				. "\r\n" . "result:\r\n" . var_export($result, true), 'handle');
+			if(isset($extra['type']) 
+				&& $extra['type'] == self::REQUEST_TYPE_NATIVE) {
+				if(is_string($result)) {
+					// 本地调用，得到的是json字符串，将json转换为数组返回即可
+					return json_decode($result, true);
+				}
+				return $result;
+			}
+		} catch (Exception $e) {
+			$this->_write_log('handle result exception:' . $e->getMessage());
+		}
+		return false;
+	}
+
+	/**
+	 * 获取酒店分销员身份信息
+	 * 
+	 * 注：此接口不适用，原因新接口同时封装了酒店分销员信息，因此对外统一使用新接口
+	 * 
+	 * @see        get_saler_info($inter_id, $openid)
+	 *
+	 * @param      string  $inter_id  公众号id
+	 * @param      string  $openid    openid
+	 * 
+	 * @return     mix		成功返回酒店分销员身份信息，失败返回False.
+	 */
+	public function get_staff_saler_info($inter_id, $openid) {
+		$extra = array(
+			'type'   => self::REQUEST_TYPE_NATIVE,
+			'model'  => 'distribute/Staff_model',
+			'method' => 'get_my_base_info_openid',
+		);
+
+		$params = array(
+			'inter_id' => $inter_id,
+			'openid'   => $openid,
+		);
+		
+		$result = $this->_post_request($params, $extra);
+		return $this->_handle_result($result, $extra, $params);
+	}
+
+	/**
+	 * 提交推送酒店分销员分销业绩
+	 *
+	 * @param      array    $reward       业绩信息
+	 * @param      string   $grade_table  分销业绩标识
+	 *
+	 * @return     boolean  推送成功返回True，失败返回False.
+	 */
+	public function post_saler_sales_info($reward, $grade_table = self::GRADE_TABLE_DEFAULT) {
+
+		// 泛分销类型业绩不能使用使用此接口
+		if($reward['reward_source'] == Reward_rule_model::REWARD_SOURCE_FANS_SALER) {
+			return false;
+		}
+
+		$extra = array(
+			'type'   => self::REQUEST_TYPE_NATIVE,
+			'model'  => 'distribute/Idistribute_model',
+			'method' => 'create_dist',
+		);
+
+		$params = array(
+			'params' => array(
+				'order_id'          => $reward['order_id'],
+				'inter_id'          => $reward['inter_id'],
+				'order_amount'      => $reward['subtotal'],
+				'saler'             => $reward['saler_id'],
+				'grade_openid'      => $reward['openid'],
+				'grade_table'       => $grade_table . $reward['rule_type'],
+				'grade_id'          => $reward['order_id'],
+				'grade_id_name'     => 'order_id',
+				'grade_total'       => round($reward['reward_total'], 2),
+				'grade_typ'         => $reward['reward_source'],
+				'grade_amount'      => $reward['grand_total'],
+				'grade_amount_rate' => $reward['reward_rate'],
+				'grade_rate_type'   => Reward_rule_model::REWARD_TYPE_FIXED ? 0: 1,
+				'remark'            => '',
+				'product'           => '套票订单' . $reward['order_id'],
+				'status'            => $reward['reward_status'] % 10,
+			),
+		);
+
+		$result = $this->_post_request($params, $extra);
+		return $this->_handle_result($result, $extra, $params);
+	}
+
+	/**
+	 * 更新酒店分销员分销业绩 注：针对退款，拒绝退款的订单分销员业绩进行更新
+	 * 分销业绩唯一确定：inter_id,grade_id,grade_typ,grade_table
+	 *
+	 * @param      array    $reward       业绩信息
+	 * @param      string   $grade_table  分销业绩标识
+	 *
+	 * @return     boolean  推送成功返回True，失败返回False.
+	 */
+	public function update_saler_sales_info($reward, $grade_table = self::GRADE_TABLE_DEFAULT) {
+
+		// 泛分销类型业绩不能使用使用此接口
+		if($reward['reward_source'] == Reward_rule_model::REWARD_SOURCE_FANS_SALER) {
+			return false;
+		}
+
+		$extra = array(
+			'type'   => self::REQUEST_TYPE_NATIVE,
+			'model'  => 'distribute/Idistribute_model',
+			'method' => 'create_dist',
+		);
+
+		$status_translate = $this->_get_status_translate_info($reward['rule_type']);
+
+		if($reward['rule_type'] == 'groupon') {
+			// 酒店分销员旧版接口将拼团成功状态标志为16，新版社交商城为12，兼容
+			$status_translate[ Reward_benefit_model::REWARD_STATUS_1 ]  = 16;
+			$status_translate[ Reward_benefit_model::REWARD_STATUS_11 ] = 16;
+		}
+
+		$params = array(
+			'params' => array(
+				'grade_id'     => $reward['order_id'],
+				'inter_id'     => $reward['inter_id'],
+				'grade_typ'    => $reward['reward_source'],
+				'grade_table'  => $grade_table . $reward['rule_type'],
+				'order_status' => $status_translate[ $reward['reward_status'] ],
+				'status'       => $reward['reward_status'] % 10,
+			),
+		);
+
+		$result = $this->_post_request($params, $extra);
+		return $this->_handle_result($result, $extra, $params);
+	}
+	
+	/**
+	 * 获取泛分销分销员身份信息
+	 * 注：此接口不适用，原因新接口同时封装了酒店分销员信息，因此对外统一使用新接口
+	 * 
+	 * @see        get_saler_info($inter_id, $openid)
+	 *
+	 * @param      string	$inter_id  公众号id
+	 * @param      string	$openid    openid
+	 * 
+	 * @return     mix		成功返回泛分销分销员身份信息，失败返回False.
+	 */
+	public function get_fans_saler_info($inter_id, $openid) {
+		$extra = array(
+			'type'   => self::REQUEST_TYPE_NATIVE,
+			'model'  => 'distribute/Idistribute_model',
+			'method' => 'fans_is_saler',
+		);
+
+		$params = array(
+			'inter_id' => $inter_id,
+			'openid'   => $openid,
+		);
+		
+		$result = $this->_post_request($params, $extra);
+		return $this->_handle_result($result, $extra, $params);
+	}
+
+	/**
+	 * 推送提交泛分销分销员业绩
+	 *
+	 * @param      array    $reward       业绩模型
+	 * @param      string   $grade_table  分销信息标识
+	 *
+	 * @return     boolean  推送成功返回True，失败返回False.
+	 */
+	public function post_fans_sales_info($reward, $grade_table = self::GRADE_TABLE_DEFAULT) {
+
+		$order = $reward['order'];
+		// $item = isset($order['item_set']) ? $order['item_set'] : array();
+		if(empty($order['item_set'])) {
+			return false;
+		}
+		$item = $order['item_set'];
+
+		$reward_type = $this->rule_model->get_reward_type();
+
+		if($reward['reward_source'] != Reward_rule_model::REWARD_SOURCE_FANS_SALER) {
+			return false;
+		}
+
+		$extra = array(
+			'type'   => self::REQUEST_TYPE_NATIVE,
+			'model'  => 'distribute/Idistribute_model',
+			'method' => 'create_ext_grade',
+		);
+
+		$params = array(
+			'params' => array(
+				'inter_id'      => $reward['inter_id'],
+				'hotel_id'      => $reward['hotel_id'],
+				'saler'         => $reward['saler_id'],
+				'grade_openid'  => $reward['openid'],
+				'grade_table'   => $grade_table . $reward['rule_type'],
+				'grade_id'      => $reward['order_id'],
+				'order_amount'  => $reward['subtotal'],
+				'grade_total'   => round($reward['reward_total'], 2),
+				'grade_amount'  => $reward['grand_total'],
+				'status'        => $reward['reward_status'] % 10,
+				'remark'        => '',
+				'order_hotel'   => $order['hotel_id'],
+				'order_status'  => $order['status'],
+				'order_time'    => $order['create_time'],
+				'grade_rule'    => $reward_type[ $reward['reward_type'] ] . ':' . $reward['reward_rate'],
+				// 泛分销grade_typ传2
+				// 'grade_typ'     => $reward['reward_source'],
+				'grade_typ'     => 2,
+				'product_count' => isset($item[0]['qty']) ? $item[0]['qty'] : 0,
+				'product'       => isset($item[0]['name']) ? $item[0]['name'] : '',
+			),
+		);
+
+		$result = $this->_post_request($params, $extra);
+		return $this->_handle_result($result, $extra, $params);
+	}
+
+	/**
+	 * 更新泛分销分销业绩信息 注：针对退款，拒绝退款的订单分销员业绩进行更新
+	 * 分销业绩唯一确定：inter_id,grade_id,grade_typ,grade_table
+	 *
+	 * @param      array    $reward       业绩信息
+	 * @param      string   $grade_table  分销信息标识
+	 *
+	 * @return     boolean  更新成功返回True，失败返回False.
+	 */
+	public function update_fans_sales_info($reward, $grade_table = self::GRADE_TABLE_DEFAULT) {
+
+		if($reward['reward_source'] != Reward_rule_model::REWARD_SOURCE_FANS_SALER) {
+			return false;
+		}
+
+		$extra = array(
+			'type'   => self::REQUEST_TYPE_NATIVE,
+			'model'  => 'distribute/Idistribute_model',
+			'method' => 'update_ext_grade',
+		);
+
+		$status_translate = $this->_get_status_translate_info($reward['rule_type']);
+
+		$params = array(
+			'params' => array(
+				'grade_id'     => $reward['order_id'],
+				'inter_id'     => $reward['inter_id'],
+				// 'grade_typ'    => $reward['reward_source'],
+				'grade_typ'    => 2,
+				'grade_table'  => $grade_table . $reward['rule_type'],
+				'order_status' => $status_translate[ $reward['reward_status'] ],
+				'status'       => $reward['reward_status'] % 10,
+			),
+		);
+
+		$result = $this->_post_request($params, $extra);
+		return $this->_handle_result($result, $extra, $params);		
+	}
+
+	/**
+	 * 根据inter_id、openid获取分销员信息 根据接口定义，如果一个用户既是酒店分销员也是泛分销员，
+	 * 那么此接口只返回酒店分销员信息，即酒店分销优先
+	 *
+	 * @param      string  $inter_id  公众号ID
+	 * @param      string  $openid    openid
+	 *
+	 * @return     mix     成功返回分销员身份信息，失败返回false
+	 */
+	public function get_saler_info($inter_id, $openid) {
+		$extra = array(
+			'type'   => self::REQUEST_TYPE_NATIVE,
+			'model'  => 'distribute/Idistribute_model',
+			'method' => 'fans_is_saler',
+		);
+
+		$params = array(
+			'inter_id' => $inter_id,
+			'openid'   => $openid,
+		);
+		
+		$result = $this->_post_request($params, $extra);
+		$data = $this->_handle_result($result, $extra, $params);
+		if($data && $data['info'] == null) { $data = false; }
+
+		return $data;
+	}
+
+	/**
+	 * 获取酒店分销分组信息
+	 *
+	 * @param      string      $inter_id  The inter identifier
+	 * @param      integer     $limit     The limit
+	 * @param      integer     $offset    The offset
+	 *
+	 * @return     array|bool  Array if get staff group information success, empty array or false if failure.
+	 *
+	 * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+	 */
+	public function get_hotel_group_info($inter_id, $limit = null, $offset = 0) {
+		
+		if(ENVIRONMENT == 'dev')
+		{
+			return $this->_mock_get_group_info();
+		}
+
+		$extra = array(
+			'type'   => self::REQUEST_TYPE_NATIVE,
+			'model'  => 'distribute/Distribute_group_model',
+			'method' => 'get_distribute_group_info_array',
+		);
+
+		$params = array(
+			'filter' => array('inter_id' => $inter_id),
+			'limit'  => $limit,
+			'offset' => $offset,
+		);
+		
+		$result = $this->_post_request($params, $extra);
+		$data = $this->_handle_result($result, $extra, $params);
+
+		return $data;
+	}
+
+	protected function _mock_get_group_info() {
+		$str = '
+			[
+			    {
+			        "group_id": "ZD000029",
+			        "group_name": "测试自动分组1",
+			        "inter_id": "a450089706",
+			        "status": "0",
+			        "type": "2",
+			        "create_time": "1473062222",
+			        "start_time": "1467302400",
+			        "end_time": "1480435200",
+			        "member_count": "2",
+			        "his_member_count": "8",
+			        "hotel_ids": "",
+			        "department_ids": "产品,产品测试,办公,呵呵哒,总办,技术部,测试",
+			        "source": "2",
+			        "check_date": "2",
+			        "check_type": "2",
+			        "check_count": "1",
+			        "sd_member_ids": "",
+			        "is_delete": "0",
+			        "update_time": "2017-03-30 18:07:02",
+			        "last_run_time": "1480300444",
+			        "locked": "0"
+			    },
+			    {
+			        "group_id": "SD000005",
+			        "group_name": "速度丰盛的44144",
+			        "inter_id": "a450089706",
+			        "status": "1",
+			        "type": "1",
+			        "create_time": "1493117695",
+			        "start_time": "1490630400",
+			        "end_time": "1493568000",
+			        "member_count": "13",
+			        "his_member_count": "0",
+			        "hotel_ids": "180,4375,4960",
+			        "department_ids": "556,9527,产品,产品测试,办公,呵呵哒,开发,总办,技术部,测试",
+			        "source": "0",
+			        "check_date": "0",
+			        "check_type": "0",
+			        "check_count": "1",
+			        "sd_member_ids": "1,8,6,7,10,11,14,15,16,23,24,20,25",
+			        "is_delete": "0",
+			        "update_time": "2017-04-25 18:54:55",
+			        "last_run_time": "0",
+			        "locked": "0"
+			    },
+			    {
+			        "group_id": "SD000004",
+			        "group_name": "dhfhdfh",
+			        "inter_id": "a450089706",
+			        "status": "1",
+			        "type": "1",
+			        "create_time": "1493116746",
+			        "start_time": "1490544000",
+			        "end_time": "1493568000",
+			        "member_count": "13",
+			        "his_member_count": "0",
+			        "hotel_ids": "180,4375,4960",
+			        "department_ids": "556,9527,产品,产品测试,办公,呵呵哒,开发,总办,技术部,测试",
+			        "source": "0",
+			        "check_date": "0",
+			        "check_type": "0",
+			        "check_count": "1",
+			        "sd_member_ids": "1,8,6,7,10,11,14,15,16,23,24,20,25",
+			        "is_delete": "0",
+			        "update_time": "2017-04-25 19:01:17",
+			        "last_run_time": "0",
+			        "locked": "0"
+			    }
+			]';
+		return json_decode($str, true);
+	}
+
+	/**
+	 * 获取酒店分销员分组信息
+	 *
+	 * @param      string      $inter_id  The inter identifier
+	 * @param      integer     $saler     The saler
+	 *
+	 * @return     array|bool  Array if get staff group information success, empty array or false if failure.
+	 *
+	 * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+	 */
+	public function get_staff_group_info($inter_id, $saler = 0) {
+
+		if(ENVIRONMENT == 'dev')
+		{
+			return $this->_mock_get_staff_group_info();
+		}
+
+		$extra = array(
+			'type'   => self::REQUEST_TYPE_NATIVE,
+			'model'  => 'distribute/Distribute_group_model',
+			'method' => 'get_saler_group_info',
+		);
+
+		$params = array(
+			'inter_id' => $inter_id,
+			'saler'  => $saler,
+		);
+		
+		$result = $this->_post_request($params, $extra);
+		$data = $this->_handle_result($result, $extra, $params);
+
+		return $data;
+	}
+
+	protected function _mock_get_staff_group_info()
+	{
+		$str = '
+		[
+		  {
+		    "group_id": "SD000004",
+		    "group_name": "dhfhdfh",
+		    "inter_id": "a450089706",
+		    "status": "1",
+		    "type": "1",
+		    "create_time": "1493116746",
+		    "start_time": "1490544000",
+		    "end_time": "1493568000",
+		    "member_count": "13",
+		    "his_member_count": "0",
+		    "hotel_ids": "180,4375,4960",
+		    "department_ids": "556,9527,产品,产品测试,办公,呵呵哒,开发,总办,技术部,测试",
+		    "source": "0",
+		    "check_date": "0",
+		    "check_type": "0",
+		    "check_count": "1",
+		    "sd_member_ids": "1,8,6,7,10,11,14,15,16,23,24,20,25",
+		    "is_delete": "0",
+		    "update_time": "2017-04-25 19:01:17",
+		    "last_run_time": "0",
+		    "locked": "0"
+		  },
+		  {
+		    "group_id": "SD000005",
+		    "group_name": "速度丰盛的44144",
+		    "inter_id": "a450089706",
+		    "status": "1",
+		    "type": "1",
+		    "create_time": "1493117695",
+		    "start_time": "1490630400",
+		    "end_time": "1493568000",
+		    "member_count": "13",
+		    "his_member_count": "0",
+		    "hotel_ids": "180,4375,4960",
+		    "department_ids": "556,9527,产品,产品测试,办公,呵呵哒,开发,总办,技术部,测试",
+		    "source": "0",
+		    "check_date": "0",
+		    "check_type": "0",
+		    "check_count": "1",
+		    "sd_member_ids": "1,8,6,7,10,11,14,15,16,23,24,20,25",
+		    "is_delete": "0",
+		    "update_time": "2017-04-25 18:54:55",
+		    "last_run_time": "0",
+		    "locked": "0"
+		  },
+		  {
+		    "group_id": "SD000007",
+		    "group_name": "20170428分组",
+		    "inter_id": "a450089706",
+		    "status": "1",
+		    "type": "1",
+		    "create_time": "1493360592",
+		    "start_time": "1491580800",
+		    "end_time": "1494000000",
+		    "member_count": "3",
+		    "his_member_count": "0",
+		    "hotel_ids": "180,4375,4960",
+		    "department_ids": "产品,产品测试,前台,办公,呵呵哒,学院,开发,总办,技术部,测试",
+		    "source": "0",
+		    "check_date": "0",
+		    "check_type": "0",
+		    "check_count": "1",
+		    "sd_member_ids": "1,8,6",
+		    "is_delete": "0",
+		    "update_time": "2017-04-28 14:23:12",
+		    "last_run_time": "0",
+		    "locked": "0"
+		  },
+		  {
+		    "group_id": "SD000008",
+		    "group_name": "20170428分组2222",
+		    "inter_id": "a450089706",
+		    "status": "1",
+		    "type": "1",
+		    "create_time": "1493360670",
+		    "start_time": "1493222400",
+		    "end_time": "1497024000",
+		    "member_count": "4",
+		    "his_member_count": "0",
+		    "hotel_ids": "180,4375,4960",
+		    "department_ids": "产品,产品测试,前台,办公,呵呵哒,学院,开发,总办,技术部,测试",
+		    "source": "0",
+		    "check_date": "0",
+		    "check_type": "0",
+		    "check_count": "1",
+		    "sd_member_ids": "1,8,6,7",
+		    "is_delete": "0",
+		    "update_time": "2017-04-28 14:24:30",
+		    "last_run_time": "0",
+		    "locked": "0"
+		  }
+		]
+		';
+		return json_decode($str, true);
+	}
+
+	public function getSalerInfoBySalerId($inter_id, $saler_id)
+	{
+		$extra = array(
+			'type'   => self::REQUEST_TYPE_NATIVE,
+			'model'  => 'distribute/Staff_model',
+			'method' => 'get_my_base_info_saler',
+		);
+
+		$params = array(
+			'inter_id' => $inter_id,
+			'saler_id' => $saler_id,
+		);
+		
+		$result = $this->_post_request($params, $extra);
+		$data = $this->_handle_result($result, $extra, $params);
+
+		return $data;
+	}
+
+}

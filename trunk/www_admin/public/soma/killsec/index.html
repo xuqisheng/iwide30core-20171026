@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>秒杀后台</title>
+    <link rel="stylesheet" href="css/AdminLTE.css">
+    <link rel="stylesheet" href="css/jedate.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/jQuery-2.1.4.min.js"></script>
+    <script src="js/jquery.jedate.min.js"></script>
+    <script src="js/index.js"></script>
+</head>
+<body>
+
+<div class="content-wrapper">
+    <section class="content">
+
+
+        <!--秒杀后台 首页-->
+        <div class="kill-index">
+            <form>
+
+                <!-- tab切换 -->
+                <div class="tab">
+                    <a href="" class="c333 fl f28 active">所有秒杀</a>
+                    <a href="" class="c333 fl f28">未开始</a>
+                    <a href="" class="c333 fl f28">进行中</a>
+                    <a href="" class="c333 fl f28">已结束</a>
+                    <a href="edit.html" class="add fr">
+                        <span>＋新增秒杀活动</span>
+                    </a>
+                </div>
+                <!-- tab 切换 -->
+
+                <div class="container">
+
+                    <!-- 搜索 -->
+                    <div class="search">
+                        <div class="fl page-title c333 f24">每页显示</div>
+                        <div class="select-wrap fl">
+                            <select class="select fl">
+                                <option value="1">10</option>
+                                <option value="2">20</option>
+                            </select>
+                        </div>
+                        <div class="fl page-title c333 f24">关键词查找</div>
+
+                        <div class="fl key">
+                            <div class="input fl">
+                                <input type="text" placeholder="活动id/活动名／商品名称" class="f24">
+                            </div>
+                            <a href="javascript:void(0)" class="fl"></a>
+                        </div>
+
+                        <input type="submit" class="go-search f28" value="查询">
+                    </div>
+                    <!-- 搜索 -->
+
+
+                    <!-- 表格 -->
+                    <div class="table">
+                        <table cellspacing="0">
+                            <tr>
+                                <th>活动id</th>
+                                <th>活动名</th>
+                                <th>商品名称</th>
+                                <th>秒杀价</th>
+                                <th>库存／名额</th>
+                                <th>启动秒杀时间</th>
+                                <th>启动关闭时间</th>
+                                <th>操作</th>
+                            </tr>
+
+                            <tr>
+                                <td>djwe12</td>
+                                <td>微信专享价</td>
+                                <td>金房卡大酒店海鲜午餐午餐晚餐</td>
+                                <td>￥4738</td>
+                                <td>138</td>
+                                <td>2017-03-31 12:12:12</td>
+                                <td>2017-04-12 12:08:08</td>
+                                <td class="operation">
+                                    <a href="" class="btn edit-list">编辑</a>
+                                    <a href="javascript:void(0)" class="btn edit-invalid" itemId="1" status="start">使失效</a>
+                                    <a href="javascript:void(0)" class="btn placeholder">占位</a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>djwe12</td>
+                                <td>微信专享价</td>
+                                <td>金房卡大酒店海鲜午餐午餐晚餐</td>
+                                <td>￥4738</td>
+                                <td>138</td>
+                                <td>2017-03-31 12:12:12</td>
+                                <td>2017-04-12 12:08:08</td>
+                                <td class="operation">
+                                    <a href="" class="btn edit-list">编辑</a>
+                                    <a href="javascript:void(0)" class="btn edit-invalid" status="run" itemId="3">使失效</a>
+                                    <a href="javascript:void(0)" class="btn edit-store" itemId="1" status="store">增加库存</a>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td>djwe12</td>
+                                <td>微信专享价</td>
+                                <td>金房卡大酒店海鲜午餐午餐晚餐</td>
+                                <td>￥4738</td>
+                                <td>138</td>
+                                <td>2017-03-31 12:12:12</td>
+                                <td>2017-04-12 12:08:08</td>
+                                <td class="operation">
+                                    <a href="javascript:void(0)" class="btn placeholder">占位</a>
+                                    <a href="javascript:void(0)" class="btn disabled">已失效</a>
+                                    <a href="" class="btn edit-view">查看</a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>djwe12</td>
+                                <td>微信专享价</td>
+                                <td>金房卡大酒店海鲜午餐午餐晚餐</td>
+                                <td>￥4738</td>
+                                <td>138</td>
+                                <td>2017-03-31 12:12:12</td>
+                                <td>2017-04-12 12:08:08</td>
+                                <td class="operation">
+                                    <a href="" class="btn edit-list">编辑</a>
+                                    <a href="javascript:void(0)" class="btn edit-invalid" itemId="2" status="run">使失效</a>
+                                    <a href="javascript:void(0)" class="btn edit-store" itemId="1" status="people">增加库存</a>
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+                    <!-- 表格 -->
+
+                    <div class="pagination">
+                        <div class="fl page-number f24">
+                            当前共筛选到 <span>12</span> 条／共 <span>100</span> 条数据
+                        </div>
+
+                        <div class="fr page">
+                            <a href="" class="last fl"></a>
+                            <div class="fl current">
+                                <a href="" class="fl active">1</a>
+                                <a href="" class="fl">2</a>
+                                <a href="" class="fl">3</a>
+                                <a href="" class="fl">4</a>
+                                <a href="" class="fl">5</a>
+                            </div>
+                            <a href="" class="next fl"></a>
+
+                            <div class="tips fl">第</div>
+                            <input class="go-to-input fl" value="1">
+                            <div class="tips fl ">页</div>
+                            <a href="" class="go fl">GO</a>
+
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+
+            <div class="kill-layer" style="display: none" id="invalidLayer">
+                <div class="layer-content">
+                    <div class="close"></div>
+                    <p class="title f32">提 示</p>
+                    <div class="tips-content f28">
+                        确定让这个活动失效？
+                    </div>
+                    <a href="javascript:void(0)" class="btn f32">确 定</a>
+                </div>
+            </div>
+
+            <div class="kill-layer" style="display: none" id="runInvalidLayer">
+                <div class="layer-content">
+                    <div class="close"></div>
+                    <p class="title f32">提 示</p>
+                    <div class="tips-content f28">
+                        <p class="f28">活动正在进行中，是否使其失效，</p>
+                        <p class="f28">失效后将不能恢复！</p>
+                    </div>
+                    <a href="javascript:void(0)" class="btn f32">确 定</a>
+                </div>
+            </div>
+
+
+            <div class="kill-layer" style="display: none" id="numberLayer">
+                <div class="layer-content">
+                    <div class="close"></div>
+                    <p class="title f32">提 示</p>
+
+                    <ul class="store">
+                        <li class="clearfix">
+                            <div class="fl title f24">秒杀模式</div>
+                            <div class="fl f24 show-tips">限制名额50人，每人限购2份</div>
+                        </li>
+
+                        <li class="clearfix">
+                            <div class="fl title f24">增加名额</div>
+                            <div class="fl f24 clearfix">
+                                <input type="text" class="fl number" placeholder="数量">
+                                <div class="fl unit">人</div>
+                            </div>
+                        </li>
+
+                        <li class="clearfix">
+                            <div class="fl title f24">增加后总库存为</div>
+                            <div class="fl f24">150份，每人限购2份</div>
+                        </li>
+
+                    </ul>
+
+                    <a href="javascript:void(0)" class="btn f32">确 定</a>
+                </div>
+            </div>
+
+
+            <div class="kill-layer" style="display: none" id="storeLayer">
+                <div class="layer-content">
+                    <div class="close"></div>
+                    <p class="title f32">提 示</p>
+
+                    <ul class="store">
+                        <li class="clearfix">
+                            <div class="fl title f24">秒杀模式</div>
+                            <div class="fl f24 show-tips">限制库存100份，每人限购2份</div>
+                        </li>
+
+                        <li class="clearfix">
+                            <div class="fl title f24">增加库存</div>
+                            <div class="fl f24 clearfix">
+                                <input type="text" class="fl number" placeholder="数量">
+                                <div class="fl unit">份</div>
+                            </div>
+                        </li>
+
+                        <li class="clearfix">
+                            <div class="fl title f24">增加后总名额为</div>
+                            <div class="fl f24">150份，每人限购2份</div>
+                        </li>
+
+                    </ul>
+
+                    <a href="javascript:void(0)" class="btn f32">确 定</a>
+                </div>
+            </div>
+
+
+        </div>
+        <!--秒杀后台 首页-->
+
+
+    </section>
+</div>
+</body>
+</html>

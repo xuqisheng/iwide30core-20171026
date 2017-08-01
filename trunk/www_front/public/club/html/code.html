@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=320,user-scalable=0">
+<title>社群客列表</title>
+<script src="../scripts/jquery.js"></script>
+<script src="../scripts/ui_control.js"></script>
+<link rel="stylesheet" type="text/css" href="../styles/global.css">
+<link rel="stylesheet" type="text/css" href="../styles/group.css">
+</head>
+<body>
+
+<script src="../scripts/alert.js"></script>
+<script src="../scripts/canvas.js"></script>
+
+<!--- 二维码和头像不能跨域 否则不能生成海报  --->
+<div class="haibao">
+	<div class="center" style="padding:3%">
+        <div class="img"><div class="squareimg"><img src="../images/eg3.jpg" /></div></div>
+        <div>Hi~我是懒人！</div>
+        <div style="height:4rem">邀请您加入茂鹏社群客，享受更低的订房折扣价</div>
+    </div>
+    <div class="code center"><img src="../images/eg3.jpg" /></div>
+</div>
+<script>
+$(function(){
+	var _w = $(window).width();
+	var rate = 640/1020;
+	var _h = _w/rate;
+	$('.haibao').height(_h);
+	pageloading('生成海报中',0.8);	
+	var fail = window.setTimeout(function(){
+		removeload();
+		$.MsgBox.Alert('生成失败, 请稍候刷新页面重试!');		
+	},10000);
+	var clone=$('.haibao').clone();
+	var _w = $('.haibao').width()*2;
+	var _h = $('.haibao').height()*2;
+	$('body').append(clone).css('overflow','hidden');
+	$('meta').attr('content','width=320,user-scalable=0,initial-scale=1');
+	clone.width(_w);
+	clone.height(_h);
+	clone.css('font-size','2rem');
+	/*生成海报代码*/
+	window.setTimeout(function(){ //模拟延迟...
+		html2canvas(clone.get(0), {  
+			allowTaint: true,  
+			taintTest: false,
+			onrendered: function(canvas) {  
+				removeload();
+				canvas.id = "mycanvas";
+				var dataUrl = canvas.toDataURL();  
+				var newImg = document.createElement("img");  
+				newImg.src =  dataUrl;  
+				$('.haibao').html(newImg); 
+				clone.remove();
+				$('body').removeAttr('style');
+				$.MsgBox.Alert('生成成功,长按保存图片哦!~');
+				window.clearTimeout(fail);
+			}  
+		});  
+	},1000);
+	
+})
+</script>
+</body>
+</html>

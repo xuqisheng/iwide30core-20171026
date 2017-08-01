@@ -1,0 +1,27 @@
+@charset "utf-8";
+/* CSS Document */
+
+header{padding-top:3%; text-align:center; border-bottom:1px solid #e4e4e4;}
+.ui_tab{margin-top:3%}
+.sum_star em{margin:2% 1%}
+.apply_list{ padding:0 3%;border-left:0; border-right:0;}
+.apply_list .title{ font-size:1.3em; text-align:center;}
+.apply_list .content{padding:3% 0; border-bottom:1px solid #e4e4e4;}
+.apply_list .content p {margin-bottom:2%; text-align:justify; line-height:1.5}
+.apply_list .content p:last-child {margin-bottom:0;}
+.apply_list .content p span,.address p span{ color:#ff7200;}
+.apply_list .point{float:right; margin-top:3%;}
+
+.user {overflow:hidden; margin-bottom:2%}
+.user .username{margin:1% 0;}
+.user .userimg{width:5em; height:5em; overflow:hidden;border-radius:50%; display:inline-block;margin-right:1%; vertical-align:middle;}
+.user .time{ color:#999; font-size:0.8em;}
+.discuss .ui_img_auto_cut{width:14em; height:14em}
+.discuss .imgbox{width:43em;height:14em; overflow:hidden;}
+.discuss .more{ float:right; padding:3em 4%; display:none}
+.apply_list .cus_apply{ border-radius:0.5em; padding:1.5% 3%; margin-top:1%;}
+.apply_list .cus_apply p{margin-bottom:0}
+
+.ui_pull ul{white-space:nowrap; position:relative; top:30%;}
+.ui_pull li{ display:inline-block;width:100%;}
+.ui_pull li img{vertical-align:middle}

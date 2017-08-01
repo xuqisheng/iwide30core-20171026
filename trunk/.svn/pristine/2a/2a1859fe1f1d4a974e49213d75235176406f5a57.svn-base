@@ -1,0 +1,4 @@
+@charset "utf-8";
+/* CSS Document */
+
+.ui_list .face_img{ width:1rem;}

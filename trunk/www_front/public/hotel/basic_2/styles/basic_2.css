@@ -1,0 +1,13 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+.yingju{ background:url(../images/bg_yingju2.jpg) repeat #f4f6f5; font-size:3rem;}
+.yingju_bg{ background:url(../images/bg_yingju.png) no-repeat; background-position:center bottom; background-size:100%; height:100%;}
+.yingju_bg li{padding:5% 0;padding-left:2.5rem;background-repeat:no-repeat;text-align:center;color:#3c3b3b;background-size:auto 65%; background-position:30% center}
+.yingju_bg li.yingju_logo{ background-image:url(../images/yingju.png); background-position:center center;height:30%}
+.yingju_bg ._1{ background-image:url(../images/yingju_ico1.png);}
+.yingju_bg ._2{ background-image:url(../images/yingju_ico2.png);}
+.yingju_bg ._3{ background-image:url(../images/yingju_ico3.png);}
+.yingju_bg ._4{ background-image:url(../images/yingju_ico4.png);}
+

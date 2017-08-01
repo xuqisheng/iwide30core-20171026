@@ -1,0 +1,8 @@
+@charset "utf-8";
+/* CSS Document */
+font:before{content:'¥';}
+.display_m font,.display_m p,.f_s_8{font-size:.8rem;}
+.record_con{padding:3%;border-bottom:1px solid #e5e5e5;background:#fff;}
+.display_m{margin:1% 0;}
+.display_m font{float:right;color:#d7313c;}
+.record_con >p{line-height:1.5;}

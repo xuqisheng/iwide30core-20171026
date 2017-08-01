@@ -1,0 +1,30 @@
+@charset "utf-8";
+/* CSS Document 
+.head_img{width:100%;height:6.2rem;background:url(../attachment/vip_block.jpg) no-repeat;
+	background-size:cover; overflow:hidden;}*/
+body,html{ height:100%;}
+.con{width:100%;background:#fff; position:fixed; bottom:-100%; max-height:80%; z-index:999; min-height:50%;}
+.con .c_detail{width:96%;margin:auto; height:90%;}
+.con .c_detail ul li{width:100%;border-bottom:1px solid #e4e4e4;position:relative;padding:0.6rem 0;}
+.con .c_detail ul li .name_con{width:62%;float:right;margin-top:0.3rem;}
+.con .c_detail ul li p{line-height:1rem;}
+.con .c_detail ul li .wrong{float:right;display:block;width:0.8rem;height:0.8rem;}
+.con .c_detail ul li .text_det{font-size:0.5rem;color:#999; word-break:break-all;overflow : hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 1;-webkit-box-orient: vertical;}
+.con .c_detail ul li p font{font-size:1rem;color:#fe6f42;}
+.con .c_detail ul li .name_img{background:#fff;width:5rem;height:5rem;position:absolute;left:0;  overflow: hidden;
+	top:-1.3rem;border-radius:0.3rem;border:1px solid #e4e4e4; text-align:center;}
+.con .c_detail ul li .name_img img{ width:auto; height:100%}
+.con .c_detail ul .buy_num { overflow:hidden}
+.con .c_detail ul .buy_num span{display:block;float:right;width:0.9rem;height:0.9rem;}
+.con .c_detail ul .buy_num .center1{height:0.9rem;position:relative;}
+.con .c_detail ul .buy_num .center1 input{height:0.9rem;color:#999;position:absolute;top:0;left:0;}
+.con .c_detail ul .pay p{line-height:1.3rem;}
+.con .c_detail ul .pay .btn2 span{display:inline-block;width:4rem;hieght:1.3rem;text-align:center;border-radius:0.2rem;border:1px solid #999;}
+.con .c_detail ul .pay .btn2 span.active{background:#fe4e00;color:#fff;border:0;}
+.con .c_detail ul .pay .btn2{padding-bottom:0.2rem;}
+.con .c_detail ul .voucher font{float:right;background:url(../images/ico/nextIco2.png) no-repeat center right;background-size: auto 0.7rem;;padding-right:1rem;}
+.con .c_detail .note{ padding:4% 0;font-size:0.6rem;color:#c6c6c6}
+.confirm{position:absolute;left:0;bottom:0;width:100%;text-align:center; padding:4% 0;background:#fe4e00;color:#fff;}
+
+.detail_txt{ padding:4%; padding-top:0; font-size:0.55rem; color:#555; line-height:1.5}
+.detail_txt img{ max-width:100%; height:auto !important;}

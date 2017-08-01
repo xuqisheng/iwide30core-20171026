@@ -1,0 +1,19 @@
+@charset "utf-8";
+/* CSS Document */
+.intro_detail{width:100%;}
+.intro_detail .ban_con{width:100%; height:8rem; text-align:center; background:#fff;}
+.intro_detail .ban_con img{}
+.intro_detail .b_txt{width:96%;margin:0.5rem auto;border-bottom:1px solid #ddd;}
+.intro_detail .b_txt font{float:right;color:#fe4e00;font-size:0.9rem;}
+.intro_detail .b_txt .txt_details{color:#999;font-size:0.5rem;line-height:1.5; padding:1% 0 3% 0; text-align:justify}
+.floors{width:100%;position:fixed;left:0;bottom:0; background:#fff; font-size:0;}
+.floors .shopping{width:24%;border-top:1px solid #ddd;padding-top:2%;float:left; background:#fff; display:block;}
+.floors .shopping .car_1{width:.8rem;height:.8rem;margin:auto;position:relative; margin-top:1%}
+.floors .shopping .car_1 .numb{position:absolute;top:-0.2rem;right:-0.3rem;font-size:0.4rem;color:#fff;
+	background:#fe4e00;border-radius:50%;text-align:center;line-height:0.5rem; width:0.5rem; height:0.5rem;}
+.floors .shopping p{text-align:center;color:#999;font-size:0.4rem; margin-top:2%;}
+.floors .btns{width:38%;color:#fff;text-align:center; padding:4% 0;}
+.floors div{font-size:0.65rem;}
+.floors .add{float:right;background:#fe8f00;}
+.floors .buy{float:right;background:#fe4e00;}
+.floors .fastbuy{background:#fe4e00; position:absolute; width:76%; right:0;}

@@ -1,0 +1,15 @@
+
+
+body,html{background:#edeef0; height:100%;}
+.borderimg{background:url(../img/bg05.png) repeat-x; padding-top:4%; background-size:auto 100%;}
+.name{color:#000; font-size:0.7rem;}
+.time{color:#999; font-size:0.5rem; padding:2% 0;}
+.thing{ text-align:center;padding:3% 0;border:1px solid #e4e4e4; border-right:0; border-left:0}
+.thing span:first-child{ float:left}
+.thing span:last-child{float:right}
+.price{ padding-top:4%;text-align:right}
+.price span{padding-left:5em;}
+.price span b{color:#ff8800;}
+
+.saoma{width:86%; margin:4% auto; padding:4%; background:#fff; text-align:center;}
+.saoma .title{ border-bottom:1px solid #e4e4e4; padding-bottom:3%;}

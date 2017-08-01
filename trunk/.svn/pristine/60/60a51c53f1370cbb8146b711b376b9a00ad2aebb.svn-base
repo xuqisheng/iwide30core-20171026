@@ -1,0 +1,74 @@
+﻿
+        html,body{ margin:0px;font-family: "Microsoft YaHei";background-color:#F5F9FC;} 
+        .nvaT { width: 99%; position: relative; height: 70px; border: 1px solid #fff;  margin: 0 auto; background-color: #fff }
+        /*width: 13%;*/
+        .nvaL{width: 200px;height: 96.7%; position: absolute;top: 3%;border: 1px solid #000; background: #000;}
+        .nvaTcho{margin-left:300px;margin:35px 0 0 220px;}
+        .cho_left {float:left;}
+        .cho_right {float: right; margin-right: 1%}
+        .cho_right div:nth-child(1){float:left; border: 1px solid #DBDBDB;border-style: none solid none none; margin-right: 20px;height: 20px; }
+        .cho_right div:nth-child(2){float:right;}
+        .cho_right div:nth-child(1) img{float:left;width:30px;height:30px;border-radius:15px 15px 15px 15px ;}
+        .cho_right div:nth-child(2) img{width:20px;height:20px;border-radius:15px 15px 15px 15px ;}
+        .cho_right div:nth-child(1) .username{font-size:14px;}
+        .cho_right div:nth-child(1) .user{font-size:12px;}
+        .cho_right img,span{margin-right:10px;}
+        
+        /*margin: auto;   margin-left: 14.5%;margin-left:222px;*/
+        /*保留左侧时的centre样式*/
+        /*.centre{height:620px; margin-left :230px;overflow:auto;}*/
+        
+        /*不保留左侧时的centre样式*/
+        .centre { height: 99%;margin: 0 1%;}
+
+         /****************** 步骤模块 Start **********************/
+        .flow{width:100%;height:50px; display: -webkit-box;-webkit-box-orient: horizontal;-webkit-box-pack: center;-webkit-box-align: center;padding-top:20px;font-size:12px;}
+        .flow .active{width:30px;height:30px;background-color:#000;font-size: 14px;line-height: 30px;}
+        .flow_one,.flow_two,.flow_three,.flow_four,.flow_five{width:25px;height:25px;background-color:#e0e0e0;border-radius:15px 15px 15px 15px;text-align:center;}
+        .flow span{color:#fff;line-height: 25px;margin-left: 9px;font-size: 12px;}
+        .flowinfo{display: -webkit-box;-webkit-box-orient: horizontal;-webkit-box-pack: center;-webkit-box-align: center;padding-bottom:15px;}
+        .flowinfo span{margin: 0 68px 0 70px;color:#808080;font-size: 12px;}
+        .flowinfo span.active{color:#000;font-size: 14px;}
+        .line {width:150px;border:2px solid #E0E0E0;margin: 5px;}
+         /****************** 步骤模块 End **********************/
+         
+        /*不保留左侧时的info样式*/
+        .info{width: 100%; height:870px;margin-bottom:20px;}
+        @media (min-height: 700px) { .info{height:820px;} } 
+        /*保留左侧时的info样式 */
+        /*.info{width: 100%; height:880px; background-color: #fff;margin-bottom:20px;margin:auto;}
+        @media (min-height: 700px) { .info{height:780px;}  }*/ 
+        
+        
+
+         /****************** 分页 Start **********************/
+         .pagination{margin-top:20px;padding-right:20px;width:100%;}
+        .pagination #pagination-right{float:right;margin-right: 20px;}
+        .pagination #pagination-left{float: left; color: #BFBFBF; margin-left: 30px;font-size:12px;}
+        .pagination #pagination-left b{color: #8A8A8A;font-weight: normal;padding:4px;}
+        .pagination ul{ border:0; margin:0; padding:0; }
+        #pagination-right li { border:0; margin:0; padding:0; font-size:10px; list-style:none; /* savers */ float:left; text-align:center;}
+        #pagination-right a{margin-right:2px;border: 1px solid #EEEEEE; }
+        #pagination-right #pagination-right .next-off  { border:solid 1px #DEDEDE; color:#B69A6A; display:block; float:left; font-weight:bold; margin-right:2px; padding:6px 11px; }
+        #pagination-right .next a,#pagination-right .previous a { font-weight:bold; }	
+        #pagination-right .active {border: 1px solid #B69A6A;background:#B69A6A; color:#FFFFFF; font-weight:bold; display:block; float:left; padding:6px 11px; /* savers */ margin-right:2px; }
+        #pagination-right a:link,#pagination-right a:visited { color:#333333; display:block; float:left; padding:6px 11px; text-decoration:none; }
+        #pagination-right a:hover { border:solid 1px #B69A6A; }
+        #pagination-right span {font-size:10px;margin:0; color:#555555;background-color:#fff;line-height: 30px;}
+        #pagination-right input[type=text] { background-color: #fff; border: 1px solid #EFEFEF;line-height: 23px;color: #333; text-align: center;outline: none; width: 25px;font-size: 12px; height: 26px;}
+        #pagination-right input[type=button]{background-color: #fff;border: 1px solid #EFEFEF; width: 30px;margin: 0px; padding: 0px;font-size: 12px;height: 26px;line-height: 26px;}
+        
+        /****************** 分页 ENd **********************/
+
+        
+        
+        /****************** checkbox 样式 **********************/
+        .chk_1 {  display: none; } 
+        .chk_1 + label { background-color: #FFF; border: 1px solid #C1CACA; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05); padding: 7px;display: inline-block; position: relative;    vertical-align: middle; margin-top: -2px;margin-bottom: 1px; } 
+        .chk_1 + label:active { box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px 1px 3px rgba(0,0,0,0.1); } 
+        /*.chk_1:checked + label {  background-color: #B69A6A;  border: 1px solid #92A1AC; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05), inset 15px 10px -12px rgba(255, 255, 255, 0.1); color: #243441; }*/ 
+        /*.chk_1:checked + label:after { content: '\2714';  position: absolute; top: -5px; left: 0px;  color: #fff;  width: 100%;  text-align: center; font-size: 1.0em;  padding: 1px 0 0 0; vertical-align: text-top; }*/ 
+        .chk_1.checked + label {  background-color: #B69A6A;  border: 1px solid #92A1AC; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0px -15px 10px -12px rgba(0, 0, 0, 0.05), inset 15px 10px -12px rgba(255, 255, 255, 0.1); color: #243441; } 
+        .chk_1.checked + label:after { content: '\2714';  position: absolute; top: -2px; left: 0px;  color: #fff;  width: 100%;  text-align: center; font-size: 12px;padding: 1px 0 0 0; vertical-align: text-top; } 
+  
+      

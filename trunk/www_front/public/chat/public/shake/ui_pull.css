@@ -1,0 +1,20 @@
+@charset "utf-8";
+/* CSS Document */
+
+.pull_get_bottle{background-image:url(../images/img05.png); background-repeat:no-repeat; background-position: top center; background-size:80%;}
+.pull_get_bottle .bgimg_bottle_default{ background:url(../images/img04.png) no-repeat bottom center; background-size:auto 55%; height:70%; position:relative; display:block;}
+.pull_get_bottle .bgimg_bottle_default div{ position:absolute; bottom:-10%; width:100%; font-size:0.6rem; color:#fff;}
+
+.pull_img_view{ background:#2b2b2b;}
+.pull_img_view .img_view_box{  display: table-cell;  vertical-align: middle; text-align:center}
+.pull_img_view .img_view_box img{ width:auto; max-height:100%; max-width:100%;}
+
+.pull_poster_edit{background:#f7f7f7; text-align:justify}
+.pull_poster_edit .poster_edit_box{background:#fff; padding:3%;overflow:hidden; border-bottom:1px solid #c8c7cc;}
+.pull_poster_edit .poster_edit_box .poster_edit_input textarea{width:100%; line-height:1.5}
+.pull_poster_edit .poster_edit_box .img_add_box{ background:url(../images/ico/ico05.png) no-repeat; background-size:100% 100%;float:left; margin-right:2%; margin-top:2%;}
+.pull_poster_edit .poster_edit_box .img_add_box img{width:3rem; height:3rem;}
+.pull_poster_edit .poster_edit_box .img_isadd{ background:none}
+.pull_poster_edit .poster_foot_btn{ padding:3%}
+.pull_poster_edit .poster_foot_btn .ui_btn{ margin-right:5%;}
+.pull_poster_edit .poster_foot_btn .send_btn{ float:right; padding:0 3%; margin-right:0}

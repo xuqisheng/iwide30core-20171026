@@ -1,0 +1,205 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;width:100%; height:100%;}
+body,html,a{color:#555;}
+.arial{font-family:arial}
+.week:before{content:'星期'}
+.topright{width: 0; height: 0;border-top: 2.5rem solid;border-left: 2.5rem solid transparent; }
+.backvote{ padding:0 5px}
+
+.index_list>*,.index_list>*:first-child{}
+.index_list .webkitbox{padding:0}
+.index_list .webkitbox>*{padding-top:6px; padding-bottom:6px}
+.index_list .near{width:60px; max-width:60px; min-width:60px; }
+.index_list .near>*{line-height:1}
+
+.border_circle{border-radius:50%; border:0.5px solid #e4e4e4; text-align:center;width:42px; max-width:42px; min-width:42px; height:42px;line-height:42px; margin:2px 8px;}
+.index_list .webkitbox .border_circle{ padding:0; }
+.submitbtn,a.submitbtn{border-radius:6px; padding:10px;width:100%}
+
+.others{margin:16px 0;}
+.others>*{ background:#fff; padding:0 2px 8px 2px ; box-shadow:0 0 10px rgba(180,180,180,0.1); margin:0 8px; border-radius:5px;}
+.others .txtclip{width:6em; min-width:100%}
+.others .img{width:40px; margin:12px auto 9px auto;}
+.others img{ border-radius:50%;}
+.others em{font-size:25px; display:block; line-height:1; color:#737282;}
+
+.headfixed{ position:fixed;width:100%; top:0; left:0; z-index:999}
+.hotel_list>*{position:relative}
+.hotel_list .info{width:40%}
+.hotel_list .img{width:10%; margin-right:8px;}
+.hotel_list .price{width:10%;}
+.new_store{position:absolute; -webkit-transform:rotate(45deg); background:#d61b2b;
+font-size:8px; width:70px; text-align:center; padding-top:20px; padding-bottom:2px;color:#fff; right:-31px; top:-11px;}
+
+.allorder_list .item{display:block; background:#fff; margin-bottom:8px; border-radius:8px;padding:12px 10px; position:relative;}
+.allorder_list .item{ border:0.5px solid #e3e3e3; }
+.allorder_list .btn_void{ min-width:5rem; padding:3px;}
+
+/*筛选*/
+
+.filter_option{position:fixed; width:100%; text-align:center; bottom:0; background:rgba(27,27,32,0.9); color:#fff; z-index:9999}
+.filter_option>*{ padding:13px 0;}
+
+.sort_list_pull{z-index:9998}
+.sort_list_pull .relative{height:100%; width:100%;}
+.sort_list_pull ul{position:absolute; bottom:45px; background:#fff;width:100%;}
+.sort_list_pull ul li{padding:12px; display:block; color:#555}
+.sort_list_pull ul li.cur{color:inherit}
+
+.filter_pull{ background:#fff; display:none}
+.filter_pull .tab_list{width:30%;}
+.filter_pull .tab_list .address_list{ padding-left:0;}
+.filter_pull .tab_list li{ padding:24px 10px 0 10px; text-align:center;}
+.filter_pull .tab_list li p{width:70%; margin:auto; margin-top:6px; border-radius:1em; padding-top:0.5em; }
+.filter_pull .tab_list li span{border-radius:1em; display:block; word-break:break-all; color:#555}
+
+
+.get_result{float:right; width:70%; height:85%}
+.get_result ul{padding-left:8%}
+.get_result li{border:0; padding:3% 0;}
+.get_result .title{padding:10px;}
+.get_result .title p{color:#303030; border-radius:1em; background:#f8f8f8; padding:2px 8px;}
+.get_result .title p:after{ content:'\20\34'; font-family:iconfont; font-size:5px; vertical-align:middle;}
+.get_result ul{ margin-bottom:3%;}
+.result_list{position:absolute; background:rgba(255,255,255,1); left:0; top:100%; height:300px;z-index:990; width:100%; overflow:auto; -webkit-overflow-scrolling:touch; text-align:left; }
+.result_list li{ background:#fff; border:solid #e4e4e4; border-width:0 0 1px 0; padding:3%;}
+.result_list li:last-child{ border-width:0;}
+
+/*搜索*/
+.searchpull{z-index:10000}
+.filter_pull .pull_searchbox{ border-radius:2em; padding:0 8px; position:relative}
+.filter_pull input{padding:8px 0; min-width:80%}
+
+/* 评价页 */
+textarea#msg{ display:block;width:100%; padding-bottom:4px}
+.topoint tt{font-family:inherit; vertical-align:middle; margin-left:8px;width:1.1rem; text-align:center; display:inline-block;}
+.topoint li{margin-top:4px}
+.pointimg{width:80px; margin-right:8px}
+.addimg {font-size:0}
+.addimg > *{ background:url(../images/addimg.png) no-repeat; background-size:100%; width:65px; height:65px; overflow:hidden; display:inline-block; margin-right:10px; margin-bottom:6px; vertical-align:middle}
+.addimg img{ width:auto; min-width:100%; max-width:200%; min-height:100%;}
+
+.sum_tag >*{ padding:2px 5px; border-radius:2px; margin:0 10px 8px 0}
+.apply_list{ padding:0 8px;}
+.apply_list>*{padding:8px 0}
+.apply_list .img{width:35px; max-width:35px; min-width:35px; border-radius:50%; overflow:hidden; margin-right:8px; background:#e4e4e4;}
+.apply_list .addimg>*{background:#eee;}
+
+.circle_percent{ width: 50px; height: 50px; position:relative; border-radius: 50%;  margin:auto;}
+.imgpercent_left,.imgpercent_right { width: 50px; height: 50px; position: absolute; top: 0;left: 0; } 
+.imgpercent_left>*,.imgpercent_right >*{ display: block; width:50px; height:50px; border-radius: 50%; position: absolute; top: 0; left: 0;background: #eee; } 
+.imgpercent_left,.imgpercent_left>*{clip:rect(0,25px,auto,0);}
+.imgpercent_right,.imgpercent_right >*{clip:rect(0,auto,auto,25px);}
+.curpercent { width: 44px; height: 44px; border-radius: 50%; left: 3px; top: 3px; background:#fff; color:#555;position: absolute; text-align: center; line-height: 45px;}
+
+
+/*房型列表*/
+.headers .allimg,.headers .blackbg{position:absolute; color:#f8f8f8;}
+.headers .allimg{ top:8px; right:8px; background:rgba(0,0,0,0.5); padding:2px 8px}
+.headers .blackbg{ bottom:0; padding:4px 8px; width:100%; background:url(../images/bg02.png) repeat-x bottom left; background-size:auto 100%; z-index:99}
+.headers .allimg .iconfont{width:3rem;min-width:3rem;}
+.room_list>*{position:relative; margin-bottom:8px}
+.room_list .img{max-width:65px;min-width:65px; width:65px;  margin-right:5px;}
+.room_list .roomname{ padding-right:8px;}
+.room_list .showprice { display:inline-block;}
+.room_list [pre],.room_list [now]{ display:inline-block;margin-left:5px;border-radius:3px; vertical-align:middle; text-align:center}
+.room_list [pre]{ border:1px solid;}
+.room_list [pre]>*{padding:0px 0.5rem}
+.room_list [now]{ padding:0.7rem 0.7rem; line-height:1;}
+.full_room,.full_room span{position:absolute; top:0; right:0; display:block; }
+.full_room span:last-child{ top:0.2rem; right:0.2rem;color:#fff;}
+.torotate{-webkit-transform:rotate(180deg) !important; display:inline-block}
+.viplist{padding:8px; text-align:center; color:#999;}
+.viplist p{line-height:1.2}
+
+/* 提交订单页 */
+.foot_fixed{ z-index:555}
+.room_count select{width:75%}
+.pad3{padding:8px}
+.pay_list{display:flex !important;flex-wrap:wrap;align-items: stretch}
+.pay_list>*{flex-grow:1; padding-bottom:5px;}
+.pay_list .pay_way em{ color:#e4e4e4;}
+.pay_list .ischeck em{ color:inherit; }
+.bookstatus .statuslist{ position: relative; width:25%;}
+.bookstatus .bg_main{display: inline-block; width:16px; height:16px;border-radius: 50%;border:2px solid #fff}
+.bookstatus hr{border-bottom: 1px solid; position: absolute; width:70%; top:8px; right: 65%;}
+.bookstatus .statuslist:first-child hr{border: 0}
+.bookstatus .not hr{border-color: #999}
+.bookstatus .active{border:2px solid #ffedd0;}
+.bookstatus .not{ background: #999;}
+
+.price_detail_pull{ z-index:444}
+.price_detail_pull .item{ padding:2% 3%}
+.price_detail_pull .item > *:first-child{text-align:left;}
+.price_detail_pull .item > *:last-child{text-align:right;}
+.price_detail_pull .scroll{ bottom:41px; width:100%; max-height:70%;}
+
+/*酒店详情*/
+.hotel_intro{ text-align:justify; line-height:1.5; padding-right:3%; margin-top:2%; text-indent:2em;}
+.vote_spread{ overflow:auto;-webkit-overflow-scrolling:touch; width:100%;display: box;display: -webkit-box;display: -moz-box;-webkit-box-align:center; padding-left:10px; padding-bottom:10px;}
+.vote_spread .squareimg{overflow:hidden}
+.vote_spread>*{ display:block;padding-right:10px; overflow:hidden;width:100%;}
+.vote_spread img{min-height:100%;}
+
+/*优惠券*/
+
+.votelist{text-align:center;}
+.ui_vote{background:#fff; overflow:hidden;border-radius:5px;text-align:left;display:inline-block; width:85%;margin-top:8px}
+.ui_vote *{font-size:12px;}
+.ui_vote .bordertop_img{background:url(../images/bg03.png?v=1) repeat-x;padding-top:5px; background-size:auto 100%;}
+.ui_vote .vote_con{ padding:4%; padding-top:7%; overflow:hidden;}
+.ui_vote .votename,
+.ui_vote .vote_con b{font-size:16px; font-weight:normal}
+.ui_vote [rebate]{float:right; font-size:24px;}
+.ui_vote [rebate]:before{font-size:14px;}
+.ui_vote .val_date{padding:4%;display:-webkit-box;}
+.ui_vote .val_date>*{-webkit-box-flex:1;font-size:10px;}
+.ui_vote .val_date>*:last-child{text-align:right}
+.vote_pull [footbtn]{width:100%; position:absolute; bottom:0;text-align: center;padding:10px 0; z-index:999}
+.vote_pull [checkbox] em{width:10px;height:10px; display:block; color:#ccc}
+.vote_pull [checkbox]{float:left;margin-left:2%;margin-top:60px}
+.votelist .ischeck [checkbox] em{color:inherit}
+
+/*  所有弹层 */
+.pull_box{width:80%; margin:10% auto; max-height:80%; overflow:hidden; border-radius:8px;}
+.pull_box .pull_title{border-bottom:3px solid}
+.pull_box .scroll{min-height:200px;}
+
+.address_pull .bg_fff{background:#F7F7F7; padding:8px 26px 8px 8px;}
+.address_pull .address_list{margin-bottom:8px}
+.address_pull .title{background:#eee; padding:4px 8px}
+.address_pull .title2{ background:#fff; padding:4px 8px}
+.address_pull .hotcity { padding:5px 10px 0px 10px;}
+.address_pull .hotcity li{ text-align:center; display:inline-block; width:31%; border:1px solid #e4e4e4; padding:2px 8px; margin-bottom:8px;}
+.address_pull .hotcity li.color_main{ border:1px solid}
+
+.address_pull .scroll{height:100%;}
+
+.guest_pull input{ width:100%;}
+.detail_pull [sever]>*{ display:inline-block; padding:2px 4px; width:30%}
+.detail_pull .scroll{min-height:150px; height:150px}
+
+.address_index{position:absolute; right:0; top:0 !important; overflow:hidden; z-index:99;   background:#fff; padding-top:20px; height:100%}
+.address_index>*{padding:2px 6px; color:#555; text-align:center}
+.address_index>*:first-child:before{content:'\2c'; font-family:'iconfont'; display:block; font-size:8px; margin-bottom:10px}
+/*radio*/
+.checkradio input{ display:none}
+.checkradio em{color:#e4e4e4;}
+.checkradio input:checked+span em{ color:inherit;border-color:transparent}
+
+/* 动画 */
+
+.rotate{
+	/* Safari and Chrome: */
+	-webkit-animation-name: scan;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.5s;
+	-webkit-animation-iteration-count:1;
+}
+@-webkit-keyframes scan /* Safari and Chrome */
+{
+from{ -webkit-transform:rotate(0deg)}
+to{-webkit-transform:rotate(180deg)}
+}

@@ -1,0 +1,342 @@
+<?php
+
+class Yasiteiwapi{
+	private $soap;
+	private $inter_id;
+	private $url;
+	private $CI;
+	
+	public function __construct($config = []){
+		$this->CI =& get_instance();
+		$soap_opt = array(
+			'soap_version' => SOAP_1_1,
+			'encoding'     => 'UTF-8',
+			'cache_wsdl'   => WSDL_CACHE_NONE,
+			//			'trace'        => true,
+		);
+		$this->CI->load->helper('common');
+		$this->CI->load->model('common/Webservice_model');
+		$this->inter_id = $config['inter_id'];
+		$this->url = $config['url'];
+		$time=time();
+		
+		try{
+			$this->soap = new SoapClient($config['url'], $soap_opt);
+		}catch(SoapFault $e){
+			$this->checkWebResult('', [], $e, $time, microtime(),[],['run_alarm'=>1]);
+		}catch(Exception $e){
+			$this->checkWebResult('', [], $e, $time, microtime(),[],['run_alarm'=>1]);
+		};
+	}
+	
+	/**
+	 * @param int $hotel_web_id PMS上的酒店ID
+	 * @param string $start_date 开始日期
+	 * @param string $end_date 结束日期
+	 * @return array|mixed
+	 */
+	public function getRoomStatus($hotel_web_id, $start_date, $end_date,$func_data=[]){
+		$parameters = [
+			'ChainID'      => (int)$hotel_web_id,
+			'BeginAccDate' => date('Y-m-d', strtotime($start_date)),
+			'EndAccDate'   => date('Y-m-d', strtotime($end_date)),
+		];
+		
+		return $this->postService('GetHotelDetailsWithRoomStatus', $parameters,$func_data);
+	}
+	
+	/**
+	 * @param array $book_folio 预订信息
+	 *                           ChainID=>酒店ID
+	 *                           RoomTypeID=>房型ID
+	 *                           Arrorig=>预留到店时间
+	 *                           Deporig=>预留离店时间
+	 *                           Mobile=>预定手机号
+	 *                           MebName=>预定人姓名
+	 *                           ContractName=>联系人姓名
+	 *                           Phone=>联系人电话
+	 *                           RoomCount=>预订房间数量
+	 *                           MebID=>会员编号
+	 *                           MebTypeID=>会员类型ID
+	 *                           RoomRate=>房价
+	 *SubSourceID=>二级渠道【22：到店付，23：微信支付】
+	 * @param array $guest_folio 入住人信息
+	 *                           Name=>入住人姓名
+	 *                           Phone=>入住人手机
+	 * @param bool $free 是否为免费房
+	 * @return array|mixed
+	 */
+	public function submitOrder($book_folio = [], $guest_folio = [], $free = false,$func_data=[]){
+		$parameters = [
+			'BookFolio'    => $book_folio,
+			'CheckInGuest' => $guest_folio,
+		];
+		$func = 'SubmitOrder';
+		if($free){
+			$func = 'SubmitFreeOrder';
+		}
+		return $this->postService($func, $parameters,$func_data);
+	}
+	
+	/**
+	 * 查询订单
+	 * @param $hotel_web_id
+	 * @param $web_orderid
+	 * @return mixed|null
+	 */
+	public function queryOrder($hotel_web_id, $web_orderid,$func_data=[]){
+		
+		$parameters = [
+			'ChainID' => $hotel_web_id,
+			'FolioID' => $web_orderid,
+		];
+		
+		$web_order = $this->postService('QueryOrder', $parameters,$func_data, true);
+		if($web_order){
+			$web_order['Arrival'] = $this->handleDate($web_order['Arrival']);
+			$web_order['Arrorig'] = $this->handleDate($web_order['Arrorig']);
+			$web_order['Depart'] = $this->handleDate($web_order['Depart']);
+			$web_order['Deporig'] = $this->handleDate($web_order['Deporig']);
+			$web_order['CreateTime'] = $this->handleDate($web_order['CreateTime']);
+			$web_order['CreateAccDate'] = $this->handleDate($web_order['CreateAccDate']);
+			$web_order['ArrAccDate'] = $this->handleDate($web_order['ArrAccDate']);
+			$web_order['DepAccDate'] = $this->handleDate($web_order['DepAccDate']);
+			$web_order['ChkOutTime'] = $this->handleDate($web_order['ChkOutTime']);
+			$web_order['ChkOutAccDate'] = $this->handleDate($web_order['ChkOutAccDate']);
+		}
+		
+		return $web_order;
+	}
+	
+	/**
+	 * 删除订单
+	 * @param $hotel_web_id
+	 * @param $web_orderid
+	 * @return array|mixed
+	 */
+	public function cancelOrder($hotel_web_id, $web_orderid,$func_data=[]){
+		$parameters = [
+			'ChainID' => $hotel_web_id,
+			'FolioID' => $web_orderid,
+		];
+		return $this->postService('CancelPersonBook', $parameters,$func_data, true);
+	}
+	
+	public function addPayment($hotel_web_id, $web_orderid, $trade_no, $price,$func_data=[]){
+		$parameters = [
+			'chainID'  => $hotel_web_id,
+			'folioID'  => $web_orderid,
+			'tradeID'  => $trade_no,
+			'payMoney' => $price
+		];
+		
+		return $this->postService('Payment', $parameters,$func_data, true);
+	}
+	
+	
+	public function addTrans($hotel_web_id, $web_orderid, $sub_id, $price, $remark = '',$func_data=[]){
+		$parameters = [
+			'chainID' => $hotel_web_id,
+			'folioID' => $web_orderid,
+			'subID'   => $sub_id,
+			'price'   => $price,
+			'remark'  => $remark,
+		];
+		
+		return $this->postService('AddTrans', $parameters,$func_data, true);
+		
+	}
+	
+	public function queryConnectedOrder($hotel_web_id, $web_orderid,$func_data=[]){
+		$parameters = [
+			'chainID' => $hotel_web_id,
+			'folioID' => $web_orderid,
+		];
+		
+		$result = $this->postService('QueryConnectedOrder', $parameters,$func_data,true);
+		if(!empty($result['DataSet'])){
+			is_array(current($result['DataSet'])) or $result['DataSet'] = [$_REQUEST['DataSet']];
+			foreach($result['DataSet'] as &$v){
+				$v['Arrival'] = $this->handleDate($v['Arrival']);
+				$v['Arrorig'] = $this->handleDate($v['Arrorig']);
+				$v['Depart'] = $this->handleDate($v['Depart']);
+				$v['Deporig'] = $this->handleDate($v['Deporig']);
+				$v['CreateTime'] = $this->handleDate($v['CreateTime']);
+				$v['CreateAccDate'] = $this->handleDate($v['CreateAccDate']);
+				$v['ArrAccDate'] = $this->handleDate($v['ArrAccDate']);
+				$v['DepAccDate'] = $this->handleDate($v['DepAccDate']);
+				$v['ChkOutTime'] = $this->handleDate($v['ChkOutTime']);
+				$v['ChkOutAccDate'] = $this->handleDate($v['ChkOutAccDate']);
+			}
+			reset($result['DataSet']);
+		}
+		return $result;
+	}
+	
+	/*public function calculatRoomRate($hotel_web_id, $web_orderid){
+		$parameters = [
+			'chainID' => $hotel_web_id,
+			'folioID' => $web_orderid,
+		];
+		
+		return $this->postService('CalculatRoomRate', $parameters, true);
+	}*/
+	
+	/**
+	 * 获取消费房费
+	 * @param $hotel_web_id
+	 * @param $web_orderid
+	 * @return mixed|null
+	 */
+	public function getRoomAccTrans($hotel_web_id, $web_orderid,$func_data=[]){
+		$parameters = [
+			'chainID' => $hotel_web_id,
+			'folioID' => $web_orderid,
+		
+		];
+		
+		return $this->postService('GetRoomAccTrans', $parameters,$func_data, true);
+	}
+	
+	public function continueStay($hotel_web_id,$sub_webid,$money,$trade_no,$stay_day=1,$remark='', $func_data = []){
+		$parameters = [
+			'nChainID'      => $hotel_web_id,
+			'nFolioID'      => $sub_webid,
+			'cContinueDays' => $stay_day,
+			'mMoney'        => $money,
+			'tTradeNo'      => $trade_no,
+			'rRemark'       => $remark
+		];
+		return $this->postService('ContinueStayIn', $parameters,$func_data,true);
+	}
+	
+	private function postService($func, $parameters, $func_data = [], $json = false){
+		$time = time();
+		$result = null;
+		$s = null;
+		$run_alarm = 0;
+		if($this->soap){
+			try{
+				$obj = $this->soap->__soapCall($func, ['parameters' => $parameters]);
+				
+				$this->CI->Webservice_model->add_webservice_record($this->inter_id, 'yasiteiw', $this->url, func_get_args(), $obj, 'query_post', $time, microtime(), $this->CI->session->userdata($this->inter_id . 'openid'));
+				
+				if(!empty($obj->{$func . 'Result'})){
+					$res = $obj->{$func . 'Result'};
+					if(!$json){
+						$result = obj2array($res);
+					}else{
+						$result = json_decode($res, true);
+					}
+				}
+				$s = $result;
+			}catch(SoapFault $e){
+				$s = $e;
+				$run_alarm = 1;
+			}catch(Exception $e){
+				$s = $e;
+				$run_alarm = 1;
+			}
+			$this->checkWebResult($func, $parameters, $s, $time, microtime(),$func_data, ['run_alarm' => $run_alarm]);
+		}
+		
+		return $result;
+	}
+	
+	protected function checkWebResult($func_name, $send, $receive, $now, $micro_time,$func_data=[], $params = []){
+		$func_name_des = $this->pms_enum('func_name', $func_name);
+		isset ($func_name_des) or $func_name_des = $func_name; // 方法名描述\
+		$err_msg = ''; // 错误提示信息
+		$err_lv = NULL; // 错误级别，1报警，2警告
+		$alarm_wait_time = 6; // 默认超时时间
+		if(!empty($params['run_alarm'])){ // 程序运行报错，直接报警
+			$err_msg = '程序报错,' . json_encode($receive, JSON_UNESCAPED_UNICODE);
+			$err_lv = 1;
+		}else{
+			switch($func_name){ // 针对不同方法判断是否出错
+				case 'GetHotelDetailsWithRoomStatus':
+					if(empty($receive['RoomStatusItems']['QueryRoomStatusItem'])){
+						$err_msg = '返回空数据';
+						$err_lv=2;
+					}
+					break;
+				case 'SubmitOrder':
+				case 'SubmitFreeOrder':
+					if(!is_numeric($receive)){
+						$err_msg=$receive;
+						$err_lv=1;
+					}
+					break;
+				case 'QueryOrder':
+					if(empty($receive)){
+						$err_msg='返回空数据';
+						$err_lv=2;
+					}
+					break;
+				case 'CancelPersonBook':
+				case 'Payment':
+				case 'AddTrans':
+					if($receive['result']!='succeed'){
+						$err_msg=$receive['msg'];
+						$err_lv=1;
+					}
+					break;
+				
+				case 'GetRoomAccTrans':
+					if($receive['result']!='succeed'){
+						$err_msg=$receive['msg'];
+						$err_lv=2;
+					}
+					break;
+				case 'QueryConnectedOrder':
+					
+					break;
+				case 'ContinueStayIn':
+					if($receive['result']!='succeed'){
+						$err_msg=$receive['msg'];
+						$err_lv=1;
+					}
+					break;
+			}
+		}
+		
+		$this->CI->Webservice_model->webservice_error_log ( $this->inter_id, 'yasiteiw', $err_lv, $err_msg, array (
+			'web_path' => $this->url,
+			'send' => $send,
+			'receive' => $receive,
+			'send_time' => $now,
+			'receive_time' => $micro_time,
+			'fun_name' => $func_name_des,
+			'alarm_wait_time' => $alarm_wait_time
+		), $func_data );
+	}
+	
+	private function pms_enum($type = '', $key = ''){
+		$arr = [];
+		switch($type){
+			case 'func_name':
+				$arr = [
+					'GetHotelDetailsWithRoomStatus' => '获取房态',
+					'SubmitOrder'=>'提交订单',
+					'SubmitFreeOrder'=>'提交免费订单',
+					'queryOrder'=>'查询订单',
+					'CancelPersonBook'=>'取消订单',
+					'Payment'=>'网络入账',
+					'AddTrans'=>'添加账单明细',
+					'QueryConnectedOrder'=>'查询关联房单',
+					'GetRoomAccTrans'=>'获取房费',
+					'ContinueStayIn'=>'续住操作'
+				];
+				break;
+		}
+		if($key === ''){
+			return $arr;
+		}
+		return isset($arr[$key]) ? $arr[$key] : null;
+	}
+	
+	private function handleDate($value){
+		return substr($value, strpos($value, '(') + 1, 10);
+	}
+	
+}

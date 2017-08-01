@@ -1,0 +1,236 @@
+<body class="goods-list-bg ">
+<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+<div class="pageloading"><p class="isload">正在加载</p></div>
+
+<script>
+    wx.config({
+        debug: false,
+        appId: '<?php echo $wx_config["appId"]?>',
+        timestamp: <?php echo $wx_config["timestamp"]?>,
+        nonceStr: '<?php echo $wx_config["nonceStr"]?>',
+        signature: '<?php echo $wx_config["signature"]?>',
+        jsApiList: [<?php echo $js_api_list; ?>,'getLocation']
+    });
+    wx.ready(function(){
+        <?php if( $js_menu_hide ): ?>wx.hideMenuItems({ menuList: [<?php echo $js_menu_hide; ?>] });<?php endif; ?>
+
+        <?php if( $js_menu_show ): ?>wx.showMenuItems({ menuList: [<?php echo $js_menu_show; ?>] });<?php endif; ?>
+
+        <?php if( $js_share_config ): ?>
+        wx.onMenuShareTimeline({
+            title: '<?php echo $js_share_config["title"]?>',
+            link: '<?php echo $js_share_config["link"]?>',
+            imgUrl: '<?php echo $js_share_config["imgUrl"]?>',
+            success: function () {},
+            cancel: function () {}
+        });
+        wx.onMenuShareAppMessage({
+            title: '<?php echo $js_share_config["title"]?>',
+            desc: '<?php echo $js_share_config["desc"]?>',
+            link: '<?php echo $js_share_config["link"]?>',
+            imgUrl: '<?php echo $js_share_config["imgUrl"]?>',
+            //type: '', //music|video|link(default)
+            //dataUrl: '', //use in music|video
+            success: function () {},
+            cancel: function () {}
+        });
+        <?php endif; ?>
+    });
+</script>
+
+  <div id="goodsList">
+        <div class="banner">
+            <?php if(isset($theme) && !empty($theme) && $theme['cat_bg']): ?>
+                <img src="<?php echo $theme['cat_bg'];?>">
+                <?php else: ?>
+                <img src="<?php echo base_url('public/soma/mooncake4/images/goods_list_banner.png');?>">
+            <?php endif;?>
+
+        </div>
+        <div class="goods-list">
+            <ul class="clearfix" id="list">
+                <?php $cnt = 0; ?>
+                <?php foreach($products as $k => $v):?>
+
+                    <?php
+                        if($cnt % 2 == 0){
+                            $cnt ++;
+                            //continue;
+                        }
+                        //是否显示¥符号
+                        $show_y_flag = true;
+                        if($v['type'] == $packageModel::PRODUCT_TYPE_POINT)
+                        {
+                            $show_y_flag = false;
+                        }
+
+                        $price_market = $v['price_market'];
+                        $price_package = $v['price_package'];
+                        $product_type = null;
+                        if(isset($v['killsec'])){
+                            $price_package = $v['killsec']['killsec_price'];
+                            $product_type = $lang->line('flash_sale');
+                        }
+                        elseif(isset($v['groupon'])){
+                            $price_package = $v['groupon']['group_price'];
+                            $product_type = $lang->line('group');
+                        }
+                        elseif(isset($v['auto_rule'])){
+                            $product_type = $lang->line('offer');
+                        }
+                        elseif($v['goods_type'] == Product_package_model::SPEC_TYPE_COMBINE){
+                            $product_type = $lang->line('combined_product');
+                        }
+                        elseif(isset($v['scopes'])){
+                            $product_type = $lang->line('exclusive');
+                        }
+
+                        //碧桂园
+                        if(in_array($this->inter_id, ['a421641095'])){
+                            if($v['keyword']){
+                                $v['name'] = $v['keyword'];
+                            }
+                        }
+                    ?>
+                    <li class="pr">
+                        <?php if($product_type != null): ?>
+                            <div class="pa label">
+                                <span class="f24"><?= $product_type ?></span>
+                            </div>
+                        <?php endif;?>
+                        <a href="<?php echo Soma_const_url::inst()->get_package_detail(array('pid'=>$v['product_id'],'id'=>$inter_id, 'tkid' => $ticketId, 'catid' => $catId) );?>">
+                            <p class="img"><img src="<?php echo $v['face_img'];?>"/></p>
+                            <p class="title f30"><?= $v['name'] ?></p>
+                            <div class="price">
+                                <p>
+                                    <span class="f24">¥</span>
+                                    <span class="discount f36"><?= $price_package ?></span>
+                                    <span class="original f24">¥ <?= $price_market ?></span>
+                                </p>
+                            </div>
+                        </a>
+                    </li>
+                <?php endforeach;?>
+            </ul>
+        </div>
+    </div>
+
+
+
+</body>
+<script src="<?php echo get_cdn_url('public/soma/mooncake4/js/search.js');?>"></script>
+<script>
+
+    var hideload = function(){
+        $('.ui_loadmore').remove();
+    }
+    var showload =function(str){
+        hideload();
+        if(str==undefined)
+            var tmp = "<div class='center ui_loadmore' style='padding:20px;'><em class='ui_loading'></em></div>";
+        else
+            var tmp = "<div class='center ui_loadmore color_888 h20' style='padding:20px;'>"+str+"</div>";
+        $('body').append(tmp);
+    }
+
+    var currentPage = 0;
+    var max = false;
+    var throttleTimer = null;
+    var canLoad = true;
+
+    function getLoad () {
+        $(window).scroll(function () {
+
+            var srollPos = $(window).scrollTop(); //滚动条距顶部距离(页面超出窗口的高度)
+            var pages = currentPage;
+            if (max === true) {
+                return false;
+            }
+            showload();
+            function getData () {
+                if ($(window).height() + $(document).scrollTop() >= $(document).height()) {
+                    $.ajax({
+                        url: "<?= Soma_const_url::inst()->get_url('*/package/ajax_get_product_list', array('id' => $inter_id, 'tkid' => $ticketId)) ?>",
+                        type: 'post',
+                        data: {'p': pages},
+                        dataType: 'json',
+                        success: function (s) {
+                            hideload();
+                            if (s.status === 1) {
+                                canLoad = true;
+                                var str = '';
+                                for (var i = 0; i < s.data.length; i++) {
+                                    var name = s.data[i].name; // 产品名称
+                                    var pic = s.data[i].face_img; // 图片
+                                    var baseUrl = "<?php echo Soma_const_url::inst()->get_package_detail(); ?>";
+                                    var href = baseUrl + '&pid=' + s.data[i].product_id + '&openid=' + "<?php echo $this->openid ?>"; // 链接
+                                    var label = ''; // 标签
+                                    var discount = s.data[i].price_package; // 折后价
+                                    var original = s.data[i].price_market; // 原价
+                                    if (s.data[i].killsec != undefined) {
+                                        label = "<?php echo $lang->line('flash_sale'); ?>"
+                                        discount = s.data[i].killsec.killsec_price;
+                                    }
+                                    if (s.data[i].groupon != undefined) {
+                                        label = "<?php echo $lang->line('group'); ?>"
+                                        discount = s.data[i].groupon.group_price;
+                                    }
+                                    if (s.data[i].auto_rule != undefined) {
+                                        label = "<?php echo $lang->line('offer'); ?>"
+                                    }
+                                    if (s.data[i].goods_type == <?= Product_package_model::SPEC_TYPE_COMBINE ?>
+                                    )
+                                    {
+                                        label = "<?php echo $lang->line('combined_product'); ?>"
+                                    }
+                                    if (s.data[i].scopes != undefined) {
+                                        label = "<?php echo $lang->line('exclusive'); ?>"
+                                    }
+                                    var appendString = '<li class="pr">';
+                                    if (label) {
+                                        appendString += '<div class="pa label"><span class="f24">' + label + '</span></div>';
+                                    }
+                                    appendString += '<a href="' + href + '">' +
+                                    '<p class="img"><img src="' + pic + '"></p>' +
+                                    '<p class="title f30">' + name + '</p>' +
+                                    '<div class="price">' +
+                                    '<p>' +
+                                    '<span class="f24">¥</span>' +
+                                    '<span class="discount f36">' + discount + '</span>' +
+                                    '<span class="original f24">¥ ' + original + '</span>' +
+                                    '</p>' +
+                                    '</div>' +
+                                    '</a>' +
+                                    '</li>';
+                                    str = str + appendString;
+                                }
+
+                                if (canLoad === true) {
+                                    $(str).appendTo($('#list'));
+                                    canLoad = false;
+                                }
+
+                                currentPage++;
+                                setLabel();
+                            } else if (s.status === 2 && s.msg === '查找数据为空！') {
+                                max = true;
+                                showload('<?php echo $lang->line('no_more_list_tip');?>');
+                            }
+
+                        }
+                    })
+                }
+            }
+
+
+            clearTimeout(throttleTimer);
+            throttleTimer = setTimeout(function () {
+                getData();
+            }, 500);
+
+        })
+    }
+
+    getLoad();
+</script>
+</html>

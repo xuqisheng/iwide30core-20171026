@@ -1,0 +1,99 @@
+@charset "utf-8";
+/* CSS Document */
+
+.ui_price b{font-family: Arial, 'Lucida Grande', Verdana, 'Microsoft YaHei', hei;}
+
+
+/* fontsize:12px */
+.sss{font-size:1.2em;}
+
+/* fontsize:18px */
+.near p,.topoint p,.backvote{font-size:1.8em}
+
+/* fontsize:22px */
+.week,.content_pull .title, 
+.close p,.sure p,
+.hotel_list .ever,
+.ui_loadmore span,
+.headers .addlike span,
+.headers .hotelname,
+.headers .allimg,
+.pre_pay p:last-child,
+.vote_spread .sever,
+.detail_pull .sever span,
+.room_list .viplist .ui_price,
+.room_list .viplist tt,
+.notic .content p,
+.order_detail li,
+.block_title,
+.block_content li span,
+.apply_list .level,
+.apply_list .point,
+.apply_list .more{font-size:2.2em;}
+
+/* fontsize:24px */
+.history,.pull_searchbox .search,.ui_vote .limit,
+.order_intro .datetime,
+.order_intro .room_type,
+.realtime_status .ui_color,
+.hotel_rule .content,
+.order_intro .sever{font-size:2.4em;} 
+
+/* fontsize:26px */
+.checkdate .date,.checkdate .checkin_time,
+.guest span,
+.ui_btn_block .btn_title, 
+.hotel_list .distance,
+.detail_pull .content p,
+.room_list .sever,
+.order_message span,
+.realtime_status li,.normal,
+.map span.ui_color,.hotel_rule .title,.vote_spread .title,.notic .title,.allorder_list .title span,.delete,.apply_list .username,.comment textarea,.checkdate .roomcount{font-size:2.6em;} 
+
+
+.tosent .bubble{font-size:2.8em}
+
+
+.ui_tab,.border_circle .checkin_time,.middle,
+.address_list li,.pre_pay p:first-child,.vote_spread .room_name,.room_list .pay_name,.order_intro .hotelname,.form_list .item> span,.form_list .item> input,.form_list .checkdate .date,.form_list .checkdate .checkin_time,.inrto_list span,
+.form_list .pay_list ul,.footfixed .total,.footfixed .submit_btn,.cancelbtn,.chooseroom_pull .list>div,.order_detail .order_status,.block_content .hotelname,.block_content span,.realtime_status .title{font-size:2.8em;}
+
+.local,.date, .keyword,.address_list li,.content_pull .around,.hotel_list .ui_price,.big,
+.sever .iconfont,.room_list .room_name,.often span, .like span,
+.room_list .no_price ,.vote_spread .ui_price,.order_message .order_status{font-size:3em;}
+
+.hotel_list .name,.pull_box li, .pull_box .pull_title, .pull_box .pull_more{font-size:3em;}
+.ui_btn,.now_pay p,.no_pay p,.chooseroom_pull .sure_btn,.footbtn,.allorder_list .ui_price{font-size:3.2em;} 
+
+.room_list .ui_price{font-size:3.6em}
+
+/* fontsize:45px */
+.ui_vote .price{font-size:4.5em;} 
+
+.ui_tab .cur, .near p,.hotel_list .ui_price,.sure p,.vote_spread .ui_price,.ui_vote,.apply_list .level,.apply_list .point{color:#fe8f00;}
+.ui_color,.room_list .ui_price,.pre_pay p:last-child,.form_list .pay_way .ui_price,.order_detail .ui_price{color:#ff7200}
+.backvote{color:#ff464a}
+.pre_pay p:first-child,.now_pay p,.no_pay p,.submit_btn,.chooseroom_pull .sure_btn,.order_detail,.footbtn{color:#fff;}
+.ui_color_gray,.ui_btn_block .btn_title, .week,.hotel_list .distance,.ui_loadmore span,.room_list .sever,.roomfull .ui_price,.detail_pull .content p,.order_intro .room_type,.order_intro .sever,.form_list .item>span:first-child,.notic .content p,.chooseroom_pull .list .roomid.disable,.realtime_status .cur_status_time,.order_message span:first-child,.topoint li,
+.sever .iconfont,.close{color:#999999;}
+.history{color:#d3d3d3;}
+.ui_tab,.ui_pull, .pull_box .pull_more,.hotel_rule,.vote_spread .title,.notic .title,.footfixed del,.chooseroom_pull .roomid,.chooseroom_pull .list .default,.ui_vote .val_date,.all_message{color:#555555}
+
+.ui_color_23a70d{ color:#23a70d;}
+.ui_color_yellow{color:#f99e12;}
+.ui_color_orange{color:#ff950d;}
+.ui_color_blue{color:#2d87e2}
+.ui_color_red{color:#ff1307}
+
+.order_detail{background-color:#fcb230;}
+.ui_btn.isable,.vote_pull .ischeck .ui_ico,.realtime_status li.iscured em,.photo_class .cur{background-color:#fe8f00;}
+.pre_pay p:first-child,.now_pay p,.footbtn,.form_list .ischeck .ui_ico,.submit_btn,.chooseroom_pull .sure_btn,.vote_pull .ischeck .ui_ico{background-color:#ff7200;}
+.roomfull .now_pay p .no_pay p,.realtime_status .circle em,button.disable{ background-color:#999}
+.chooseroom_pull .item>div:first-child{ background-color:#e4e4e4}
+.apply_list .cus_apply{background:#fef5e7;}
+
+.form_list .pay_way .ui_ico,.vote_pull .votelist .ui_ico{ border-color:#c3c3c3}
+.pre_pay,.now_pay,.no_pay,.guest_pull li,.form_list .ischeck .ui_ico,.footfixed .submit_btn,.vote_pull .ischeck .ui_ico,.realtime_status .iscured hr,.bdtom{ border-color:#ff7200;}
+.backvote{ border-color:#ff464a}
+.roomfull .now_pay .no_pay{border-color:#999}
+.realtime_status .iscur .circle em{ border-color:#fde2b7;}

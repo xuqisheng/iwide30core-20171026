@@ -1,0 +1,12 @@
+html{background:#FFF}
+body{font-size:12px;background:#FFF; min-width:1100px}
+.showhotel{ border-top:#d2d2dd 1px solid; border-left:#d2d2dd 1px solid}
+.showhotel td{ border-bottom:#d2d2dd 1px solid; border-right:#d2d2dd 1px solid; height:30px; text-indent:10px}
+.showhotel th{ border-bottom:#d2d2dd 1px solid; border-right:#d2d2dd 1px solid; background:#EEEEEE; height:40px}
+.monaddtime{display:none}
+.alladdtime{display:none}
+a{color:#666666}
+
+.qfpages{font-size:14px}
+.qfpages a{text-decoration:none}
+.qfpages cite{margin-left:10px; font-size:14px; font-style:normal}

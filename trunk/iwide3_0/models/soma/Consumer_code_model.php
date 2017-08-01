@@ -1,0 +1,514 @@
+<?php 
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Consumer_code_model extends MY_Model_Soma {
+
+    const CODE_LEN= 12;
+    
+    const STATUS_UNSIGN  = 1;
+    const STATUS_SIGNED  = 2;
+    const STATUS_CONSUME = 3;
+    const STATUS_GIFT    = 4;
+
+    public function get_status_label()
+    {
+        return array(
+            self::STATUS_UNSIGN  => '未分配',
+            self::STATUS_SIGNED  => '已分配',  //分配asset_item后变更
+            self::STATUS_CONSUME => '已消费',  // consumer_item核销时 变更
+            self::STATUS_GIFT    => '已转赠',
+        );
+    }
+    
+	public function get_resource_name()
+	{
+		return '核销码管理';
+	}
+	
+	public static function model($className=__CLASS__)
+	{
+		return parent::model($className);
+	}
+	
+	/**
+	 * @return string the associated database table name
+	 */
+	public function table_name($inter_id=NULL)
+	{
+		return $this->_shard_table('soma_consumer_code', $inter_id);
+	}
+
+	public function table_primary_key()
+	{
+	    return 'code_id';
+	}
+	
+	public function attribute_labels()
+	{
+		return array(
+            'code_id'=> 'ID',
+            'consumer_id'=> '消费单ID',
+            'consumer_item_id'=> '消费细单ID',
+            'code'=> '核销码',
+            'status'=> '状态',
+		);
+	}
+
+	/**
+	 * 后台管理的表格中要显示哪些字段
+	 */
+	public function grid_fields()
+	{
+        //主键字段一定要放在第一位置，否则 grid位置会发生偏移
+	    return array(
+            'code_id',
+            'consumer_id',
+            'consumer_item_id',
+            'code',
+            'status',
+	    );
+	}
+
+	/**
+	 * 在EasyUI grid中的 date-option 定义，包括宽度，是否排序等等
+	 *   type: grid中的表头类型定义 
+	 *   form_type: form中的元素类型定义
+	 *   form_ui: form中的属性补充定义，如加disabled 在< input “disabled” / > 使元素禁用
+	 *   form_tips: form中的label信息提示
+	 *   form_hide: form中自动化输出中剔除
+	 *   form_default: form中的默认值，请用字符类型，不要用数字
+	 *   select: form中的类型为 combobox时，定义其下来列表
+	 */
+	public function attribute_ui()
+	{
+	    /* text,textbox,numberbox,numberspinner, combobox,combotree,combogrid,datebox,datetimebox, timespinner,datetimespinner, textarea,checkbox,validatebox. */
+	    //type: numberbox数字框|combobox下拉框|text不写时默认|datebox
+	    $base_util= EA_base::inst();
+	    $modules= config_item('admin_panels')? config_item('admin_panels'): array();
+
+	    return array(
+            'code_id' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                //'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|combobox|number|email|url|price
+            ),
+            'consumer_id' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                //'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|combobox|number|email|url|price
+            ),
+            'consumer_item_id' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                //'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|combobox|number|email|url|price
+            ),
+            'code' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                //'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|combobox|number|email|url|price
+            ),
+            'status' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                //'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|combobox|number|email|url|price
+            ),
+	    );
+	}
+	
+	/**
+	 * grid表格中默认哪个字段排序，排序方向
+	 */
+	public static function default_sort_field()
+	{
+	    return array('field'=>'code_id', 'sort'=>'desc');
+	}
+	
+	/* 以上为AdminLTE 后台UI输出配置函数 */
+	
+    /**
+     * 根据code找出id（消费单ID/消费明细ID）
+     * @param String $code
+     * @param string $field
+     * @return String
+     */
+	public function find_id_by_code($code, $field='consumer_id')
+	{
+	    if($code){
+	        $result= $this->_shard_db_r('iwide_soma_r')->get_where('soma_consumer_code', array('code'=>$code) )
+	        ->result_array();
+	        if( count($result)>0 && isset($result[0][$field]) ){
+	            return $result[0][$field];
+	        }
+	    }
+	    return NULL;
+	}
+	
+	/**
+	 * 生成若干不重复的数字串
+	 * @return array()
+	 */
+	public function generate_code($require_qty, $code_len=8)
+	{
+	    //$start= microtime();  //性能测试
+	    $this->load->helper('soma/math');
+	    //根据生成数量决定分段生成的长度，长度+2是为了让随机数重复的机率变为1/100
+	    //实验证明 100个8为长度码，每次长度+2共1次执行效率在15-25毫秒，长度+1共2次执行执行效率在 25-35毫秒
+	    $genlen= strlen($require_qty)+ 2;
+	    $genstart= str_pad(1, $genlen, '0', STR_PAD_RIGHT );
+	    $genend= str_pad(9, $genlen, '9', STR_PAD_RIGHT );
+        //echo $require_qty. ';'; echo $genlen. ';'; echo $genstart. ';'; echo $genend. ';';die;
+	    
+        $times= intval($code_len/ $genlen );    //根据预定长度决定分几次生成随机数
+        $last= $code_len% $genlen;              //剩下多长字符串
+        //echo $times; echo $last;die;
+        
+	    $code_all= $code_data= array();
+	    while ( $times>0 ){
+	        $tmp= gen_unique_rand($genstart, $genend, $require_qty);
+	        $code_all[]= $tmp;
+	        $times--;
+	    }
+	    //echo microtime()- $start;  //执行耗时
+        //print_r($code_all);die;
+        
+	    if($last>0){
+	        $laststart= str_pad(1, $last, '0', STR_PAD_RIGHT );
+	        $lastend= str_pad(9, $last, '9', STR_PAD_RIGHT );
+	    }
+	    foreach ($code_all as $k=> $v){
+	        foreach ($v as $sk=> $sv){
+    	        if( isset($code_data[$sk]) ) $code_data[$sk].= $sv;
+    	        else $code_data[$sk]= $sv;
+    	        // if($last>0) $code_data[$sk].= rand($laststart, $lastend);
+    	    }
+	    }
+	    if($last>0) {
+	    	foreach ($code_data as $k => $v) {
+	    		$code_data[$k].=rand($laststart, $lastend);
+	    	}
+	    }
+        //print_r($code_data);die;
+	    return $code_data;
+	}
+    
+    /**
+     * 发出礼物时减少asset_item 对应code
+     * libinyan@mofly.cn
+     */
+	public function remove_asset_code($asset_item_id, $require_qty, $inter_id=NULL)
+	{
+	    $ids= array();
+	    $table= $this->table_name();
+	    $result= $this->_shard_db_r('iwide_soma_r')->where('status', self::STATUS_SIGNED )
+	       ->where('asset_item_id', $asset_item_id)
+	       ->order_by('code_id desc')->get($table)->result_array();
+	    if(count($result)>0) { 
+	        for( $i=0; $i<$require_qty; $i++ ){
+    	        $ids[]= $result[$i]['code_id'];
+    	    }
+	        return $this->_shard_db()->where_in('code_id', $ids)->delete($table);
+	    } else {
+	        return FALSE;
+	    }
+	}
+	
+	/**
+	 * 接受赠礼时产生 asset_item 对应的新code
+	 * libinyan@mofly.cn
+	 */
+	public function generate_asset_code($id_array, $require_qty, $inter_id=NULL)
+	{
+	    $array= array();
+	    $code_data = $this->generate_code($require_qty, self::CODE_LEN );
+	    foreach ($code_data as $k=> $v){
+	        $array[$k] = $id_array;
+	        $array[$k]['code']= $v;
+	        $array[$k]['inter_id']= $inter_id;
+	        $array[$k]['status']= self::STATUS_SIGNED;
+	    }
+        $result = true;
+	    if(count($code_data) > 0 ) {
+			$result = $this->_shard_db()->insert_batch('soma_consumer_code', $array);
+		}
+	    return $result;
+	}
+	
+	/**
+	 * 根据目前的核销码剩余量生成新的核销码，并记录生成情况表
+	 * @param number $qty_total
+	 * @return boolean
+	 */
+	public function generate_newcode($qty_total=100, $inter_id=NULL)
+	{
+	    $return= array( 'qty_total'=> $qty_total, 'qty_unsign'=> 0, 'qty_sign'=> 0, 'qty_consume'=> 0, 'qty_require'=> 0 );
+	    $table= $this->table_name();
+	    $data= $this->_shard_db_r('iwide_soma_r')->select('code_id, status')->get_where($table )->result_array();
+	    foreach ($data as $v) {
+	        if($v['status']==self::STATUS_UNSIGN) $return['qty_unsign']++;
+	        elseif($v['status']==self::STATUS_SIGNED) $return['qty_sign']++;
+	        else $return['qty_consume']++;
+	    }
+	    
+	    $require_qty= $return['qty_require']= $qty_total- $return['qty_unsign'];
+	    if($require_qty>0 ){
+	        //清除已经分配并消费的code
+	        $this->_shard_db()->delete($table, array('status'=> self::STATUS_CONSUME ) );
+	        $code_data= $this->generate_code($require_qty, self::CODE_LEN );
+	        $baseinfo= array('status'=> self::STATUS_UNSIGN);
+	        $insert_data= array();
+	        foreach ($code_data as $v){
+	            $insert_data[]= array('code'=> $v)+ $baseinfo;
+	        }
+	        //print_r($insert_data);die;
+	        $r0= $this->_shard_db()->insert_batch($table, $insert_data );
+	        //var_dump($r0);die;
+	        
+	        //统计需要重复的行数
+	        $prefix= $this->_shard_db()->dbprefix;
+	        $sql= "select `code`, count(*) as c from {$prefix}soma_consumer_code group by code having c>1";
+	        $r1= $this->_shard_db_r('iwide_soma_r')->query($sql)->result_array();
+	        //print_r($r1);die;
+	        $return['duplicate_row']= count($r1);
+	        foreach ($r1 as $v ) {
+	            //清除重复的未分配码
+	            $this->_shard_db()->delete($table, array('code'=>$v['code'], 'status'=> self::STATUS_UNSIGN ) );
+	        }
+	        //把记录写入记录表
+	        $result= $this->save_generate_log($return);
+	        return $result;
+	        
+	    } else {
+	        return TRUE;
+	    }
+	}
+
+	/**
+	 * 记录生成核销码时各个数值，没有新增码时不记录
+	 * @param array $data
+	 * @return boolean
+	 */
+	public function save_generate_log($data)
+	{
+	     $data['excute_time']= date('Y-m-d H:i:s');
+	     $result= $this->_shard_db()->insert('soma_consumer_code_log', $data );
+	     return $result;
+	}
+	
+    /**
+     * 根据code查找信息
+     * $model->get_consumer_code_info_by_code( $code, $inter_id  );
+     * @author luguihong@mofly.cn
+     */
+    public function get_consumer_code_info_by_code( $code, $inter_id ){
+        if( !$code ){
+            return FALSE;
+        }
+
+        $where = array();
+        $where['code'] = $code;
+        $where['inter_id'] = $inter_id;
+
+        $table = $this->table_name( $inter_id );
+        // 换成读写库，事务相关，请勿切换为读库
+        $result = $this->soma_db_conn->order_by('code_id desc')->get_where( $table, $where )->result_array();
+
+        //处理输出信息
+        $info = array();
+        if( count( $result ) > 0 ){
+
+            $info = $result[0];
+
+        }
+        // $info = $this->find( $where );
+        
+        return $info;
+    }
+    
+    /**
+     * 核销code记录;
+     * @author libinyan@mofly.cn
+     */
+	public function consume_code($consumer, $code, $data, $inter_id, $assetItemId=NULL )
+	{
+	    $data['status']= isset($data['status'])? $data['status']: self::STATUS_CONSUME;
+	    $array= array(
+	        'consumer_id'=> $data['consumer_id'], 
+	        'consumer_item_id'=> $data['consumer_item_id'], 
+	        'status'=> $data['status'],
+	    );
+
+	    $where = array();
+	    $where['code'] = $code;
+	    $where['inter_id'] = $inter_id;
+	    if( $assetItemId ){
+	    	$where['asset_item_id'] = $assetItemId;
+	    }
+
+	    if($code){
+    	    $consumer->_shard_db($inter_id)->where( $where )
+    	       ->update($this->table_name($inter_id), $array);
+    	    if ($consumer->_shard_db( $inter_id )->affected_rows() > 0){
+	            return TRUE;
+	        }else{
+	            return FALSE;
+	        }
+	    }else{
+	        return FALSE;
+	    }
+	}
+
+	/**
+     * 根据订单ID核销code记录;（退款时使用）
+     * @author luguihong@mofly.cn
+     */
+	public function consume_code_by_refund( $filter=array(), $inter_id, $salesRefundModel )
+	{
+		if( count( $filter ) == 0 ){
+			return FALSE;
+		}
+		
+	    $array= array(
+	        'status'=> self::STATUS_CONSUME,
+	    );
+	    $salesRefundModel->_shard_db( $inter_id )->where( $filter )->where( 'inter_id', $inter_id )
+	       ->update($this->table_name($inter_id), $array);
+        if( $salesRefundModel->_shard_db( $inter_id )->affected_rows() > 0 ){
+            return TRUE;
+        }else{
+            return FALSE;
+        }
+	}
+
+	/**
+     * 根据订单ID核销code记录;（邮寄时使用）
+     * @author luguihong@mofly.cn
+     */
+	public function consume_code_by_mail( $consumer, $codeIds, $inter_id=NULL )
+	{
+		if( count( $codeIds ) == 0 ){
+			return FALSE;
+		}
+		
+	    $array= array(
+	        'status'=> self::STATUS_CONSUME,
+	    );
+
+	    $table_name = $this->table_name( $inter_id );
+
+	    if( count($codeIds)>0 ){
+	        $consumer->_shard_db( $inter_id )->where_in( 'code_id', $codeIds )->where('inter_id',$inter_id)->update( $table_name, $array );
+	        if ($consumer->_shard_db( $inter_id )->affected_rows() > 0){
+	            return TRUE;
+	        }else{
+	            return FALSE;
+	        }
+	    }else{
+	    	return FALSE;
+	    }
+
+	}
+
+	//根据订单ID获取相应数量的核销码
+	public function get_code_by_orderId( $filter, $limit=1, $inter_id=NULL )
+	{
+		if( count( $filter ) == 0 ){
+			return FALSE;
+		}
+
+        $db = $this->_shard_db_r('iwide_soma_r');
+		$table_name = $this->table_name( $inter_id );
+		$db->where('inter_id',$inter_id);
+
+		if( $limit ){
+			$db->limit($limit);
+		}
+		
+		return $db->where( $filter )->get( $table_name )->result_array();
+	}
+
+	//根据资产细单ID获取相应数量的核销码
+	public function get_code_by_assetItemIds( $assetItemIds, $inter_id, $filter=array(), $limit=NULL )
+	{
+        // $db = $this->_shard_db_r('iwide_soma_r');
+        // 更换为读库，数据库事务相关
+        $db = $this->soma_db_conn;
+
+		if( $limit ){
+            $db->limit($limit);
+		}
+
+		if( count( $filter ) > 0 ){
+			foreach ($filter as $k => $v) {
+				if( is_array( $v ) ){
+                    $db->where_in( $k, $v );
+				}else{
+                    $db->where( $k, $v );
+				}
+			}
+		}
+
+		$table_name = $this->table_name( $inter_id );
+		return $db->where( 'inter_id', $inter_id )
+					->where_in( 'asset_item_id', $assetItemIds )
+					->order_by('code_id desc')
+					->get( $table_name )
+					->result_array();
+	}
+
+    /**
+     * 更新转赠后的核销码状态
+     *
+     * @param      string   $inter_id  公众号
+     * @param      int      $aiid      资产细单ID
+     * @param      int      $gift_qty  转赠数量（对应有几个码）
+     * @param      boolean  $rollback  回滚操作标识
+     *
+     * @return     boolean  更新成功返回true，失败返回false.
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     */
+    public function updateGiftConsumerCodeStatus($inter_id, $aiid, $gift_qty, $rollback = '')
+    {
+        if($rollback == 'rollback') {
+            $this->soma_db_conn->set('status', self::STATUS_SIGNED);
+            $this->soma_db_conn->where('status', self::STATUS_GIFT);
+            $this->soma_db_conn->order_by('code_id', 'desc');
+        } else {
+            $this->soma_db_conn->set('status', self::STATUS_GIFT);
+            $this->soma_db_conn->where('status', self::STATUS_SIGNED);
+            $this->soma_db_conn->order_by('code_id', 'asc');
+        }
+        $this->soma_db_conn->where('asset_item_id', $aiid);
+        $this->soma_db_conn->limit($gift_qty);
+        $this->soma_db_conn->update($this->table_name($inter_id));
+
+        return ($this->soma_db_conn->affected_rows() == $gift_qty) ? true : false;
+    }
+
+}

@@ -1,0 +1,162 @@
+<?php
+/*
+ * 分账
+ * date 2017-06-28
+ * author chenjunyu
+ */
+
+class Check extends MY_Controller {
+	function __construct() {
+		parent::__construct ();
+		$this->debug = $this->input->get ( 'debug' );
+		error_reporting ( 0 );
+		if (! empty ( $this->debug )) {
+			error_reporting ( E_ALL );
+			ini_set ( 'display_errors', 1 );
+        }
+		$this->load->library('MYLOG');
+	}
+    private function check_arrow(){//访问限制
+        //var_dump($_SERVER['REMOTE_ADDR']);die;
+        return true;
+        $arrow_ip = array('10.25.168.86','10.25.3.85');//只允许服务器自动访问，不能手动
+        if(!in_array($_SERVER['REMOTE_ADDR'],$arrow_ip)/*&&$_SERVER['SERVER_ADDR']!=$_SERVER['REMOTE_ADDR']*/){
+            exit('非法访问！');
+        }
+    }
+
+    /**
+     * [redis_lock redis上/解锁]
+     * @param [type] [操作类型，set/delete]
+     * @param [key] [键]
+     * @param [value] [type为set时，value是值]
+     * @return [boolean] [操作结果]
+     */
+    protected function redis_lock($type='set' ,$key='synchro_lock' ,$value='lock'){
+        $this->load->library ( 'Cache/Redis_proxy', array (
+                'not_init' => FALSE,
+                'module' => 'common',
+                'refresh' => FALSE,
+                'environment' => ENVIRONMENT
+        ), 'redis_proxy' );
+        $ok = false;
+        if($type == 'set'){
+            $ok = $this->redis_proxy->setNX ( $key, $lock );
+        }elseif($type == 'delete' ){
+            $ok = $this->redis_proxy->del ( $key );
+        }
+        return $ok;
+    }
+
+    //同步订单状态
+    public function synchro(){
+    	$this->check_arrow();
+    	//上锁
+    	$ok = $this->redis_lock();
+        if(!$ok){
+            //程序锁住，记录报警日志并终止执行，上线将此日志交博士加入报警短信
+            MYLOG::w('err:'.__FUNCTION__ . ' lock fail!', 'iwidepay_check');
+            exit('FAILURE!');
+        }
+        set_time_limit ( 0 );
+        @ini_set('memory_limit','512M');
+
+        $this->load->model('iwidepay/iwidepay_model');
+        //查出需同步的状态的全部订单,按模块分组返回
+        $orders = $this->iwidepay_model->get_sync_orders();
+
+        foreach ($orders as $k => $module) {
+	        //分模块同步状态
+	        switch ($module) {
+	        	case 'hotel':
+	        		# code...
+	        		break;
+	        	case 'soma':
+	        		# code...
+	        		break;
+	        	case 'vip':
+	        		# code...
+	        		break;
+	        	case 'okpay':
+	        		# code...
+	        		break;
+	        	case 'dc':
+	        		# code...
+	        		break;
+	        	default:
+	        		# code...
+	        		break;
+	        }
+	    }
+
+        //释放锁
+        $this->redis_lock('delete');
+    }
+
+    /**
+     * 封装curl的调用接口，get的请求方式
+     * @param string 请求URL
+     * @param array  请求参数值array(key=>value,...)
+     * @param second 超时时间
+     * @return mixed 请求成功返回成功结构，否则返回FALSE
+     */
+    private function doCurlGetRequest($url, $data = array(), $timeout = 10){
+        if($url == "" || $timeout <= 0){
+            return false;
+        }
+        if($data != array()){
+            $url = $url . '?' . http_build_query($data);
+        }
+        $con = curl_init(( string )$url);
+        curl_setopt($con, CURLOPT_HEADER, false);
+        curl_setopt($con, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($con, CURLOPT_TIMEOUT, ( int )$timeout);
+        curl_setopt($con, CURLOPT_SSL_VERIFYPEER, false);
+
+        $res = curl_exec($con);
+        curl_close($con);
+        return $res;
+
+    }
+
+    /**
+     * 封装curl的调用接口，post的请求方式
+     * @param string URL
+     * @param string POST表单值
+     * @param array  扩展字段值
+     * @param second 超时时间
+     * @return mixed 请求成功返回成功结构，否则返回FALSE
+     */
+    private function doCurlPostRequest($url, $requestString, $extra = array(), $timeout = 10){
+        if($url == "" || $requestString == "" || $timeout <= 0){
+            return false;
+        }
+        $con = curl_init(( string )$url);
+        curl_setopt($con, CURLOPT_HEADER, false);
+        curl_setopt($con, CURLOPT_POSTFIELDS, $requestString);
+        curl_setopt($con, CURLOPT_POST, true);
+        curl_setopt($con, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($con, CURLOPT_TIMEOUT, ( int )$timeout);
+        curl_setopt($con, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($con, CURLOPT_SSL_VERIFYHOST, 0);
+
+        if(!empty ($extra) && is_array($extra)){
+            $headers = array();
+            foreach($extra as $opt => $value){
+                if(strexists($opt, 'CURLOPT_')){
+                    curl_setopt($con, constant($opt), $value);
+                } elseif(is_numeric($opt)){
+                    curl_setopt($con, $opt, $value);
+                } else{
+                    $headers [] = "{$opt}: {$value}";
+                }
+            }
+            if(!empty ($headers)){
+                curl_setopt($con, CURLOPT_HTTPHEADER, $headers);
+            }
+        }
+        $res = curl_exec($con);
+        curl_close($con);
+        return $res;
+    }
+}

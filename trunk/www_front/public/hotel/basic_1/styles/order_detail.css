@@ -1,0 +1,33 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;}
+header,section{background:#fff;}
+header{padding:2% 0}
+.realtime_status > *{ padding:0 3%}
+.realtime_status .title,.realtime_status .cur_status_txt{padding-bottom:2%}
+
+.realtime_status .cur_status{margin-top:2%; padding-top:3%; padding-bottom:1%;border-top:1px solid #e4e4e4; text-align:center;}
+.realtime_status .circle,.realtime_status .circle em{width:0.9em; height:0.9em; display:inline-block; border-radius:50%; }
+.realtime_status .circle em{border-width:3px; border-style:solid; border-color:#fff;}
+.realtime_status li{ display:inline-block;  width:24%; position:relative}
+.realtime_status hr{border-width:1px; position:absolute; width:70%; right:68%; top:0.6em;}
+
+section,.all_message .datetime{ padding:3% 0;margin-top:3%}
+.all_message{padding-bottom:0; text-align:center;}
+.all_message > div:first-child{margin-bottom:1%}
+.all_message .datetime{border-top:1px solid; border-bottom:1px solid; border-color:#e4e4e4; overflow:hidden;}
+.all_message li{display:inline-block; vertical-align:middle}
+.all_message .datetime li.count{ border-bottom:1px solid #555555; width:5em; margin:0 2%; margin-bottom:2%;}
+.all_message .datetime ul div{ line-height:1.5}
+
+.all_message .otherway li{width:24%; padding:2% 0;}
+.all_message .otherway li a{display:block; height:100%; border-left:1px solid #e4e4e4; padding:2% 0}
+.all_message .otherway li:first-child a{ border-left:0}
+
+.order_message{padding:2% 3%; line-height:1.5}
+.order_message span:first-child{width:20%; display:inline-block;}
+
+.footfixed .submit_btn{padding-top:3%}
+.realtime_status .cur_status_time{font-size:0.8em}
+

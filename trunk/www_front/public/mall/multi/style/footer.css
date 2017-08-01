@@ -1,0 +1,9 @@
+@charset "utf-8";
+/* CSS Document */
+
+.single{padding:3% 5%; padding-top:0;}
+.single a,.single>div,.single button{ display:block; text-align:center;padding:4% 0;font-size:0.7rem; border-radius:0.2rem;border:1px solid #058104; margin-bottom:5%}
+
+.green,.green:active,.green:visited{color:#fff;background:#04be02}
+.white,.white:active,.white:visited{color:#333;background:#fff; border-color:#999999 !important;}
+.disable{color:#999;background:#e4e4e4 !important; border-color:#999999 !important;}

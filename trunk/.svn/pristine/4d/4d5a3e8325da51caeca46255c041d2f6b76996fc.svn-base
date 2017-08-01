@@ -1,0 +1,110 @@
+html,body{height:100%;width:100%;min-height:504px;position:relative;font-family:"MicrosoftYaHei";}
+.color_ffde00{color:#ffde00;}
+.clearfix:after {content: "" ;display:block;height:0;clear:both;visibility:hidden;} 
+.f_s_185{font-size:1.857rem}
+img{display:inline-block;width:100%;height:auto;}
+.p_3{padding:3% 0;}
+.float_l{float:left;}
+body,html,input,button,textarea{font-size:14px; /*基础字体大小*/} 
+/*.border_bottom,.border_top{position:relative;}*/
+.border_bottom:before{
+	content: '';
+	position:absolute;
+	bottom:0px;
+	left:0;
+	border-bottom: 1px solid #e1e1e1;
+	-webkit-box-sizing:border-box;
+	box-sizing: border-box;
+	width: 200%;
+	height: 0;
+	-webkit-transform:scale(0.5);
+	transform:scale(0.5);
+	-webkit-transform-origin:left top;
+	transform-origin:left bottom;
+}
+.border_bottom:after{
+	height:0px;bottom:0;
+}
+.border_top:after{
+	content:'';
+	position:absolute;
+	top:0px;
+	left:0;
+	border-top:1px solid #e1e1e1;
+	-webkit-box-sizing:border-box;
+	box-sizing:border-box;
+	width:200%;
+	height:0;
+	-webkit-transform:scale(0.5);
+	transform:scale(0.5);
+	-webkit-transform-origin:left top;
+	transform-origin:left top;
+}
+
+*{margin:0;padding:0;-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-text-size-adjust:none;-webkit-text-size-adjust:100%;font-family:Helvetica Neue,sans-serif;outline:0; box-sizing:border-box; background-clip:padding-box}
+a{text-decoration:none;}
+input,select,textarea,button,a{ border:none; font-weight:normal; resize:none; background:none;-webkit-appearance:none; color:#555;}
+table{border-collapse:collapse;border-spacing:0}
+img{border:0; width:100%;}
+abbr,acronym{border:0;font-variant:normal}
+del{text-decoration:line-through}
+address,caption,cite,code,dfn,em,th,var{font-style:normal;font-weight:500}
+ol,ul{list-style:none}
+.display_flex{display:flex;display:-webkit-flex;justify-content:top;align-items:center;-webkit-align-items:center;}
+.display_flex >div{-webkit-flex:1;flex:1;cursor:pointer;}
+
+.h36{font-size:1.285rem}
+.h34{font-size:1.214rem}
+.h32{font-size:1.143rem}
+.h30{font-size:1.071rem}
+.h28{font-size:1rem/*基础字体大小*/}
+.h26{font-size:0.929rem}
+.h24{font-size:0.857rem}
+.h22{font-size:0.785rem}
+.h20{font-size:0.714rem}
+.h18{font-size:0.642rem}
+.bg1{background:url('../images/bg.jpg');width:100%;height:100%;background-size:100% 100%;}
+
+.sign{color:#fff;font-size:20px;text-align:center;font-weight:bold;padding-top:8%;}
+.sign_btn{width:100px;height:100px;border-radius:50%;margin:8% auto 0;background:#fecd2a;border:7px solid #f4820d;text-align:center;font-size:28px;line-height:90px;font-weight:bold;position:relative;color:#792211;}
+.enlarge_actives{animation:enlarge 2s infinite linear;-webkit-animation:enlarge 2s infinite linear;}
+@keyframes enlarge{
+	0%{transform:scale(1);}
+	50%{transform:scale(0.8);}
+	100%{transform:scale(1);}
+}
+@-webkit-keyframes enlarge{
+	0%{-webkit-transform:scale(1);}
+	50%{-webkit-transform:scale(0.8);}
+	100%{-webkit-transform:scale(1);}
+}
+.actives{background:#dedede;border:7px solid #c8c5c5;color:#c8c5c5;}
+.sign_img{width:86px;height:60px;position:absolute;top:-20%;right:-66%;display:none;}
+.sign_time{width:88%;height:30%;margin:7% auto 0;background:url('../images/bg2.png') no-repeat;background-size:100% 100%;padding-top:5%;}
+.container{background:#fff;width:90%;height:70%;margin:5% auto 0;}
+.money{width:70%;border-radius:50%;overflow:hidden;}
+.week{height:100%;text-align:center;font-size:18px;color:#f9bd2c;font-weight:bold;}
+.week >div{position:relative;}
+.hook{display:block;width:12px;position:absolute;top:13%;right:3%;display:none;}
+.cont_text{font-size:12px;color:#fff;text-align:right;margin-top:2.5%;}
+.sing_number{width:80%;margin:2% auto 0;font-size:12px;color:#fff;}
+.sing_number >div:nth-of-type(2){text-align:right;}
+.flroot_btn{width:100%;position:absolute;bottom:5%;text-align:center;}
+.flroot_btn >a{display:block;cursor:pointer;text-align:center;background:#fedb30;border-radius:8px;padding:8px 0;box-shadow:0px 3px 0px #f4820d;color:#792211;width:30%;margin:auto;}
+.fixed{height:100%;width:100%;position:fixed;left:0px;top:0px;background:rgba(0,0,0,0.7);display:none;}
+.f_con{width:80%;margin:38% auto 0;background:#fff;padding:10% 0;border-radius:17px;position:relative;}
+.trophy{width:80px;height:auto;display:block;margin:0 auto 0;}
+.f_txt{color:#3d3d3d;font-size:12px;text-align:center;margin-top:5%;}
+.congratulations{width:82%;position:absolute;top:-20%;left:9%;}
+.close{width:24px;height:24px;position:absolute;top:-18%;right:-0%;}
+
+.title{font-size:16px;color:#000;text-align:center;padding:5% 0;}
+.title>img{width:20px;vertical-align:bottom;margin-right:2%;}
+.ranking{}
+.my_ranking{}
+.ranking .con_rank >div{padding:3% 0;margin:0 5%;}
+.ranking .con_rank >div:nth-of-type(1){margin:0;padding:3% 5%;background:linear-gradient(-45deg,#f6f6f6 0px,#f6f6f6 6px,#f2f2f2 7px,#f2f2f2 15px,#f6f6f6 16px,#f6f6f6 22px,#f2f2f2 23px);background:-webkit-linear-gradient(-45deg,#f6f6f6 0px,#f6f6f6 6px,#f2f2f2 7px,#f2f2f2 15px,#f6f6f6 16px,#f6f6f6 22px,#f2f2f2 23px);background-size: 22px 22px;}
+.ranking .con_rank >div >div:nth-of-type(2){-webkit-flex:3.5;flex:3.5;border-right:1px solid #e4e4e4;text-align:center;padding:2% 0;}
+.ranking .con_rank >div >div:nth-of-type(3){text-align:center;}
+.m_number{font-size:18px;color:#ffc600;}
+.m_number >img{width:30px;}

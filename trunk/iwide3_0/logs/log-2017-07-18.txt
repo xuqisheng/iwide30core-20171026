@@ -1,0 +1,1 @@
+ERROR - 2017-07-18 14:09:35 --> Unable to connect to the database

@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=320,user-scalable=0">
+<title>社群客列表</title>
+<script src="../scripts/jquery.js"></script>
+<script src="../scripts/ui_control.js"></script>
+<link rel="stylesheet" type="text/css" href="../styles/global.css">
+<link rel="stylesheet" type="text/css" href="../styles/group.css">
+</head>
+<body>
+
+<!-- 没有社群客的样式 -->
+<div class="ui_none"><div>你还没有社群客~<a href="add_new.html" class="color_link">点此添加</a></div></div> 
+<!-----end---->
+
+<div class="group_list">
+    <div class="bg_fff">
+        <div class="center" style="float:right">
+            <p class="color_main total_num">100</p>
+            <p class="h22">已加入59人</p>
+        </div>
+        <div class="bd_bottom">
+        	<p>广州茂腾信息科技有限公司</p>
+            <p class="h22 color_888">有效期：20160101-20161231</p>
+            <div style="clear:both">
+                <span>部分酒店适用</span>
+                <span>协议价A</span>
+            </div>
+        </div>
+        <div class="list_foot color_main">
+            <div class="btn_void xs show_detail">查看明细</div>
+            <a class="btn_void xs" href="code.html">分享二维码</a>
+        </div>
+    </div>
+    <div class="bg_fff">
+        <div class="center" style="float:right">
+            <p class="color_main total_num">100</p>
+            <p class="h22">已加入59人</p>
+        </div>
+        <div class="bd_bottom">
+        	<p>广州茂腾信息科技有限公司</p>
+            <p class="h22 color_888">有效期：20160101-20161231</p>
+            <div style="clear:both">
+                <span>全部酒店适用</span>
+                <span>协议价A</span>
+            </div>
+        </div>
+        <div class="list_foot color_main">
+        	<span>审核中</span>
+        </div>
+    </div>
+</div>
+<div class="ui_pull" id="detail_pull" style="display:none">
+	<div class="detail_list bg_fff pad3">
+    	<div class="center"><span class="btn_main bdradius" style="width:3rem"></span></div>
+        <div class="center color_main pad3 h30">酒店明细</div>
+        <ul class="scroll" id="detail_list">
+        	<!--
+            <li>天美石牌桥酒店</li>
+        	<li>天美火车站店</li>
+        	<li>天美番禺店</li>
+            -->
+        </ul>
+        <div class="bd_top color_main pad10" id="num">共3家</div>
+    </div>
+    <div class="pull_close center" onClick="toclose()"><span>&times;</span></div>
+</div>
+
+<script>
+$('.show_detail').click(function(){
+	pageloading('请稍候');
+	window.setTimeout(function(){//模拟延迟
+		var html='<li>天美石牌桥酒店</li><li>天美火车站店</li><li>天美番禺店</li>';
+		if ( html=='' )
+			html='<li>加载失败</li>';
+		$('#detail_list').html(html);
+		toshow($('#detail_pull'));
+		removeload()
+	},500);
+})
+</script>
+</body>
+</html>

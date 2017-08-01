@@ -1,0 +1,72 @@
+<?php
+// +----------------------------------------------------------------------
+// | 前端模版数据处理模块
+// +----------------------------------------------------------------------
+// | Author: liwensong <septet-l@outlook.com>
+// +----------------------------------------------------------------------
+// | Vapi.php 2017-06-16
+// +----------------------------------------------------------------------
+
+class Vapi extends MY_Admin_Member{
+    public function __construct(){
+        parent::__construct();
+        $this->load->model('membervip/common/Public_model','common_model');
+        $this->load->model('membervip/common/Public_log_model','common_logm');
+        $this->load->model('membervip/admin/Vapi_logic','vapi_logic');
+    }
+
+    public function coupon_task(){
+        $msg = array(
+            'status'=>1004,
+            'err'=>'9999',
+            'msg'=>'请求失败'
+        );
+
+        if(is_ajax_request()){
+            $tag_data = $this->vapi_logic->coupon_task_list();
+            $this->_ajaxReturn($tag_data);
+        }
+        $this->_ajaxReturn($msg);
+    }
+
+    public function task_item(){
+        $msg = array(
+            'status'=>1004,
+            'err'=>'9999',
+            'msg'=>'请求失败'
+        );
+        if(is_ajax_request()){
+            $task_id = $this->input->get('id');
+            if(empty($task_id)){
+                $task_id = $this->input->post('id');
+            }
+            if(!empty($task_id)){
+                $msg['err'] = 9000;
+                $msg['msg'] = '参数错误';
+                $this->_ajaxReturn($msg);
+            }
+            $tag_data = $this->vapi_logic->task_item($task_id);
+            $this->_ajaxReturn($tag_data);
+        }
+        $this->_ajaxReturn($msg);
+    }
+
+    //优惠批量发放配置
+    public function create_coupon_task(){
+        $msg = array(
+            'status'=>1004,
+            'err'=>'9999',
+            'msg'=>'请求失败'
+        );
+
+        if(is_ajax_request()){
+            $task_id = $this->input->get('id');
+            if(empty($task_id)){
+                $task_id = $this->input->post('id');
+            }
+            $tag_data = $this->vapi_logic->coupon_task_tag($task_id);
+            $this->_ajaxReturn($tag_data);
+        }
+        $this->_ajaxReturn($msg);
+    }
+}

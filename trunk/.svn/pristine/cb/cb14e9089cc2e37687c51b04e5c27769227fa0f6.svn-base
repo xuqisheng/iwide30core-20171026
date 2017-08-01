@@ -1,0 +1,111 @@
+<?php
+
+namespace App\services\soma;
+
+use App\services\BaseService;
+use MY_Model_Soma;
+
+class PackageService extends BaseService
+{
+
+    public static function getInstance()
+    {
+        return self::init(self::class);
+    }
+
+
+    public function mainModelName(){
+        return 'soma/product_package_model';
+    }
+
+
+    /**
+     * 获取套票列表
+     * @param array $params
+     * @return array
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
+    public function index($params = []){
+
+        $word = isset($params['word']) ? $params['word'] : null;
+        $status = isset($params['status']) ? $params['status'] : null;
+        $where = [
+            ['and', 'status', '=', $status],
+            ['and', 'name', 'like', $word, 'both']
+        ];
+
+        $select = [
+            'product_id',
+            'cat_id',
+            'goods_type',
+            'face_img',
+            'name',
+            'price_package',
+            'stock',
+            'is_hide',
+            'validity_date',
+            'sort',
+            'status'
+        ];
+
+        $result = PaginateService::getInstance()->paginate($this->mainModelName(), $select, $where, 20);
+
+        if(count($result['data'])){
+
+            //套票分类
+            $where = [['and', 'cat_id', 'in', array_column($result['data'], 'cat_id')]];
+            $catList = PaginateService::getInstance()->all('soma/category_package_model', ['cat_id', 'cat_name'], $where);
+
+            $this->getCI()->load->model('soma/product_package_model', 'productPackageModel');
+            $productPackageModel = $this->getCI()->productPackageModel;
+
+            foreach($result['data'] as $key => &$val){
+                //商品分类
+                if(count($catList)){
+                    foreach($catList as $vale){
+                        if($vale['cat_id'] == $val['cat_id']){
+                            $val['cat_id'] = $vale['cat_name'];
+                            break;
+                        }
+                    }
+                }
+                //首页是否显示
+                foreach($productPackageModel->get_status_yes_label() as $item => $value){
+                   if($val['is_hide'] == $item){
+                       $val['is_hide'] = $value;
+                       break;
+                   }
+                }
+                //状态
+                foreach($productPackageModel->get_status_label() as $item => $value){
+                    if($val['status'] == $item){
+                        $val['status'] = $value;
+                        break;
+                    }
+                }
+                //商品类型
+                foreach((new MY_Model_Soma())->get_product_type_label() as $item => $value){
+                    if($val['goods_type'] == $item){
+                        $val['goods_type'] = $value;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
+
+    /**
+     * 获取套票分类
+     * @param $inter_id
+     * @return mixed
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
+    public function getCatalog($inter_id){
+
+        return PaginateService::getInstance()->all('soma/category_package_model', [], [['and', 'inter_id', '=', $inter_id]]);
+    }
+
+}

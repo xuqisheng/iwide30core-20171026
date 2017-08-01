@@ -1,0 +1,42 @@
+@charset "utf-8";
+/* CSS Document transparent */
+
+@font-face {font-family: 'iconfont';
+    /*src: url('iconfont.eot');  IE9*/
+    /*src: url('iconfont.eot?#iefix') format('embedded-opentype'),  IE6-IE8 */
+    src: url('../fonts/iconfont.woff') format('woff'), /* chrome、firefox */
+    url('../fonts/iconfont.ttf') format('truetype') /* chrome、firefox、opera、Safari, Android, iOS 4.2+*/
+    /*url('iconfont.svg#svgFontName') format('svg');  iOS 4.1- */
+}
+.iconfont{font-family:"iconfont";}
+
+.flex{display:flex;align-items:center;}
+.flexwrap{flex-wrap:wrap;}
+.flexgrow{flex-grow: 1}
+.flexrow{flex-flow:column;justify-content:space-between }
+.flexjustify{justify-content:space-around; align-items: stretch}
+
+#index_search,.hotel_list .mask{position:absolute; width:100%; bottom:15%; z-index:20}
+.hotel_list > *{padding-bottom:45%; background-repeat:no-repeat; background-size:cover; background-color:#D9D9E1; margin-bottom:8px;}
+.hotel_list .mask{bottom:0;left:0;background:rgba(0,0,0,0.5); color:#fff;padding:4px 8px;}
+.hotel_list .mask .webkitbox{-webkit-box-align:start}
+
+.filter_option{background:#fff; color:#555}
+.filter_option .up:after{content:'\54'; font-family:iconfont}
+.filter_option .down:after{content:'\53'; font-family:iconfont}
+
+.room_list .item{margin:0; padding:8px 8px 8px 0; align-items: center;}
+.room_list .full,.room_list .full .color_key,.room_list .full .color_main,.room_list .full .color_minor{color:#999}
+.room_list .full .bg_minor,.room_list .full .bg_main{ background:#999}
+.room_list .full .img:after,.room_list .full .squareimg:after{content:" ";position:absolute; width:100%;left:0; text-align:center; }
+.room_list .full .img:after{background:rgba(0,0,0,0.3); top:0;  height:100%;z-index:9; }
+.room_list .full .squareimg:after{content:"满房"; color:#fff;top:40%;z-index:11; }
+.room_list .img{width:95px; min-width:95px; max-width:95px; position:relative;}
+.room_list .squareimg{padding-bottom:66.5%; overflow:hidden}
+.room_list .room_name{display:flex;flex-flow:column;justify-content:space-between; flex-grow: 1}
+
+.star em{background:url(../icon/star.png) no-repeat center; background-size:100% 100%; width:1em; height:1em; vertical-align:text-bottom}
+.star .star1{  background-image:url(../icon/star1.png)}
+.star .star2{  background-image:url(../icon/star2.png)}
+
+

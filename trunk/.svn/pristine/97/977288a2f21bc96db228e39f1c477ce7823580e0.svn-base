@@ -1,0 +1,84 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+/**
+*	用户重置密码
+*	@author  Frandon
+*	@copyright www.iwide.cn
+*	@version 4.0
+*	@Email 489291589@qq.com
+*/
+class Resetpassword extends MY_Front_Member
+{
+	//用户重置密码页面
+	public function index(){
+		$post_config_url = PMS_PATH_URL."adminmember/getresetconfig";
+		$post_config_data =  array(
+			'inter_id'=>$this->inter_id,
+			);
+		//请求注册配置
+		$data['login_config'] = $this->doCurlPostRequest( $post_config_url , $post_config_data )['data'];
+        $this->template_show('member',$this->_template,'resetpassword',$data);
+    }
+
+	//保存重置密码
+	public function saveresetpassword(){
+		$post_login_url = PMS_PATH_URL."member/resetpassword";
+		$post_login_data = array(
+			'inter_id'=>$this->inter_id,
+			'openid'=>$this->openid,
+			'phone'=>$this->input->post('phone'),
+			'data'=>$this->input->post(),
+			'sms'=>$this->input->post('phonesms'),
+        );
+
+        //如果有验证码,验证
+        $conf_url = PMS_PATH_URL."adminmember/getresetconfig";
+        $post_data =  array('inter_id'=>$this->inter_id);
+        //请求登录配置
+        $pwdconfig = $this->doCurlPostRequest($conf_url,$post_data);
+        $pwdconfig = isset($pwdconfig['data'])?$pwdconfig['data']:array();
+        if(isset($pwdconfig['phonesms']) && $pwdconfig['phonesms']['show']=='1' && $pwdconfig['phonesms']['check']=='1'){
+            if(!isset($_POST['phonesms'])) {
+                echo json_encode(array('err'=>'40003','msg'=>'验证码不存在'));exit;
+            }
+            $checkSmsData = $post_login_data;
+            $checkSmsData['data']['sms']=$_POST['phonesms'];
+            $checkSmsData['cellphone']=$post_login_data['phone'];
+            $checkSmsData['smstype'] = isset($_POST['smstype'])?$_POST['smstype']:0;
+            $res = $this->doCurlPostRequest(PMS_PATH_URL."member/checksms",$checkSmsData);
+            if($res['err']>0){
+                echo json_encode($res);exit;
+            }
+        }
+
+		$login_result = $this->doCurlPostRequest( $post_login_url , $post_login_data );
+		echo json_encode($login_result);
+	}
+
+    //储值卡重置密码页面
+    public function resetbindpwd(){
+        $post_config_url = PMS_PATH_URL."adminmember/getresetconfig";
+        $post_config_data =  array(
+            'inter_id'=>$this->inter_id,
+        );
+        //请求注册配置
+        $data['login_config'] = $this->doCurlPostRequest( $post_config_url , $post_config_data )['data'];
+        $this->template_show('member',$this->_template,'resetbindpwd',$data);
+    }
+
+    //保存重置密码
+    public function saveresetbindpwd(){
+        $post_login_url = PMS_PATH_URL."member/resetpassword";
+        $post_login_data = array(
+            'inter_id'=>$this->inter_id,
+            'openid'=>$this->openid,
+            'phone'=>$this->input->post('phone'),
+            'data'=>$this->input->post(),
+            'pandc'=>1
+        );
+
+        $login_result = $this->doCurlPostRequest( $post_login_url , $post_login_data );
+        echo json_encode($login_result);
+    }
+}
+?>

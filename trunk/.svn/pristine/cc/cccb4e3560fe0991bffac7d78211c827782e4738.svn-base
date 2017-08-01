@@ -1,0 +1,213 @@
+<?php
+defined ( 'BASEPATH' ) or exit ( 'No direct script access allowed' );
+class Focus extends MY_Admin {
+	protected $label_module = NAV_HOTEL;
+	protected $label_controller = '焦点图设置';
+	protected $label_action = '';
+	function __construct() {
+		parent::__construct ();
+		$this->inter_id = $this->session->get_admin_inter_id ();
+		$this->module = 'hotel';
+		// $this->output->enable_profiler ( true );
+	}
+	protected function main_model_name() {
+		return 'hotel/hotel_ext_model';
+	}
+	public function index()
+	{
+		$this->label_action = '集团轮播图管理';
+		$this->_init_breadcrumb ( $this->label_action );
+
+		$this->load->model ( 'wx/publics_model' );
+		$datas['focus'] = $this->publics_model->get_pub_imgs($this->session->get_admin_inter_id(),'hotelslide');
+		$data = array('datas'=>$datas,'inter_id'=>$this->session->get_admin_inter_id(),'t'=>0);
+
+		$html = $this->_render_content ( $this->_load_view_file ( 'slide' ), $data, true );
+		// $this->load->view($this->_get_template().'/index');
+		echo $html;
+	}
+	public function grid()
+	{
+	    $inter_id= $this->session->get_admin_inter_id();
+	    if($inter_id== FULL_ACCESS) $filter= array();
+	    else if($inter_id) $filter= array('inter_id'=>$inter_id );
+	    else $filter= array('inter_id'=>'deny' );
+	    //print_r($filter);die;
+	    
+	    $this->_grid($filter,$_POST);
+	}
+	
+	public function save(){
+		$is_success = false;
+		if(empty($this->input->get('t'))){
+			$this->load->model ( 'wx/publics_model' );
+			$is_success = $this->publics_model->save_focus();
+		}else if($this->input->get('t') == 1){
+			$this->load->model ( 'hotel/hotel_ext_model' );
+			$is_success = $this->hotel_ext_model->save_focus();
+		}else if($this->input->get('t') == 2){
+			$this->load->model ( 'hotel/rooms_model' );
+			$is_success = $this->rooms_model->save_focus();
+		}
+		if($is_success){
+			echo json_encode(array('errmsg' => 'ok'));
+		}else{
+			echo json_encode(array('errmsg' => 'faild'));
+		}
+	}
+	public function del(){
+		$is_success = false;
+		if(empty($this->input->get('t'))){
+			$this->load->model ( 'wx/publics_model' );
+			$is_success = $this->publics_model->del_focus();
+		}else if($this->input->get('t') == 1){
+			$this->load->model ( 'hotel/hotel_ext_model' );
+			$is_success = $this->hotel_ext_model->del_focus();
+		}else if($this->input->get('t') == 2){
+			$this->load->model ( 'hotel/rooms_model' );
+			$is_success = $this->rooms_model->del_focus();
+		}
+		if($is_success){
+			echo json_encode(array('errmsg' => 'ok'));
+		}else{
+			echo json_encode(array('errmsg' => 'faild'));
+		}
+	}
+
+    public function update_focus(){
+        $is_success = false;
+        if(empty($this->input->get('t'))){
+            $this->load->model ( 'wx/publics_model' );
+            $is_success = $this->publics_model->update_focus();
+        }else if($this->input->get('t') == 1){
+            $this->load->model ( 'hotel/hotel_ext_model' );
+            $is_success = $this->hotel_ext_model->update_focus();
+        }else if($this->input->get('t') == 2){
+            $this->load->model ( 'hotel/rooms_model' );
+            $is_success = $this->rooms_model->update_focus();
+        }
+        if($is_success){
+            echo json_encode(array('errmsg' => 'ok'));
+        }else{
+            echo json_encode(array('errmsg' => 'faild'));
+        }
+    }
+
+
+    public function hotel_focus(){
+
+        $this->label_action = '酒店轮播图管理';
+        $this->_init_breadcrumb ( $this->label_action );
+
+        $this->load->model ( 'hotel/hotel_ext_model' );
+        $datas = $this->hotel_ext_model->get_focus_s();
+        $datas['focus'] = json_decode( json_encode( $datas['focus']),true);
+        $data = array('datas'=>$datas,'t'=>1);
+        $html = $this->_render_content ( $this->_load_view_file ( 'slide' ), $data, true );
+        echo $html;
+    }
+
+
+
+    public function room_focus(){
+
+        $this->label_action = '房间轮播图管理';
+        $this->_init_breadcrumb ( $this->label_action );
+
+        $this->load->model ( 'hotel/rooms_model' );
+        $datas = $this->rooms_model->get_focus_s();
+        $datas['focus'] = json_decode( json_encode( $datas['focus']),true);
+
+        $data = array('datas'=>$datas,'t'=>2);
+
+        $html = $this->_render_content ( $this->_load_view_file ( 'slide' ), $data, true );
+        echo $html;
+
+    }
+
+    public function room_types() {
+        $hotel_id = $this->input->get ( 'hid' );
+        $this->load->model ( 'hotel/rooms_model' );
+        echo json_encode ( $this->rooms_model->get_hotel_rooms ( $this->inter_id, $hotel_id )->result_array() );
+    }
+    //新版轮播图
+    public function slide_index(){
+    	$this->label_action = '集团轮播图管理';
+    	$this->_init_breadcrumb ( $this->label_action );
+
+    	$this->load->model ( 'hotel/hotel_model' );
+    	$entity_id = $this->session->get_admin_hotels ();
+    	if (! empty ( $entity_id )) {
+    		$data ['hotels'] = $this->hotel_model->get_hotel_by_ids ( $this->inter_id, $entity_id );
+    	} else
+    		$data ['hotels'] = $this->hotel_model->get_all_hotels ( $this->inter_id,1 );
+
+    	$this->load->model ( 'wx/publics_model' );
+		$data['data'] = $this->publics_model->get_pub_imgs($this->session->get_admin_inter_id(),'hotelslide');
+		$data['inter_id'] = $this->session->get_admin_inter_id();
+    	$html = $this->_render_content ( $this->_load_view_file ( 'slide' ), $data, true );
+    	echo $html;
+    }
+    //异步获取轮播图数据
+    public function ajax_get_slide()
+    {
+    	$t = $this->input->get('t');
+    	if($t==1){
+    		$this->load->model ( 'hotel/hotel_ext_model' );
+    		$datas = $this->hotel_ext_model->get_focus_s();
+    		$title = '酒店图片';
+    	}elseif($t==2){
+    		$this->load->model ( 'hotel/rooms_model' );
+    		$datas = $this->rooms_model->get_focus_s();
+    		$title = '房型图片';
+    	}else{
+			$this->load->model ( 'wx/publics_model' );
+			$datas = $this->publics_model->get_pub_imgs($this->session->get_admin_inter_id(),'hotelslide');
+    		$title = '集团图片';
+    	}
+
+	    echo json_encode(array('errmsg' => 'ok','data'=>$datas,'title'=>$title));
+    }
+    //新版轮播图编辑新增
+    public function slide_edit()
+    {
+    	$data['t'] = $this->input->get('t');
+    	if(empty($data['t'])){
+	    	$this->label_action = '添加/编辑集团轮播图';
+		}else if($data['t'] == 1){
+	    	$this->label_action = '添加/编辑酒店轮播图';
+		}else if($data['t'] == 2){
+	    	$this->label_action = '添加/编辑房型轮播图';
+		}
+    	$this->_init_breadcrumb ( $this->label_action );
+    	
+    	$key = $this->input->get('key');
+    	$this->load->model ( 'hotel/hotel_model' );
+    	$entity_id = $this->session->get_admin_hotels ();
+    	if (! empty ( $entity_id )) {
+    		$data ['hotels'] = $this->hotel_model->get_hotel_by_ids ( $this->inter_id, $entity_id );
+    	} else
+    		$data ['hotels'] = $this->hotel_model->get_all_hotels ( $this->inter_id,1 );
+    	if($key){
+    		if(empty($data['t'])){
+				$this->load->model ( 'wx/publics_model' );
+	    		$data['row'] = $this->publics_model->get_pub_img_by_id($key);
+    		}else{
+    			$this->load->model ( 'hotel/hotel_ext_model' );
+    			$data['row'] = $this->hotel_ext_model->get_h_img_by_id($key);
+    		}
+        }
+        if(empty($data['row']['hotel_id'])){
+            $hotel_id = $data ['hotels'][0]['hotel_id'];
+        }else{
+            $hotel_id = $data['row']['hotel_id'];
+        }
+		if($data['t']==2){
+			$this->load->model ( 'hotel/rooms_model' );
+			$data['room_list'] = $this->rooms_model->get_hotel_rooms ( $this->inter_id, $hotel_id)->result_array();
+		}
+		$data['inter_id'] = $this->inter_id;
+    	$html = $this->_render_content ( $this->_load_view_file ( 'slide_edit' ), $data, true );
+    	echo $html;
+    }
+}

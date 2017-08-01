@@ -1,0 +1,194 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- 全局控制 -->
+<script src="scripts/viewport.js?v=26"></script>
+<script src="scripts/jquery.js?v=27"></script>
+<script src="scripts/ui_control.js?v=27"></script>
+<link href="styles/global.css?v=27" rel="stylesheet">
+<link href="styles/ui.css?v=27" rel="stylesheet">
+<link href="styles/ui_ico.css?v=27" rel="stylesheet">
+<link href="styles/ui_style.css?v=27" rel="stylesheet">
+<link href="styles/ui_pull.css?v=27" rel="stylesheet">
+<!-- end -->
+<script src="scripts/submit_order.js?v=26"></script>
+<link href="styles/submit_order.css" rel="stylesheet">
+<title>提交订单</title>
+<style>
+.checkin .date:after{content:"入住"}
+.checkout .date:after{content:"离店"}
+.checkin_time:before{ content:"共"}
+.checkin_time:after{ content:"晚"}
+</style>
+</head>
+<body>
+
+<header class="order_intro">
+	<div class="hotelname">广州天美酒店公寓</div>
+    <div class="datetime">09月15日-09月16日  共1晚</div>
+    <div class="room_type">房型:高级双人房</div>
+	<div class="sever">双床  25㎡  宽带 双早</div>
+</header>
+<!-- 预订 -->
+<div class="form_list">
+	<div class="item ui_btn_block room_num">
+    	<span>房间数</span>
+        <span class="num">前台分配(2间)</span>
+    </div>
+	<div class="item">
+    	<span>入住人</span>
+        <input type="text" required class="person" placeholder="请输入姓名">
+    </div>
+	<div class="item">
+    	<span>手机号</span>
+        <input type="tel" required class="phone" placeholder="请输入手机号">
+    </div>
+</div>
+<!-- 以上为预订部分 -->
+<!-- 续住 -->
+<script src="scripts/calendar.js"></script>
+<script src="scripts/date.js"></script>
+<link href="styles/calendar.css" rel="stylesheet">
+<input type="hidden" id="startdate" name="startdate" value="" />
+<input type="hidden" id="enddate" name="enddate" value="" />
+<div class="form_list">
+	<div class="item ui_btn_block ">
+    	<span>续住时间</span>
+        <div class="checkdate" id='checkdate'>
+            <span class="checkin" id='checkin'><span class="date">1月1日</span></span>
+            <span class="checkout" id='checkout'><span class="date">1月1日</span></span>
+            <span class="checkin_time ui_color">1</span>
+        </div>
+    </div>
+	<div class="item">
+    	<span>续住房型</span>
+        <span>高级双人房</span>
+    </div>
+	<div class="item ui_btn_block">
+    	<span>续住房号</span>
+        <span>8899</span>
+    </div>
+</div>
+<!-- 以上为 续住 部分 -->
+<div class="form_list">
+	<div class="item">
+    	<span>连住优惠</span>
+        <span class="pay_way ischeck"><em class="ui_ico ui_ico13"></em><span>连住3天抵减300元</span></span>
+    </div>
+	<div class="item">
+    	<span>积分抵用</span>
+        <input type="tel" placeholder="积分抵房价(可用1860分/186元)">
+    </div>
+	<div class="item ui_btn_block usevote">
+    	<span>优惠券</span>
+        <span>不适用/不使用</span>
+    </div>
+</div>
+<div class="form_list">
+	<div class="item pay_list">
+    	<span>支付方式</span>
+        <ul>
+            <li class="pay_way ischeck"><em class="ui_ico ui_ico13"></em><span>微信支付</span></li>
+            <li class="pay_way"><em class="ui_ico ui_ico13"></em><span>到店支付</span></li>
+			<!-- 续住时不显示以下 会员卡支付 方式 -->
+            <li class="pay_way"><em class="ui_ico ui_ico13"></em><span>会员卡余额支付(<tt class="ui_price">568.89</tt>)</span></li>
+        </ul>
+    </div>
+</div>
+<div class="notic">
+	<div class="title">温馨提示</div>
+    <div class="content">
+    	<p>1.支付说明：微信支付或积分支付不可取消，房间将整晚为您保留；到店支付房间保留至入住当天18:00，钟点房仅限8～10点入住。</p>
+        <p>2.返券说明：本单使用优惠券后不可获取返券，未使用优惠券情况下可获得200元住房优惠券。</p>
+    </div>
+</div>
+<div style="padding-top:15%">
+    <div class="footfixed">
+    	<div class="total ui_color">合计 <span class="ui_price">389</span> <del class="ui_price">389</del></div>
+        <a href="submit_results.html" class="submit_btn">提交订单</a>
+    </div>
+</div>
+
+
+<div class="ui_pull chooseroom_pull" style="display:none">
+    <div class="list">
+        <div class="default ischoose">前台分配(<span>2</span>间)</div>
+        <div class="item">
+            <div class="room_name">商务大床房(<span>3</span>间)</div>
+            <div class="roomid"><span>204</span>(无烟层  有窗  近电梯)</div>
+            <div class="roomid"><span>205</span>(无烟层  有窗  近电梯)</div>
+            <div class="roomid"><span>206</span>(无烟层  有窗  近电梯)</div>
+        </div>
+        <div class="item">
+            <div class="room_name">商务大床房(<span>4</span>间)</div>
+            <div class="roomid"><span>207</span>(无烟层  有窗  近电梯)</div>
+            <div class="roomid"><span>208</span>(无烟层  有窗  近电梯)</div>
+            <div class="roomid"><span>209</span>(无烟层  有窗  近电梯)</div>
+            <div class="roomid"><span>210</span>(无烟层  有窗  近电梯)</div>
+        </div>
+    </div>
+    <div style="padding-top:18%"><div class="sure_btn">确定</div></div>
+</div>
+
+
+<div class="ui_pull vote_pull">
+    <div class="notic">
+        <div class="title">温馨提示</div>
+        <div class="content">
+            <p>1.原则上每个间夜仅可使用 1 张住房抵用券，特殊注明可叠加使用多张券的房型除外</p>
+            <p>2.抵用券不找零、不兑换，使用后不可取消，请谨慎使用</p>
+        </div>
+    </div>
+    <ul class="votelist">
+    	<li class="ischeck">
+        	<em class="ui_ico ui_ico13"></em>
+            <div class="ui_vote">
+            	<p class="bordertop_img"></p>
+                <div class="vote_con">
+            	<p class="price">50元</p>
+            	<p class="votename">高级大床房抵价券</p>
+                <p class="limit">仅限碧桂园凤凰酒店集团使用</p>
+                <p class="val_date">有效期至2015.12.31</p>
+                </div>         
+            	<p class="borderbtom_img"></p>  
+            </div>
+        </li>
+    	<li>
+        	<em class="ui_ico ui_ico13"></em>
+            <div class="ui_vote">
+            	<p class="bordertop_img"></p>
+                <div class="vote_con">
+            	<p class="price">50元</p>
+            	<p class="votename">高级大床房抵价券</p>
+                <p class="limit">仅限碧桂园凤凰酒店集团使用</p>
+                <p class="val_date">有效期至2015.12.31</p>
+                </div>         
+            	<p class="borderbtom_img"></p>  
+            </div>
+        </li>
+    </ul>
+    <div style="padding-top:18%"><div class="footbtn">确定</div></div>
+</div>
+</body>
+<script>
+$(function(){
+	$('.votelist li').click(function(){
+		$(this).addClass('ischeck').siblings().removeClass('ischeck');
+	})
+	$('.usevote').click(function(){
+		toshow($('.vote_pull'));
+	})
+	$('.vote_pull .footbtn').click(function(){
+		toclose();
+	})
+})
+</script>
+</html>

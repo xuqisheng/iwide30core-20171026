@@ -1,0 +1,564 @@
+<?php
+defined ( 'BASEPATH' ) or exit ( 'No direct script access allowed' );
+class Comment extends MY_Admin {
+	protected $label_module = NAV_HOTEL;
+	protected $label_controller = '酒店评论';
+	protected $label_action = '';
+	function __construct() {
+		parent::__construct ();
+		$this->inter_id = $this->session->get_admin_inter_id ();
+		$this->module = 'hotel';
+		$this->common_data ['csrf_token'] = $this->security->get_csrf_token_name ();
+		$this->common_data ['csrf_value'] = $this->security->get_csrf_hash ();
+		// $this->output->enable_profiler ( true );
+	}
+	protected function main_model_name() {
+		return 'hotel/Comment_model';
+	}
+	public function index() {
+		$data = $this->common_data;
+		$model = $this->_load_model ( $this->main_model_name () );
+		$data ['hotel_id'] = $this->input->get_post ( 'hotel' );
+		$data ['room_id'] = $this->input->get_post ( 'r' );
+		$this->load->model ( 'hotel/hotel_model' );
+		// $data ['hotels'] = $this->hotel_model->get_all_hotels ( $this->inter_id );
+		
+		$entity_id = $this->session->get_admin_hotels ();
+		if (! empty ( $entity_id )) {
+			$hotel_ids = explode ( ',', $entity_id );
+			if (! empty ( $data ['hotel_id'] ) && ! in_array ( $data ['hotel_id'], $hotel_ids )) {
+				$data ['hotel_id'] = 0;
+			}
+			$data ['hotels'] = $this->hotel_model->get_hotel_by_ids ( $this->inter_id, $entity_id );
+		} else
+			$data ['hotels'] = $this->hotel_model->get_all_hotels ( $this->inter_id );
+		
+		$data ['fields_config'] = $model->grid_fields ();
+		if (! empty ( $data ['hotel_id'] )) {
+			$list = $model->get_hotel_comments ( $this->inter_id, $data ['hotel_id'], null, '' );
+			$this->load->model ( 'common/Enum_model' );
+			$status_des = $this->Enum_model->get_enum_des ( array (
+					'HOTEL_COMMENT_STATUS' 
+			) );
+			foreach ( $list as $k => $d ) {
+				$list [$k] ['disp_status'] = $status_des ['HOTEL_COMMENT_STATUS'] [$d ['status']];
+				$list [$k] ['comment_time'] = date ( 'Y-m-d H:i:s', $d ['comment_time'] );
+				$list [$k] ['hotel_name'] = empty ( $d ['order_info'] ['hotel_name'] ) ? '' : $d ['order_info'] ['hotel_name'];
+				$list [$k] ['room_name'] = empty ( $d ['order_info'] ['room_name'] ) ? '' : $d ['order_info'] ['room_name'];
+			}
+			$data ['list'] = $list;
+		} else {
+			$data ['hotel_id'] = empty ( $data ['hotels'] [0] ) ? 0 : $data ['hotels'] [0] ['hotel_id'];
+		}
+		$this->_render_content ( $this->_load_view_file ( 'index' ), $data, false );
+	}
+    public function change_comment_status() {
+        $hotel_id = $this->input->get ( 'hid' );
+        $comment_id = $this->input->get ( 'comment_id' );
+        $status = intval ( $this->input->get ( 'status' ) );
+        $status = $status == 1 ? 2 : 1;
+        $model = $this->_load_model ( $this->main_model_name () );
+        $result = $model->change_comment_status ( $this->inter_id, $comment_id, $status, $hotel_id );
+        if ($result==1){
+            $comment=$model->get_comment_by_id($this->inter_id, $comment_id, $hotel_id);
+            $keywords =  $model->get_keyword($this->inter_id);
+            if(!empty($keywords)){      //更新关键词统计
+                foreach($keywords as $keyword){
+                    $count = json_decode($keyword['count']);
+                    $match = $model ->match_single_comment($keyword['keyword'],$comment);
+                    if($match){
+                        if($status==1){
+                            $count->$hotel_id = $count->$hotel_id + 1;
+                        }else{
+                            $count->$hotel_id = $count->$hotel_id - 1;
+                        }
+                    }
+                    $model->update_keyword_count($keyword['keyword_id'],json_encode($count));
+                }
+            }
+
+
+            $data['score']=$comment['score'];
+            $data['facilities_score']=$comment['facilities_score'];
+            $data['clean_score']=$comment['clean_score'];
+            $data['service_score']=$comment['service_score'];
+            $data['net_score']=$comment['net_score'];
+
+            if(isset($comment['images'])){
+                $data['images']=$comment['images'];
+            }
+
+            if($status==1){
+                $action='add';
+            }else{
+                $action = 'del';
+            }
+            $model->update_hotel_score_from_redis($this->inter_id,$hotel_id,$data,$action);
+            echo $status;
+        }else{
+            echo 0;
+        }
+    }
+
+
+
+
+
+
+
+    public function comment_settings(){    //获取酒店关键词
+
+        $data = $this->common_data;
+        $model = $this->_load_model ( $this->main_model_name () );
+
+        $inter_id = $this->session->get_admin_inter_id ();
+        $entity_id = $this->session->get_admin_hotels ();
+
+        $data['list'] = $model->get_keyword($inter_id);
+
+        $data['type']=$model->get_comment_show_type($inter_id);
+
+        if(!empty($data['type']) && !empty($data['type']->sign)){
+            $data['sign'] = explode(',',$data['type']->sign);
+        }
+
+//        if ($inter_id == FULL_ACCESS){
+//            exit;
+//        }else{
+//            $list = $model->get_keyword($inter_id);
+//        }
+
+        $data['logs']=$model->get_keyword_log($this->inter_id);
+
+        $data['log_des'] = $model->hotel_log_des();
+
+        $this->_render_content ( $this->_load_view_file ( 'keyword' ), $data, false );
+
+    }
+
+
+    public function keyword_post(){   //添加关键词
+
+        $model = $this->_load_model ( $this->main_model_name () );
+        $inter_id = $this->session->get_admin_inter_id ();
+
+        $keyword = $this->input->get('keyword');
+
+        $content=$model->get_comment_content($inter_id);
+
+        if($content){
+
+            $count = json_encode($model->match_keyword($keyword,$content));
+
+        }
+
+        $result = $model->new_keyword($inter_id,$keyword,$count);
+
+        if($result){
+
+            $content=$model->get_comment_content($inter_id);
+
+            if($content){
+
+                $count = $model->match_keyword($keyword,$content);
+
+            }
+            $this->load->model('hotel/Hotel_log_model');
+            $this->Hotel_log_model->add_admin_log('hotel_comment_keyword#'.$result,'add',$keyword);
+        }
+
+        echo json_encode($result);
+
+    }
+
+
+    public function del_keyword(){   //删除关键词
+
+        $inter_id = $this->session->get_admin_inter_id ();
+        $keyword_id = $this->input->get('keyword_id');
+
+        $model = $this->_load_model ( $this->main_model_name () );
+
+        $result = $model->update_keyword($inter_id,$keyword_id);
+
+        if($result){
+
+            $keyword=$model->get_keyword_by_id($inter_id,$keyword_id);
+            $this->load->model('hotel/Hotel_log_model');
+            $this->Hotel_log_model->add_admin_log('hotel_comment_keyword#'.$keyword_id,'del',$keyword['keyword']);
+
+        }
+
+        echo json_encode($result);
+
+    }
+
+
+
+    public function get_comment($type=''){    //获取酒店评论
+
+        $data = $this->common_data;
+        $model = $this->_load_model ( $this->main_model_name () );
+        $inter_id = $this->session->get_admin_inter_id ();
+
+        $entity_id = $this->session->get_admin_hotels ();
+
+        $this->load->model ( 'hotel/Hotel_model');
+        $this->load->model ( 'hotel/Comment_model');
+
+        $data['comment_config']=$this->Comment_model->get_comment_show_type($inter_id);
+
+        $data['hotel']=$this->Hotel_model->get_all_hotels($inter_id,1);
+
+        $condition = $this->input->get();
+
+        $idents=array();
+
+        if (! empty ( $entity_id )) {
+            $idents['entity_id'] = $entity_id;
+            $data['entity_id'] = explode(',',$entity_id);
+        }
+
+
+        if($condition){
+            if($type=='output'){
+                unset($condition['type']);
+                $idents = $condition;
+            }else{
+                foreach($condition['data'] as $arr){
+                    $idents[$arr['name']]=$arr['val'];
+                }
+            }
+        }
+
+
+        $data['comment'] = $model->get_comments($inter_id,$idents);
+
+        if(!empty($data['comment']['list'])){
+            $array_comment_ids = array();
+            $data['feedback'] = array();
+            foreach($data['comment']['list'] as $comments){
+                $array_comment_ids[] = $comments['comment_id'];
+            }
+
+            $feedback_content = $this->Comment_model->get_feedbacks($array_comment_ids,$inter_id);
+
+            if(!empty($feedback_content)){
+                foreach($feedback_content as $arr_feedback){
+                    $data['feedback'][$arr_feedback['feedback_comment_id']][] = $arr_feedback['content'];
+                    $data['feedback_time'][$arr_feedback['feedback_comment_id']][] = date('Y-m-d H:i:s',$arr_feedback['feedback_time']);
+                }
+            }
+        }
+
+
+        if(!empty($idents['hotel_id'])){
+            $temp_score = $model->get_hotel_score_from_redis($inter_id,array($idents['hotel_id']));
+            $data['score_count'] = json_decode($temp_score[$idents['hotel_id']]);
+        }
+
+
+        if($condition){
+
+            if($data['comment']['list']){
+                foreach($data['comment']['list'] as $key=>$arr){
+                    $info = json_decode($arr['order_info']);
+                    $data['comment']['list'][$key]['comment_time']=date('Y-m-d H:i:s',$arr['comment_time']);
+                    $data['comment']['list'][$key]['hotel_name']=$info->hotel_name;
+                    $data['comment']['list'][$key]['room_name']=$info->room_name;
+                    if(!empty($info->sign)){
+                        $data['comment']['list'][$key]['sign'] = explode(',',$info->sign);
+                    }
+                }
+            }
+
+            if(isset($data['score_count'])){
+                $data['score_count']->score = round($data['score_count']->score,1);
+                $data['score_count']->facilities_score = round($data['score_count']->facilities_score,1);
+                $data['score_count']->clean_score = round($data['score_count']->clean_score,1);
+                $data['score_count']->service_score = round($data['score_count']->service_score,1);
+                $data['score_count']->net_score = round($data['score_count']->net_score,1);
+            }else{
+                $data['score_count']['score'] = 0;
+                $data['score_count']['facilities_score']  = 0;
+                $data['score_count']['clean_score']  = 0;
+                $data['score_count']['service_score']  = 0;
+                $data['score_count']['net_score']  = 0;
+                json_encode($data['score_count']);
+            }
+
+
+            if($type=='output'){
+                return $data;
+            }else{
+                echo json_encode($data);
+            }
+
+        }else{
+            $data['score_count']['score'] = 0;
+            $data['score_count']['facilities_score']  = 0;
+            $data['score_count']['clean_score']  = 0;
+            $data['score_count']['service_score']  = 0;
+            $data['score_count']['net_score']  = 0;
+            json_encode($data['score_count']);
+
+            if($type=='output'){
+                return $data;
+            }else{
+                $this->_render_content ( $this->_load_view_file ( 'comment_list' ), $data, false );
+            }
+
+        }
+
+    }
+
+
+    public function hotel_new_feedback(){        //酒店新的回复
+
+        $this->load->model ( 'hotel/Comment_model');
+
+        $inter_id = $this->session->get_admin_inter_id ();
+
+        $data = $condition = $this->input->get();
+
+        $info = array(
+            'status'=>0,
+            'msg'=>'回复失败'
+        );
+
+        $check = $this->Comment_model->check_comment_feedback($inter_id,$data['comment_id']);
+
+        if(!$check){
+
+            $result = $this->Comment_model->new_feedback($inter_id,$data);
+
+            if($result){
+
+                $this->Comment_model->change_comment_feedback($inter_id,$data['comment_id'],1);
+
+                $info['status'] = 1;
+                $info['msg'] = '回复成功';
+
+            }
+
+        }else{
+            $info['msg'] = '已经回复了';
+        }
+
+        echo json_encode($info);
+
+    }
+
+
+        public function comment_setting_save(){    //酒店评论配置
+
+            $this->load->model ( 'hotel/Comment_model');
+            $this->load->model ( 'hotel/Hotel_log_model');
+            $inter_id = $this->session->get_admin_inter_id ();
+
+            $post_data = $this->input->get();
+
+            $data['comment_config']=$this->Comment_model->get_comment_show_type($inter_id);
+
+            $info=array(
+                "status"=>0,
+                "message"=>'保存失败'
+            );
+
+            $logs = array();
+
+            $logs['auth'] = $post_data['auth'];
+            $logs['sign'] = $post_data['sign'];
+
+            $comment_config = array(
+                'auth'=>$post_data['auth'],
+                'service_score'=>$data['comment_config']->service_score,
+                'net_score'=>$data['comment_config']->net_score,
+                'facilities_score'=>$data['comment_config']->facilities_score,
+                'clean_score'=>$data['comment_config']->clean_score,
+                'sign'=>implode(',',$post_data['sign'])
+            );
+
+            if(!empty($post_data['service'])){
+                $logs['score_name'][] = $comment_config['service_score'].'修改成'.$post_data['service'];
+                $comment_config['service_score']=$post_data['service'];
+            }
+            if(!empty($post_data['net'])){
+                $logs['score_name'][] = $comment_config['net_score'].'修改成'.$post_data['net'];
+                $comment_config['net_score']=$post_data['net'];
+            }
+            if(!empty($post_data['facilities'])){
+                $logs['score_name'][] = $comment_config['facilities_score'].'修改成'.$post_data['facilities'];
+                $comment_config['facilities_score']=$post_data['facilities'];
+            }
+            if(!empty($post_data['clean'])){
+                $logs['score_name'][] = $comment_config['clean_score'].'修改成'.$post_data['clean'];
+                $comment_config['clean_score']=$post_data['clean'];
+            }
+
+
+            $keywords = $this->Comment_model->get_keyword($inter_id);
+            $hash_keywords = array();
+
+            if(!empty($keywords)){
+                foreach($keywords as $keyword){
+                    $hash_keywords[$keyword['keyword_id']] = $keyword;
+                }
+            }
+
+
+            if(!empty($post_data['keyword_id'])){     //更新关键词
+                foreach($post_data['keyword_id'] as $key_arr){
+                    if(!is_numeric($key_arr)){
+                        if(!isset($content))$content=$this->Comment_model->get_comment_content($inter_id);
+                        if(!empty($content)){
+                            $count = json_encode($this->Comment_model->match_keyword($key_arr,$content));
+                        }
+                        $logs['add'][] = $key_arr;
+                        $this->Comment_model->new_keyword($inter_id,$key_arr,$count);  //新增关键词
+                    }elseif(isset($hash_keywords[$key_arr])){
+                          unset($hash_keywords[$key_arr]);
+//
+                    }
+                }
+            }
+
+            if(!empty($hash_keywords)){
+                foreach($hash_keywords as $del_keyword){
+                    $logs['del'][] = $del_keyword['keyword'];
+                    $this->Comment_model->update_keyword($inter_id,$del_keyword['keyword_id']);  //删除关键词
+                }
+            }
+
+            $this->Hotel_log_model->add_admin_log('comment_setting','update',json_encode($logs));
+
+            if($this->Comment_model->update_comment_config($inter_id,$comment_config)){    //修改酒店评论配置
+                $info['status']=1;
+                $info['message']='保存成功';
+            }
+
+            echo json_encode($info);
+
+        }
+
+
+        public  function commentSettingLog(){
+
+            $data = $this->common_data;
+            $model = $this->_load_model ( $this->main_model_name () );
+
+            $data['logs']=$model->get_keyword_log($this->inter_id);
+
+            print_r($data['logs']);exit;
+
+            $data['log_des'] = $model->hotel_log_des();
+
+        }
+
+
+        public function deal_comment_config(){
+
+            $model = $this->_load_model ( $this->main_model_name () );
+            $configs = $model->allCommentConfig();
+
+            if(!empty($configs)){
+                foreach($configs as $config){
+                   $data = array(
+                       
+                   );
+                }
+            }
+
+        }
+
+
+        public function reset_comment_score(){
+
+            $data = $this->input->get();
+
+            if(empty($data['id']) || empty($data['hotel_ids'])){
+                echo "更新失败";
+            }else{
+
+                $this->load->model ( 'hotel/Comment_model');
+                $this->load->model ( 'hotel/Hotel_model');
+
+                $hotels = $this->Hotel_model->get_hotel_by_ids($data['id'],$data['hotel_ids'],1);
+
+                if(!empty($hotels)){
+                    $hotel_ids = array();
+                    foreach($hotels as $hotel){
+                        $hotel_ids[] = $hotel['hotel_id'];
+                    }
+                    print_r($this->Comment_model->set_hotel_score_from_redis($data['id'],$hotel_ids));
+                }else{
+                    echo "没有对应的酒店";
+                }
+
+            }
+
+
+        }
+
+    public function ext_comments(){
+
+        ini_set('memory_limit','265M');
+        set_time_limit(120);
+        $inter_id= $this->session->get_admin_inter_id();
+
+        $type = $this->input->get('type');
+
+        $res  = $this->get_comment('output');
+
+        $this->load->model ( 'plugins/Excel_model');
+        $this->load->model ( 'wx/Publics_model');
+
+        $publics = $this->Publics_model->get_public_by_id($inter_id);
+
+        $head = array ('酒店','房型','总评分',$res['comment_config']->service_score,$res['comment_config']->clean_score,$res['comment_config']->facilities_score,$res['comment_config']->net_score,'出游类型','订单号','用户','评论时间','评论内容','状态','图片','酒店回复','回复时间');
+
+        $data = array();
+
+        if(isset($res['comment']['list']) && !empty($res['comment']['list'])){
+            foreach($res['comment']['list'] as $key=>$item){
+                $temp[0]=$item['hotel_name'];
+                $temp[1]=$item['room_name'];
+                $temp[2]= $item['score'];
+                $temp[3]=$item['service_score'];
+                $temp[4]=$item['clean_score'];
+                $temp[5]=$item['facilities_score'];
+                $temp[6]=$item['net_score'];
+                $temp[7]= '';
+                if(!empty($item['sign']))$temp[7]= implode(',',$item['sign']);
+                $temp[8]= '`'.$item['orderid'];
+                $temp[9]= $item['nickname'];
+                $temp[10]= $item['comment_time'];
+                $temp[11]= $item['content'];
+                if($item['status']==1)$temp[12]= '显示';elseif($item['status']==2)$temp[12]= '隐藏';;
+                if(empty($item['images']))$temp[13]= '没';elseif(!empty($item['images']))$temp[13]= '有';
+                $temp[14]= '';
+                if(!empty($res['feedback'][$item['comment_id']][0]))$temp[14]= $res['feedback'][$item['comment_id']][0];
+                $temp[15]= '';
+                if(!empty($res['feedback_time'][$item['comment_id']][0]))$temp[15]= $res['feedback_time'][$item['comment_id']][0];
+
+                if($type==1){
+                    if(!empty($res['feedback'][$item['comment_id']]))$data[]=$temp;
+                }elseif($type==2){
+                    if(empty($res['feedback'][$item['comment_id']]))$data[]=$temp;
+                }else{
+                    $data[]=$temp;
+                }
+            }
+
+        }
+
+        $ext_date = date('Y-m-d',time());
+
+        $filename = $publics['name'].'评论导出_'.$ext_date;
+
+        $this->Excel_model->exp_exl($head,$data,$filename);
+
+
+    }
+
+}

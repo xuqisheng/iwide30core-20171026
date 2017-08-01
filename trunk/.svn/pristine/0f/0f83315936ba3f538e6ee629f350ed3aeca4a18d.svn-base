@@ -1,0 +1,146 @@
+@charset "utf-8";		
+/* CSS Document */
+
+
+.point>*:before{content:"\e021";font-family:iconfont;margin-right:4px;font-size: 16px;}
+.lineheight{line-height:2}
+.nobd{border-color:transparent !important}
+/*input的替换文字*/
+.placeinput input{width:1px; position:absolute; left:0}
+.placeinput>*{ display:block}
+.placeinput .placetxt,.placeinput input:focus,.placeinput .isinput{-webkit-box-flex:1; box-flex:1; width:auto;position:static}
+.placeinput input:focus+.placetxt,.placeinput .isinput+.placetxt{display:none; }
+.placeinput .main_tab_line{ margin:0 15px;}
+/*酒店查询页*/
+.search_bg{background:url("../images/search_bg.jpg") no-repeat;background-size: 100% 100%;}
+/*.search_bg:after{content: "";background-color: black;position: fixed;top: 0px;left: 0px;width: 100%;height: 100vh;opacity: 0}*/
+.searchLayer{padding: 26px 2.5rem .6rem 2.5rem;}
+.searchLayer .date-title{margin-bottom: 9.8px;}
+.checkdate{justify-content:space-around;padding: .3rem 20px 0 20px;}
+.checkdate .iconfont>*{vertical-align:middle}
+.checkdate .day{font-size:49px; padding-bottom:15px; padding-bottom:6px;}
+.checkdate .rotate60{width:80px}
+.histroy div{margin-bottom: 1.187rem;}
+.histroy_bottom{margin-bottom: 1.406rem;}
+.searchLayer .button{font-size: 1.1rem;letter-spacing: 6px;padding-left: 12px;}
+.searchLayer .main_tab_line{height: 0.909rem;}
+.search_bg .search_top_img{margin-right: 0.609rem;border-radius: 4px;overflow: hidden;position: relative;width: 319px;height: 159.5px;}
+.search_top_img:after{content: "";background-color: black;opacity: 0.1;position: absolute;top: 0px;left: 0px;width: 100%;height: 100%;}
+.search_top_img .squareimg{padding-bottom: 159.5px;}
+.search_img_wrapper{padding: 0.875rem 0 0 0.875rem;padding-right: 30px;}
+.search_top_word{position: absolute;bottom: 3px;right: 8px;z-index: 2;}
+.search_discount_word{margin-bottom: 0.168rem;}
+.search_bg .others>*{padding: 0.3rem 2px 1rem 2px;}
+#old_search a{margin-bottom: 1.406rem;}
+#old_search a:last-child{margin-bottom: 0px;}
+.others .img .always:before{content:"\e055";font-family:iconfont;font-size: 1.42rem}
+.others .img .collect:before{content:"\e061";font-family:iconfont;font-size: 1.42rem}
+.others .img .order:before{content:"\e053";font-family:iconfont;font-size: 1.42rem}
+/*广告位*/
+.others>*{padding: 0 2px 1.2rem 2px;margin-right:0.625rem;border-radius: 3.5px;border:0.5px solid transparent;background-clip:border-box;position: relative;}
+.others>*:last-child{margin-right:0}
+.others .txtclip{width:6em; min-width:100%}
+.others .img{width:40px;margin: 1.112rem auto  0.75rem auto;}
+.others img{ border-radius:50%;}
+.others em{display:block; line-height:1;}
+.others .checked{ background:none; border:0.5px solid #505050;position: relative;}
+
+/*房型列表*/
+.big_banner .swiper-container,.big_banner .swiper-wrapper{z-index: 0;}
+.big_banner .roomlist_photo_num{position: absolute;right: 1rem;bottom: calc(4.3rem + 3.5px);display: inline-block;z-index: 2;left: auto;width: auto;color: #ffffff;font-size: 0.731rem;}
+.big_banner .swiper-pagination-current{font-size: 1.158rem;margin-right: -0.1rem;}
+.big_banner .swiper-pagination-total{font-size: 0.731rem;margin-left: -0.1rem;}
+.big_banner .squareimg{padding-bottom: 28rem;background:#1f1f1f;}
+.big_banner .squareimg img{min-height: 103%;background:#1f1f1f;}
+.big_banner .bg_alpha{position:absolute;bottom: -1px;width:100%;padding-top: 4.3rem;}
+.sepc_tag{margin-top:15px}
+.sepc_tag>*{display:inline-block; padding:0.3rem 0.4rem; letter-spacing:1px; line-height:1; border-radius:3px; border:0.5px solid; margin-right:0.3rem}
+.room_information{padding: 0.75rem 6% 0.89rem 6%;}
+.room_list_choose{padding: 5px 7px;}
+#business_portal{ width: 1rem; text-align: right;}
+#business_portal .iconfont{    margin-left: 3px;}
+#package_room_list .bookBtn{width: 61px;line-height: 1.2;padding: 0.15rem 0.1rem;}
+.hide_pack .main_tab_line ,.hide_pack .shadow_b,.hide_pack #j-swim{display: none!important;}
+.hide_pack #business_portal{position: absolute;top: 11px;right: 17px;width: 66px!important;}
+.hide_pack{padding-bottom: 7px;position: relative;}
+.room_collect{cursor: pointer;}
+.room_list_question{cursor: pointer;}
+/*评分*/
+.score:after, .room_list_score:after{content:"分"; font-size:0.853rem;}
+.score>*:first-child , .room_list_score:first-letter{font-size:2rem}
+.score>*:last-child, .room_list_score{font-size:1.7rem}
+/*分割光线*/
+.light{ min-width:7rem; margin-left:-5rem; margin-right:-2.5rem;}
+/*房间*/
+.room_list {margin-top:.5rem}
+.room_list .img{ border-radius:4px; overflow:hidden;}
+.room_list .squareimg{padding-bottom: 184px;}
+.room_list .squareimg img{height: 100%;min-height: 100%;border-radius: 4px;}
+.room_list .imgtitle{padding: 0.5rem 12px;bottom: -1px;border-radius: 4px;}
+.room_list_shadow .shadow_b{  position: absolute; top: 100%; left: 0px; width: 100%; height: 4px; overflow: hidden;}
+.room_list_shadow .shadow_b:after{    content: ""; position: absolute; border-radius: 39%; left: 1px; top: -53px; height: 51px; width: 100%; box-shadow: 7px 0px 6px 1px #b2945e;}
+.discount_price{display: none;}
+.discount_price,.original_price{float: left;}
+.room_collect_hide .itemfoot{display: none;}
+.room_collect_hide .room_triangle{transform:rotate(180deg); -webkit-transform:rotate(180deg);display: inline-block;}
+.room_collect_hide .discount_price{display: block;}
+.room_collect_hide .original_price{display: none;}
+.room_collect:after{content: "收起";color: #808080;font-size: 14px;}
+.room_collect_hide .room_collect:after{content: "更多";}
+.server>*{margin-right:10px;}
+.imgtitle{position:absolute; bottom: -1px; padding: 1rem 12px; width:100%; background: -webkit-linear-gradient(bottom,rgba(22,22,22,1),rgba(22,22,22,0)); /* Safari 5.1 - 6.0 */ background: linear-gradient(bottom, rgba(22,22,22,1) ,rgba(22,22,22,0)); /* 标准的语法*/ z-index: 1; }
+.itemfoot{ position:relative; border-radius:4px; }
+.itemfoot:after{content:"";border: solid 8px;border-color:transparent transparent #1f1f1f transparent;position:absolute;left: 29px;bottom:99%;}
+.bookBtn{text-align:center;border: .5px solid;width: 61px;padding:0.5px;display:inline-block;line-height:1;min-width:3.4rem;}
+.bookBtn .single{padding: 3.61px 0;display:inline-block;}
+.bookBtn .room_reserve{line-height: 24px;font-size: .85rem;}
+.bookBtn_need{padding: 0.15rem 0.1rem;}
+.room_description{height: 192px;padding-bottom: 0px;border-top-left-radius: 4px;border-top-right-radius: 4px;position: relative;z-index: 1;}
+.room_description_rows{ margin: 0px 10px;}
+.room_description_rows div{width: 33%;margin-bottom: 15px;}
+.room_description_rows em{float: left;width: 20px;height: 23px;text-align: left;margin-right: 3px;font-size: 1.05rem;margin-top: -1px;}
+.room_description_rows p{margin-bottom: 1.3rem;}
+.hotel_details_wrap .room_description_rows em{margin-top: 0px;}
+.item *{letter-spacing: 0.2px;}
+.room_list_describe span{position: relative;padding-left: 7px;}
+.room_list_describe>*:before{font-size: 24px;position: absolute;top: -10px;left: 0px;}
+.room_list_exclusive{overflow: hidden;}
+.room_list_line{margin:0px 5px 0px -10px;opacity:0.8;width:2.2rem;height: 4.2rem;}
+.room_list_word{width: 107px;position: relative;}
+.room_list_number{width: 5rem;text-align: center;}
+.room_list .bd_list>*{    padding:1.3rem 0}
+.room_free_choice{position: relative;}
+.room_free_choice:after{content: "";background: url("../images/free_choice.png");background-size: 100% 100%;width: 4.2rem;height: 4.825rem;left: -0.48rem;top: -0.55rem;display: block;position: absolute;}
+.room_member_circle{width: 0.35rem;height: 0.35rem;background-color: white;float: left;margin-top: 0.45rem;margin-right: 0.4rem;border-radius: 50%;}
+#room_description_wrap .close{    width: 19px; height: 22px; display: block;}
+.submit_type{overflow: hidden;text-align: left;}
+.submit_type > label{width: 31%;float: left;text-align: center;margin: 0px 1.63% 10px .7%;}
+.like_ico{position: absolute;right: 0.937rem;bottom: 20px;width: 20px;height: 22px;}
+.like_ico em{display: block;width: 23px;height: 23px;}
+/*星星*/
+.star>*{margin-right:0.32rem}
+.star>*:nth-child(1){ color:#d6bf95;}
+.star>*:nth-child(2){ color:#cdb280;}
+.star>*:nth-child(3){ color:#c7a973;}
+.star>*:nth-child(4){ color:#be9f67;}
+.star>*:nth-child(5){ color:#b2945e;}
+.star .off{color: #363636;}
+/*提交订单*/
+.orderhead{overflow: hidden;padding:10px;padding-left: 30px;}
+.submit{ text-align:center; color:#fff; padding:0.9rem 0}
+.order_nologin_box .squareimg{padding-bottom: 3.125rem;border-radius: 5px}
+.order_nologin_spacing{letter-spacing: 3px;}
+.order_nologin_word{/*background: -webkit-linear-gradient(right,rgba(31,31,31,1) 30%,rgba(31,31,31,0) 100%);background:linear-gradient(right,rgba(31,31,31,1) 30%,rgba(31,31,31,0) 100%);*/position: absolute;top: 0px;height: 100%;width: 100%;text-align: right;line-height: 3.125rem;border-radius: 5px}
+.order_money_ico{margin: 5px 2px 0 3px;}
+.submit_order_button{    position: fixed; z-index: 90; width: 100%; left: 0; bottom: 0;}
+.submit_order_button > div{    float: left; margin-top: 8px;}
+.submit_order_button > span{    width: 150px; float: right;}
+.j_sumit_order{display: none;}
+.detailed_show .j_sumit_order{display: block;}
+.detailed_show #j_detailed em{transform:rotate(180deg); -webkit-transform:rotate(180deg);display: inline-block;}
+.submit_order_check{position: absolute;right: 0.43rem;top: 0.4rem;}
+.input_item{margin: 15px 0;    padding-bottom: 15px;}
+/*详情介绍*/
+.hotel_phone{width: 4.5rem;text-align: center;position: relative;}
+.hdetail_describe{display: inline-block;padding: 0.4rem 0.7rem 0.35rem 0.7rem;border-radius: 2px;margin-right: 0.3rem;text-align: center;line-height: 0.7rem;text-indent: 1px;}
+.hdetail_describe_word{}

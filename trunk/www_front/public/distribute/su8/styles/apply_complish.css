@@ -1,0 +1,11 @@
+@charset "utf-8";
+/* CSS Document */
+html,body{width:100%;height:100%;}
+.box{width:100%;height:39%;}
+.box .gon{width:4rem;height:4rem;margin:auto;padding-top:13%;}
+.b_lo > p{text-align:center;padding:5% 0;font-size:0.8rem;font-weight:bold;}
+.b_lo .examine,.b_lo .success{color:#d40f20;}
+.b_lo .fail{color:#c55200;}
+.d_txt > p > a,.d_txt{text-align:center;color:#989898;}
+.d_txt p{padding:1% 0;}
+.f_shop{width:80%;padding:5% 0;background:#d40f20;border-radius:.3rem;margin:10% auto;text-align:center;color:#fff;font-size:.7rem;}

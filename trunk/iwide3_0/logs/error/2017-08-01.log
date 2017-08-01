@@ -1,0 +1,1 @@
+2017-08-01 16:08:03 | 702 | 127.0.0.1 | 7dad63ab889f5bc065a7b568d8634d08bf209a7f | /index.php/privilege/auth/login?redirect=http%3A%2F%2Fadmin.iwide.com%2Findex.php%2Fprivilege%2Fauth%2Findex | POST={"username":"huiyuan","password":"huiyuan123","captcha":"149612"} | ERROR | Unable to connect to the database

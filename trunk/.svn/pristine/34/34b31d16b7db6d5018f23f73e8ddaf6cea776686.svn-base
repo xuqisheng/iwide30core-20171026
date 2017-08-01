@@ -1,0 +1,126 @@
+<?php
+/**
+* 酒店提醒
+* author chenjunyu 2016-10-19
+*/
+
+defined ( 'BASEPATH' ) or exit ( 'No direct script access allowed' );
+header("Content-type:text/html;charset=utf-8");
+
+class Hotel_notify extends MY_Front{
+
+	function __construct(){
+		parent::__construct();
+		$this->inter_id=$this->session->userdata('inter_id');
+		$this->openid=$this->session->userdata($this->inter_id.'openid');
+		MYLOG::hotel_tracker($this->openid,  $this->inter_id);
+		$this->datas['inter_id'] = $this->inter_id;
+		if($this->input->get('asd')){
+			$this->output->enable_profiler(true);
+		}
+	}
+
+	public function index(){
+		
+	}
+
+	public function register(){
+		$data = array();
+		$this->load->model('hotel/hotel_notify_model');
+		//查询该用户的绑定情况和状态
+		$reg_info = $this->hotel_notify_model->get_config($this->openid,$this->inter_id);
+		if($reg_info){
+			redirect(site_url('hotel_notify/hotel_notify/result').'?id='.$this->inter_id);
+		}else{
+			//查出当前酒店内部id下的所有酒店信息
+			$data['hotels'] = $this->hotel_notify_model->get_all_hotels($this->inter_id);
+			//压入全部酒店选项
+			array_unshift($data['hotels'], array('hotel_id'=>0,'inter_id'=>$this->inter_id,'name'=>'全部酒店'));
+			$this->display('hotel_notify/register',$data);
+		}
+	}
+
+	//异步注册请求
+	public function toRegister(){
+		$this->load->model('hotel/hotel_notify_model');
+		if($errmsg = $this->hotel_notify_model->save()){
+			echo json_encode($errmsg);
+		}else{
+			echo json_encode($errmsg);
+		}
+	}
+
+
+	function result(){
+		$this->load->model ( 'hotel/hotel_notify_model' );
+		$reg_info = $this->hotel_notify_model->get_config ( $this->openid, $this->inter_id );
+		if(!$reg_info){
+			redirect(site_url('hotel_notify/hotel_notify/register').'?id='.$this->inter_id);
+		}else{
+			$datas ['status'] = $reg_info['status']==1?'complete':'unbind';
+			if($reg_info['hotel_id']==0){
+				$datas ['hotelname'] = '全部酒店';
+			}else{
+				$this->db->where(array('inter_id'=>$this->inter_id,'hotel_id'=>$reg_info['hotel_id']));
+				$hotels = $this->db->get('hotels')->result_array();
+				$datas ['hotelname'] = !empty($hotels[0])?$hotels[0]['name']:'';
+			}
+			$this->display('hotel_notify/register',$datas);
+		}
+	}
+
+	function deal_order(){
+        $orderid = $this->input->get ( 'oid', TRUE );
+		//查询指定订单
+		$this->load->model ( 'hotel/Order_model' );
+		$idents = array(
+				'idetail' => array (
+						'r' 
+				),
+				'orderid'=>$orderid
+			);
+		$order = $this->Order_model->get_main_order($this->inter_id,$idents);
+		if(!isset($order[0])){
+			echo '订单不存在';exit;
+		}
+		$order = $order[0];
+		//权限验证
+		$this->load->model('hotel/hotel_notify_model');
+		$conf = $this->hotel_notify_model->get_config($this->openid,$this->inter_id,1);
+		$weeks = explode(',',$conf['weeks']);
+		$wx_notifys = explode(',',$conf['wx_notify']);
+		$this_week = date('w',$order['order_time']);
+		if($this_week==0)
+			$this_week = 7;
+		if( ($conf['hotel_id']!=0 && $conf['hotel_id']!=$order['hotel_id']) ){
+			echo $conf['hotel_id'].':'.$order['hotel_id'];
+			echo '权限不足1';exit;
+		}
+		if( !in_array($this_week,$weeks) ){
+			echo $this_week.':';
+			var_dump($weeks);
+			echo '权限不足2';exit;
+		}
+		if( (!in_array('all',$wx_notifys) && !in_array('new_deal',$wx_notifys)) ){
+			var_dump($wx_notifys);
+			echo '权限不足3';exit;
+		}
+		//查询未确认订单
+		$idents = array(
+				'idetail' => array (
+						'r' 
+				),
+				'status'=>0,
+				'paytype'=>'daofu',
+				'order_by'=>'order_time desc'
+			);
+		if($conf['hotel_id']!=0){
+			$idents['hotel_id'] = $conf['hotel_id'];
+		}
+		$order_list = $this->Order_model->get_order_list($this->inter_id, $idents);
+
+		echo '<pre>';
+		var_dump($order);
+		var_dump($order_list);
+	}
+}

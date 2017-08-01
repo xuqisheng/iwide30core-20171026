@@ -1,0 +1,15 @@
+body{font-family:microsoft Yahei; background:#f0f0f0; }
+*{padding:0; margin:0; outline:0; }
+ul,li{ list-style:none; }
+.yellow{ color:#ffd800 }
+
+.wrap-outer{ left:0; right:0; bottom:0; top:0; position:absolute; -webkit-box-orient: horizontal; -webkit-box-pack: center; -webkit-box-align:center; z-index:0;}
+.wrap { width:100%; background:#f6f6f6; max-width:414px; margin:0 auto; min-height:100%; text-align:center; }
+
+header{ width:100%; height:52px; background:url(../../images/topbar-bgline.gif) repeat-x center; background-size:auto 52px; line-height:52px; color:#fff; font-weight:bold }
+header .icon-back{ float:left; display:block; width:52px; height:52px; background: url(../../images/icon-back.gif) no-repeat center; background-size:10px 19px; }
+header .icon-home{ float:right; display:block; width:52px; height:52px; background:url(../../images/icon-home.gif) no-repeat center; background-size:21px 18px; }
+
+.btns{ color:#fff; width:100%; height:45px; line-height:45px; font-size:20px; text-align:center; display:block; border-radius:5px; -webkit-border-radius:5px; -moz-border-radius:5px; text-decoration:none; font-weight:normal; }
+
+.btn-balance{ background:#ef2c43; }

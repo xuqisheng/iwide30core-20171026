@@ -1,0 +1,25 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+body,html{ background:#eeeeee;}
+img{ width:auto;}
+.vote_list{ padding:4%;}
+.vote_list .item{ border:2px solid #d4d4d4; background:#f08600; color:#fff; border-radius:0.3rem; overflow:hidden; position:relative; padding:7% 5%; margin-bottom:4%;}
+.vote_list .item.ischoose{ border-color:#f0b500;}
+.vote_list .item .choose{ position:absolute; right:0.2rem; top:0.2rem;}
+.vote_list .item .choose img{ height:0.7rem;}
+.vote_list .item .logo{ float:left; font-size:0;margin-right:3%; height:2.5rem;}
+.vote_list .item .logo img{ height:2.5rem; border-radius:50%;}
+.vote_list .item .from{ font-size:0.7rem;}
+.vote_list .item .giftname{ font-size:1rem;}
+.vote_list .item .arrow-left { position:absolute;	top:0; right:0; border-top:10% solid transparent; border-bottom:2rem solid transparent; border-right:2rem solid #d4d4d4; }
+.vote_list .ischoose .arrow-left{ border-right-color:#f0b500 !important;}
+.vote_orderid{ position:absolute; right:5%;bottom:4%; color:#dd760d; font-size:0.6rem;}
+.vote_list .status{ border:5px solid #da740f; width:4em; height:4em; line-height:4.8em;border-radius:50%; color: #da740f; font-size:0.7rem; font-weight:bold; position:absolute;right:-0.5em; top:-1.1em; -webkit-transform:rotate(30deg); text-align:center}
+
+.remind .page{ border-radius:0.3rem; background:#fff; margin:30% auto; width:90%; color:#000;font-size:0.6rem}
+.remind .content{ padding:5%; padding-top:0;}
+.remind .pull_btn{border-top:1px solid #e1e1e1; padding:5% 0; text-align:center}
+.foot_btn{ padding-top:15%; text-align:center;}
+.foot_btn span{ position:fixed; display:inline-block; border-radius:0.3rem; background:#df9d6b;color:#fff; width:90%;bottom:3%;right: 5%; font-size:0.7rem; padding:4% 0;text-align:center}

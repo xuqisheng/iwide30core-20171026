@@ -1,0 +1,34 @@
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1, shrink-to-fit=no">
+	<meta name="Maker" content="Taoja" tel="13544425200">
+	<meta name="format-detection" content="telephone=no">
+	<title>直播</title>
+	<link type="text/css" href="/public/zb/css/tao.css" rel="stylesheet">
+</head>
+
+<body class="full">
+	<flex class="bg full absolute" style="justify-content: center;">
+		<video webkit-playsinline preload poster='<?php echo $channel['head_img']?>' playsinline class="bofangqi absolute" x5-video-player-type="h5" style="top:0px;right:0px;height:100%;">
+			<source src='<?php echo $channel['play_url']?>' type="application/vnd.apple.mpegurl" />
+			<p class="warning">Your browser does not support HTML5 video.</p>
+		</video>
+	</flex>
+	<div class="full absolute replay_btn"></div>
+</body>
+	<script>
+		var thevideo = document.querySelector(".bg>video");
+		var rbtn = document.querySelector(".replay_btn");
+		document.addEventListener("touchmove",function(e){
+			e.preventDefault();
+		});
+		rbtn.addEventListener("touchstart",function(){
+			thevideo.load();
+			thevideo.play();
+		});
+	</script>
+</html>

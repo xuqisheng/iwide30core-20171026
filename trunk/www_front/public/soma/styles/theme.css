@@ -1,0 +1,102 @@
+@charset "utf-8";
+/* CSS Document transparent */
+/*文本大小和颜色  边框样式和颜色  背景颜色 */
+/*单位只能使用rem  1rem=html的字体大小*/
+
+.search_pull,.showdetail_pull,.order_list,.coupon_pull,.drop_down_item{background:#f8f8f8;}
+/*
+.border,.border_bottom,.border_top,.border-right,
+.pay_way .item,.block_list li,.normal_list li{border-image:url(../images/border.gif) 2 stretch;}
+.border{ border-width:1px 0px 1px 0px;}
+.border-right{ border-width:0px 1px 0px 0px;}
+.border_bottom,.pay_way .item,.block_list li{border-width:0 0 1px 0;}
+.border_top{border-width:1px 0 0 0;}
+*/
+.search_box_pull input,.hot_city li.cur{border:0;}
+.search_pull .border{ border-width:1px;}
+.refund_reason em,.ico_style{border:2px solid #666666}
+.refund_reason .choose em{ border-color:#fc9327;}
+
+
+.tab_menus div.cur{border-bottom:3px solid #ff950d;color:#ff950d}
+.is_guess{border-bottom:1px solid #3e3e3e;}
+.group_rule em{ border:5px solid #fff;}
+.group_rule .cur em{ border-color:#fee2c5;}
+.group_rule .active hr{ border-color: #ff950d}
+.search_box_pull{border-radius:1rem; border:1px solid #7b7b7b;}
+
+.color_fff,.bn_title,.search_box,.class_list .item em,
+.hot:after,.fn span,.hot_city li.cur,.buy_link a,
+.after_float,.refund_reason .choose em,
+.foot_btn *,.step_style em,.drop_down_menu.cur,.cur .drop_down_header:after,.cur .drop_down_header{ color:#fff;}
+.s_input,.search_box_pull input,.search_pull,.drop_down_item{ color:#666;}
+.tab_menus p{ color:#e5e5e5;}
+.against,.mcolor,.group_rule .active{color:#ff950d;}
+.coupon_disable .ticket,.coupon_disable .against,.tp_local,del,.fcolor{ color:#9a9a9a;}
+.buy_list li:first-child{ color:#999}
+.warn{color:#B00}
+.refund_reason em{ color:transparent;}
+.ticket,.c_555{color:#555;}
+
+.hotel_link a{background-color:#36ba49}
+.fcolor_2{background:#fbfafa}
+.group_rule em{background:#999}
+.search_pull .pulltile{background:#eee}
+.group_member_list .img,.gray_bg{background:#e3e2e2}
+.bgcolor_fff,.tp_list .item,.drop_down_menu{ background:#fff;}
+.m_bg,.after_float,.hot:after,.hot_city li.cur,.result_btn >*,
+.group_rule .active em,.step_style em,.drop_down_menu.cur{ background:#ff950d;}
+.m_bg2{ background-color:#ffb80d}
+.buy_link a{background:#e24948;}
+.refund_reason .choose em,.foot_btn >*{background:#fc9327}
+/*.disable{ background:#c8c8c8;}*/
+
+.s_input{ background:rgba(255,255,255,0.5);}
+.fen_bg{background:url(../images/fensan.png) no-repeat;background-size:80% auto; background-position:90% 2%; height:100%;}
+.group_member_list .img{ background-image:url(../images/23165.png); background-repeat:no-repeat; background-size:100%;}
+
+
+.share_pull{background-image:url(../images/fensan.png); background-repeat:no-repeat; background-size:95%; background-position: center 10%;}
+.result_pull .share_pull{background-image:url(../images/fensan2.png); background-size:80%;}
+.group_full{background:url(../images/bg.jpg) repeat-x; background-size:auto 100%;}
+
+
+.tp_list .img{ font-size:0}
+.search_pull .hot:after{ font-size:0.5rem;}
+.h4,.tab_menus > div.hot:after,.tp_list .fn,del,.after_float{font-size:0.8rem;}
+.normal,input,textarea,button{font-size:1rem;}
+.h3,.group_rule{font-size:0.9rem;}
+.h2{font-size:1.2rem;}
+.h1{font-size:1.5rem;}
+.class_list em{ font-size:1.8rem}
+.h0{font-size:2rem;}
+.pay_status em {font-size:4rem;}
+
+.left_fadein{
+	-webkit-animation-name: fadein;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.5s;
+	-webkit-animation-iteration-count:1;
+}
+@-webkit-keyframes fadein /* Safari and Chrome */
+{
+from{ transform:translateX(400px);}
+to{transform:translateX(0);}
+}
+
+
+body,html { font-size:15px}
+@media only screen and (min-width: 319px) and (max-width: 480px) {
+}
+@media only screen and (min-width: 481px) and (max-width: 720px) {
+	body,html {}
+}
+@media only screen and (min-width: 721px) and (max-width: 950px) {
+	body,html {}
+}
+@media only screen and (min-width: 951px){
+	body,html {}
+}
+
+
+

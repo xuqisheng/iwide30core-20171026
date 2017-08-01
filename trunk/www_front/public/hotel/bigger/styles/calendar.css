@@ -1,0 +1,41 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+#ncalendar .calendar_head{display:-webkit-box;display:box;-webkit-box-align:center;text-align:center;margin: 50.5px 0 54px 0;}
+#ncalendar .calendar_head>*{color: #ffffff;-webkit-box-flex: 1;-moz-box-flex:1;box-flex:1;flex-grow: 1;display:block;/* padding:1rem 0; */font-size:0.975rem;}
+#currentDate{width: 141.2px;}
+#ncalendar tbody td.current,
+#ncalendar tbody td.begin,
+#ncalendar tbody td.end,
+#ncalendar tbody td.begin .ct{}
+
+#ncalendar .unable{	color:#393836 !important;}
+
+#ncalendar tbody td.current,
+#ncalendar tbody td.begin,
+#ncalendar tbody td.end{}
+
+#ncalendar{position:fixed;top:100%;height:100%;width:100%;overflow:hidden;z-index:999999;font-size:0.853rem;padding: 0 0.937rem;-webkit-transition:top 300ms,right 300ms,left 300ms,bottom 300ms;}
+#ncalendar table{width: 100%;border-collapse:collapse;border-spacing:0;margin:auto;}
+
+#ncalendar tbody td { padding:0.5rem 0; position:relative; box-sizing:content-box}
+#ncalendar thead{ border-bottom:0.5px solid #363636;}
+#ncalendar tbody td{text-align: center;color: #bfbfbf;padding: 2rem 0;}
+#ncalendar tbody td span{display:block;}
+#ncalendar thead td{text-align: center;padding-bottom: 1.457rem;}
+.today{color:#b2945e!important;}
+.BG .today{color:#333333!important;}
+#ncalendar tbody td.span{background: #eee;box-sizing:border-box;}
+#ncalendar tbody td.timename{text-align: center;padding:2%;color:#444;height:1em;}
+
+#ncalendar td > *{position:absolute;top: 1.5rem;left:0;text-align:center;/* padding: 0 0.937rem; */width: 100%;height: 48px;line-height: 48px;}
+#ncalendar .BG>*{background:#b2945e;color:#333333;box-shadow: 0 0 9px 2px rgba(178,148,94,.3);}
+#ncalendar .unable+.BG>*,#ncalendar td:first-child>*,#ncalendar .S>*{ border-top-left-radius:3em; border-bottom-left-radius:3em}
+#ncalendar td:last-child>*,#ncalendar .E>*,#ncalendar .T>*{border-top-right-radius:3em;border-bottom-right-radius:3em;left: -1px;}
+
+#ncalendar ._tips{position:fixed; width:100%; bottom:3%;z-index:999999; text-align:center}
+#ncalendar ._tips span{background:rgba(0,0,0,0.6); color:#fff; padding:2% 5%; font-size:15px;}
+
+#ncalendar #preDate{-webkit-transform:rotate(180deg);transform:rotate(180deg);}
+

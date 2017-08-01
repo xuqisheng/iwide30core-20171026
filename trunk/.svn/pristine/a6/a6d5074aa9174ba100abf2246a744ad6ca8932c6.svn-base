@@ -1,0 +1,137 @@
+@charset "utf-8";
+/* CSS Document transparent*/
+
+/*基础样式*/
+*{margin:0;padding:0;-webkit-text-size-adjust:100%;font-family:"PingFang SC","微软雅黑","Microsoft YaHei",Helvetica,"Helvetica Neue",Tahoma,Arial,sans-serif;outline:0; box-sizing:border-box;
+	/*样式过渡*/
+	transition: left 350ms,bottom 350ms,color 200ms, background-color 200ms; 
+	-moz-transition: left 350ms,bottom 350ms,color 200ms, background-color 200ms;	/* Firefox 4 */
+	-webkit-transition:left 350ms,bottom 350ms,color 200ms, background-color 200ms;	/* Safari 和 Chrome */
+	-o-transition: left 350ms,bottom 350ms,color 200ms, background-color 200ms;	/* Opera */
+  font-size:14px;
+}
+@media screen and (min-width:375px){
+    html{
+        font-size: 16.4px;
+    }
+}
+@media screen and (min-width:414px){
+    html{
+        font-size:18.11px;
+    }
+}
+a{-webkit-tap-highlight-color:rgba(255,0,0,0);}
+input,textarea,button,a{ border:none; font-weight:normal; resize:none; background:none;-webkit-appearance:none;}
+table{border-collapse:collapse;border-spacing:0}
+img{border:0;}
+abbr,acronym,label{border:0;font-variant:normal; font-weight:normal; margin:0}
+del{text-decoration:line-through}
+address,caption,cite,code,dfn,em,th,var{font-style:normal;font-weight:500}
+ol,ul{list-style:none}
+p{line-height:1.5}
+a,a:active,a:visited{text-decoration: none;}
+hr{ border:none; border-bottom:1px solid #999999;}
+
+.row_line:after{content:" ";height:0px;border-bottom:2px solid #f8f8f8;display:block;flex:1;-webkit-flex:1;-ms-flex:1;}
+.clearfix:after{content:"";display:block;height:0;clear:both;visibility:hidden;}
+.ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.middle{vertical-align:middle;}
+.sub{vertical-align:sub;}
+.y:before{content:"¥";}
+.w{width:100%}
+.text_nowrap{white-space:nowrap;}
+html{ font-size:62.5%}
+body,input,textarea,button,a{font-size:1.2rem; color:#7e8e9f/*基础样式*/} 
+.relative{position:relative}
+.absolute{position:absolute;}
+.text_right{text-align:right;}
+.text_left{text-align:left;}
+.center{text-align:center;}
+.pointer{cursor:pointer;}
+.w_h_100{width:100%;height:100%;}
+.cursor{cursor:pointer;}
+.italic{font-style:italic;}
+.float_left{float:left;}
+.j_img img{width:100%;}
+.inline_block{display:inline-block;}
+.block{display:block;}
+.none{display:none;}
+.hiddens{overflow:hidden;}
+
+
+/*border*/
+.border_eee_1{border:1px solid #eee;}
+.border_ccc_1{border:1px solid #ccc;}
+.border_808080_1{border:1px solid #808080;}
+.border_bfbfbf_1{border:1px solid #bfbfbf;}
+.border_b69b69_1{border:1px solid #b69b69;}
+.border_e6e6e6_1{border:1px solid #e6e6e6;}
+.border_bottom_ccd6e1_1{border-bottom:1px solid #ccd6e1;}
+.border_right_ccc_1{border-right:1px solid #ccc;}
+
+
+/*radius*/
+.radius_3{border-radius:3px;}
+.radius_50{border-radius:50%;}
+
+
+/*background*/
+.bg_fff{background:#fff;}
+.bg_b69b69{background:#b69b69;}
+.bg_f6f6f6{background:#f6f6f6;}
+.bg_f8fafc{background:#f8fafc;}
+.bg_ff9900{background:#ff9900;}
+
+/*color*/
+.color_fff{color:#fff;}
+.color_333{color:#333;}
+.color_bfbfbf{color:#bfbfbf;}
+.color_b69b69{color:#b69b69;}
+.color_808080{color:#808080;}
+.color_666{color:#666;}
+.color_999{color:#999;}
+.color_e0e0e0{color:#e0e0e0;}
+.color_9e9e9e{color:#9e9e9e;}
+.color_666{color:#666;}
+.color_ff9900{color:#ff9900;}
+
+/*margin*/
+.margin_auto{margin:auto;}
+.margin_bottom_15{margin-bottom:15px;}
+.margin_bottom_20{margin-bottom:1.42rem;}
+.margin_bottom_12{margin-bottom:12px;}
+
+
+/*padding*/
+.padding_12_0{padding-top:12px;padding-bottom:12px;}
+
+/*width*/
+.width_65{width:65%;}
+.width_82{width:82%;}
+
+/*height*/
+
+/*font-size*/
+
+/*font-weight*/
+.font_weight{font-weight:bold;}
+
+/*flex*/
+.flex{display:flex;display:-webkit-flex;display:-ms-flex;align-items:center;}
+.column{flex-direction:column}
+.between{justify-content: space-between;}
+.around{justify-content: space-around;}
+.centers{justify-content:center;}
+.end{align-items: flex-end;}
+.nowrap{flex-wrap:nowrap;}
+.wrap{flex-wrap:wrap;}
+.stretch{align-items:stretch;}
+.start{align-items:flex-start}
+.flex_1{flex:1;-webkit-flex:1;}
+
+
+
+/*扫码核销*/
+.box_content{padding:5rem 0;}
+.sao_icon{width:5rem;height:5rem;border-radius:50%;box-shadow:0 0 10px #555;}
+

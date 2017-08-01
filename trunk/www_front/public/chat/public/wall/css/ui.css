@@ -1,0 +1,36 @@
+@charset "utf-8";
+/* CSS Document */
+
+.face_img{width:1.4rem; height:auto}
+.ui_male,.ui_female{ font-weight:bold;}
+.ui_male:after{content:"♂";color:#237bf3;}
+.ui_female:after{content:"♀"; color:#ed7f8c;}
+.ui_price:before{content:"￥"; font-family:Arial;}
+
+.ui_img_auto_cut{ width:3rem; height:3rem; position:relative; overflow:hidden; display:inline-block}
+.ui_img_auto_cut img{ position:absolute}
+.ui_img_auto_cut ._w_h{ width:100%; height:auto; left:0 !important;}
+.ui_img_auto_cut ._h_w{ height:100%; width:auto; top:0 !important;}
+
+.ui_tab{padding:5% 0 ;text-align:center; font-size:0;}
+.ui_tab>div{display:inline-block; padding:3% 0; width:40%; border:2px solid #237bf3; background:#fff; color:#237bf3; font-size:0.6rem;}
+.ui_tab>div:first-child{border-radius:0.3rem 0 0 0.3rem}
+.ui_tab>div:last-child{border-radius:0 0.3rem 0.3rem 0}
+.ui_tab>div.cur{ background:#237bf3; color:#fff;}
+
+.user_img{width:2.5rem; height:2.5rem; border-radius:0.3rem;margin-right:3%; overflow:hidden}
+.user_img img{ min-height:100%; min-width:100%;}
+
+.ui_list{ padding-left:3%; font-size:0.7rem;border:1px solid #b5b8bd; border-left:0; border-right:0;}
+.ui_list .ui_item{overflow:hidden; padding:4% 0; padding-right:3%; border-bottom:1px solid #b5b8bd;}
+.ui_list .ui_item:last-child{ border-bottom:0;}
+.ui_list .ui_item .user_img{ float:left;}
+.ui_list .ui_item .user_name{ padding:2% 0;}
+.ui_list .ui_item .ui_content,.ui_list .ui_item .ui_time{overflow:hidden;white-space:nowrap;text-overflow:ellipsis; color:#999999;}
+
+.ui_btn{width:1.2rem; height:1.2rem;  color:#fff; line-height:1.2rem; display:inline-block;vertical-align:bottom; margin-bottom:1%}
+
+.send_btn{ background:#0088df;color:#fff; text-align:center;line-height:1.2rem; font-size:0.6rem; border-radius:0.2rem; padding:1% 0;margin-right:0 !important;margin-bottom:0; white-space:nowrap; float:right; min-width:3.5em; max-width:5em;}
+
+.ui_count{position:absolute; right:-0.2rem; top:-0.2rem; background:#e60012; text-align:center; color:#fff; width:0.8rem; height:0.8rem; line-height:0.8rem; font-size:0.5rem; border-radius:50%; }
+.ui_notic_default{ color:#cf0b0b; background:#feefda; padding:2% 3%; display:block; text-decoration:underline; font-size:0.55rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}

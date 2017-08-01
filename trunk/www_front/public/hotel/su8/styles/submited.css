@@ -1,0 +1,18 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8}
+header{background:url(../images/bg01.png) no-repeat; background-size:100% 100%; height:32%}
+header .statusimg{ height:70%; background:url(../images/success.png) no-repeat center bottom; background-size:auto 70%;}
+header .statustxt{text-align:center; margin-top:2%}
+
+.user .userimg{width:10em; height:10em; border-radius:50%; overflow:hidden; float:left; border:3px solid #fff;}
+.tosent{ padding:5%}
+
+.bubble,.jiantou{ background:#fff;  border:1px solid #e4e4e4;}
+.bubble{ position:relative; border-radius:0.5em; margin-left:6em; padding:2% 3%; text-align:justify}
+.jiantou{position:absolute; border-top:0; border-right:0; top:40%; left:-0.3em; width:0.6em; height:0.6em; transform:rotate(45deg)}
+
+.ui_vote{width:100%; margin-top:5%;}
+
+

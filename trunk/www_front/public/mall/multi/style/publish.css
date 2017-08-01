@@ -1,0 +1,9 @@
+@charset "utf-8";
+/* CSS Document */
+.success{width:100%;}
+.success .logo{width:4rem;height:4rem;margin:auto;border-radius:50%;display:block !important;margin-top:24%;}
+.success .p_s{color:#fe8f00;}
+.success p{text-align:center;margin-top:0.6rem;font-weight:bold;font-size:0.8rem;}
+.txt{width:90%;margin:auto;text-align:center;padding:3% 0;}
+.t_ali{width:30%;text-align:center;margin:auto;color:#4896e5;font-size:.8rem;padding-right:3%;background:url(../images/ico/ico_10.png) no-repeat right center;
+background-size:17%;}

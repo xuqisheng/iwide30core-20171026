@@ -1,0 +1,55 @@
+.sa-title{ background:url(../../images/sa-title-bgpic.gif) no-repeat 0 0; background-size:100% auto; padding:7px 15px 15px; -webkit-box-orient:horizontal; -webkit-box-pack:center; -webkit-box-align:center; display:-webkit-box; vertical-align:middle  }
+.sa-title img{ width:30px; margin-top:8px; vertical-align:middle }
+.sa-title h1{ font-size:16px; line-height:22px; color:#fff; text-shadow:3px 3px 3px #c90e26; -webkit-text-shadow:3px 3px 3px #c90e26; -moz-text-shadow:3px 3px 3px #c90e26; font-weight:normal; display:inline-block; text-align:left; padding-left:8px; vertical-align:middle; margin-top:8px }
+
+.satisefy-checks{ background:#fff; text-align:left; color:#4b4b4b; font-weight:bold; font-size:15px }
+.satisefy-checks .one-check{ margin-left:26px; border-bottom:1px solid #d5d5d5; height:40px; line-height:40px; clear:both }
+.satisefy-checks .ui-cb{ float:left; }
+.satisefy-checks .ui-cb input[type=radio]{ display:none; }
+.satisefy-checks .ui-cb label{ width:35px; height:40px; background:url(../../images/checkbox.png) no-repeat left center; background-size:auto 19px; display:block }
+.satisefy-checks .ui-cb input[type=radio]:checked + label{ background-position:-38px }
+
+.detial-view{ margin-top:10px; padding:10px; background:#fff; color:#777; text-align:center; overflow:hidden }
+.detial-view li{ float:left; height:30px; margin:5px 0  }
+.detial-view .li-wid-1{  font-size:14px; text-align:right; font-weight:bold; width:24% }
+.detial-view .li-wid-2, .detial-view .li-wid-3{ font-size:15px; text-align:center; width:34%; margin:5px 2%;  }
+.detial-view .view-tit{ height:18px; line-height:18px }
+.detial-view .cmmChosBtn{ background:#f3f3f3; box-shadow: 0px 0px 30px #ccc inset; -webkit-box-shadow: 0px 0px 30px #ccc inset; -moz-box-shadow: 0px 0px 30px #ccc inset; }
+.detial-view .cmmChosdisAgree{ background: url(../../images/cmmbg_disagree.gif) no-repeat center #dc0000; background-size:auto 10px; box-shadow:none; }
+.detial-view .cmmChosAgree{ background: url(../../images/cmmbg_agree.gif) no-repeat center #8dcc2a; background-size:auto 16px; box-shadow:none; }
+
+h2.share-text-title{ font-size:18px; line-height:40px; padding-left:10px; color:#6b6464; text-shadow:1px 1px 0 #fff; -webkit-text-shadow:1px 1px 0 #fff; -moz-text-shadow:1px 1px 0 #fff; font-weight:normal; text-align:left }
+
+.share-area-wrap{ border-top:1px solid #d5d5d5; border-bottom:1px solid #d5d5d5; padding:12px 10px; background:#fff }
+.share-area-wrap .share-area{ width:98%; border:1px solid #c2c2c2; border-radius:5px; -webkit-border-radius:5px; -moz-border-radius:5px; padding:1%; font-size:12px; color:#444; line-height:18px; height:72px }
+
+.btn-wrap{ padding:18px 26px; }
+.btn-wrap .btn-submit{ background:#ef2c43; }
+
+/*推荐度调查*/
+.recommendind-rate{ background:#fff; margin:10px 0 5px; padding:10px 10px 0; text-align:left }
+.recommendind-rate h4{ font-size:12px; color:#383838; font-weight:normal; line-height:30px; text-align:left }
+.recommendind-rate .recommending-bar{ -moz-border-radius:5px; -webkit-border-radius:5px; border-radius:5px; height:42px; line-height:42px; display:-moz-box; display:-webkit-box; display:box; display:flex; width:100%; text-align:center;
+    background: -moz-linear-gradient(left, #f7f7f7 10%, #ffa8bc 60%, #ff4880 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(10%,#f7f7f7), color-stop(60%,#ffa8bc), color-stop(100%,#ff4880));
+    background: -webkit-linear-gradient(left, #f7f7f7 10%,#ff4880 100%);
+    background: -o-linear-gradient(left, #f7f7f7 10%, #ffa8bc 60%, #ff4880 100%);
+    background: -ms-linear-gradient(left, #f7f7f7 10%, #ffa8bc 60%, #ff4880 100%);
+    background: linear-gradient(to right, #f7f7f7 10%, #ffa8bc 60%, #ff4880 100%);
+}
+.recommendind-rate .recommending-bar .ui-cb-2{ -moz-box-flex:1; -webkit-box-flex:1; box-flex:1; flex:1 }
+.recommendind-rate .recommending-bar .one-rate{ display:block; height:42px; background:url(../../images/icon-radio-2.png) no-repeat center 13px; background-size:15px auto }
+.recommendind-rate .recommending-bar .ui-cb-2 input[type=radio]:checked + label { background-position:center -40px }
+.recommendind-rate .recommending-bar .ui-cb-2 input[type=radio]{ display:none }
+.recommendind-rate .recom-end-point{ line-height:40px; font-size:14px; display:inline-block; padding:0 1px }
+.recommendind-rate .low-recommendding{ color:#a2a2a2 }
+.recommendind-rate .high-recommendding{ float:right; color:#f52345 }
+
+@media screen and ( max-width:360px ){
+	.recommendind-rate{ padding:10px 0 }
+	.recommendind-rate h4{ padding-left:10px }
+	.recommendind-rate .recommending-bar{ -moz-border-radius:0; -webkit-border-radius:0; border-radius:0 }
+	.recommendind-rate .low-recommendding{ padding-left:10px }
+	.recommendind-rate .high-recommendding{ padding-right:10px }
+}
+

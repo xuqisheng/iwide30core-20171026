@@ -1,0 +1,84 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;}
+
+header .ui_ico{width:2.2em; height:2.2em;}
+header .allimg,header .hotelname,header .addlike,header .blackbg,.tag_zp{position:absolute; color:#f8f8f8;}
+header .allimg{ bottom:15%; right:3%; background:rgba(0,0,0,0.5); padding:1% 2%}
+header .hotelname{ bottom:3%; left:3%; width:70%}
+header .hotelname img{width:auto; height:15px; vertical-align:text-bottom}
+.hotelname .tag{border:1px solid #fff; border-radius:2px;; color:#fff; font-size:9px; padding:1px 5px; }
+header .addlike,.tag_zp{ top:3%; right:3%; z-index:99; border-radius:50%;background:#005bac; text-align:center;width:25px; height:25px; line-height:26px;}
+header .addlike:before,header .addlike.islike:before{ font-family:'iconfont'; font-size:15px;content:"\2a";}
+header .addlike.islike:before{content:"\29"}
+header .blackbg{ bottom:0; padding-top:10%; width:100%; background:url(../images/bg02.png) repeat-x bottom left; background-size:auto 100%; opacity:0.9}
+.headers .banner{display:none}
+.tag_zp{right:13%; font-size:7px; white-space:nowrap;}
+
+.inrto_list,.list_head,.room_list .item,.hotel_rule,.vote_spread{background:#fff; border-width:1px 0 1px 0; border-image:url(border.gif) 2 stretch;}
+.inrto_list{padding-left:3%; border-top:0}
+.inrto_list .ui_btn_block{border-width:0 0 1px 0; border-image:url(border.gif) 2 stretch; padding-top:3%; padding-bottom:3%; background-size:auto 30%;}
+.inrto_list .ui_btn_block span{ display:inline-block; overflow:hidden }
+.inrto_list .ui_btn_block:last-child{border-width:0}
+.inrto_list .txtclip{width:88%; }
+.inrto_list .ui_ico{width:2em; height:2em; margin-right:2%}
+.inrto_list span:last-child{ float:right}
+
+.room_list .item,.vote_spread .item,.list_head,.now_pay,.pre_pay,.room_list .item_left {overflow:hidden; }
+
+.headfixed,.hotel_list .item,.hotel_rule .title,.vote_spread .title,.item_foot .viplist,.item_foot .pay_way{border-width:0 0 1px 0; border-image:url(border.gif) 2 stretch;}
+
+.list_head{margin-top:3%}
+.checkdate{padding-top:3%; padding-bottom:3%; padding-left:3%; width:66%; float:left}
+.checkdate .checkin_time{float:right;}
+.guest{float:right;width:23%; display:block; text-align:right; padding-top:3%; padding-right:3%;}
+.guest .ui_ico{ width:2.4em; height:2.4em}
+.guest .iconfont{font-size:2.9em;}
+.guest span{vertical-align:middle}
+
+.room_list .item,.vote_spread .item{ margin-bottom:3%; position:relative; display:block; overflow:hidden}
+.room_list .item_left,.vote_spread  .item_left{padding:1.5% 3%;width:70%;}
+.room_list .item:last-child,.vote_spread .item:last-child{ margin-bottom:0}
+.room_list_many .item{margin-bottom:2%}
+.room_list .item:first-child{border-top:0}
+.room_list .room_img,.vote_spread .room_img{ float:left; width:61px; height:61px; margin-right:3%; position:relative}
+.room_list .room_img img,.vote_spread .room_img img{ position:absolute; min-height:100%;}
+.room_list .room_name,.vote_spread .room_name{padding-top:0%}
+.room_list .backvote,.vote_spread .sever{ margin-top:1%}
+.room_list .sever{width:73%;}
+
+.item_right{ position:absolute; right:3%; top:20%; width:50%; text-align:right}
+.item_right>div{display:inline-block; vertical-align:middle}
+.item_right .backvote{margin-right:2em}
+.item_right .iconfont{font-size:8px; color:#999;}
+
+.room_list_many .item_right{ top:2.5em; padding:3% 0;}
+.room_list_many .item_right .ui_ico{width:2.9em; height:2.9em; background-size:100% auto;}
+.room_list_many .item_right .ui_price{ padding-right:0.4em}
+
+.item_foot{ padding-bottom:3%; background:#f8f8f8;border-width:1px 0 0 0; border-image:url(border.gif) 2 stretch;}
+.item_foot .viplist,.vote_spread .item{padding:2% 4%}
+.item_foot .viplist{background:#f8faf1; text-align:center; padding-bottom:0; display:flex; display:-webkit-box;}
+.item_foot .vip{display:block; width:24%; text-align:center; padding-bottom:4%;-webkit-box-flex:1;}
+.item_foot .room_book .item_right{top:35%; padding:0}
+.item_foot .pay_way{position:relative; margin-left:3%; padding:3%;}
+.item_foot .pay_way:last-child{border-bottom:0; padding-bottom:0}
+
+.now_pay,.pre_pay,.no_pay{border-width:1px; border-style:solid;border-radius:0.5em;text-align:center; width:45px; display:inline-block; vertical-align:middle; }
+.now_pay p,.pre_pay p,.no_pay p{font-size:15px; background:none;}
+.item_right .ui_price{ padding-right:0.7em}
+.no_pay{background-color:#999;border-color:#999;}
+.hotel_rule,.vote_spread{margin-top:3%}
+.hotel_rule .title,.hotel_rule .content,.vote_spread .title{padding:3%}
+
+.full_room,.full_room span{position:absolute; top:0; right:0; display:block; }
+.full_room span:last-child{ top:0.2em; right:0.2em;}
+.full_room{font-size:2.4em; color:#fff;}
+.topright{width: 0; height: 0;border-top: 2.5em solid #999;border-left: 2.5em solid transparent; }
+.full_room.ag_price{width:7em;}
+.full_room.ag_price .topright{border-top:2.5em solid #ff1307;}
+
+.room_list .isfull,.room_list .isfull .ui_price{ color:#999 !important} 
+
+.ui_price:before,.ui_price tt{ font-size:0.7em;}

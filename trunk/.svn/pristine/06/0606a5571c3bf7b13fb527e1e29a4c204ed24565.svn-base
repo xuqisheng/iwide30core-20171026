@@ -1,0 +1,452 @@
+<?php
+class MY_Front_Soma extends MY_Front {
+
+    public $db_shard_config= array();
+    public $current_inter_id= '';
+
+    public $cache_timeout= '300';
+    public $cache_redis= NULL;
+    public $open_cache= TRUE;
+    public $open_cdn= TRUE;
+
+    public function __construct()
+    {
+        parent::__construct ();
+
+        //初始化数据库分片配置
+        if( $this->inter_id ){
+            $this->load->model('soma/shard_config_model', 'model_shard_config');
+            $this->current_inter_id= $this->inter_id;
+            $this->db_shard_config= $this->model_shard_config->build_shard_config($this->inter_id);
+            //print_r($this->db_shard_config);
+        }
+        
+        if( isset($_SERVER['CI_ENV']) && $_SERVER['CI_ENV']=='production' ){
+            $success = Soma_base::inst()->check_cache_redis();
+            if( !$success){
+                //redis故障关闭cache
+                $this->open_cache= FALSE;
+            }
+            $this->open_cdn= TRUE;
+            
+        } else {
+            $this->open_cache= FALSE;  //非生产环境自动关闭cache
+            $this->open_cdn= FALSE;  //非生产环境自动关闭CDN
+        }
+
+        //加载缓存
+        $params= $this->input->get();
+        $this->_load_cache_html($this->inter_id, $this->module, $this->controller, $this->action, $params);
+
+    }
+
+    /**
+    ==基本类
+    举报: "menuItem:exposeArticle"
+    调整字体: "menuItem:setFont"
+    日间模式: "menuItem:dayMode"
+    夜间模式: "menuItem:nightMode"
+    刷新: "menuItem:refresh"
+    查看公众号（已添加）: "menuItem:profile"
+    查看公众号（未添加）: "menuItem:addContact"
+    ==传播类
+    发送给朋友: "menuItem:share:appMessage"
+    分享到朋友圈: "menuItem:share:timeline"
+    分享到QQ: "menuItem:share:qq"
+    分享到Weibo: "menuItem:share:weiboApp"
+    收藏: "menuItem:favorite"
+    分享到FB: "menuItem:share:facebook"
+    分享到 QQ 空间/menuItem:share:QZone
+    ==保护类
+    编辑标签: "menuItem:editTag"
+    删除: "menuItem:delete"
+    复制链接: "menuItem:copyUrl"
+    原网页: "menuItem:originPage"
+    阅读模式: "menuItem:readMode"
+    在QQ浏览器中打开: "menuItem:openWithQQBrowser"
+    在Safari中打开: "menuItem:openWithSafari"
+    邮件: "menuItem:share:email"
+    一些特殊公众号: "menuItem:share:brand"
+     */
+    //展示为以后的皮肤做扩展
+    //$pathArr = array('package','default')
+//    protected function _view($file, $datas=array(),$pathArr = NULL )
+    protected function _view($file, $datas=array())
+    {
+        /*
+         * js_api_list: eg: array('hideMenuItems', 'showMenuItems', 'onMenuShareTimeline', 'onMenuShareAppMessage' ); 一般不需要修改
+         * js_menu_hide: eg: array( 'menuItem:setFont', 'menuItem:share:appMessage', 'menuItem:share:timeline', 'menuItem:favorite', 'menuItem:copyUrl' ); 主动隐藏
+         * *** 关注 js_menu_show: eg: array( 'menuItem:share:timeline', 'menuItem:favorite', 'menuItem:copyUrl' ); 主动显示
+         * *** 关注 js_share_config: eg: array('title','desc','link','imgUrl')
+         */
+        $js_api_list= $menu_show_list= $menu_hide_list= '';
+        $datas['wx_config'] = $this->_get_sign_package($this->inter_id);
+        $datas['base_api_list'] = array('hideMenuItems', 'showMenuItems', 'onMenuShareTimeline', 'onMenuShareAppMessage' );
+        if( isset($datas['js_api_list']) ) {
+            $datas['js_api_list']+= $datas['base_api_list'];
+        } else {
+            $datas['js_api_list']= $datas['base_api_list'];
+        }
+        foreach ($datas['js_api_list'] as $v){
+            $js_api_list.= "'{$v}',";
+        }
+        $datas['js_api_list']= substr($js_api_list, 0, -1);
+
+        //主动显示某些菜单
+        if( !isset($datas['js_menu_show']) )
+            $datas['js_menu_show']= array( 'menuItem:setFont', 'menuItem:share:appMessage', 'menuItem:share:timeline', 'menuItem:favorite', 'menuItem:copyUrl' );
+        foreach ($datas['js_menu_show'] as $v){
+            $menu_show_list.= "'{$v}',";
+        }
+        $datas['js_menu_show']= substr($menu_show_list, 0, -1);
+
+        //主动隐藏某些菜单
+        if( !isset($datas['js_menu_hide']) )
+            $datas['js_menu_hide']= array( 'menuItem:share:appMessage', 'menuItem:share:timeline', 'menuItem:copyUrl', 'menuItem:share:email', 'menuItem:originPage' );
+        foreach ($datas['js_menu_hide'] as $v){
+            $menu_hide_list.= "'{$v}',";
+        }
+        $datas['js_menu_hide']= substr($menu_hide_list, 0, -1);
+
+        if( !isset($datas['js_share_config']) )
+            $datas['js_share_config']= FALSE;   //array('title','desc','link','imgUrl')
+
+        $datas['uri']= array(
+            'module'=> $this->module,
+            'controller'=> $this->controller,
+            'action'=> $this->action,
+        );
+        $datas['inter_id']= $this->inter_id;  //id
+        $datas['openid']= $this->openid;
+
+        $datas['business']= $this->input->get('bsn')? $this->input->get('bsn'): ($this->input->post('bsn')? $this->input->post('bsn'): '' ) ;
+        $datas['settlement']= $this->input->get('stl')? $this->input->get('stl'): ($this->input->post('stl')? $this->input->post('stl'): '' ) ;
+        $datas['saler']= $this->input->get('saler')? $this->input->get('saler'): ($this->input->post('saler')? $this->input->post('saler'): '' ) ;
+        $datas['fans']= $this->input->get('fans')? $this->input->get('fans'): ($this->input->post('fans')? $this->input->post('fans'): '' ) ;
+        $path= 'soma'. DS;
+//        if(is_array($pathArr) && !empty($pathArr)){
+//           foreach($pathArr as $v){
+//               $path .= $v. Ds;
+//           }
+//        }
+
+        if( !file_exists(VIEWPATH. $path. $this->theme. DS. $file. ".php") ){
+            if( defined('PROJECT_AREA') && PROJECT_AREA=='mooncake' 
+                && file_exists(VIEWPATH. $path. 'mooncake'. DS. $file. ".php")) {
+                $html= $this->load->view($path. 'mooncake'. DS. $file, $datas, TRUE);
+            } else {
+                $html= $this->load->view($path. 'default'. DS. $file, $datas, TRUE);
+            }
+        } else {
+            $html= $this->load->view($path. $this->theme. DS. $file, $datas, TRUE);
+        }
+
+        //CDN URL 替换。
+        $html= $this->_replace_cdn_url($html);
+
+        $cdn_url= $this->_match_url($this->module, $this->controller, $this->action);
+        if( $cdn_url ){
+            if( !$this->cache_redis ){
+                $cache= $this->_load_cache();
+                $this->cache_redis= $cache->redis->redis_instance();
+            }
+            $params= $this->input->get();
+            $cache_key= $this->_cache_html_key($this->inter_id, $cdn_url, $params);
+            if( substr($html, -6) =='header' ){
+                $this->cache_redis->setex($cache_key, $this->cache_timeout, $html );
+            } else {
+                $header= $this->cache_redis->get($cache_key);
+                $this->cache_redis->setex($cache_key, $this->cache_timeout, $header. $html );
+            }
+        }
+        echo $html;
+    }
+
+    //# Redis 缓存html start #########################################
+    protected function _load_cache_html($inter_id, $module, $controller, $action, $params)
+    {
+        $cdn_url= $this->_match_url($module, $controller, $action);
+        if( $cdn_url ){
+            if( !$this->cache_redis ){
+                $cache= $this->_load_cache();
+                $this->cache_redis= $cache->redis->redis_instance();
+            }
+            $key= $this->_cache_html_key($inter_id, $cdn_url, $params);
+            $html= $this->cache_redis->get($key);
+            if($html) die($html);
+        }
+    }
+    protected function _replace_cdn_url($html)
+    {
+        if( $this->open_cdn ){
+            if( isset($_SERVER['CI_ENV']) && $_SERVER['CI_ENV']=='production' ){
+                $search= array(
+                    'http://file.iwide.cn/public',
+                );
+                $replace= array(
+                    'http://soma.cdn.iwide.cn/public',
+                );
+            } else {
+                $search= array(
+                    'http://30.iwide.cn:821/public',
+                );
+                $replace= array(
+                    'http://soma.cdn.iwide.cn/public',
+                );
+            }
+            return str_replace($search, $replace, $html);
+
+        } else {
+            return $html;
+        }
+    }
+    protected function _cache_html_key($inter_id, $cdn_url, $params)
+    {
+        if( isset($params['id']) ) unset($params['id']);
+        if( isset($params['openid']) ) unset($params['openid']);
+        $cache_key= 'SOMA_HTML:'. $inter_id. ':'. $cdn_url;
+        $param_key= implode('_', $params);
+        if( count($params)>0 )
+            return $cache_key. ':'. $param_key;
+        else
+            return $cache_key;
+    }
+    protected function _match_url($module, $controller, $action)
+    {
+        if( $this->open_cache ){
+            $url= strtolower($module). '_'. strtolower($controller). '_'. strtolower($action);
+            $matchs= array(
+                'soma_package_index',
+                'soma_package_package_list',
+                'soma_package_package_detail',
+                'soma_package_category_list',
+                'soma_package_success',
+                'soma_package_mooncake_list',
+            );
+            if( in_array($url, $matchs) ) return $url;
+        }
+        return FALSE;
+    }
+    //# Redis 缓存html end #########################################
+
+
+    protected function _get_sign_package($inter_id, $url='')
+    {
+        $this->load->helper('common');
+        $this->load->model('wx/publics_model', 'publics');
+        $this->load->model('wx/access_token_model');
+        $jsapiTicket = $this->access_token_model->get_api_ticket( $inter_id );
+        //$jsapiTicket = $this->access_token_model->get_api_ticket($this->session->userdata('inter_id'), $this->openid);
+
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+            || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        if(!$url)
+            $url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+
+        $timestamp = time();
+        $nonceStr = createNonceStr();
+        $public = $this->publics->get_public_by_id( $inter_id );
+
+        // 这里参数的顺序要按照 key 值 ASCII 码升序排序
+        $string = "jsapi_ticket=$jsapiTicket&noncestr=$nonceStr&timestamp=$timestamp&url=$url";
+        $signature = sha1($string);
+        $signPackage = array(
+            "appId"     => $public['app_id'],
+            "nonceStr"  => $nonceStr,
+            "timestamp" => $timestamp,
+            "url"       => $url,
+            "signature" => $signature,
+            "rawString" => $string
+        );
+        return $signPackage;
+    }
+
+    /**
+     * 带智能检测用户关注情况，视情况进行高级授权跳转
+     */
+    public function _get_wx_userinfo()
+    {
+        $this->load->model('wx/publics_model');
+        $fans= $this->publics_model->get_fans_info( $this->openid );
+        $public=$this->publics_model->get_public_by_id($this->input->get('id'));
+
+        if( !$fans || empty($fans['nickname']) || empty($fans['headimgurl']) ){
+            $userinfo= $this->publics_model->get_wxuser_info($this->inter_id, $this->openid );
+
+            if( isset($userinfo['subscribe']) && $userinfo['subscribe']==0 ){
+                //微信返回的信息显示没有关注，则进行高级授权验证
+                if( isset($_SERVER['SERVER_SOFTWARE']) && $_SERVER['SERVER_SOFTWARE']=='nginx' )
+                    $refer_url =  'http://'. $_SERVER ['HTTP_HOST']. $_SERVER ['REQUEST_URI'] ;
+                else
+                    $refer_url =  'http://'. $_SERVER ['SERVER_NAME']. $_SERVER ['REQUEST_URI'] ;
+                
+                if( defined('PROJECT_AREA') && PROJECT_AREA=='mooncake' ){
+                    // 将refer_url转码，以免被微信服务器对url参数进行拆解
+                    $refer_url = base64_url_encode($refer_url);
+                    
+                    $inter_id = $this->input->get('id');
+                    $url = front_site_url($inter_id, FALSE);
+                    
+                    $scope = 'snsapi_base';
+                    if ($this->input->get ( 'scope' )) {
+                        $scope = $this->input->get ( 'scope' );
+                    }
+                    $url .= "/index.php/soma/api/mooncake_decode_cb/?refer=".$refer_url;                    
+
+                    $this->write_log('Base refer url :' .$url."\n");
+                    $url = urlencode ($url);                    
+
+                    $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" . $public ['app_id']
+                    . "&redirect_uri=$url&response_type=code&scope=$scope&state=STATE#wechat_redirect";
+                    
+                    $this->write_log('Get Wx Userinfo Url :' .$url ."\n");
+                    redirect ( $url );exit();
+                    
+                } else {
+                    //普通跳转
+                    $inter_id= $this->inter_id;
+                    $refer_url= urlencode($refer_url);
+                    redirect(  site_url("Public_oauth/index?scope=snsapi_userinfo&id={$inter_id}&refer={$refer_url}")  );exit();
+                }
+                
+            } else {
+                $this->publics_model->update_wxuser_info($this->inter_id, $this->openid );
+                return $userinfo;
+            }
+
+        } else {
+            return $fans;
+        }
+    }
+
+    /**
+     * 加载缓存组件
+     * @see MY_Controller::_load_cache()
+     */
+    protected function _load_cache( $name='Cache' )
+    {
+        $success = Soma_base::inst()->check_cache_redis();
+        if( !$success){
+            //redis故障关闭cache
+            Soma_base::inst()->show_exception('当前访问用户过多，请稍后再试！', TRUE );
+        }
+        if(!$name || $name=='cache') //不能为小写cache
+        $name='Cache';
+
+        $this->load->driver('cache',
+            array('adapter' => 'redis', 'backup' => 'file', 'key_prefix' => 'soma_'),
+            $name
+        );
+        return $this->$name;
+    }
+
+    /**
+     * 对于需要跳转站外域名获取code的，根据inter_id 做区分跳转
+     * @param unknown $inter_id
+     * @param unknown $refer
+     */
+    protected function _wx_redirect($inter_id, $refer)
+    {
+        if( defined('PROJECT_AREA') && PROJECT_AREA=='mooncake' ){
+            //月饼说专用授权跳转
+            $this->load->model('wx/Publics_model');
+            $public=$this->Publics_model->get_public_by_id($this->input->get('id'));
+
+            if (! $this->input->get ( 'code' )) {
+                //没有code参数，跳转到weixin获取code，再跳回此地址
+                if( isset($_SERVER['SERVER_SOFTWARE']) && $_SERVER['SERVER_SOFTWARE']=='nginx')
+                    $refer_url =  'http://' . $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'] ;
+                else
+                    $refer_url =  'http://' . $_SERVER ['SERVER_NAME'] . $_SERVER ['REQUEST_URI'] ;
+
+                // 将refer_url转码，以免被微信服务器对url参数进行拆解
+                $refer_url = base64_url_encode($refer_url);
+
+                $inter_id = $this->input->get('id');
+                $url = front_site_url($inter_id, FALSE);
+
+                $scope = 'snsapi_base';
+                if ($this->input->get ( 'scope' )) {
+                    $scope = $this->input->get ( 'scope' );
+                }
+                $url .= "/index.php/soma/api/mooncake_decode_cb/?refer=".$refer_url;
+
+                $this->write_log('Base refer url :' .$url."\n");
+                $url = urlencode ($url);
+
+                $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" . $public ['app_id'] 
+                    . "&redirect_uri=$url&response_type=code&scope=$scope&state=STATE#wechat_redirect";
+
+                $this->write_log('Front Soma get Code Url :' .$url ."\n");
+                redirect ( $url );
+                exit();
+                
+            } else {
+                //有code参数，进行数据存储。
+                $code = $this->input->get ( 'code' );
+                // $redirect_uri = urldecode($this->input->get ( 'refer' ));
+                $redirect_uri = base64_url_decode($this->input->get ( 'refer' ));
+                $this->write_log('Code :' .$code ."\n"."redirect_uri : " .$redirect_uri ."\n");
+                $inter_id = $this->input->get('id');
+                $this->write_log("Get Params :" . json_encode($_GET));
+
+                $result = $this->_auth_res($this->input->get ( 'code' ),$this->input->get('id'));
+                $result = json_decode ( $result, TRUE );
+                $this->session->set_userdata ( array ( $this->session->userdata ( 'inter_id' ) . 'openid' => $result ['openid'] ) );
+                if ($result ['openid']) {
+                    $accessstoken = null;
+                    if ($this->input->get ( 'scope' )) {
+                        $accessstoken = $result ['access_token'];
+                    }
+                    $this->Publics_model->update_wxuser_info ( $this->session->userdata ( 'inter_id' ), $result ['openid'], $accessstoken );
+                }
+
+                redirect ( $redirect_uri );
+                exit();
+            }
+            
+        } else {
+            //正常URL跳转
+            redirect( site_url ( 'public_oauth/index' ) . '?id=' . $inter_id. '&refer='. urlencode($refer) );
+        }
+    }
+
+
+    /**
+     * 网页授权通过code获取用户信息
+     * @param String code
+     * @param String 公众号识别码
+     * @return JSON 请求微信返回结果
+     */
+    private function _auth_res($code,$inter_id)
+    {
+        $this->load->model('wx/Publics_model');
+        $public=$this->Publics_model->get_public_by_id($inter_id);
+        $url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=" . $public ['app_id'] 
+            . "&secret=" . $public ['app_secret'] . "&code=$code&grant_type=authorization_code";
+
+        $this->load->helper('common');
+        return doCurlGetRequest($url);
+    }
+
+
+    //日志写入
+    public function write_log( $content )
+    {
+        $file= date('Y-m-d'). '.txt';
+        //echo $tmpfile;die;
+        $path= APPPATH.'logs'.DS. 'mooncake'. DS;
+        if( !file_exists($path) ) {
+            @mkdir($path, 0777, TRUE);
+        }
+        $fp = fopen( $path. $file, 'a');
+
+        $CI = & get_instance();
+        $ip= $CI->input->ip_address();
+        $content= str_repeat('-', 40). "\n[". date('Y-m-d H:i:s'). ']'
+            ."\n". $ip. "\n". $content. "\n";
+        fwrite($fp, $content);
+        fclose($fp);
+    }
+    
+}

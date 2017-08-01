@@ -1,0 +1,12 @@
+$('.pull_btn').click(function(){
+    $('.alert_cont').fadeIn();
+    $('.conter_box').css({'display':'block'});
+    $('.share_box').css({'display':'none'});
+})
+$('.reward_btn').click(function(){
+    $('.conter_box').css({'display':'none'});
+    $('.share_box').css({'display':'block'});
+})
+$('.cancel_btn,.share_box').click(function(){
+    $('.alert_cont').fadeOut();
+})

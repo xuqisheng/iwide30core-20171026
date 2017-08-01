@@ -1,0 +1,24 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html,.page{height:100%; background:#f8f8f8;}
+.bottle_detail,.bottle_detail .user_img{overflow:hidden}
+
+.bottle_detail{text-align:justify; color:#666; height:95%;  padding:0.7rem; position:relative}
+.bottle_detail .user_img{width:2rem; height:2rem;float:left; margin-right:3%;}
+.bottle_detail .user_name{font-size:0.7rem; color:#000;padding:1% 0;}
+.bottle_detail .user_local{ font-size:0.5rem;color:#999}
+.bottle_detail .user_said_detail{clear:both;  font-size:0.6rem;}
+.bottle_detail .user_said_detail p{margin-top:6%;}
+.bottle_detail .user_said_detail .ui_img_auto_cut{ width:30%; height:auto;}
+
+.bottle_detail .foot_btn{ bottom:6%; position:absolute; width:90%; text-align:center}
+.bottle_detail .foot_btn a,
+.bottle_detail .foot_btn div{ display:inline-block;color:#999999; width:45%; border:1px solid #d7d7d7; padding:4% 0; border-radius:0.2rem; font-size:0.65rem;}
+.bottle_detail .foot_btn a:first-child,
+.bottle_detail .foot_btn div:first-child{ background:#43a939;border-color:#43a939; color:#fff; margin-right:5%}
+
+
+.pull_img_view{ background:#2b2b2b;}
+.pull_img_view .img_view_box{  display: table-cell;  vertical-align: middle; text-align:center}
+.pull_img_view .img_view_box img{ width:auto; max-height:100%; max-width:100%;}

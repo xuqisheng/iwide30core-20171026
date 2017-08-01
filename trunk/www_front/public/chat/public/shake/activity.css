@@ -1,0 +1,55 @@
+@charset "utf-8";
+/* CSS Document */
+
+.activity_item .ui_img_auto_cut{width:100%; height:10rem;}
+.activity_item{position:relative; text-align:center}
+.activity_item .absolute{top:20%; width:100%; }
+.activity_box{background:rgba(0,0,0,0.7);padding:2% 3%; display:inline-block;color:#e1e1e2; width:64%; overflow:hidden}
+.activity_box>div{ padding:1.5% 0}
+.activity_box .act_title{font-size:0.8rem}
+.activity_box .act_local,
+.activity_box .act_time,
+.activity_box .act_type
+{display:inline-block; padding:0 0.9rem; background-size:auto 95%; background-repeat:no-repeat; background-position:left center;}
+.activity_box .act_local{ background-image:url(../images/ico/ico09.png);clear:both; overflow:hidden}
+.activity_box .act_time{background-image:url(../images/ico/ico10.png)}
+.activity_box .act_type{background-image:url(../images/ico/ico11.png); padding-right:0;}
+.activity_box .act_time,.activity_box .act_count{ float:left;}
+.activity_box .act_type,.activity_box .act_person{float:right}
+.act_person .ui_male:after,.act_person .ui_female:after{content:none}
+.act_person .ui_male:before{content:"♂";}
+.act_person .ui_female:before{content:"♀"; }
+
+.activity_detail { text-align:left;color:#999; background:#fff; padding-bottom:3%; margin-bottom:3%;}
+.activity_detail p{ padding:0% 3%; padding-top:0.5%; font-size:0.5rem;}
+.activity_detail p:first-child{ font-size:0.65rem;}
+
+.person_list{background:#fff; padding-left:3%}
+.person_list .person_list_title{ color:#999; padding:4% 0; padding-right:4%; display:block}
+.person_list .person_list_title span:last-child{ float:right}
+.person_list .person_list_title span:last-child:after{ content:" >"; font-weight:bold; font-size:0.8rem; }
+.person_list .ui_btn{ background:#43a939; width:5em; text-align:center; border-radius:0.2rem; font-size:0.6rem; margin-top:3%}
+
+.reg_head{padding:4% 0; color:#666; background:#d3d3d3; text-align:center}
+.reg_box {padding-left:3%; border-bottom:1px solid #d3d3d3;}
+.reg_box .input_box { border-bottom:1px solid #d3d3d3;padding:3% 0}
+.reg_box .input_box:last-child { border-bottom:0; padding:3% 0}
+.reg_box .input_box span{width:4em; display:inline-block; }
+.reg_box .input_box input{width:70% }
+
+.foot_btn{position:fixed; width:100%; bottom:0; padding:4% 0; text-align:center; color:#fff; background:#43a939;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

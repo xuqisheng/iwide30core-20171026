@@ -1,0 +1,37 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f5f6f5}
+body *{ font-size:0.6rem;}
+.head{background:url(../images/vote_bg01.png) repeat-x left bottom; background-size:3%; padding-bottom:2%}
+.main{background:#f08600; color:#fff; padding:1% 3%; text-align:center; position:relative; overflow:hidden}
+.main>div{margin-top:2%}
+.main>div.tosend{ padding:1% 3%; border-radius:0.15rem; border:1px solid #fff; float:right; margin-top:3%; font-size:0.55rem}
+.main .status{ border:8px solid #da740f; width:4em; height:4em; line-height:4.8em;border-radius:50%; color: #da740f; font-size:1rem; font-weight:bold; position:absolute;right:-0.6em; top:-1.5em; -webkit-transform:rotate(30deg)}
+.hotel{ text-align:left}
+.hotel img{width:2rem; height:auto; vertical-align:middle; margin-right:1%;}
+.moon_name{ font-size:1.1rem}
+.border{ border:1px solid #e1e1e1; border-left:0; border-right:0; margin-top:4%;}
+.erweima { padding:3%; border-bottom:1px solid #e1e1e1; overflow:hidden; background:#fff;}
+.erweima > div{margin-top:2.5%; font-size:0.7rem;}
+.erweima img{width:3rem; float:right;}
+.mail_btn{padding:3.5% 0; background:#fff; text-align:center}
+.mail_btn.callback{ color:#dd0e0e}
+.mail_btn.toget{ color:#0e91dd}
+.mail_btn.disable{ color:#999999}
+
+.btn_list,.normal_list{padding-left:3%; background:#fff;}
+.btn_list a,.normal_list a{ color:#000;}
+.btn_list .item,.normal_list .item{padding:4% 3%; padding-left:0; background:url(../images/ico/ico06.png) no-repeat; display:block; background-position:97% center; background-size:auto 0.6rem; border-top:1px solid #e1e1e1;}
+.btn_list .item span,.normal_list .item span{float:right; margin-right:6%; color:#999; font-size:0.5rem; margin-top:0.5%}
+.btn_list .item:first-child,.normal_list .item:first-child{ border:0}
+
+.normal_list .item{background:none}
+.normal_list .item span{font-size:0.6rem; margin-right:0}
+.recive{margin-top:5%}
+
+.again_send{ text-align:center; padding-top:10%; padding-bottom:4%}
+.again_send img{ width:auto; height:0.8rem; vertical-align:middle; padding-left:3%;}
+.again_send a,.again_send div{display:inline-block; margin-left:3%; width:35%;}
+.again_send a:first-child,.again_send div:first-child{ color:#dfb27d; margin:0;}
+.again_send a:last-child,.again_send div:last-child{ color:#afd750;}

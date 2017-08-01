@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- 全局控制 -->
+<script src="scripts/viewport.js"></script>
+<script src="scripts/jquery.js"></script>
+<script src="scripts/ui_control.js"></script>
+<link href="styles/global.css" rel="stylesheet">
+<link href="styles/ui.css" rel="stylesheet">
+<link href="styles/ui_ico.css" rel="stylesheet">
+<link href="styles/ui_style.css" rel="stylesheet">
+<link href="styles/ui_pull.css" rel="stylesheet">
+<!-- end -->
+<link href="styles/order_detail.css" rel="stylesheet">
+<title>订单详情</title>
+</head>
+<body>
+<header class="realtime_status">
+	<div class="title">预订成功</div>
+    <div class="ui_color">酒店已收到您的订单，请您在预订时间内抵达酒店出示您的证件办理入住手续。</div>
+    <ul class="cur_status">
+    	<li class="iscured">
+            <div class="circle"><em></em></div>
+            <div class="cur_status_txt">提交订单</div>
+            <div class="cur_status_time">09.02  08:12</div>
+        </li>
+    	<li class="iscured iscur">
+            <div class="circle"><em><hr></em></div>
+            <div class="cur_status_txt">酒店确认</div>
+            <div class="cur_status_time">09.02  08:12</div>
+        </li>
+    	<li>
+            <div class="circle"><em><hr></em></div>
+            <div class="cur_status_txt">入住</div>
+            <div class="cur_status_time">-</div>
+        </li>
+    	<li>
+            <div class="circle"><em><hr></em></div>
+            <div class="cur_status_txt">离店</div>
+            <div class="cur_status_time">-</div>
+        </li>
+    </ul>
+</header>
+<section class="all_message">
+	<div class="big">广州天美酒店公寓</div>
+    <div class="normal ui_color_gray">豪华双床房</div>
+	<div class="normal ui_color_gray">WI-FI  无早  接送</div>
+    <ul class="datetime">
+    	<li><p class="normal">入住</p><p class="middle">09月16日</p></li>
+        <li class="normal count">共1晚</li>
+        <li><p class="normal">离店09月16日</p><p class="middle">09月16日</p></li>
+        <div class="normal ui_martop">房间保留至09月16日 18:00:00</div>
+        <div class="normal ui_color_gray">地址：广州市天河区天河路隆德大厦</div>
+    </ul>
+    <ul class="otherway">
+    	<li><a href="#" class="normal ui_color">打车前往</a></li>
+        <li><a href="#" class="normal ui_color">路线导航</a></li>
+        <li><a href="#" class="normal ui_color">酒店周边</a></li>
+        <li><a href="tel:120" class="normal ui_color">联系酒店</a></li>
+    </ul>
+</section>
+
+<section class="order_message">
+	<div class="order_status">订单信息</div>
+    <ul>
+    	<li><span>订单编号</span><span>1023456789</span></li>
+        <li><span>订单总价</span><span class="ui_price">389</span></li>
+        <li><span>支付类型</span><span>到店支付</span></li>
+        <li><span>订单状态</span><span>酒店确认</span></li>
+    </ul>
+</section>
+<div style="padding-top:15%">
+    <div class="footfixed">
+    	<div class="cancelbtn">取消订单</div><!-- 在线支付不可取消 无取消订单按钮 -->
+        <a href="submit_order.html" class="submit_btn">再次预订</a>
+    </div>
+</div>
+</body>
+</html>

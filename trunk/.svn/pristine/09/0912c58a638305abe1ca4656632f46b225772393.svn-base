@@ -1,0 +1,10 @@
+@charset "utf-8";
+/* CSS Document */
+.price_list_title{
+    text-align: center;
+    width:100%;
+    line-height: 40px;
+}
+.pirce_list{
+    margin-top: 0%;
+}

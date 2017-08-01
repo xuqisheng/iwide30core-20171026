@@ -1,0 +1,13 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{ background:#fff;}
+.list{ padding:4% 0;}
+.list .item{ display:block; color:#444; text-align:center;}
+.list .item>div{padding:1% 0}
+.list .item .name{font-size:0.9rem}
+.list .item .blue{ background:url(../images/ico/ico06_1.png) no-repeat; background-position:right center; display:inline-block; padding-right:4%; background-size:auto 60%; color:#2d87e2;}
+.list .item .imgbox{ height:8rem; overflow:hidden; padding:1rem 0; margin-bottom: 5%;}
+.list .item .imgbox img{ min-height:100%; width:auto; max-width:100%;}
+
+

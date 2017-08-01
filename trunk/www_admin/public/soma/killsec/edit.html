@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>秒杀后台</title>
+    <link rel="stylesheet" href="css/AdminLTE.css">
+    <link rel="stylesheet" href="css/jedate.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/jQuery-2.1.4.min.js"></script>
+    <script src="js/jquery.jedate.min.js"></script>
+    <script src="js/edit.js"></script>
+
+</head>
+<body>
+
+<div class="content-wrapper">
+    <section class="content">
+
+
+        <!--秒杀后台 新建秒杀-->
+        <div class="kill-edit">
+
+            <!--提示 -->
+            <div class="error clearfix" id="errorBox">
+                <div class="icon fl"></div>
+                <div class="fl f28" id="errorMsg">请至少预留10分钟启动活动</div>
+                <div class="fr close" id="errorClose"></div>
+            </div>
+            <!--提示 -->
+
+
+            <div class="container">
+                <form action="">
+                    <div class="main-title">
+                        <h1 class="f28">新建秒杀</h1>
+                        <div class="line"></div>
+                    </div>
+
+                    <div class="kill-content">
+                        <ul>
+
+                            <li class="clearfix">
+                                <div class="fl part">
+                                    <div class="fl sub-title f24 ">公众号</div>
+                                    <div class="fl item f24">金房卡</div>
+                                </div>
+                                <div class="fl part">
+                                    <div class="fl sub-title f24 "><span class="required">*</span>活动名称</div>
+                                    <div class="fl item f24">
+                                        <input type="text" class="input f24 w200" placeholder="请输入活动名称" id="activeName" value="">
+                                    </div>
+                                </div>
+                            </li>
+
+
+                            <li class="clearfix">
+                                <div class="fl part">
+                                    <div class="fl sub-title f24">关键字描述</div>
+                                    <div class="fl item f24">
+                                        <input type="text" class="input f24 w200" placeholder="请输入活动描述" id="keyWord">
+                                    </div>
+                                </div>
+
+                                <div class="fl part">
+                                    <div class="fl sub-title f24 "><span class="required">*</span>展示时间</div>
+                                    <div class="fl item f24">
+                                        <input type="text" placeholder="请选择" readonly class="formdate w340" id="showTime">
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="clearfix">
+                                <div class="fl part">
+                                    <div class="fl sub-title f24"><span class="required">*</span>活动时间</div>
+                                    <div class="fl item f24 clearfix">
+                                        <div class="radio">
+                                            <input type="radio" value="1" name="active_time" checked>
+                                            <span>固定时间</span>
+                                        </div>
+
+                                        <div class="radio">
+                                            <input type="radio" value="2" name="active_time">按周期循环
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+
+                            <li class="clearfix" id="selectTime">
+                                <div class="fl">
+                                    <div class="fl sub-title"></div>
+                                    <div class="fl item f24 clearfix">
+                                        <div class="fl sub-title f24 second-title">开始时间</div>
+                                        <div class="fl item f24">
+                                            <input type="text" placeholder="选择日期" readonly class="formdate start-time" id="startTime">
+                                        </div>
+                                    </div>
+
+                                    <div class="fl item f24 clearfix">
+                                        <div class="fl sub-title f24 second-title">结束日期</div>
+                                        <div class="fl item f24">
+                                            <input type="text" placeholder="选择日期" readonly class="formdate start-time" id="endTime">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </li>
+
+                            <li class="clearfix" id="week">
+                                <div class="fl">
+                                    <div class="fl sub-title"></div>
+                                    <div class="fl item f24 clearfix">
+                                        <div class="fl sub-title f24 second-title">该时间段</div>
+                                        <div class="fl item f24 clearfix">
+
+                                            <div class="week">
+                                                <input type="checkbox" value="1" class="week-checkbox">
+                                                <span>周一</span>
+                                            </div>
+
+                                            <div class="week">
+                                                <input type="checkbox" value="2" class="week-checkbox">
+                                                <span>周二</span>
+                                            </div>
+
+                                            <div class="week">
+                                                <input type="checkbox" value="3" class="week-checkbox">
+                                                <span>周三</span>
+                                            </div>
+
+                                            <div class="week">
+                                                <input type="checkbox" value="4" class="week-checkbox">
+                                                <span>周四</span>
+                                            </div>
+
+                                            <div class="week">
+                                                <input type="checkbox" value="5" class="week-checkbox">
+                                                <span>周五</span>
+                                            </div>
+
+                                            <div class="week">
+                                                <input type="checkbox" value="6" class="week-checkbox">
+                                                <span>周六</span>
+                                            </div>
+
+                                            <div class="week">
+                                                <input type="checkbox" value="0" class="week-checkbox">
+                                                <span>周日</span>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </li>
+
+                            <li class="clearfix">
+                                <div class="fl part">
+                                    <div class="fl sub-title"></div>
+                                    <div class="fl item f24 clearfix">
+                                        <div class="fl sub-title f24 second-title">启动时间</div>
+                                        <div class="fl item f24">
+                                            <input type="text" placeholder="请选择" readonly class="formdate start-time" id="startUpTime">
+                                        </div>
+                                    </div>
+
+                                    <div class="fl item f24 clearfix">
+                                        <div class="fl sub-title f24 second-title">持续时间</div>
+                                        <div class="fl item f24">
+                                            <input type="text" class="input f24 w200" placeholder="1-72小时之内" id="duration">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </li>
+
+
+                            <li class="clearfix">
+                                <div class="fl part">
+                                    <div class="fl sub-title f24"><span class="required">*</span>限制方式</div>
+                                    <div class="fl item f24 clearfix">
+                                        <div class="radio">
+                                            <input type="radio" value="1" name="limit" checked>
+                                            <span>限制库存</span>
+                                        </div>
+
+                                        <div class="radio">
+                                            <input type="radio" value="2" name="limit">限制名额
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="clearfix" id="limitStore">
+                                <div class="fl part">
+                                    <div class="fl sub-title"></div>
+                                    <div class="fl item f24 clearfix">
+                                        <div class="fl sub-title f24 second-title">秒杀总库存</div>
+                                        <div class="fl item f24">
+                                            <input type="text" class="input f24 w200" placeholder="数量" id="storeTotal">
+                                        </div>
+                                        <div class="unit fl f24">份，每人限购</div>
+                                        <div class="fl item f24">
+                                            <input type="text" class="input f24 w200" placeholder="数量" id="homebuying">
+                                        </div>
+                                        <div class="unit fl f24">份</div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li id="storeTips">
+                                <div class="fl sub-title"></div>
+                                <div class="tips f24 fl">注：用户在限购次数内，可以继续购买</div>
+                            </li>
+
+
+                            <li class="clearfix" id="limitPeopleNumber">
+                                <div class="fl part">
+                                    <div class="fl sub-title"></div>
+                                    <div class="fl item f24 clearfix">
+                                        <div class="fl sub-title f24 second-title limit-title">限制</div>
+                                        <div class="fl item f24">
+                                            <input type="text" class="input f24 w200" placeholder="数量" id="peopleNumber">
+                                        </div>
+                                        <div class="unit fl f24">人购买一次，限购</div>
+                                        <div class="fl item f24">
+                                            <input type="text" class="input f24 w200" placeholder="数量" id="limitNumber">
+                                        </div>
+                                        <div class="unit fl f24">份</div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li id="peopleNumberTips">
+                                <div class="fl sub-title"></div>
+                                <div class="tips f24 fl">注：每人只有一个购买机会，购买过后，不能重复购买</div>
+                            </li>
+
+
+
+                            <li class="clearfix">
+                                <div class="fl part">
+                                    <div class="fl sub-title f24"><span class="required">*</span>其他</div>
+                                    <div class="fl item f24 clearfix">
+
+                                        <div class="radio">
+                                            <input type="checkbox" value="1" class="kill-other">
+                                            <span>显示库存／名额</span>
+                                        </div>
+
+                                        <div class="radio">
+                                            <input type="checkbox" value="2" class="kill-other">
+                                            <span>订阅通知</span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="clearfix">
+                                <div class="fl part">
+                                    <div class="fl sub-title f24"><span class="required">*</span>选择商品</div>
+                                    <div class="item fl">
+
+
+                                            <select class="select fl" id="goodsList">
+                                                <option value="" disabled selected>请选择商品</option>
+                                                <option value="1">金房卡自助套餐（豪华版）</option>
+                                                <option value="2">金房卡自助套餐（精华版）</option>
+                                            </select>
+
+
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li class="clearfix" id="goodsInfo">
+                                <div class="fl">
+                                    <div class="fl sub-title f24"></div>
+                                    <div class="item fl goods">
+                                        <div class="fl f24 mr-30">库存</div>
+                                        <div class="fl f24 mr-60" id="currentStore"></div>
+                                        <div class="fl f24 mr-30">微信价</div>
+                                        <div class="fl f24 mr-60" id="weChatPrice"></div>
+                                        <div class="fl f24 mr-30">秒杀价</div>
+                                        <div class="fl f24"><input type="text" class="input f24 w200" id="killPrice"></div>
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+
+                        <div class="save">
+                            <a href="javascript:void(0)" class="f32">取 消</a>
+                            <a href="javascript:void(0)" class="f32 active" id="killSave">保 存</a>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="kill-layer" style="display: none" id="saveLayer">
+                <div class="layer-content">
+                    <div class="close"></div>
+                    <p class="title f32">提 示</p>
+                    <div class="tips-content f28">
+                        <p class="f28">活动启动前10分钟，可编辑内容，</p>
+                        <p class="f28">之后将不能修改秒杀内容</p>
+                    </div>
+                    <a href="javascript:void(0)" class="btn f32">确 定</a>
+                </div>
+            </div>
+
+
+
+        </div>
+        <!--秒杀后台 新建秒杀-->
+
+    </section>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,570 @@
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1, shrink-to-fit=no">
+	<meta name="Maker" content="Taoja" tel="13544425200">
+	<meta name="format-detection" content="telephone=no">
+	<title>个人中心</title>
+	<style>
+        html{
+            font-size: 12px;
+            font-family: PingFang SC Light, 微软雅黑;
+        }
+		.full {
+			height: 100%;
+		}
+		
+		block {
+			display: block;
+			width: 100%;
+		}
+		
+		ib {
+			display: inline-block;
+			vertical-align: middle;
+		}
+		
+		.none {
+			display: none;
+		}
+		
+		flex {
+			display: flex;
+			align-items: center;
+			flex-wrap: wrap;
+		}
+		
+		.center {
+			text-align: center;
+		}
+		
+		[between] {
+			justify-content: space-between;
+		}
+		
+		[nowrap] {
+			flex-wrap: nowrap;
+		}
+		
+		.w100 {
+			width: 100%
+		}
+		
+		.absolute {
+			position: absolute
+		}
+		
+		body {
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			margin: 0;
+			overflow: auto;
+			font-size: 1.1rem;
+		}
+		
+		.right {
+			float: right
+		}
+		
+		.full {
+			width: 100%;
+			height: 100%
+		}
+		
+		.maxscreen {
+			width: 100%
+		}
+		
+		.left {
+			float: left
+		}
+		
+		body {
+			background-color: #f9f9f9;
+		}
+		
+		.headimg {
+			width: 17%;
+			border-radius: 100%;
+			    box-shadow: 0px 0px 10px RGBA(0,0,0,0.2);
+		}
+		
+		.head {
+			text-align: center;
+			background-color: white;
+			position: relative;
+		}
+		
+		.headbg {
+			position: absolute !important;
+			top: 0px;
+			overflow: hidden;
+			opacity: 0.1;
+		}
+		
+		.headimg_body {
+			padding-top: 27px;
+		}
+		
+		.username_body {
+			margin-top: 15px;
+			font-size: 1.25rem;
+		}
+        .head>*{
+            position: relative;
+        }
+		.userinfo>ib {
+			width: 50%;
+		}
+		
+		.userinfo {
+			margin-top: 25px;
+			padding-bottom: 15px;
+		}
+		
+		.userinfo>ib>block:nth-child(1)>ib {
+			font-size: 1.8rem;
+			font-weight: bold;
+		}
+		
+		.userinfo>ib>block:nth-child(2)>ib {
+			font-size: 1rem;
+		}
+		
+		.userinfo>ib>block:nth-child(2) {
+			margin-top: 4px;
+		}
+		
+		.userinfo:after {
+    content: "";
+    position: absolute;
+    width: 0px;
+    height: 1.8rem;
+    border-left: 1px solid #e0e0e0;
+    left: 50%;
+    top: 1rem;
+		}
+		
+		.info {
+			background-color: white;
+			margin-top: 15px;
+			padding-top: 1px;
+			padding-bottom: 40px;
+		}
+		
+		.info>flex,
+		.info>div {
+			margin-left: 18px;
+			margin-top: 20px;
+		}
+		
+		.info>div>ib>img {
+			width: 18px;
+		}
+		
+		.zhibo_each {
+			width: 154px;
+			margin-right: 10px;
+			position: relative;
+			    box-shadow: 0px 0px 10px RGBA(199,199,199,0.8);
+			    border-radius: 10px;
+            font-size: 16px;
+                display: inline-flex;
+    flex-wrap: wrap;
+    height: 92px;
+    align-items: center;
+		}
+		.zhibo_each>img{
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			-o-object-fit:cover;
+		}
+		.zhibo_name {
+			font-size: 1.2rem;
+			color: white;
+			bottom: 5px;
+			left: 5px;
+			transform: scale(0.8);
+			transform-origin: left bottom;
+			-webkit-transform: scale(0.8);
+			-webkit-transform-origin: left bottom;
+		}
+		
+		.zhibo_num {
+			font-size: 1.2rem;
+			color: white;
+			bottom: 5px;
+			right: 5px;
+			transform: scale(0.8);
+			transform-origin: left bottom;
+			-webkit-transform: scale(0.8);
+			-webkit-transform-origin: left bottom;
+		}
+		
+		.zhibo_btn {
+			position: absolute;
+			left: 50%;
+			width: 30px;
+			margin-left: -15px;
+			top: 50%;
+			margin-top: -15px;
+		}
+		
+		.zhibo_ing {
+			position: absolute;
+			right: 5px;
+			top: 5px;
+			width: 32%;
+		}
+		
+		.goods_body {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			overflow-y: hidden;
+			align-items: stretch;
+		}
+		
+		.goods_each {
+			max-width: 160px;
+			min-width: 160px;
+			padding: 20px;
+			margin-right: 10px;
+			border-radius: 5px;
+			border: 1px solid #eee;
+			display: inline-flex;
+			flex-wrap: wrap;
+			align-items: stretch;
+		}
+		
+		.goods_each block:nth-child(1) {
+			text-align: center;
+		}
+		
+.goods_name_info {
+    color: black;
+    font-size: 1.25rem;
+    margin-top: 20px;
+    text-align: left;
+}
+		
+		.ginfo {
+			color: #a1a1a1;
+			margin-top: 5px;
+			font-size: 1.1rem;
+		}
+		
+		.goods_each flex {
+			margin-top: 20px;
+		}
+		
+		.goods_each flex ib:nth-child(1) {
+			color: black;
+			font-size: 1.4em;
+		}
+		
+		.goods_each flex ib:nth-child(2) {
+			font-size: 0.8em;
+			background-color: #cb4f3e;
+			color: white;
+			padding: 1px 3px;
+			border-radius: 3px;
+		}
+		
+		.goods_icon {
+			width: 60px;
+			height: 60px;
+			border-radius: 100%;
+			overflow: hidden;
+		}
+		
+		.btn_buy {
+			color: #fd5c51;
+			border: 1px solid #fd5c51;
+			padding: 5px 15px;
+			border-radius: 30px;
+            display:inline-flex;
+            align-items: center;
+            justify-content: center;
+		}
+		.btn_buy2{
+			    color: #fd5c51;
+    border: 1px solid #fd5c51;
+    padding: 5px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+            display:inline-flex;
+            align-items: center;
+            justify-content: center;
+		}
+		.zhibo_body {
+			overflow-x: auto;
+			overflow-y: hidden;
+			padding: 10px 0px;
+		}
+		
+		.goods_bottom {
+			text-align: center;
+			align-self: flex-end;
+			margin-top: 20px;
+		}
+		
+		.goods_price {
+			text-align: left;
+			color: black;
+			font-size: 1.5rem;
+			margin-bottom: 20px;
+			font-weight: bold;
+		}
+		.goods_price span{
+			font-size: 14px;
+		}
+		.single_img{
+			    width: 50px;
+    border-radius: 100%;
+		}
+		.goods_single{
+			    padding: 0px 18px;
+		}
+		.ginfo_single {
+			color: #a1a1a1;
+			font-size: 0.8em;
+		}
+		.userinfo ib block:nth-child(1){
+	color:#fea251;
+}
+		.zhibo_each:nth-child(1),.goods_each:nth-child(1){
+			margin-left: 20px;
+		}
+        .zhibo_body>ib{
+            display: inline-flex;
+            align-items: stretch;
+        }
+        .goods_body>ib{
+            display: inline-flex;
+            align-items: stretch;
+        }
+        .headbg_muban{
+        	position:absolute;
+        	width: 100%;
+        	height: 100%;
+    background: -webkit-linear-gradient(left bottom, #fff, RGBA(255,255,255,0));
+    background: linear-gradient(left bottom, #fff, RGBA(255,255,255,0));
+        }
+        @media screen and (min-width:375px){
+    html{
+        font-size: 14px;
+    }
+            .zhibo_each{
+                width: 182px;
+                height: 108px;
+            }
+}
+@media screen and (min-width:414px){
+    html{
+        font-size: 15px;
+    }
+    .zhibo_each{
+                width: 202px;
+                height: 120px;
+            }
+}
+	</style>
+</head>
+
+<body>
+	<div class="head">
+		<div class="headbg full">
+			<img src="img/0.jpg" class="w100 left">
+		</div>
+		<div class="headbg_muban"></div>
+		<div class="headimg_body">
+			<ib>
+				<img class="headimg" src="img/0.jpg">
+			</ib>
+		</div>
+		<div class="username_body">
+			<ib>JIN宝</ib>
+		</div>
+		<flex between nowrap class="userinfo">
+			<ib class="gomingxi">
+				<block>
+					<ib>100</ib>
+				</block>
+				<block>
+					<ib>虾米币</ib>
+				</block>
+			</ib>
+			<ib>
+				<block>
+					<ib>1</ib>
+				</block>
+				<block>
+					<ib>我的订单</ib>
+				</block>
+			</ib>
+		</flex>
+	</div>
+	<div class="info">
+		<div>
+			<ib><img src="img/kanguo.png"></ib>
+			<ib>看过的直播</ib>
+		</div>
+		<div style="margin-top: 10px;margin-left: 0px;">
+			<flex nowrap class="zhibo_body">
+                <ib>
+				<ib class="zhibo_each">
+					<img src="img/zhibo.png" class="w100">
+					<ib class="absolute zhibo_name">一个萝卜的直播</ib>
+					<ib class="absolute zhibo_num">1.2万</ib>
+					<ib class="zhibo_btn">
+						<img src="img/action.png" class="w100">
+					</ib>
+					<ib class="zhibo_ing">
+						<img src="img/zhiboing.png" class="w100">
+					</ib>
+				</ib>
+				<ib class="zhibo_each">
+					<img src="img/zhibo.png" class="w100">
+					<ib class="absolute zhibo_name">一个萝卜的直播</ib>
+					<ib class="absolute zhibo_num">1.2万</ib>
+					<ib class="zhibo_btn">
+						<img src="img/action.png" class="w100">
+					</ib>
+					<ib class="zhibo_ing none">
+						<img src="img/zhiboing.png" class="w100">
+					</ib>
+				</ib>
+				<ib class="zhibo_each">
+					<img src="img/zhibo.png" class="w100">
+					<ib class="absolute zhibo_name">一个萝卜的直播</ib>
+					<ib class="absolute zhibo_num">1.2万</ib>
+					<ib class="zhibo_btn">
+						<img src="img/action.png" class="w100">
+					</ib>
+					<ib class="zhibo_ing none">
+						<img src="img/zhiboing.png" class="w100">
+					</ib>
+				</ib>
+                </ib>
+			</flex>
+		</div>
+		<div style="margin-top: 15px;">
+			<ib><img src="img/tuijian.png"></ib>
+			<ib>推荐的商品</ib>
+		</div>
+		<div style="margin-left: 0px;">
+			<flex class="goods_body">
+                <ib>
+				<ib class="goods_each">
+					<block>
+						<ib class="goods_icon"><img class="w100" src="img/0.jpg"></ib>
+                        <div class="goods_name_info">
+                            <div>
+                                <ib>金房卡酒店111</ib>
+                            </div>
+                            <div class="ginfo">
+                                <ib>随时可用，可退款</ib>
+                            </div>
+                        </div>
+					</block>
+					<block class="goods_bottom">
+						<div class="goods_price">
+							<ib><span>$</span>168</ib>
+						</div>
+						<div>
+							<ib class="btn_buy">
+								<ib>立即购买</ib>
+								<ib style="margin-left: 5px;"><img src="img/arrow2.png" style="width: 5px;"></ib>
+							</ib>
+						</div>
+					</block>
+				</ib>
+				<ib class="goods_each">
+					<block>
+						<ib class="goods_icon"><img class="w100" src="img/0.jpg"></ib>
+                        <div class="goods_name_info">
+                            <div>
+                                <ib>金房卡酒店111</ib>
+                            </div>
+                            <div class="ginfo">
+                                <ib>随时可用，可退款</ib>
+                            </div>
+                        </div>
+					</block>
+					<block class="goods_bottom">
+						<div class="goods_price">
+							<ib><span>$</span>168</ib>
+						</div>
+						<div>
+							<ib class="btn_buy">
+								<ib>立即购买</ib>
+								<ib style="margin-left: 5px;"><img src="img/arrow2.png" style="width: 5px;"></ib>
+							</ib>
+						</div>
+					</block>
+				</ib>
+                    <ib class="goods_each">
+					<block>
+						<ib class="goods_icon"><img class="w100" src="img/0.jpg"></ib>
+                        <div class="goods_name_info">
+                            <div>
+                                <ib>金房卡酒店111</ib>
+                            </div>
+                            <div class="ginfo">
+                                <ib>随时可用，可退款</ib>
+                            </div>
+                        </div>
+					</block>
+					<block class="goods_bottom">
+						<div class="goods_price">
+							<ib><span>$</span>168</ib>
+						</div>
+						<div>
+							<ib class="btn_buy">
+								<ib>立即购买</ib>
+								<ib style="margin-left: 5px;"><img src="img/arrow2.png" style="width: 5px;"></ib>
+							</ib>
+						</div>
+					</block>
+				</ib>
+                </ib>
+			</flex>
+			<flex class="goods_single none" between>
+				<ib><img src="img/0.jpg" class="single_img"></ib>
+				<ib>
+					<block>金房卡酒店自助...</block>
+					<block class="ginfo_single">随时可用，可退款</block>
+				</ib>
+				<ib>
+					<ib class="btn_buy2">
+								<ib>立即购买</ib>
+								<ib style="margin-left: 5px;"><img src="img/arrow2.png" style="width: 5px;"></ib>
+							</ib>
+				</ib>
+			</flex>
+		</div>
+	</div>
+	<script src="js/jquery-1.7.2.min.js"></script>
+	<script src="js/Taoja_new.min.js"></script>
+    <script src="js/iscroll.js"></script>
+    <script>
+        $(".gomingxi").on("touchstart",function(){
+            window.location = "mingxi.html"; 
+        });
+        new IScroll(".zhibo_body", {
+            scrollX: true,
+            scrollY: false
+        });
+        new IScroll(".goods_body", {
+            scrollX: true,
+            scrollY: false
+        });
+    </script>
+</body>
+
+</html>

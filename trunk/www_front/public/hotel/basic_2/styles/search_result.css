@@ -1,0 +1,26 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;}
+header{padding-top:10%}
+.headfixed,.hotel_list .item{border-width:0 0 1px 0; border-image:url(border.gif) 2 stretch;}
+
+.checkdate{padding-top:3%; padding-bottom:3%; padding-left:3%; width:60%;}
+.checkdate .checkin_time{float:right; margin-right:3%;}
+.map{float:right;width:30%; display:block; text-align:center; margin-top:2.5%; border-left:1px solid #e4e4e4}
+.map .ui_ico{ width:3.8em; height:3.8em}
+.map span{vertical-align:middle}
+
+.ui_price:after{color:#999; font-size:0.7em;}
+
+.hotel_list{min-height:78%}
+.hotel_list .item{overflow:hidden; background:#fff; display:block;position:relative}
+.hotel_list .ui_img_auto_cut{ width:75px; height:75px; float:left; margin:2%;}
+.hotel_list .ui_img_auto_cut img{ min-height:100%;}
+.hotel_list .allin_box{padding:2%;}
+.hotel_list .allin_box>div{padding-bottom:1.5%;}
+.hotel_list .allin_box>div:last-child{padding-bottom:0;}
+.hotel_list .coupon{float:right; text-align:center; margin-top:-1em}
+
+
+.ui_price:before{ font-size:0.7em;}

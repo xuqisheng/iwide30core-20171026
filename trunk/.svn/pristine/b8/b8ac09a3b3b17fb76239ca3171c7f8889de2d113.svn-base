@@ -1,0 +1,61 @@
+<?php
+//!isset($_SERVER['SERVER_PROTOCOL']) OR exit('No direct script access allowed');
+class Auto_Fans_Data extends CI_Controller{
+	function __construct(){
+        parent::__construct ();
+        $this->debug = $this->input->get ( 'debug' );
+        error_reporting ( 0 );
+        if (! empty ( $this->debug )) {
+            error_reporting ( E_ALL );
+            ini_set ( 'display_errors', 1 );
+            //ini_set('error_log', dirname(__FILE__) . '/error_log.txt');
+        }
+        //$this->output->enable_profiler ( false );
+        $this->load->library('MYLOG');
+	}
+	
+	public function index(){
+		echo 'arrival';
+	}
+
+    private function check_arrow(){//访问限制
+        //var_dump($_SERVER['REMOTE_ADDR']);die;
+        //return true;
+        $arrow_ip = array('10.25.168.86','10.25.3.85','10.46.74.165');//只允许服务器自动访问，不能手动
+        if(!in_array($_SERVER['REMOTE_ADDR'],$arrow_ip)/*&&$_SERVER['SERVER_ADDR']!=$_SERVER['REMOTE_ADDR']*/){
+            exit('非法访问！');
+        }
+    }
+
+	//每天自动更新粉丝数据
+	public function auto_run_fans(){//echo 234;die;
+        $this->check_arrow();
+		echo 'start_time:'.date('Y-m-d H:i:s');
+		set_time_limit(0);
+		@ini_set('memory_limit','1024M');
+		$start = $end = 0;
+		/*$start = $this->input->get('s');//日期型
+		if(!empty($start)){
+			$end = date('Y-m-d',(strtotime($start) + 3600*24));
+		}*/
+		$this->load->model('distribute/follower_report_model');
+		$this->follower_report_model->write_log('start_time:'.date('Y-m-d H:i:s'));
+		//获取所有公众号
+		$inter_ids = $this->follower_report_model->get_all_wx_public();
+		if(!empty($inter_ids)){
+			//获取平台粉丝总数 和 所有公众号总和
+			$data = array();
+			$data = $this->follower_report_model->get_all_fans_count($end);//截止到 var_dump($data);die;
+			$this->follower_report_model->write_log(json_encode($data));
+			foreach($inter_ids as $k=>$v){
+				$this->follower_report_model->write_log($k);
+				//循环每个inter_id 获取各项数据
+				$data['public_name'] = $v['name'];
+				$insert_id = $this->follower_report_model->update_every_day_data($v['inter_id'],$data,$start,$end);//die;
+			}
+		}
+		echo 'end_time'.date('Y-m-d H:i:s');
+		$this->follower_report_model->write_log('end_time:'.date('Y-m-d H:i:s'));
+	}
+
+}

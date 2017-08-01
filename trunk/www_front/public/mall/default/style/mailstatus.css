@@ -1,0 +1,34 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+.mailstatus{ font-size:0.8rem; padding:1.5rem 0.5rem; background-repeat:no-repeat; background-position:90% center; background-size:auto 2rem;}
+.mailing .mailstatus{background-image:url(../images/img01.png); }
+.sending .mailstatus{background-image:url(../images/img02.png); }
+
+.notic{ padding:2% 4%; padding-bottom:8%;}
+
+.content{display:block; padding-left:4%;}
+.content .item{background:none; padding-left:0; display:block; overflow:hidden}
+.orderlist .content .item .itemimg{width:3.5rem; height:3.5rem;}
+.receive .content .item > div{ margin-top:0.2rem}
+.receive .content .item .itemimg{width:2.2rem; height:2.2rem; border-radius:0.2rem; margin-top:0}
+
+.ui_list .item{ padding:4%; padding-left:10%; background-repeat:no-repeat;background-position:2% center;background-size:auto 0.8rem;}
+.ui_list .item > div{ margin-bottom:3%;}
+.ui_list .item > div:last-child{ margin-bottom:0;}
+.ui_list .itemico1{background-image:url(../images/ico/ico01.png);}
+.ui_list .itemico2{background-image:url(../images/ico/ico02.png);background-position:left center;}
+.ui_list .itemico3{background-image:url(../images/ico/ico03.png);}
+
+.orderlist {margin-bottom:3%;  border-top: 1px solid #e4e4e4;}
+.orderlist .ordertitle,.orderlist .orderfoot,.receive .title{ padding:4%}
+.orderlist .orderfoot{ padding:3% 0 4% 3%;text-align:right}
+.orderlist .orderfoot span.float{ padding-top:1%;}
+.orderlist .orderfoot em{font-size:0.8rem}
+.orderlist .orderfoot .showdetail{ border-top:1px solid #e4e4e4; padding-top:3%; padding-right:4%; margin-top:3%;}
+.orderlist .orderfoot .showdetail a{ border:1px solid #e4e4e4; color:#000; padding:2% 5%; border-radius:0.3rem;}
+.receive .title{ padding-bottom:2%}
+
+
+

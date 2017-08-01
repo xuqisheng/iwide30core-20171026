@@ -1,0 +1,66 @@
+/*打赏页面 Css*/
+.reward_header{text-align: center;padding-top: 1.857rem;}
+.portrait{width: 5.357rem;height: 5.357rem;border-radius: 50%;margin-bottom: 5px;}
+.portrait_name{margin-bottom: 0.2rem;}
+.portrait_ico{width: 16px;height: 16px;vertical-align: middle;margin-bottom: 3px;}
+.portrait_evaluate{margin-top: 9px;margin-bottom: 2.4rem;}
+.portrait_evaluate > p{margin: 0px 10px;display: inline-block;}
+.portrait_num{color: #666666;}
+.reward_title_wrapper{text-align: center;}
+.reward_rows{margin-top: 20px;}
+.reward_title{margin: 0px 5%; }
+.reward_title_lline{height: 1px; width: 29%; display: inline-block; margin-bottom: 5px; background: linear-gradient(to left, #eaeaea , rgba(236, 236, 236, 0.2)); background: -webkit-linear-gradient(to left, #eaeaea , rgba(236, 236, 236, 0.2)); }
+.reward_title_rline{height: 1px; width: 29%; display: inline-block; margin-bottom: 5px; background: linear-gradient(to right, #eaeaea , rgba(236, 236, 236, 0.2)); background: -webkit-linear-gradient(to right, #eaeaea , rgba(236, 236, 236, 0.2)); }
+.reward_content{text-align: center;margin-top: 15px;padding: 0px 3%;}
+.reward_star{background: url("../images/stars01.png") no-repeat;width: 34px;height: 32px;display: inline-block;background-size: 100% 100%;margin: 0px 3px;}
+.reward_star_active{background-image: url("../images/stars02.png");}
+.reward_content_rows{position: relative;overflow: hidden;color: #ffa012;display: inline-block;height: 45px;width: 30%;margin: 0px 1%;line-height: 45px;border-radius: 3px;border:1px solid #ff9900;margin-bottom: 10px;}
+.reward_money{margin-right: 5px;}
+.reward_active:after{content: "";position: absolute;top: 2px;right: 2px;background: url("../images/gou.png") no-repeat;width: 11px;height: 15px;}
+.reward_active:before{content: "";position: absolute;top: -14px;right: -15px;width: 31px;height: 35px;background-color: #ff9900;transform: rotate(-39deg);-webkit-transform: rotate(-39deg);}
+.reward_money_input{text-align: right;width: 97.5%;padding: 10px 5%;border: 1px solid #eaeaea;display: inline-block;border-radius: 3px;}
+.reward_money_input input{text-align: right;width: 100px;color: black;}
+.reward_money_title{color: #808080;float: left;}
+.reward_money_wrod{ color: #808080;display: inline-block;}
+.reward_money_button{background-color: #ff9900;color: white;width: 97.5%;border-radius: 3px;display: block;margin: 0 auto;height: 45px;line-height: 45px;margin-top: 5px;}
+.reward_money_tips{text-align: right;color: #fd3d3d;margin-top: 10px;display: none;}
+.reward_tips_ico{width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;}
+.w_money_inpout{height:23px;width:97.5%;margin-top: 10px;}
+/*成功页*/
+.res_header{    text-align: center; padding-top: 50px;}
+.reward_success_ico{width: 43px;height: 43px;margin-bottom: 3px;margin-left: -10px;border: 1px solid #ff9900;border-radius: 50%;padding: 7px 4px;}
+.reward_success{color: #ff9900;}
+.reward_success_thank{color:#808080;margin-top: 48px;margin-bottom: 5px;}
+.reward_success_a{color: #333333; overflow: hidden; display: inline-block;}
+.reward_success_a span{float: left;}
+.reward_success_a span:nth-child(2){ margin-top:-1px;margin-left: 2px;}
+
+.scratchCard {position: relative;width: 85%;height: 160px;margin: 24px auto;background: url(../images/ggl.png) no-repeat center center;background-size: 100% 100%;}
+.scratchCard .scratchCardCanvas {position: absolute; top: 13px; left: 3%; width: 94%; height: 135px; line-height: 82px; text-align: center; z-index: 2; }
+.scratchCard .info {position: absolute; top: 13px; left: 3%; width: 94%; height: 135px; text-align: center;background-color: #fdf8f0;}
+.scratchCard .prompt {line-height: 40px;min-height: 5.6rem;}
+.scratchCard .info span.btn {position: relative;color: white;border-radius: 3px;margin: 0 auto;margin-top: 8px;z-index: 1;background-color: #ff9900;padding: 3px 0;display: inline-block;min-width: 6.8rem;}
+.scratch_title{color: #fd3d3d;margin: 6px 0 2px 0;}
+.scratch_word{color: #808080;}
+.scratch_bg{position: fixed;top: 0px;left: 0px;height: 100%;width: 100%;background-color: rgba(0,0,0,0.7);z-index: 10;padding-top: 50%;display: none;}
+
+.flexlayer{display:flex;align-items:center;justify-content:space-around;}
+.flexlayer .layerbox{}
+.scratch_bg .layerbox{background-color: #fff;height:auto;width: 78%;border-radius:8px;overflow:hidden;padding: 15px 0px 0px 0px;margin: 0 auto;}
+.scratch_tips_title{text-align: center;color: #333333;}
+.scratch_tips_word{padding: 0.9rem 1.5rem 1rem 1.5rem;color: #333333;}
+.scratch_tips_button{overflow: hidden;border-top: 1px solid #dfdfdf;}
+.scratch_tips_button p{width: 50%;float: left;text-align: center;padding: 0.9rem 0;color: #999999;}
+.scratch_tips_button p:nth-child(1){border-right: 1px solid #dfdfdf;}
+.scratch_tips_button .scratch_active a{color: #3373f6;}
+
+/*速8*/
+.s8_bg{background-color: #f8f8f8;}
+.s8_success_ico{width: 6.857rem;height: 4.571rem;margin-bottom: 0.2rem;}
+.s8_success{color: #d13e30;}
+.s8_wrap{background-color: white;padding-bottom: 3.5rem;padding-top: 2rem;}
+.s8_title{margin: 0.928rem 0 0.328rem 0;color: #808080;}
+.s8_bg .scratchCard{background: url(../images/s8_bg.png) no-repeat;background-size: 100% 100%;width: 87%;height: 165px;}
+.s8_bg .scratchCard .info{top: 17px;left: 4.5%;width: 91%;height: 130px;background: url(../images/s8_ggl2.png) no-repeat;background-size: 100% 100%;}
+.s8_bg .scratchCard .scratchCardCanvas{top: 17px;left: 4.5%;width: 91%;height: 130px;}
+.s8_bg .reward_success_thank{margin-top: 5px;}

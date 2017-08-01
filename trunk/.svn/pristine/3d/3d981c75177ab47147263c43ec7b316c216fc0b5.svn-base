@@ -1,0 +1,17 @@
+@charset "utf-8";
+/* CSS Document */
+.banner{width:100%;}
+.banner .ban_con{width:100%; height:8rem; text-align:center; background:#fff;}
+.banner .ban_con img{}
+.banner .b_txt{width:96%;margin:0.5rem auto;border-bottom:1px solid #999;}
+.banner .b_txt font{float:right;color:#fe4e00;font-size:0.9rem;}
+.banner .b_txt .txt_details{color:#999;font-size:0.5rem;line-height:1.5; padding:3% 0; text-align:justify}
+.floors{width:100%;position:fixed;left:0;bottom:0;}
+.floors .shopping{width:24%;border-top:1px solid #999;padding:0.3rem 0;float:left;}
+.floors .shopping .car_1{width:.8rem;height:.8rem;margin:auto;position:relative; margin-top:1%}
+.floors .shopping .car_1 .numb{position:absolute;top:-0.2rem;right:-0.3rem;font-size:0.2rem;color:#fff;
+	background:#fe4e00;border-radius:50%;padding:0.1rem;text-align:center;line-height:0.4rem;}
+.floors .shopping p{text-align:center;color:#999;font-size:0.4rem;line-height:0.8rem}
+.floors .btns{width:38%;color:#fff;text-align:center;line-height:2.3rem;}
+.floors .add{float:left;background:#fe8f00;}
+.floors .buy{float:right;background:#fe4e00;}

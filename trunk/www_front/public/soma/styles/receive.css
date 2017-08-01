@@ -1,0 +1,81 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{ background: #feefe3;height:100%;}
+.giftbox{text-align:center}
+
+
+.fromuser {padding:5%; overflow:hidden; color:#a1753b; margin-bottom:4.3%;}
+.fromuser .userimg{width:16%; float:left;margin-right:3%;}
+.fromuser .userimg img{border-radius:0.4rem;}
+.fromuser .name{padding-right:5%;float:left; }
+.fromuser .name,.fromuser .time{margin-top:2%; color:#666666;}
+.fromuser .wish{margin-top:2%; color:#e1843b;}
+
+
+.giftbox .boximg{width:50%; font-size:0; margin:auto; }
+.giftbox .boximg div{ font-size:0 !important;}
+.giftbox .boxlogo{position:absolute;width:18%;right:13%; bottom:13%; opacity:0.5}
+
+.again{ display:block; position:static; padding:4% 0; bottom:3%;width:100%;text-align:center; color:#a1753b;}
+.again span{ padding:1% 2%}
+.again:active,.again:visited{color:#a1753b; }
+.again img{ height:0.6rem; width:auto; vertical-align:text-bottom}
+
+
+.gif{ opacity:0.7; width:100%; position:absolute; top:30%; text-align:center; z-index:99999999;}
+.gif img{ width:35%; text-align:center}
+
+
+.shaking{
+	animation-name: myfirst;
+	animation-duration: 0.3s;
+	animation-iteration-count: 2;
+	/* Safari and Chrome: */
+	-webkit-animation-name: myfirst;
+	-webkit-animation-duration: 0.3s;
+	-webkit-animation-iteration-count: 2;
+}
+@keyframes myfirst
+{
+0%   {transform: rotate(10deg);-webkit-transform: rotate(10deg);}
+50%  { transform: rotate(-15deg);-webkit-transform: rotate(-15deg);}
+100% { transform: rotate(5deg);-webkit-transform: rotate(5deg);}
+}
+@-webkit-keyframes myfirst /* Safari and Chrome */
+{
+0%   {transform: rotate(10deg);-webkit-transform: rotate(10deg);}
+50%  { transform: rotate(-15deg);-webkit-transform: rotate(-15deg);}
+100% { transform: rotate(5deg);-webkit-transform: rotate(5deg);}
+}
+.tap{
+	animation-name: tapgif;
+	animation-duration: 1.5s;
+	animation-iteration-count: infinite;
+	animation-direction: alternate;
+	/* Safari and Chrome: */
+	-webkit-animation-name: tapgif;
+	-webkit-animation-direction: alternate;
+	-webkit-animation-duration: 1.5s;
+	-webkit-animation-iteration-count: infinite;
+}
+@keyframes tapgif
+{
+from{opacity:0.6}
+to{opacity:1}
+}
+@-webkit-keyframes tapgif /* Safari and Chrome */
+{
+from{opacity:0.6}
+to{opacity:1}
+}
+@keyframes a
+{
+0%   {transform: scale(1.1,1.1);-webkit-transform: scale(1.1,1.1)}
+100% { transform: scale(1,1);-webkit-transform: scale(1,1);}
+}
+@-webkit-keyframes a /* Safari and Chrome */
+{
+0%   {transform: scale(1.1,1.1);-webkit-transform: scale(1.1,1.1)}
+100% { transform: scale(1,1);-webkit-transform: scale(1,1);}
+}

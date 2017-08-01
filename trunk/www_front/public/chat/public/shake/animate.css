@@ -1,0 +1,177 @@
+@charset "utf-8";
+/* CSS Document */
+
+/*属性	描述
+@-webkit-keyframes	规定动画。	
+-webkit-animation	所有动画属性的简写属性，除了 animation-play-state 属性。	
+-webkit-animation-name	规定 @keyframes 动画的名称。	
+-webkit--webkit-animation-duration	规定动画完成一个周期所花费的秒或毫秒。默认是 0。	
+-webkit-animation-timing-function	规定动画的速度曲线。默认是 "ease"。	
+-webkit-animation-delay	规定动画何时开始。默认是 0。	
+-webkit-animation-iteration-count	规定动画被播放的次数。默认是 1。infinite无限循环	
+-webkit-animation-direction	规定动画是否在下一周期逆向地播放。默认是 "normal"。	alternate
+-webkit-animation-play-state	规定动画是否正在运行或暂停。默认是 "running"。	
+-webkit-animation-fill-mode	规定对象动画时间之外的状态。
+matrix(n,n,n,n,n,n)	定义 2D 转换，使用六个值的矩阵。
+translate(x,y)	定义 2D 转换，沿着 X 和 Y 轴移动元素。
+translateX(n)	定义 2D 转换，沿着 X 轴移动元素。
+translateY(n)	定义 2D 转换，沿着 Y 轴移动元素。
+scale(x,y)	定义 2D 缩放转换，改变元素的宽度和高度。
+scaleX(n)	定义 2D 缩放转换，改变元素的宽度。
+scaleY(n)	定义 2D 缩放转换，改变元素的高度。
+rotate(angle)	定义 2D 旋转，在参数中规定角度。
+skew(x-angle,y-angle)	定义 2D 倾斜转换，沿着 X 和 Y 轴。
+skewX(angle)	定义 2D 倾斜转换，沿着 X 轴。
+skewY(angle)	定义 2D 倾斜转换，沿着 Y 轴。
+*/
+.fadein{
+	-webkit-animation-name: fadein;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.5s;
+	-webkit-animation-iteration-count:1;
+}
+@-webkit-keyframes fadein /* Safari and Chrome */
+{
+0%{ -webkit-transform:scale(0,0)}
+50%{-webkit-transform:scale(0.9,0.9)}
+70%{-webkit-transform:scale(1.5,1.5)}
+100%{ -webkit-transform:scale(1,1)}
+}
+.fadeout{
+	-webkit-animation-name: fadeout;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.5s;
+	-webkit-animation-iteration-count:1;
+}
+@-webkit-keyframes fadeout /* Safari and Chrome */
+{
+0%{ -webkit-transform:scale(1,1)}
+50%{-webkit-transform:scale(0.5,0.5)}
+75%{-webkit-transform:scale(0.9,0.9)}
+100%{ -webkit-transform:scale(0,0)}
+}
+
+.fire{
+	/* Safari and Chrome: */
+	-webkit-animation-name: scan;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.5s;
+	-webkit-animation-iteration-count:infinite;
+}
+@-webkit-keyframes scan /* Safari and Chrome */
+{
+from{  -webkit-transform:scale(1,1)}
+to{ -webkit-transform:scale(1,0.8)}
+}
+.shaking{
+	/* Safari and Chrome: */
+	-webkit-animation-name: shaking;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.5s;
+	-webkit-animation-iteration-count:infinite;
+}
+@-webkit-keyframes shaking /* Safari and Chrome */
+{
+0%{  -webkit-transform:translateX(1px)}
+30%{ -webkit-transform:translateX(-1px)}
+70%{ -webkit-transform:translateX(2px)}
+100%{ -webkit-transform:translateX(-1px)}
+}
+.last{
+	/* Safari and Chrome: */
+	-webkit-animation-name: last;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.2s;
+	-webkit-animation-iteration-count:infinite;
+}
+@-webkit-keyframes last /* Safari and Chrome */
+{
+0%{  -webkit-transform:translate(-3px)}
+30%{ -webkit-transform:translate(4px)}
+70%{ -webkit-transform:translate(-2px)}
+100%{ -webkit-transform:translate(1px)}
+}
+.fly1{
+	/* Safari and Chrome: */
+	-webkit-animation-name: birdfly1;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 15s;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-direction:alternate;
+}
+@-webkit-keyframes birdfly1 /* Safari and Chrome */
+{
+	from{ top:5%; left:30%; -webkit-transform:rotate(30deg);}
+	to{top:10%; left:25%; -webkit-transform:rotate(-30deg);-webkit-transform:scale(0.5,0.5)}
+}
+.fly2{
+	/* Safari and Chrome: */
+	-webkit-animation-name: birdfly2;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 20s;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-direction:alternate;
+}
+@-webkit-keyframes birdfly2 /* Safari and Chrome */
+{
+	from{ top:8%; left:50%; -webkit-transform:rotate(-30deg);}
+	to{top:5%; left:60%; -webkit-transform:rotate(30deg);-webkit-transform:scale(1.5,1.5)}
+}
+.fly3{
+	/* Safari and Chrome: */
+	-webkit-animation-name: birdfly3;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 25s;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-direction:alternate;
+}
+@-webkit-keyframes birdfly3 /* Safari and Chrome */
+{
+	from{ top:10%; left:65%; }
+	to{top:11%; left:55%;}
+}
+.fly4{
+	/* Safari and Chrome: */
+	-webkit-animation-name: birdfly4;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 18s;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-direction:alternate;
+}
+@-webkit-keyframes birdfly4 /* Safari and Chrome */
+{
+	from{ top:3%; left:75%; -webkit-transform:rotate(-10deg); }
+	to{top:11%; left:85%; -webkit-transform:rotate(10deg);-webkit-transform:scale(1.5,1.5)}
+}
+
+.fly5{
+	/* Safari and Chrome: */
+	-webkit-animation-name: birdfly5;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 28s;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-direction:alternate;
+}
+@-webkit-keyframes birdfly5 /* Safari and Chrome */
+{
+	from{ top:15%; left:90%; -webkit-transform:rotate(20deg); }
+	to{top:5%; left:75%; -webkit-transform:rotate(-20deg);-webkit-transform:scale(0.8,0.8)}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

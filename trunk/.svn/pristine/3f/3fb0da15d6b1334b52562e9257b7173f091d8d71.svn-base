@@ -1,0 +1,98 @@
+<body class="goods-list-bg ">
+<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+<div class="pageloading"><p class="isload">正在加载</p></div>
+
+<script>
+    wx.config({
+        debug: false,
+        appId: '<?php echo $wx_config["appId"]?>',
+        timestamp: <?php echo $wx_config["timestamp"]?>,
+        nonceStr: '<?php echo $wx_config["nonceStr"]?>',
+        signature: '<?php echo $wx_config["signature"]?>',
+        jsApiList: [<?php echo $js_api_list; ?>,'getLocation']
+    });
+    wx.ready(function(){
+        <?php if( $js_menu_hide ): ?>wx.hideMenuItems({ menuList: [<?php echo $js_menu_hide; ?>] });<?php endif; ?>
+
+        <?php if( $js_menu_show ): ?>wx.showMenuItems({ menuList: [<?php echo $js_menu_show; ?>] });<?php endif; ?>
+
+        <?php if( $js_share_config ): ?>
+        wx.onMenuShareTimeline({
+            title: '<?php echo $js_share_config["title"]?>',
+            link: '<?php echo $js_share_config["link"]?>',
+            imgUrl: '<?php echo $js_share_config["imgUrl"]?>',
+            success: function () {},
+            cancel: function () {}
+        });
+        wx.onMenuShareAppMessage({
+            title: '<?php echo $js_share_config["title"]?>',
+            desc: '<?php echo $js_share_config["desc"]?>',
+            link: '<?php echo $js_share_config["link"]?>',
+            imgUrl: '<?php echo $js_share_config["imgUrl"]?>',
+            //type: '', //music|video|link(default)
+            //dataUrl: '', //use in music|video
+            success: function () {},
+            cancel: function () {}
+        });
+        <?php endif; ?>
+    });
+</script>
+
+  <div id="goodsList">
+        <div class="banner">
+            <img src="<?php echo base_url('public/soma/mooncake4/images/goods_list_banner.png');?>">
+        </div>
+        <div class="goods-list">
+            <ul class="clearfix" id="list">
+
+                <?php foreach($products as $k => $v):?>
+                    <?php
+                        $price_market = $v['price_market'];
+                        $price_package = $v['price_package'];
+                        $product_type = null;
+                        if(isset($v['killsec'])){
+                            $price_package = $v['killsec']['killsec_price'];
+                            $product_type = $lang->line('flash_sale');
+                        }
+                        elseif(isset($v['groupon'])){
+                            $price_package = $v['groupon']['group_price'];
+                            $product_type = $lang->line('group');
+                        }
+                        elseif(isset($v['auto_rule'])){
+                            $product_type = $lang->line('offer');
+                        }
+                        elseif($v['goods_type'] == Product_package_model::SPEC_TYPE_COMBINE){
+                            $product_type = $lang->line('combined_product');
+                        }
+                        elseif(isset($v['scopes'])){
+                            $product_type = $lang->line('exclusive');
+                        }
+                    ?>
+                    <li class="pr">
+                        <?php if($product_type != null): ?>
+                            <div class="pa label">
+                                <span class="f24"><?= $product_type ?></span>
+                            </div>
+                        <?php endif;?>
+                        <a href="<?php echo Soma_const_url::inst()->get_package_detail(array('pid'=>$v['product_id'],'id'=>$inter_id, 'openid' => $this->openid) );?>">
+                            <p class="img"><img src="<?php echo $v['face_img'];?>"/></p>
+                            <p class="title f30"><?= $v['name'] ?></p>
+                            <div class="price">
+                                <p>
+                                    <span class="f24">¥</span>
+                                    <span class="discount f36"><?= $price_package ?></span>
+                                    <span class="original f24">¥ <?= $price_market ?></span>
+                                </p>
+                            </div>
+                        </a>
+                    </li>
+                <?php endforeach;?>
+            </ul>
+        </div>
+    </div>
+
+
+
+</body>
+<script src="<?php echo get_cdn_url('public/soma/mooncake4/js/search.js');?>"></script>
+</html>

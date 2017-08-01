@@ -1,0 +1,690 @@
+<?php 
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Sales_invoice_model extends MY_Model_Soma {
+
+    const STATUS_APPLY   = 1;
+    const STATUS_SHIPPED = 2;
+    const STATUS_HOLDING = 3;
+    const STATUS_FINISHED = 4;
+    
+    public function get_status_label()
+    {
+        return array(
+            self::STATUS_APPLY   => '待邮寄',
+            self::STATUS_SHIPPED => '邮寄中',
+            self::STATUS_HOLDING => '异常挂起',
+            self::STATUS_FINISHED => '已邮寄',
+        );
+    }
+
+	public function get_resource_name()
+	{
+		return 'Sales_invoice_model';
+	}
+	
+	public static function model($className=__CLASS__)
+	{
+		return parent::model($className);
+	}
+	
+	/**
+	 * @return string the associated database table name
+	 */
+	public function table_name()
+	{
+		return 'soma_sales_invoice';
+	}
+
+	public function table_primary_key()
+	{
+	    return 'invoice_id';
+	}
+	
+	public function attribute_labels()
+	{
+		return array(
+            'invoice_id'=> '配送ID',
+            'inter_id'=> '公众号ID',
+            'hotel_id'=> '酒店ID',
+            'openid'=> 'Openid',
+            'order_id'=> '订单编号',
+            'row_total'=> '订单金额',
+            'grand_total'=> '实付金额',
+            'invoice_title'=> '发票抬头',
+            'tax_id' => '纳税人识别号',
+            'invoice_num'=> '发票号码',
+            'address'=> '地址信息',
+            'contact'=> '联系人',
+            'phone'=> '联系电话',
+            'post_fee'=> '邮寄费用',
+            'distributor'=> '配送商',
+            'tracking_no'=> '配送单号',
+            'create_time'=> '创建时间',
+            'status'=> '当前状态',
+            'post_admin'=> '邮寄操作人',
+            'post_admin_ip'=> '邮寄操作IP',
+            'post_time'=> '邮寄时间',
+            'commet'=> '地址备注',
+		);
+	}
+
+    public function form_fields() {
+        return array(
+            'order_id',
+            // 'invoice_num',
+            'row_total',
+            'grand_total',
+            'invoice_title',
+            'address',
+            'contact',
+            'phone',
+            'post_fee',
+            'post_time',
+            'distributor',
+            'tracking_no',
+            'post_admin',
+            'post_admin_ip',
+            'status',
+            'commet',
+        );
+    }
+
+	/**
+	 * 后台管理的表格中要显示哪些字段
+	 */
+	public function grid_fields()
+	{
+        //主键字段一定要放在第一位置，否则 grid位置会发生偏移
+	    return array(
+            'invoice_id',
+            'order_id',
+            'row_total',
+            'grand_total',
+            'invoice_title',
+            'tax_id',
+            'distributor',
+            'tracking_no',
+            'post_time',
+            'address',
+            'contact',
+            'phone',
+            'status',
+            // 'inter_id',
+            // 'hotel_id',
+            // 'openid',
+            // 'invoice_num',
+            // 'post_fee',
+            // 'create_time',
+            // 'post_admin',
+            // 'post_admin_ip',
+            // 'commet',
+	    );
+	}
+
+	/**
+	 * 在EasyUI grid中的 date-option 定义，包括宽度，是否排序等等
+	 *   type: grid中的表头类型定义 
+	 *   form_type: form中的元素类型定义
+	 *   form_ui: form中的属性补充定义，如加disabled 在< input “disabled” / > 使元素禁用
+	 *   form_tips: form中的label信息提示
+	 *   form_hide: form中自动化输出中剔除
+	 *   form_default: form中的默认值，请用字符类型，不要用数字
+	 *   select: form中的类型为 combobox时，定义其下来列表
+	 */
+	public function attribute_ui()
+	{
+	    /* text,textbox,numberbox,numberspinner, combobox,combotree,combogrid,datebox,datetimebox, timespinner,datetimespinner, textarea,checkbox,validatebox. */
+	    //type: numberbox数字框|combobox下拉框|text不写时默认|datebox
+	    $base_util= EA_base::inst();
+	    $modules= config_item('admin_panels')? config_item('admin_panels'): array();
+
+	    return array(
+            'invoice_id' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '5%',
+                //'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'inter_id' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'hotel_id' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'openid' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'order_id' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '7%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'row_total' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '7%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                // 'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text', //textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'grand_total' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '7%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                // 'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'invoice_title' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'tax_id' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text', //textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'invoice_num' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'address' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'contact' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '7%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'phone' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'post_fee' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'distributor' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                // 'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'combobox',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+                'select' => $this->get_distributor_select_option(),
+            ),
+            'tracking_no' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                //'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'create_time' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'status' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'combobox',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+                'select' => $this->get_status_label(),
+            ),
+            'post_admin' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'post_admin_ip' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'post_time' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'datetime',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'commet' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                //'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+                //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'textarea',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+	    );
+	}
+	
+	/**
+	 * grid表格中默认哪个字段排序，排序方向
+	 */
+	public static function default_sort_field()
+	{
+	    return array('field'=>'invoice_id', 'sort'=>'desc');
+	}
+	
+	/* 以上为AdminLTE 后台UI输出配置函数 */
+
+    public function get_distributor_select_option()
+    {
+        $table = $this->_shard_table('soma_cms_distributor');
+        $data= $this->_shard_db_r('iwide_soma_r')
+                    ->get_where($table, array('status'=> self::STATUS_TRUE) )
+                    ->result_array();
+        $option= $this->array_to_hash($data, 'dist_label', 'dist_name');
+        return array(''=> ' - ')+ $option;
+    }
+
+    public function get_distributor_select_html() {
+
+        $options = $this->get_distributor_select_option();
+
+        $html = '';
+        foreach ($options as $k => $v) {
+            $html .= "<option value='$k'";
+            if($k == $this->m_get('distributor')) {
+                $html .= " selected='selected'";
+            }
+            $html .= ">$v</option>";
+        }
+
+        return $html;
+    }
+
+    public function get_export_fields() {
+        return array(
+            'invoice_id',
+            'order_id',
+            'row_total',
+            'grand_total',
+            'invoice_title',
+            'tax_id',
+            'distributor',
+            'tracking_no',
+            'post_time',
+            'address',
+            'contact',
+            'phone',
+            'status',
+        );
+    }
+
+    public function get_export_header() {
+        $fields = $this->get_export_fields();
+        $labels = $this->attribute_labels();
+        $header = array();
+        foreach ($fields as $field) { $header[] = $labels[$field]; }
+        return $header;
+    }
+
+    public function export_item($select, $filter) {
+        $db = $this->_shard_db_r('iwide_soma_r');
+        foreach ($filter as $k => $v) {
+            if($k == 'create_time' || $k == 'post_time') {
+                $db->where("$k >=", $v['start']);
+                $db->where("$k <=", $v['end']);
+            }
+            if(is_array($v)){
+                $db->where_in($k, $v);
+            } else {
+                $db->where($k, $v);
+            }
+        }
+        $table = $this->_shard_table('soma_sales_invoice');
+        $result = $db->select($select)->get( $table )->result_array();
+
+        // 将状态转换为文字
+        $status = $this->get_status_label();
+        foreach ($result as $k => $row) {
+            $result[$k]['status'] = @$status[$row['status']];
+        }
+
+        return $result;
+    }
+
+    /**
+     * 校验批量发货输入数据
+     * 
+     * @param  [array] $data 批量发货提交数据
+     * @return [bool]        true|false
+     */
+    public function batch_data_validation($data) {
+        $this->load->library('form_validation');
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules('distributor', '配送商', 'required');
+        $this->form_validation->set_rules('batch', '上传文件', $this->csv_validation($data['batch']));
+        return $this->form_validation->run();
+    }
+
+    /**
+     * 校验csv文件
+     * @param  [type] $data 上传数据$_FILES
+     * @return [type]       [description]
+     */
+    protected function csv_validation($data) {
+        // var_dump($data);exit;
+        if(!$data || $data['error'] != 0 
+            || $data['type'] != 'application/vnd.ms-excel'
+            || empty($data['tmp_name'])) {
+            return false;
+        }
+
+        // 判断顺序是不是错误
+        $csv_data = $this->_data_from_csv($data);
+        $header = $this->get_export_header();
+
+        for ($i=0; $i<count($header); $i++) {
+            if($header[$i] != $csv_data[0][$i]) { return false; }
+        }
+
+        return true;
+    }
+
+    /**
+     * 将数据转为数据库可接受的数据格式
+     * 
+     * @param  [type] $data     原始数据
+     * @param  [type] $inter_id 定位分片的公众号ID
+     * @return [type]           格式化后的数据
+     */
+    public function format_batch_data($data, $inter_id = null) {
+        // 解析csv文件
+        $csv_data = $this->_data_from_csv($data['batch']);
+        unset($csv_data[0]); //去头
+
+        $now_time = date('Y-m-d H:i:s');
+        $admin = $this->session->admin_profile;
+        $post_admin = $admin['username'];
+        $CI =& get_instance();
+        $post_admin_ip = $CI->input->ip_address();
+
+        $fmt_data = $ids = array();
+        foreach ($csv_data as $row) {
+
+            if(true) { $row[2] = $row[4] = null; /*目前csv中不允许自己填时间和快递名*/ }
+            if(empty($row[3]) || $row[3] == '') { continue; } // 没有配送单号的过滤掉
+
+            $post_time = empty($row[4]) ? $now_time : date('Y-m-d H:i:s', strtotime($row[4]));
+            $dist = empty($row[2]) ? $data['distributor'] : $row[2];
+            $fmt_data[$row[0]] = array(
+                'invoice_id' => $row[0],
+                'distributor' => $this->get_distributor_name($dist),
+                'tracking_no' => $row[3],
+                'post_time' => $post_time,
+                'post_admin' => $post_admin,
+                'post_admin_ip' => $post_admin_ip,
+                'status' => self::STATUS_SHIPPED,
+            );
+            $ids[] = $row[0];
+        }
+        // var_dump($fmt_data);exit;
+        $db = $this->_shard_db_r('iwide_soma_r');
+        $table = $this->_shard_table($this->table_name());
+        $db_res = $db->select('invoice_id')
+                     ->where('status', self::STATUS_APPLY)
+                     ->where_in('invoice_id', $ids)
+                     ->get($table)
+                     ->result_array();
+        
+        $ret_data = array();
+        foreach ($db_res as $db_row) {
+            $ret_data[] = $fmt_data[ $db_row['invoice_id'] ];
+        }
+
+        return $ret_data;
+    }
+
+    /**
+     * 将输入的配送商名/代码转换成代码
+     * @param  [type] $dist 配送商名|配送商代码
+     * @return [type]       配送商代码
+     */
+    public function get_distributor_name($dist) {
+        $options = $this->get_distributor_select_option();
+        if(in_array($dist, array_keys($options))) { return $dist; }
+        $label_name = array_flip($options);
+        if(in_array($dist, array_keys($label_name))) { return $label_name[$dist]; }
+        throw new Exception("Can't format distributor into db data", 1);
+        
+    }
+
+    /**
+     * 将上传的csv文件转化为数组
+     * @param  [type] $csv_file 上传信息
+     * @return [type]           array
+     */
+    protected function _data_from_csv($csv_file) {
+        $csv = fopen($csv_file['tmp_name'], 'r');
+        $csv_data = array(); 
+        $n = 0; 
+        while ($data = fgetcsv($csv)) { 
+            $num = count($data); 
+            for ($i = 0; $i < $num; $i++) { 
+                $csv_data[$n][$i] = mb_convert_encoding($data[$i], 'utf-8', 'gbk');//$data[$i]; 
+            } 
+            $n++; 
+        }
+        return $csv_data;
+    }
+
+    /**
+     * 批量保存
+     * @param  [type] $data     数据库可接受的数据
+     * @param  [type] $inter_id 定位分片的公众号ID
+     * @return [type]           true|false
+     */
+    public function batch_save($data, $inter_id = null) {
+        if(empty($data)) { return true; }
+        $db = $this->_shard_db($inter_id);
+        $table = $this->_shard_table($this->table_name());
+        $db->trans_begin();
+        try {
+            $db->update_batch($table, $data, 'invoice_id');
+            if($db->trans_status()) {
+                $db->trans_commit();
+                return true;
+            } else {
+                $db->trans_rollback();
+                return false;
+            }
+        } catch (Exception $e) {
+            $db->trans_rollback();
+            return false;
+        }
+    }
+	
+    /**
+     * 新后台重写此方法,提供新后台的数据，注意保持ori_data中的原数据格式，避免其他地方调用异常
+     *
+     * @param      array   $params  The parameters
+     * @param      array   $select  The select
+     * @param      string  $format  The format
+     */
+    public function filter( $params=array(), $select= array(), $format='array' ) {
+        $ori_data = parent::filter($params, $select, $format);
+        return $this->get_new_backend_order_data($ori_data);
+    }
+
+    public function get_new_backend_order_data($ori_data) {
+
+        $filter = $orders = $items = $ids = $hash_orders= array();
+        foreach($ori_data['data'] as $row) {
+            $ids[] = $row[1];
+        }
+
+        $this->load->model('soma/Sales_order_model', 'o_model');
+
+        $filter['where'] = array('order_id' => $ids);
+        $orders = $this->o_model->get_order_collection($filter);
+
+        foreach($orders as $row) {
+            $hash_orders[$row['order_id']] = $row;
+        }
+
+        $new_res = $ori_data;
+        foreach($ori_data['data'] as $key => $row) {
+            $new_res['data'][$key]['order_info'] = array();
+            if(isset($hash_orders[ $row[1] ])) {
+                $new_res['data'][$key]['order_info'] = $hash_orders[ $row[1] ];
+            }
+        }
+
+        return $new_res;
+    }
+
+}

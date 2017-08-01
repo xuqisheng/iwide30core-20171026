@@ -1,0 +1,1 @@
+2017-06-29 17:09:56 | 645 | 127.0.0.1 | d100efceabec43dd598205930f4a1c6519162289 | /index.php/membervip/vapi/coupon_task | POST=[] | E_ERROR | Call to undefined method Vapi::_ajaxReturn() | /private/home/www/30core/iwide3_0/controllers/admin/membervip/Vapi.php in 20

@@ -1,0 +1,37 @@
+.bg_l_g_fec50f_ffa70a{
+	background:-webkit-gradient(linear,left top, right bottom,from(#4e8064),to(#316f4d))!important;
+	background:linear-gradient(left top,#4e8064,#316f4d)!important;
+	background:-webkit-linear-gradient(left top,#4e8064,#316f4d)!important;
+}
+.bg_ff9900{
+	background:#316f4d!important;
+}
+.recharge_btn_list >.active{
+	background:#316f4d!important;
+	color:#fff;
+	border:1px solid #316f4d!important;
+}
+.head_title >div.active{
+	color:#316f4d!important;
+}
+input[type=radio]:checked+.radio,input[type=radio]:checked+.checkbox,.choose .b_radius{border-color:#316f4d!important}
+input[type=radio]:checked+.radio>*,input[type=radio]:checked+.checkbox>*,.choose .b_radius>*{background:#316f4d!important}
+
+.bd_main_color{ border-color:#316f4d!important}
+.bg_main,a.bg_main,.btn_main,a.btn_main{background-color:#316f4d!important}
+.color_main,a.color_main,.btn_void,a.btn_void{color:#316f4d!important}
+.weui_btn_primary{color:white!important;background-color:#316f4d!important }
+.cards_list .item{border-color:#316f4d!important; background:none}
+.goods_name,.cards_list .item .goods_desc,.ui_price{color:#316f4d!important;}
+.btn_void.cur{background:#316f4d!important}
+.balance-pay{color:#316f4d!important}
+.tc_body span{color:#316f4d!important }
+.tc_body>div>flex>ib:nth-child(2){border: 1px transparent solid; color: white; background-color: #316f4d!important }
+.record .active {color:#316f4d!important }
+.number_con >p:nth-of-type(1) {color:#316f4d!important; font-size: 0.929rem; }
+.card_info .choiced{color: #316f4d!important;border: 1px solid #316f4d !important;}
+.theprice{color: #316f4d!important;}
+.liji{ background-color: #316f4d!important;}
+.choiced:after{     background-image: url(../images/gou_green.png)!important;}
+.number_con >p:nth-of-type(1){color: white!important;}
+.weui_extra_area{ position: static;text-align: center; padding: 15px 0; }

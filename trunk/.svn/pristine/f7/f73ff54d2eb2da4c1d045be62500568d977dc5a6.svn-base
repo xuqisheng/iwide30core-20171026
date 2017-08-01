@@ -1,0 +1,131 @@
+<?php
+class Iwidepay_refund_model extends MY_Model{
+
+    const TAB_IWIDEPAY_REFUND = 'iwide_iwidepay_refund';
+	function __construct() {
+		parent::__construct ();
+	}
+
+    protected function db_read(){
+        
+        $db_read = $this->load->database('iwide_r1',true);
+        return $db_read;
+        
+    }
+    
+    protected function db_write(){
+        
+        return $this->db;
+    }
+
+    /**
+     * @author 沙沙
+     * @param string $select
+     * @param array $where 条件
+     * @return array $data
+     * @date 2017-6-28
+     */
+    public function get_one($select = '*',$where = array())
+    {
+        $res = $this->db_read()->select($select)->where($where)->get(self::TAB_IWIDEPAY_REFUND)->row_array();
+        return $res;
+    }
+
+    /**
+     * 获取 交易流水数量
+     */
+    public function count_refund($filter)
+    {
+        $sql = "SELECT count(R.id) as num
+                FROM ".self::TAB_IWIDEPAY_REFUND." AS R";
+
+        $where = $this->set_where_sql($filter);
+
+        $sql .= " WHERE {$where}";
+
+        $data = $this->db_read()->query($sql)->row_array();
+        return $data ? $data['num'] : 0;
+    }
+
+    /**
+     * 获取 退款记录
+     */
+    public function get_refund($select = 'R.*',$filter,$cur_page,$page_size)
+    {
+        $sql = "SELECT {$select},H.name as hotel_name,P.name
+                FROM ".self::TAB_IWIDEPAY_REFUND." AS R";
+        $sql .= " LEFT JOIN iwide_hotels as H ON H.inter_id = R.inter_id AND H.hotel_id = R.hotel_id";
+        $sql .= " LEFT JOIN iwide_publics as P ON P.inter_id = R.inter_id";
+
+        $where = $this->set_where_sql($filter);
+
+        $sql .= " WHERE {$where}";
+        $sql .= " ORDER BY R.id desc";
+        $sql .= $this->gen_limit($cur_page,$page_size);
+        $data = $this->db_read()->query($sql)->result_array();
+        return $data;
+    }
+
+
+    /**
+     * 创建查询条件sql语句
+     * @access 	public
+     * @param 	array	$filter 需要操作的数组
+     * @return 	string
+     */
+    public function set_where_sql($filter)
+    {
+        $where = ' R.refund_status >= 0';
+        if(!empty($filter['inter_id']) && $filter['inter_id'] !='ALL_PRIVILEGES')
+        {
+            $where .= " and  R.inter_id = '{$filter['inter_id']}'";
+        }
+        if (!empty($filter['hotel_id']))
+        {
+            $where .= " and R.hotel_id IN ({$filter['hotel_id']})";
+        }
+        //模块
+        if (!empty($filter['module']))
+        {
+            $where .= " and R.module = '{$filter['module']}'";
+        }
+
+        //退款类型
+        if (!empty($filter['type']))
+        {
+            $where .= " and R.type = {$filter['type']}";
+        }
+
+        if (!empty($filter['start_time']))
+        {
+            $where .= " and R.add_time >= '{$filter['start_time']}'";
+        }
+
+        if (!empty($filter['end_time']))
+        {
+            $where .= " and R.add_time <= '{$filter['end_time']} 23:59:59'";
+        }
+
+        //单号
+        if (!empty($filter['orig_order_no']))
+        {
+            $where .= " and R.orig_order_no LIKE '%{$filter['orig_order_no']}%'";
+        }
+
+        return $where;
+    }
+
+    /**
+     * 取得列表限定记录数
+     * @access 	public
+     * @param   string		$page 当前页数
+     * @param   boolean		$page_size	偏移量
+     * @return  string		拼装的sql语句
+     */
+    public function gen_limit($page, $page_size){
+        $page = intval($page);
+        $page_size = intval($page_size);
+        return $page_size > 0 ? (' limit ' . max(0, ($page-1)*$page_size) . ', ' . max(1, $page_size)) : '';
+    }
+
+}

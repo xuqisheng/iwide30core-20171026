@@ -1,0 +1,76 @@
+<?php include 'header.php' ?>
+    <section class="gradient_bg wrapper order_details_wrap">
+        <?php if(!empty($orders)){foreach($orders as $o){ ?>
+        
+         <div class="order_rows">
+            <div class="shadow_r"></div>
+            <a href="<?php echo Hotel_base::inst()->get_url("ORDERDETAIL",array('oid'=>$o['id']))?>">
+                <?php if($o['status']==0 || $o['status']==1){ ?>
+                <p class="color3 h28 mar_t30"><?php echo $o['status_des'];?></p>
+                <?php }else{ ?>
+                <p class="main_color1 h28 mar_t30"><?php echo $o['status_des'];?></p>
+                <?php }?>
+                <p class="color1 h38 my_order_name"><?php echo $o['hname'];?></p>
+            <p class="h24 mar_b20">
+                <span class="color3"><?php if(isset($o['first_detail']['roomname'])){echo $o['first_detail']['roomname'];}?> - <?php echo $o['hname'];?></span>
+                <span class="color3"><?php echo $o['roomnums'] ?>间</span>
+            </p>
+            <p class="h24 my_order_time">
+                <span class="mar_r10 color3">入住</span><span class="mar_r20 color2"><?php echo date('m/d',strtotime($o['startdate']));?></span>
+                <span class="mar_r10 color3">离店</span><span class="mar_r20 color2"><?php echo date('m/d',strtotime($o['enddate']));?></span>
+            </p>
+            <p class="main_color1 iconfont h30">&#xFFE5; <span class="h48"><?php echo $o['price'];?></span></p>
+            </a>
+            <?php if ($o['re_pay']==1){?>
+                <div class="order_list_payment">
+            	        <p class="order_payment_time color3 h22 float">支付倒计时 <span class="main_color2 h28 time_out" last_repay_time="<?php echo $o['orderstate']['last_repay_time']?>"></span></p>
+        	            <a class="button2 iconfont floatr my_order_button" href="<?php echo $o['orderstate']['repay_url']?>">立即支付</a>
+                </div>
+            <?php }else{?>
+            <div class="webkitbox webkitright iconfont">
+            	<?php if ($o['status']==3&&$o['can_comment']==1){?>
+                	<a class="color2 h24" href="<?php echo Hotel_base::inst()->get_url("TO_COMMENT",array('oid'=>$o['id']));?>">评论</a>
+                    <span class="order_operation_line"></span>
+                <?php }?>
+                <?php if ($o['orderstate']['self_checkout']){?>
+                   	<a class="color2 h24 mar_r40" href="<?php echo $o['orderstate']['self_checkout']==1?Hotel_base::inst()->get_url("CHECK_OUT",array('oid'=>$o['id'])):"javascript:void(0)";?>"><?php echo $o['orderstate']['self_checkout_des'];?></a>
+                <?php }?>
+                <a class="button xs my_order_button" href="<?php echo Hotel_base::inst()->get_url("INDEX",array('h'=>$o['hotel_id'],'type'=>$o['price_type']));?>">再次预定</a>
+            </div> 
+            <?php }?>
+        </div>
+        <?php }}else{?>
+        	<div class="blankpage">
+                <p class="iconfont">&#xe053;</p>
+                <p class="color3 center h28"><a href="<?php echo $index_url;?>">还没有订单，逛逛订房~</a></p>
+            </div>
+        <?php }?>
+        <?php include 'footer.php' ?>
+
+    </section>
+    <script type="text/javascript">
+        var N =function(num){
+            if(num<10) return '0'+num;
+            else return num;
+        }
+        var time;
+        time = setInterval(function(){
+            $(".time_out").each(function(){
+                var newtime = new Date(getNowFormatDate()),
+                    oldtime = new Date($(this).attr("last_repay_time")),
+                    s1 = newtime.getTime(),
+                    s2 = oldtime.getTime(),
+                    total = (s2 - s1)/1000,
+                    day = parseInt(total / (24*60*60)),//计算整数天数
+                    afterDay = total - day*24*60*60,//取得算出天数后剩余的秒数
+                    hour = parseInt(afterDay/(60*60)),//计算整数小时数
+                    afterHour = total - day*24*60*60 - hour*60*60,//取得算出小时数后剩余的秒数
+                    min = parseInt(afterHour/60),//计算整数分
+                    afterMin = total - day*24*60*60 - hour*60*60 - min*60;//取得算出分后剩余的秒数
+                    if(total < 0){return false;}
+                    $(this).html(N(hour)+":"+N(min)+":"+N(afterMin))
+            })
+        },1000)
+    </script>
+</body>
+

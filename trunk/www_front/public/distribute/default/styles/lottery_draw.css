@@ -1,0 +1,63 @@
+@charset "utf-8";
+/* CSS Document */
+html,body{height:100%;min-height:100%;}
+.box{height:100%;width:100%;background:url(../images/bg_8.png) no-repeat center;
+background-size:100%;}
+.txt_fill{width:71%;height:27%;margin:auto;position:relative;padding-top:15%;
+background:url("../images/box_1.png") no-repeat center;
+background-size:100%;z-index:2;}
+.b_btns{width:15%;height:15%;position:absolute;top:10%;left:-13%;}
+.txt_fill .txt_11{width:90%;margin:auto;}
+.txt_fill .txt_11 h2{text-align:center;font-size:1.2rem;color:#000;}
+.txt_fill .txt_11 p{text-align:center;padding:2% 0;color:#000;}
+.txt_fill .tim{position:absolute;bottom:0;left:40%;font-size:1rem;font-weight:bold;color:#ff0000;}
+.n_body{height:54%;width:100%;background:url(../images/bg_1.png) no-repeat center bottom;
+background-size:100%;position:absolute;bottom:0;}
+.n_body .pterson{width:43%;position:absolute;top:-4%;left:28%;}
+.n_body .di{position:absolute;width:27%;height:24%;background:url(../images/in_2.png) no-repeat;
+background-size:100%;float:right;z-index:9;right:10%;top:24%;}
+.di .coin{width:80%;height:24%;margin:auto;padding-top:16%;}
+.bi_btn{width:75%;margin:auto;padding-top:52%;}
+.bi_btn h2{width:68%;margin:auto;background:rgba(255,255,255,0.5);border-radius:1rem;}
+.bi_btn h2 img{display:block;width:60%;margin:auto;padding:2% 0;}
+.fenSan{width:70%;height:20%;position:absolute;bottom:0;right:10%;background:url('../images/bb.png') no-repeat center right;
+background-size:20%;}
+.txt_bg{width:80%;height:80%;}
+.fix{width:100%;height:100%;position:fixed;top:0;left:0;background:rgba(0,0,0,.7);z-index:9999;display:none;}
+.lin_btn{width:70%;height:28%;background:#fde15b;border-radius:.3rem;margin:45% auto;padding:2% 8%;}
+.lin_btn > p{height:50%;}
+.lin_btn > p:first-child{border-bottom:1px solid #d7bf4d;}
+.lin_btn .li_txt{padding:1% 0;}
+.lin_btn .linqu{text-align:center;}
+.lin_btn .linqu span{display:block;width:34%;background:#ff441b;margin:10% auto;padding:3% 0;
+border-radius:.2rem;color:#fff;}
+.di .s_animate{
+-webkit-animation:a_building 3s 1s linear infinite;
+-mox-animation:a_building 3s 1s linear infinite;
+animation:a_building 3s 1s linear infinite;
+-0-animation:a_building 3s 1s linear infinite;}
+.n_body .s_animate{
+animation:a_building 3s linear infinite;
+-o-animation:a_building 3s linear infinite;
+-moz-animation:a_building 3s linear infinite;
+-webkit-animation:a_building 3s linear infinite;}
+@-webkit-keyframes a_building{
+	0%{ -webkit-transform:scale(1,1);}
+	25%{ -webkit-transform:scale(1.1,1.1);}
+	50%{ -webkit-transform:scale(.9,.9);}
+	75%{ -webkit-transform:scale(1.1,1.1);}
+	100%{ -webkit-transform:scale(1,1);}
+}
+@-0-keyframes a_building{
+	0%{ -webkit-transform:scale(1,1);}
+	25%{ -webkit-transform:scale(1.1,1.1);}
+	50%{ -webkit-transform:scale(.9,.9);}
+	75%{ -webkit-transform:scale(1.1,1.1);}
+	100%{ -webkit-transform:scale(1,1);}
+}@-moz-keyframes a_building{
+	0%{ -webkit-transform:scale(1,1);}
+	25%{ -webkit-transform:scale(1.1,1.1);}
+	50%{ -webkit-transform:scale(.9,.9);}
+	75%{ -webkit-transform:scale(1.1,1.1);}
+	100%{ -webkit-transform:scale(1,1);}
+}

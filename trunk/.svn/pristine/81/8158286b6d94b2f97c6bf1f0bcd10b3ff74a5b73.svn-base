@@ -1,0 +1,616 @@
+<?php
+if (! defined ( 'BASEPATH' ))
+	exit ( 'No direct script access allowed' );
+/**
+ * 公众号信息
+ *
+ * @author Nfou
+ * @since 2015-11-04
+ * @version 1.0.0
+ * @package models\wx
+ */
+class Publics_model extends CI_Model {
+	function __construct() {
+		parent::__construct ();
+	}
+	const TAB_PUB = 'publics';
+	const TAB_PUBIMG = 'public_images';
+	const TAB_FANS = 'fans';
+	/**
+	 * 根据公众号ID取公众号
+	 *
+	 * @param $id 公众号ID        	
+	 * @param $field ID类型        	
+	 * @param $status 公众号状态，0正常，1停用，2已删除
+	 *        	return $query
+	 */
+	function get_public_by_id($id, $field = 'inter_id', $status = null) {
+		//修改为从库
+		//get_public_by_id
+		$db_read = $this->load->database("iwide_r1", TRUE);
+		
+		if (! is_null ( $status )) {
+			
+			$db_read->where ( 'status', $status );
+		}
+		return $db_read->get_where ( self::TAB_PUB, array (
+				$field => $id 
+		) )->row_array ();
+	}
+	
+	/**
+	 * 取所有公众号
+	 *
+	 * @param $num 数量        	
+	 * @param $offset 起始位置
+	 *        	return $query
+	 */
+	function get_public($num = null, $offset = null) {
+		$db_read = $this->load->database("iwide_r1", TRUE);
+		$db_read->where ( 'status', 0 );
+		if ($num == null)
+			return $db_read->get ( 'publics' )->result ();
+		else
+			return $db_read->get ( self::TAB_PUB, $num, $offset )->result ();
+	}
+	/**
+	 *
+	 * @author libinyan
+	 */
+	public function get_public_hash($params = array(), $select = array(), $format = 'array') {
+		$db_read = $this->load->database("iwide_r1", TRUE);
+		$table = self::TAB_PUB;
+		$select = count ( $select ) == 0 ? '*' : implode ( ',', $select );
+		$db_read->select ( " {$select} " );
+		
+		$where = array ();
+		$dbfields = array_values ( $fields = $db_read->list_fields ( $table ) );
+		foreach ( $params as $k => $v ) {
+			// 过滤非数据库字段，以免产生sql报错
+			if (in_array ( $k, $dbfields ) && is_array ( $v )) {
+				$db_read->where_in ( $k, $v );
+			} else if (in_array ( $k, $dbfields )) {
+				$db_read->where ( $k, $v );
+			}
+		}
+		$result = $db_read->get ( $table );
+		if ($format == 'object')
+			return $result->result ();
+		else
+			return $result->result_array ();
+	}
+	/**
+	 *
+	 * @author libinyan
+	 */
+	public function array_to_hash($array, $label_key, $value_key = NULL) {
+		$data = array ();
+		foreach ( $array as $k => $v ) {
+			// 过滤额外增加的数据 如 key=0的不完整数据
+			if (isset ( $v [$label_key] )) {
+				if ($value_key == NULL) {
+					$key = $k;
+				} else {
+					$key = $v [$value_key];
+				}
+				$data [$key] = $v [$label_key];
+			}
+		}
+		return $data;
+	}
+	/**
+	 *
+	 * @author libinyan
+	 */
+	public function hash_to_option($array) {
+		// [{value:'',text:'All'},{value:'P',text:'P'},{value:'N',text:'N'}],
+		$data = array ();
+		foreach ( $array as $k => $v ) {
+			$data [] = array (
+					'value' => $k,
+					'text' => $v 
+			);
+		}
+		return $data;
+	}
+	/**
+	 *
+	 * @author libinyan
+	 */
+	public function hash_to_optionhtml($array, $selected = NULL) {
+		$html = '';
+		foreach ( $array as $k => $v ) {
+			if ($selected !== NULL && $selected == $k)
+				$html .= "<option value='{$k}' selected='selected'>{$v}</option>";
+			else
+				$html .= "<option value='{$k}'>{$v}</option>";
+		}
+		return $html;
+	}
+	
+	/**
+	 * 创建公众号
+	 *
+	 * @param $array 公众号信息
+	 *        	return 受影响行数
+	 */
+	function create($array) {
+		return $this->db->insert ( self::TAB_PUB, $array );
+	}
+	
+	/**
+	 * 更新公众号
+	 *
+	 * @param $array 公众号信息
+	 *        	return 受影响行数
+	 */
+	function update_public($array) {
+		$this->db->where ( 'inter_id', $array ['inter_id'] );
+		$this->db->update ( self::TAB_PUB, $array );
+	}
+	
+	/**
+	 * 删除公众号
+	 *
+	 * @param $id 公众号内部ID
+	 *        	return 受影响行数
+	 */
+	function delete($id) {
+		/*
+		 * $this->db->where('inter_id',$id);
+		 * return $this->db->update('public',array('status'=>1));
+		 */
+		$this->db->delete ( self::TAB_PUB, array (
+				'inter_id',
+				$id 
+		) );
+	}
+	
+	/**
+	 * 添加幻灯片记录
+	 *
+	 * @param
+	 *        	$data
+	 */
+	function create_lightbox($data) {
+		return $this->db->insert ( self::TAB_PUBIMG, $data );
+	}
+	function update_lightbox($id, $info, $sort) {
+		$this->db->where ( 'id', $id );
+		return $this->db->update ( self::TAB_PUBIMG, array (
+				'info' => $info,
+				'sort' => $sort 
+		) );
+	}
+	function save_lightbox($inter_id,$id,$data,$type){
+		if (empty($id)){
+			$data['inter_id']=$inter_id;
+			$data['type']=$type;
+			return $this->create_lightbox($data);
+		}else{
+			$map=array('id'=>$id,'inter_id'=>$inter_id,'type'=>$type);
+			$data=array_diff_key($data, $map);
+			if (!empty($data)){
+				$this->db->where($map);
+				return $this->db->update(self::TAB_PUBIMG,$data);
+			}
+		}
+		return FALSE;
+	}
+	function save_focus(){
+		$datas['image_url']  = trim($this->input->post('imgurl'));
+		$datas['info']       = trim($this->input->post('describe'));
+		$datas['sort']       = $this->input->post('sort');
+        $datas['link']       = $this->input->post('link');
+        
+        if (empty($datas['link'])){
+        	$datas['link']='#';
+        }else{
+        	if(strpos($datas['link'],'http://')!==0&&strpos($datas['link'],'https://')!==0){
+        		$datas['link']='http://'.$datas['link'];
+        	}
+        }
+        
+		$key= $this->input->post('key');
+		if(empty($key)){
+			$datas['inter_id']   = $this->input->post('inter_id');
+			$datas['status']     = 0;
+			$datas['type']       = 'hotelslide';
+			return $this->db->insert(self::TAB_PUBIMG,$datas) > 0;
+		}else{
+			$this->db->where(array('inter_id'=>$this->input->post('inter_id'),'id'=>$this->input->post('key')));
+			return $this->db->update(self::TAB_PUBIMG,$datas) > 0;
+		}
+	}
+	function del_focus(){
+		$this->db->where(array('inter_id'=>$this->input->get('inter_id'),'id'=>$this->input->get('key')));
+		return $this->db->delete(self::TAB_PUBIMG) > 0;
+	}
+
+    function update_focus(){
+    	
+    	$link=$this->input->get('link');
+    	if (empty($link)){
+    		$link='#';
+    	}else{
+    		if(strpos($link,'http://')!==0&&strpos($link,'https://')!==0){
+    			$link='http://'.$link;
+    		}
+    	}
+    	$data = array (
+            'info' =>$this->input->get('info'),
+            'sort' => $this->input->get('sort'),
+            'link' => $link
+        );
+    	$imgurl = trim($this->input->get('imgurl'));
+    	if(!empty($imgurl)){
+    		$data['image_url'] = $imgurl;
+    	}
+        $this->db->where(array('inter_id'=>$this->input->get('inter_id'),'id'=>$this->input->get('key')));
+        $this->db->update ( self::TAB_PUBIMG, $data );
+        return true;
+    }
+	
+	/**
+	 * 删除幻灯片记录
+	 *
+	 * @param $id 幻灯片id        	
+	 */
+	function del_lightbox($id) {
+		$this->db->where ( 'id', $id );
+		return $this->db->update ( self::TAB_PUBIMG, array (
+				'status' => 1 
+		) );
+	}
+	function get_pub_imgs($id, $type = '',$status='valid') {
+		$db_read = $this->load->database('iwide_r1',true);
+		$db_read->order_by ( 'sort desc' );
+		$db_read->where ( array (
+				'inter_id' => $id,
+				// 				'status' => 0,
+				'type' => $type
+		) );
+		switch ($status){
+			case 'valid':
+				$db_read->where('status',0);
+				break;
+			case 'normal':
+				$db_read->where_in('status',array(0,1));
+				break;
+			case 'delete':
+				$db_read->where('status',2);
+				break;
+			default:
+				break;
+		}
+		return $db_read->get ( self::TAB_PUBIMG )->result_array ();
+	}
+	/**
+	 * 根据ID取幻灯片
+	 *
+	 * @param $id 公众号ID        	
+	 *        	return $query
+	 */
+	function get_pub_img_by_id($id) {
+		$db_read = $this->load->database('iwide_r1',true);
+		return $db_read->get_where ( self::TAB_PUBIMG, array (
+				'id' => $id 
+		) )->row_array ();
+	}
+	function get_public_by_hotel_id($hotel_id, $inter_id = '') {
+		$db_read = $this->load->database('iwide_r1',true);
+		$sql = "SELECT p.* FROM iwide_hotels h INNER JOIN iwide_public p ON h.inter_id=p.inter_id WHERE h.hotel_id=$hotel_id";
+		if ($inter_id)
+			$sql .= " and h.inter_id=$inter_id";
+		$sql .= " limit 1";
+		return $db_read->query ( $sql )->row_array ();
+	}
+	function get_wxuser_info($inter_id, $openid, $accesstoken = null,$continue = TRUE) {
+		$this->load->model ( 'wx/Access_token_model' );
+		$access_token = $this->Access_token_model->get_access_token ( $inter_id );
+		if ($accesstoken)
+			$url = "https://api.weixin.qq.com/sns/userinfo?access_token=$accesstoken&openid=$openid&lang=zh_CN";
+		else
+			$url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token=' . $access_token . '&openid=' . $openid;
+
+		
+		$this->write_log("Public_model:get_wxuser_info()-->curl_url : " . $url.' | '.empty($access_token) ? 'cgi user info' : 'sns user info');
+
+		$con = curl_init ( $url );
+		curl_setopt ( $con, CURLOPT_HEADER, false );
+		curl_setopt ( $con, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt ( $con, CURLOPT_SSL_VERIFYPEER, false );
+		$result = curl_exec ( $con );
+
+		$this->write_log("Public_model:get_wxuser_info()-->result : " . json_encode($result));
+
+		$result = json_decode ( $result, TRUE );
+		if(isset($result['errcode']) && ($result['errcode'] == 40001 || $result['errcode'] == 42001) && $continue){
+			$access_token = $this->Access_token_model->reflash_access_token($inter_id);
+			return $this->get_wxuser_info($inter_id, $openid, null, false);
+		}
+		return $result;
+	}
+
+	/**
+	 * 2016-7-20 16:02:31
+	 * 将更新fans表的依据改为isset($result['headimgurl'])
+	 * 原依据$result['headimgurl']的值作为判断导致没有设置头像的用户数据不加入fans表
+	 * 
+	 * 2016-09-12 增加统一分配粉丝编号机制 Ounianfeng
+	 */
+	function update_wxuser_info($inter_id, $openid, $accesstoken = null) {MYLOG::w("UPDATE1 | {$inter_id} | openid={$openid}","check_soma_fansinfo");
+		$db_read = $this->load->database('iwide_r1',true);
+		$check = $db_read->get_where ( self::TAB_FANS, array (
+				'openid' => $openid,
+				'inter_id' => $inter_id 
+		) );
+		//统一分配粉丝编号 2016-09-12 Ounianfeng
+		$this->load->model('wx/Fans_key_model');
+		if ($check->num_rows () > 0) {MYLOG::w("UPDATE2 | {$inter_id} | openid={$openid}","check_soma_fansinfo");
+			$result = $this->get_wxuser_info ( $inter_id, $openid, $accesstoken );
+			if(isset($result ['subscribe']) && $result ['subscribe'] == 1){
+				$sql = 'INSERT IGNORE INTO iwide_fans_subs (`inter_id`,`event`,`openid`,`source`,`hotel_id`,`club_source`,`event_time`) VALUES (?,?,?,?,?,?,?)';
+				$this->db->query($sql,[$inter_id,2,$openid,-1,-1,-1,date('Y-m-d H:i:s')]);
+			}MYLOG::w('result1'.json_encode($result),"check_soma_fansinfo");
+			if (!empty($result ['openid'])) {
+				if (isset($result ['headimgurl'])) {
+					$stime = null;
+					if (!empty($result ['subscribe_time']))
+						$stime = date ( "Y-m-d H:i:s", $result ['subscribe_time'] );
+					$pams = array (
+							'headimgurl' => $result ['headimgurl'],
+							'nickname' => $result ['nickname'],
+							'sex' => $result ['sex'],
+							'province' => $result ['province'],
+							'city' => $result ['city'],
+							'unionid' => isset($result ['unionid']) ? $result ['unionid'] : '',
+							'privilege' => isset($result ['privilege']) ? json_encode($result ['privilege']) : '',
+							'subscribe_time' => $stime 
+					);
+					$check = $check->row();
+					if(isset($check->fans_key) && $check->fans_key == 0){
+						$pams['fans_key'] = $this->Fans_key_model->get_fans_key();//统一分配粉丝编号 2016-09-12 Ounianfeng
+					}
+					$this->db->where ( array (
+							'openid' => $openid,
+							'inter_id' => $inter_id 
+					) );
+					$this->db->update ( 'fans', $pams );
+					MYLOG::w('result2'.json_encode($pams),"check_soma_fansinfo");
+					
+					
+					
+					
+					//存在unionid添加至用户基础关联表
+					if(isset($result ['unionid']) && $result ['unionid'] != ""){
+					
+						MYLOG::w("UPDATE | {$inter_id} | openid={$openid} | unionid={$result ['unionid']}","insert_update_iwide_fans_ext","_before_update");
+					
+						$this->load->model ( 'wxapp/User_model' );
+					
+						$this->User_model->addUnionidToUser($inter_id,$openid,$result ['unionid']);
+					
+					}else{
+					    
+					    //如果是直播的公众号就增加fans_ext表
+					    /* if($inter_id == 'a469428180'){
+					        	
+					        MYLOG::w("UPDATE | {$inter_id} | openid={$openid} | unionid={$result ['unionid']}","insert_update_iwide_fans_ext","_before_update");
+					
+						      $this->load->model ( 'wxapp/User_model' );
+					
+						      $this->User_model->addUnionidToUserNoUnionid($inter_id,$openid,$result ['unionid']);
+					        	
+					    } */
+					    
+					}
+				}
+			}
+		} else {
+			$result = $this->get_wxuser_info ( $inter_id, $openid, $accesstoken );MYLOG::w('result2--1'.json_encode($result),"check_soma_fansinfo");
+			if(isset($result ['subscribe']) && $result ['subscribe'] == 1){
+				$sql = 'INSERT IGNORE INTO iwide_fans_subs (`inter_id`,`event`,`openid`,`source`,`hotel_id`,`club_source`,`event_time`) VALUES (?,?,?,?,?,?,?)';
+				$this->db->query($sql,[$inter_id,2,$openid,-1,-1,-1,date('Y-m-d H:i:s')]);
+			}MYLOG::w('result2--2'.json_encode($result),"check_soma_fansinfo");
+			if (!empty($result ['openid'])) {
+				$stime = null;
+				if (!empty($result ['subscribe_time']))
+					$stime = date ( "Y-m-d H:i:s", $result ['subscribe_time'] );
+				if (isset($result ['headimgurl'])) {MYLOG::w('result2--3'.json_encode($result),"check_soma_fansinfo");
+					$this->db->insert ( 'fans', array (
+							'inter_id'       => $inter_id,
+							'openid'         => $openid,
+							'headimgurl'     => $result ['headimgurl'],
+							'nickname'       => $result ['nickname'],
+							'sex'            => $result ['sex'],
+							'province'       => $result ['province'],
+							'city'           => $result ['city'],
+							'fans_key'       => $this->Fans_key_model->get_fans_key(),//统一分配粉丝编号 2016-09-12 Ounianfeng
+							'unionid'        => isset($result ['unionid']) ? $result ['unionid'] : '',
+							'privilege'      => isset($result ['privilege']) ? json_encode($result ['privilege']) : '',
+							'subscribe_time' => $stime 
+					) );
+				} else {MYLOG::w('result2--4'.json_encode($result),"check_soma_fansinfo");
+					$this->db->insert ( 'fans', array (
+							'inter_id'       => $inter_id,
+							'fans_key'       => $this->Fans_key_model->get_fans_key(),//统一分配粉丝编号 2016-09-12 Ounianfeng
+							'openid'         => $openid, 
+							'subscribe_time' => $stime 
+					) );
+				}
+				MYLOG::w('result2--5',"check_soma_fansinfo");
+				//如果是直播的公众号就增加fans_ext表
+				if($inter_id == 'a469428180'){
+				    	
+				    $result ['unionid'] = (isset($result ['unionid'])&&$result ['unionid']!="")?$result ['unionid']:"null";
+				    	
+				}
+				
+				//存在unionid添加至用户基础关联表
+				if(isset($result ['unionid']) && $result ['unionid'] != ""){
+				
+					MYLOG::w("UPDATE | {$inter_id} | openid={$openid} | unionid={$result ['unionid']}","insert_update_iwide_fans_ext","_before_update");
+	
+					$this->load->model ( 'wxapp/User_model' );
+					
+					$this->User_model->addUnionidToUser($inter_id,$openid,$result ['unionid']);
+					
+				}else{
+				    
+				    //如果是直播的公众号就增加fans_ext表
+				    /* if($inter_id == 'a469428180'){
+				    
+				        MYLOG::w("UPDATE | {$inter_id} | openid={$openid} | unionid={$result ['unionid']}","insert_update_iwide_fans_ext","_before_update");
+				        	
+				        $this->load->model ( 'wxapp/User_model' );
+				        	
+				        $this->User_model->addUnionidToUserNoUnionid($inter_id,$openid,$result ['unionid']);
+				    
+				    } */
+				    
+				}
+			}
+		}
+		return ;
+	}
+
+    /**
+     * 获取粉丝信息
+     * @param $openid 微信ID
+     * @return mixed
+     */
+	function get_fans_info($openid,$inter_id = '') {
+		$db_read = $this->load->database('iwide_r1',true);
+		$where = array('openid'=>$openid);
+		if(!empty($inter_id))
+			$where['inter_id'] = $inter_id;
+		$db_read->where($where);
+		$query = $db_read->get ( self::TAB_FANS )->row_array ();
+		return $query;
+	}
+	
+	/**
+	 * 通过多个openid获取所有粉丝信息
+	 * @param Array $openids
+	 */
+	public function get_fans_info_byIds($openids)
+	{
+		$db_read = $this->load->database('iwide_r1',true);
+	    if( is_array($openids) ){
+			$db_read->where_in('openid', $openids);
+	    } else {
+			$db_read->where('openid', $openids);
+	    }
+		return $db_read->where('nickname is not', NULL)->get( self::TAB_FANS )->result_array ();
+	}
+	
+	function get_fans_info_one($inter_id,$openid) {
+		$db_read = $this->load->database('iwide_r1',true);
+		$db_read->order_by('id','desc');
+		$db_read->limit(1);
+		return $db_read->get_where ( self::TAB_FANS, array (
+				'inter_id'=>$inter_id,
+				'openid' => $openid
+		) )->row_array ();
+	}
+	function get_fans_ext($inter_id, $openid) {
+	    $db = $this->load->database('iwide_r1',true);
+	    $db->limit ( 1 );
+	    $db->where ( array (
+	            'inter_id' => $inter_id,
+	            'openid' => $openid
+	    ) );
+	    return $db->get ( 'fans_ext' )->row_array ();
+	}
+    
+    public function get_authorizer_info($authorizer_appid,$component_appid,$component_access_token = ''){
+    	if(empty($authorizer_appid)) return NULL;
+    	$this->load->model('wx/access_token_model');
+    	$this->load->helper('common');
+    	if(empty($component_access_token)){
+    		$component_access_token = $this->access_token_model->get_component_access_token();
+    	}
+    	$url = 'https://api.weixin.qq.com/cgi-bin/component/api_get_authorizer_info?component_access_token='.$component_access_token;
+    	$params = array('component_appid'=>$component_appid,'authorizer_appid'=>$authorizer_appid);
+    	$res_str = doCurlPostRequest($url, json_encode($params));
+    	$res = json_decode($res_str);
+    	$avgs['name']        = $res->authorizer_info->nick_name;
+    	$avgs['public_id']   = $res->authorizer_info->user_name;
+    	$avgs['wechat_name'] = $res->authorizer_info->alias;
+    	$avgs['logo']        = $res->authorizer_info->head_img;
+    	$avgs['app_type']    = $res->authorizer_info->verify_type_info->id;
+    	$avgs['auth_info']   = $res_str;
+    	$this->load->model('wx/publics_model');
+    	$app_info = $this->publics_model->get_public_by_id($params['authorizer_appid'],'app_id');
+    	
+    	//Set app auth info
+    	$this->access_token_model->set_redis_key_status($app_info['inter_id'].'_AUTH_INFO',$res_str);
+    	
+    	$inter_id = 'a'.substr(time(),1);
+    	$avgs['is_authed']   = 2;
+    	if(empty($app_info)){
+	    	$avgs['app_id']      = $res->authorization_info->authorizer_appid;
+    		$avgs['inter_id']    = $inter_id;
+	    	$avgs['create_time'] = date('Y-m-d H:i:s');
+	    	if($this->input->get('auth_code'))
+	    		$avgs['auth_code'] = $this->input->get('auth_code');
+	    	if($this->input->get('expires_in'))
+	    		$avgs['auth_expire_time'] =  $this->input->get('expires_in') + time();
+    		$avgs['auth_time'] = time();
+	    	$this->db->insert('publics',$avgs);
+	    	$res->inter_id = $inter_id;
+	    	
+	    	//Set admin account infos
+	    	$admin_profiler = $this->session->userdata('admin_profiler');
+	    	$this->db->where(array('admin_id'=>$admin_profiler['admin_id']));
+	    	$this->db->update('core_admin',array('inter_id'=>$res->inter_id));
+	    	
+    	}else{
+    		$this->db->where(array('app_id'=>$authorizer_appid));
+    		$this->db->update('publics',$avgs);
+	    	$res->inter_id = $app_info['inter_id'];
+    	}
+    	return $res;
+    }
+    
+	
+	//日志写入
+    public function write_log( $content )
+    {
+        $file= date('Y-m-d'). '.txt';
+        //echo $tmpfile;die;
+        $path= APPPATH.'logs'.DS. 'public_oauth'. DS;
+        if( !file_exists($path) ) {
+            @mkdir($path, 0777, TRUE);
+        }
+        $fp = fopen( $path. $file, 'a');
+
+        $CI = & get_instance();
+        $ip= $CI->input->ip_address();
+        $content= str_repeat('-', 40). "\n[". date('Y-m-d H:i:s'). ']'
+            ."\n". $ip. "\n". $content. "\n";
+        fwrite($fp, $content);
+        fclose($fp);
+    }
+    
+    public function update_auth_status($params){
+    	$avgs = array();
+    	if(!isset($params['app_id'])){
+    		return FALSE;
+    	}
+    	if(isset($params['info_typ'])){
+    		$avgs['is_authed'] = $params['info_typ']; 
+    		$avgs['auth_time'] = date('Y-m-d H:i:s');
+    	}
+    	if(isset($params['authorization_code'])){
+    		$avgs['auth_code'] = $params['authorization_code'];
+    	}
+    	if(isset($params['expire_time'])){
+    		$avgs['auth_expire_time'] = $params['expire_time'];
+    	}
+    	$this->db->where('app_id',$params['app_id']);
+    	return $this->db->update('publics',$avgs);
+    }
+
+}

@@ -1,0 +1,127 @@
+@charset "utf-8";
+/* CSS Document */
+*{margin:0;padding:0;-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-text-size-adjust:none;-webkit-text-size-adjust:100%;font-family: pingfang sc regular,Helvetica Neue,sans-serif;outline:0; box-sizing:border-box;background-clip:padding-box}
+body{font-family:pingfang sc regular,Helvetica Neue,sans-serif;}
+input,select,textarea,button,a{ border:none; font-weight:normal; resize:none; background:none;-webkit-appearance:none; color:#555;}
+table,input{border-collapse:collapse;border-spacing:0}
+img{border:0; width:100%;}
+abbr,acronym{border:0;font-variant:normal}
+del{text-decoration:line-through}
+label,input{font-family:pingfang sc regular,Helvetica Neue,sans-serif;}
+address,caption,cite,code,dfn,em,th,var{font-style:normal;font-weight:500}
+ol,ul{list-style:none}
+div,p{line-height:1.5}
+.txt_nowrap{text-overflow:ellipsis;white-space:nowrap;overflow: hidden;}
+a,a:active,a:visited{text-decoration: none;}
+/* 字体大小 */
+body,html,input,button,textarea{font-size:14px; /*基础字体大小*/} 
+
+.h36{font-size:1.285rem}
+.h34{font-size:1.214rem}
+.h32{font-size:1.143rem}
+.h30{font-size:1.071rem}
+.h28{font-size:1rem/*基础字体大小*/}
+.h26{font-size:0.929rem}
+.h24{font-size:0.857rem}
+.h22{font-size:0.785rem}
+.h20{font-size:0.714rem}
+.h18{font-size:0.642rem}
+
+.l_h_12{line-height:1.3}
+.clearfix:after {content: "" ;display:block;height:0;clear:both;visibility:hidden;} 
+.m_t_4{margin-top:4.5%;}
+.m_t_2{margin-top:2%;}
+.m_t_1{margin-top:1%;}
+.border_bottom,.border_top{position:relative;}
+.border_bottom:before{
+	content: '';
+	position:absolute;
+	bottom:0px;
+	left:0;
+	border-bottom: 1px solid #e1e1e1;
+	-webkit-box-sizing:border-box;
+	box-sizing: border-box;
+	width: 200%;
+	height: 0;
+	-webkit-transform:scale(0.5);
+	transform:scale(0.5);
+	-webkit-transform-origin:left top;
+	transform-origin:left bottom;
+}
+.border_bottom:after{
+	height:0px;bottom:0;
+}
+.border_top:after{
+	content:'';
+	position:absolute;
+	top:0px;
+	left:0;
+	border-top:1px solid #e1e1e1;
+	-webkit-box-sizing:border-box;
+	box-sizing:border-box;
+	width:200%;
+	height:0;
+	-webkit-transform:scale(0.5);
+	transform:scale(0.5);
+	-webkit-transform-origin:left top;
+	transform-origin:left top;
+}
+.f_s_185{font-size:1.857rem}
+img{display:inline-block;width:100%;height:auto;}
+.p_3{padding:3% 0;}
+.float_l{float:left;}
+.bg_f{background:#fff}
+.bg_ff7{background:#ff7200;}
+.w_100{width:100%;}
+
+.hd{padding-top:3%;}
+.h_txt{font-size:12px;color:#000;line-height:1.5;}
+.page_title{padding:0 3%;}
+.logo{width:50px;height:50px;border-radius:50%;overflow:hidden;float:left;margin-right:4%;border:1px solid #e4e4e4;}
+.emwith{width:8em;}
+.txt-float-right{text-align:right;}
+.txt-color{color:#000;}
+/*.txt-line-height{line-height:35px;}*/
+.panel{margin:4.5%;padding:3% 0;border:1px solid #e4e4e4;border-radius:8px;background:#fff;}
+.weui_cell{padding:7.5px 15px;position:relative;display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-align: center;-webkit-align-items: center;-ms-flex-align: center;align-items: center;}
+.weui_label{display:block;}
+.weui_cell_primary{-webkit-box-flex:1;-webkit-flex:1;-ms-flex:1;flex:1;}
+
+.weui_cells_title{margin-top:.77em;margin-bottom:.3em;padding-left:15px;padding-right:15px;color:#888;font-size:14px;}
+.hook{width:25px;height:25px;}
+.weui_icon_checked{width:25px;height:25px;margin-right:2%;background:url(../images/empty.png) no-repeat;background-size:100% auto;vertical-align: middle;display:inline-block;}
+.weui_check{position:absolute;left:-9999em;}
+.weui_check:checked+.weui_icon_checked{background:url(../images/check.png) no-repeat;background-size:100% auto;}
+
+.j_ico{display:inline-block;width:23px;height:16px;}
+.j_ico > img{display:block;width:100%;height:auto;}
+.add_bg{background:url(http://ihotels.iwide.cn/public/okpay/default/images/check.png) no-repeat 95% center;
+		background-size: 17px 17px;}
+.active_color{color:#999;}
+
+.weui_btn_area{margin:1.17647059em 15px 0.3em;}
+.weui_btn{position:relative;display:block;margin-left:auto;margin-right:auto;padding-left:14px;padding-right:14px;box-sizing:border-box;font-size:18px;text-align:center;text-decoration:none;color:#FFFFFF;line-height:2.3;border-radius:5px;-webkit-tap-highlight-color: rgba(0, 0, 0, 0);overflow:hidden;width:100%;}
+
+/*余额支付密码start*/
+.pb_4{padding-bottom:4%;}
+.flex{position:fixed;top:0px;left:0px;z-index:5;background:rgba(0, 0, 0, 0.8);width:100%;height:100%;display:none;}	
+.fle_box{width:82%;margin:24% auto;background:#fff;border-radius:15px;text-align:center;}
+.title{font-size:20px;padding:10px 0px;border-bottom:1px solid #ff9900;position: relative;}
+.close{width:15px;height:15px;display:block;margin:1% 0 0 0%;position: absolute;left:4%;top:31%;}
+.title >div{text-align: center;}
+.ho_name{font-size:14px;padding:17px 0;}
+.f_money{font-size:32px;line-height:1;}
+.fle_btn{width:87.5%;margin:auto;margin-top:12%;font-size:20px;background:#ff9900;padding:5px 30px;border-radius:3px;color:#fff;}
+.error{padding:15px 0;font-size:15px;}
+.list_input,.btn_list{display:flex;align-items:center;display:-webkit-flex;-webkit-align-items:center;justify-content:center;-webkit-justify-content:center;}
+.btn_list a{display:block;flex:1;-webkit-flex:1;}
+.btn_list div{flex:1;-webkit-flex:1;padding:13px 0;color:#2d87e2;position:relative;}
+.list_input{width:87.5%;height:38px;border:1px solid #e4e4e4;margin:auto;margin-top:8%;}
+.list_input .box_input{height:100%;flex:1;-webkit-flex:1;width:16.5%;position:relative;line-height:38px;overflow:hidden;}
+.list_input .box_input:last-child:after{content:'';width:0;height:0;}
+.flex_div{width:100%;height:100%;position:absolute;top:0px;left:0px;}
+.box_input input{width:100%;height:100%;text-align:center;font-size:16px;}
+#input{position:absolute;top:0px;left:0px;}
+#input:focus{left:-1300px;}
+.active:before{content:'';position:absolute;top:50%;left:50%;width:16px;margin-left:-8px;height:16px;margin-top:-8px;border-radius:50%;background-color:#000;}
+/*余额支付密码end*/

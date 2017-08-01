@@ -1,0 +1,24 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * class Fans_saler
+ * 泛分销控制器
+ */
+class Fans_saler extends CI_Controller
+{
+    /**
+     * 激活
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     */
+    public function active()
+    {
+        $header['title']    = '招募令';
+        $data['origin_url'] = urldecode($this->input->get('origin_url', true));
+        $base_path = 'soma' . DS . 'default' . DS . 'package' . DS;
+        $html = $this->load->view($base_path . 'fans_saler_header', $header, true);
+        $html .= $this->load->view($base_path . 'fans_saler_active', $data, true);
+        echo $html;
+    }
+}

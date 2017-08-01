@@ -1,0 +1,62 @@
+@charset "utf-8";
+/* CSS Document */
+.ui_ico{ height:0.8rem; width:0.8rem; display:inline-block;vertical-align:middle; background:no-repeat center; background-size:100%;margin-top:-1%;}
+.ui_ico.ui_ico1{background-image:url(../images/ico_2.png);}
+.ui_ico.ui_ico2{background-image:url(../images/ico_4.png);}
+.ui_ico.ui_ico3{background-image:url(../images/ico_1.png);}
+.ui_ico.ui_ico4{background-image:url(../images/ico_6.png);}
+.ui_ico.ui_ico5{background-image:url(../images/ico_3.png);}
+.padding{padding:4%; margin-bottom:4%}
+.modify,.c_fff{color:#fff;}
+.head{height:5.6rem;width:100%;background:url(../images/bg01.jpg) no-repeat; background-size:cover; color:#fff;position:relative;}
+.head .user_name{font-size:0.8rem; margin:1% 0;}
+.head .user_data{ float:right; margin-top:3%; font-size:0.55rem;}
+.head .user_data{ background:url(../images/ico13.png) no-repeat; background-position:center 5%; background-size:5%;}
+.head .user_img{float:left;}
+.modify{float:right;}
+.head .viplv_black{padding:1%; font-size:0.55rem;color:#fff;}
+.head .mask{ background:rgba(0,0,0,0.3);width:100%;height:33%;position:absolute;bottom:0;left:0;display: -webkit-box;}
+.head .mask .lis{color:#fff;-webkit-box-flex:1;text-align:center;padding:2% 0;position:relative;}
+.head .mask .lis:after{content:'';position:absolute;top:0px;right:0px;height:100%;width:0px;border-right:1px solid #fff;-webkit-transform:scaleY(0.5)}
+.head .mask .lis:last-child:after{content:'';border-right:0px;}
+.head .mask .lis >div{color:#fff;font-weight:100;}
+.head .mask .lis .f_txt{font-size:0.5rem;}
+
+
+.user_img{width:2.5rem; height:2.5rem; border-radius:50%;margin-right:3%; overflow:hidden}
+.user_img img{ min-height:100%; min-width:100%;}
+
+.ui_list{ padding-left:3%; font-size:0.7rem;border:1px solid #b5b8bd; border-left:0; border-right:0;}
+.ui_list .ui_item{overflow:hidden; padding:4% 0; padding-right:3%; border-bottom:1px solid #b5b8bd;}
+.ui_list .ui_item:last-child{ border-bottom:0;}
+.ui_list .ui_item .user_img{ float:left;}
+.ui_list .ui_item .user_name{ padding:2% 0;}
+.ui_list .ui_item .ui_content,.ui_list .ui_item .ui_time{overflow:hidden;white-space:nowrap;text-overflow:ellipsis; color:#999999;}
+
+.ui_btn{width:1.2rem; height:1.2rem;  color:#fff; line-height:1.2rem; display:inline-block;vertical-align:bottom; margin-bottom:1%}
+.ui_normal_btn{display:inline-block; -webkit-appearance:none; background:#6fcd6e;color:#fff; border:1px solid #6fcd6e; padding:2%; border-radius:0.2rem;}
+.ui_normal_btn.ui_disable_btn{ background:#fff;color:#c3c3c3; border:1px solid #e3e3e3;}
+.ui_foot_btn{width:93%;color:#fff; padding:3% 0;margin:8% auto; background:#6fcd6e; text-align:center; border-radius:0.3rem;display:block; font-size:0.7rem;}
+.ui_foot_fixed_btn{width:100%;padding:2% 0; position:fixed; bottom:0;background:#fff; text-align:center;border-top:1px solid #e3e3e3;display:block; }
+.ui_foot_fixed_btn div{font-size:0.45rem; margin-top:1%; color:#000}
+
+
+.disable{ background:#e3e3e3; color:#999999}
+.send_btn{ background:#0088df;color:#fff; text-align:center;line-height:1.2rem; font-size:0.6rem; border-radius:0.2rem; padding:1% 0;margin-right:0 !important;margin-bottom:0; white-space:nowrap; float:right; min-width:3.5em; max-width:5em;}
+
+.ui_count{position:absolute; right:-0.2rem; top:-0.2rem; background:#e60012; text-align:center; color:#fff; width:0.8rem; height:0.8rem; line-height:0.8rem; font-size:0.5rem; border-radius:50%; }
+.ui_notic_default{ color:#cf0b0b; background:#feefda; padding:2% 3%; display:block; text-decoration:underline; font-size:0.55rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+
+.ui_border {border:1px solid #e1e1e1; border-left:0; border-right:0; margin-top:4%;}
+.ui_btn_list,.ui_normal_list{padding-left:3%; background:#fff;}
+.ui_btn_list .item,.ui_normal_list .item{padding:4%; padding-left:0;display:block; border-top:1px solid #e1e1e1; position:relative; color:#000; overflow:hidden}
+.ui_btn_list .item{background:url(../images/arro_1.png) no-repeat center right; background-position: 96% 40%;background-size: auto 30%;}
+.ui_btn_list .item span,.ui_normal_list .item span{float:right; margin-right:4%; color:#999; font-size:0.5rem;}
+.ui_btn_list .item:first-child,.ui_normal_list .item:first-child{ border:0}
+.ui_normal_list .item span{font-size:0.6rem; margin-right:0}
+
+
+.ui_btn_list .address{ background:url(../images/ico10.png) no-repeat; background-position:96% center; background-size:6%}
+.ui_btn_list .address:after{content:none;}
+.ui_btn_list .address tt{ font-size:0.8rem;}
+.ui_btn_list .address div{ width:80%; margin-top:2%; font-size:0.55rem; color:#666}

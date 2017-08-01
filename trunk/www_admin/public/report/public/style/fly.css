@@ -1,0 +1,10 @@
+@charset "utf-8";
+/* CSS Document */
+
+.fly_animate{overflow:hidden; text-align:left}
+.fly_animate img{ width:0.4rem; position:absolute;}
+.fly_animate img.plane{ width:4rem; top:3rem; left:0}
+
+
+
+

@@ -1,0 +1,20 @@
+@charset "utf-8";
+/* CSS Document */
+body,html{background:#fff;}
+.p_head{width:100%;padding:0.3rem 0;background:#f8f8f8;}
+.p_head .head_con{width:96%;margin:auto;}
+.p_head .head_con .h_l{width:4rem;border-radius:0.3rem;float:left; text-align:center; height:4rem; border:1px solid #e4e4e4;overflow: hidden; background:#fff; margin-right:4%;}
+.p_head .head_con .h_l img{width:auto; height:100%}
+.p_head .head_con .h_r{;}
+.p_head .head_con .h_r .h_name{line-height:1.2rem;font-weight:bold;}
+.p_head .head_con .h_r .txt_details{font-size:0.5rem;color:#999; word-break:break-all;overflow : hidden;text-overflow: ellipsis;display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical; line-height:1.5}
+.p_head .head_con p font{font-size:1rem;color:#ff7200;}
+.con_list{width:100%;}
+.con_list .show_lis{width:96%;margin:auto;}
+.con_list .show_lis p{border-bottom:1px solid #e4e4e4;line-height:1.8rem;}
+.con_list .show_lis p font{float:right}
+.fix{width:100%;position:fixed;bottom:0;left:0;border-top:1px solid #e4e4e4;}
+.fix span{display:block;}
+.fix .money{float:left;width:64%;text-indent:0.3rem;font-weight:bold; margin-top:3%;}
+.fix .money font{font-size:0.8rem;}
+.fix .fast_pay{float:right;width:34%;text-align:center;color:#fff; padding:4% 0;background:#fe4e00;}

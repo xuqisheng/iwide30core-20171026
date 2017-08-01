@@ -1,0 +1,51 @@
+<body class="bg_fafafa">
+<div class="pageloading"><p class="isload">正在加载</p></div>
+<div class="index_title" style="display: none;">
+    <div><a><span class="active">热门景点</span></a></div>
+    <div><a><span class="">附近景点</span></a></div>
+</div>
+<?php if( $ticketList ):?>
+    <?php foreach( $ticketList as $k=>$v ):?>
+        <div class="container">
+            <div id="slide" class="slide">
+                <?php
+                    if( isset( $v['block_arr'] ) && $v['block_arr'] ):
+                        foreach( $v['block_arr'] as $sk=>$sv ):?>
+                            <div class="img">
+                                <a href="<?php echo $sv['block_link'];?>"><img src="<?php echo $sv['block_img'];?>"></a>
+                            </div>
+                <?php 
+                        endforeach;
+                    endif;
+                ?>
+                <div class="slide-bt"></div>
+            </div>
+        </div>
+    <?php endforeach;?>
+<?php endif;?>
+<div class="container_list">
+    <?php if( $products ):?>
+        <?php foreach( $products as $k=>$v ):?>
+            <div class="bg_fff containers m_b_12 clearfix">
+                <a href="">
+                    <div class="con_img"><img src="<?php echo isset($v['face_img']) ? $v['face_img'] : base_url('public/soma/images/default.jpg'); ?>"></div>
+                    <div class="contents">
+                        <div class="cont_title text_ellipsis"><?php echo $v['name'];?></div>
+                        <div class="cont_txt"><?php echo $v['hotel_name'];?></div>
+                        <div class="cont_price"><span class="cont_price_ico">¥</span><?php echo $v['price_package'];?></div>
+                        <div class="d_flex_r cont_btn_list">
+                            <a href="<?php echo Soma_const_url::inst()->get_url('*/*/package_detail',array('id'=>$this->inter_id,'pid'=>$v['product_id'],'tkid'=>$ticketId)); ?>">
+                                <span class="btn_details color_ff9900">查看详情</span>
+                            </a>
+                            <a href="<?php echo Soma_const_url::inst()->get_url('*/*/ticket_select_time',array('id'=>$this->inter_id,'pid'=>$v['product_id'],'tkid'=>$ticketId)); ?>">
+                                <span class="btn_buy bg_ff9900 color_fff">快速购买</span>
+                            </a>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        <?php endforeach;?>
+    <?php endif;?>
+</div>
+</body>
+</html>

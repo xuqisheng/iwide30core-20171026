@@ -1,0 +1,28 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{height:100%;}
+.feeling{height:100%; width:100%;background:#8fcebd; color:#cf7ca6; }
+.feeling .bgimg{font-size:0;}
+.feeling .logo{width:12%;position:absolute;margin:3% 4%; right:0; top:0;}
+.feeling .content{ padding:3% 4%; padding-bottom:0;background:no-repeat top left;background-size:100% auto; height:70%;}
+.feeling .content .detail{ position:absolute; right:9%; z-index:999; text-align:right;}
+.feeling .content .imgbox,.feeling .content .imgscroll,.feeling .content .imgscroll img,.feeling .content .imgscroll ul{height:7rem;}
+.feeling .content .imgbox{ margin:5% 0; overflow:hidden; width:100%; position:relative}
+.feeling .content .imgscroll{text-align:center; width:100%;overflow-x:hide;}
+.feeling .content .imgscroll img{ width:auto}
+.feeling .content .imgscroll ul{ position:relative; left:0;}
+.feeling .content .imgscroll ul li{float:left;}
+.feeling .content .name{ width:70%}
+.name,.price{font-size:0.7rem}
+.feeling .content .ico{position:absolute; top:40%;left:0; z-index:99; padding:10% 5%;}
+.feeling .content .ico img{width:80%}
+.feeling .content .next{right:0; left:auto !important;}
+.feeling .content .box1{left:-100%;}
+.feeling .content .box3{left:100%;}
+.feeling .link{position:absolute; bottom:0;text-align:center; width:100%}
+.feeling .link a{width:24%;  display:inline-block;color:#cf7ca6; }
+
+.feeling .btn {text-align:right; padding:0 5%;}
+.feeling .btn a{border:1px solid #d3d3d3;display:inline-block; width:47%; text-align:center; padding:4% 0; font-size:0.7rem; background:#fff; color:#333; border-radius:0.2rem;}
+.feeling .btn a:first-child{ float:left;background:#a53f71; color:#fff;border-color:#4a1d38}

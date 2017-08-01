@@ -1,0 +1,461 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * Class Payment
+ *
+ * @property Sales_order_model $Sales_order_model
+ * @property Sales_payment_model $sales_payment_model
+ */
+class Payment extends MY_Controller {
+
+    public $db_soma = 'iwide_soma';
+    public $db_soma_read = 'iwide_soma_r';
+
+    public $db_shard_config= array();
+    public $current_inter_id= '';
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->load->somaDatabase($this->db_soma);
+        $this->load->somaDatabaseRead($this->db_soma_read);
+    }
+    
+    /**
+     * 拉起微信支付操作，因支付目录限制，已经移到 index.php/wxpay/soma_pay
+     */
+    public function wxpay_invoke()
+    {
+        $order_id= $this->input->get('order_id');
+        $inter_id= $this->input->get('inter_id');
+        $openid= $this->input->get('openid');
+
+        $this->load->model('soma/Sales_order_model');
+	    $order_detail= $this->Sales_order_model->find( array('order_id'=> $order_id) );
+        //$order=
+        if( $order_id && $inter_id && $openid && $order_detail ){
+            $this->load->model('pay/wxpay_model');
+            $this->load->model('pay/pay_model' );
+            $this->load->model('wx/publics_model');
+			$public = $this->publics_model->get_public_by_id($inter_id);
+			
+			if(!empty($public['app_id'])){
+			    $pay_paras=$this->pay_model->get_pay_paras($inter_id);
+			    //print_r($pay_paras);die;
+			    if( isset($pay_paras['sub_mch_id']) ){
+			        $this->wxpay_model->setParameter("sub_openid", $openid);
+			        $this->wxpay_model->setParameter("sub_mch_id", $pay_paras['sub_mch_id']);
+			        $this->wxpay_model->setParameter("mch_id", $pay_paras['mch_id']);
+			        
+			    } else {
+			        $this->wxpay_model->setParameter("openid", $openid);
+			        $this->wxpay_model->setParameter("mch_id", $pay_paras['mch_id']);
+			        if(empty($pay_paras['app_id'])) //new
+			            $pay_paras['app_id']= $public['app_id'];
+			    }
+
+			    $this->load->model('soma/Sales_order_model');
+			    $business_type= $this->Sales_order_model->get_business_type();  //各种业务类型中文标识：套票|
+			    $settle_type= $this->Sales_order_model->get_settle_label();  //各种结算方式中文标识：普通购买|拼团购买
+			    $order_desc= '社交商城_';
+			    $order_desc.= array_key_exists($order_detail['business'], $business_type)? $business_type[$order_detail['business']]: '';
+			    $order_desc.= array_key_exists($order_detail['settlement'], $settle_type)? $settle_type[$order_detail['settlement']]: '';
+			    $order_desc.= '_单号：'. $order_id;
+			    
+			    $this->wxpay_model->setParameter("body", $order_desc);//商品描述
+			    $this->wxpay_model->setParameter("total_fee", $order_detail['grand_total']* 100 );//总金额
+			    $this->wxpay_model->setParameter("out_trade_no", $order_id );//商户订单号
+			    $this->wxpay_model->setParameter("notify_url", Soma_const_url::inst()->get_payment_return() .'/'. $order_id );//通知地址
+			    $this->wxpay_model->setParameter("trade_type", "JSAPI");//交易类型
+			    $prepay_id = $this->wxpay_model->getPrepayId($pay_paras);
+			    $this->wxpay_model->setPrepayId($prepay_id);
+			    $jsApiObj["appId"]     = $pay_paras['app_id'];
+			    $jsApiObj["timeStamp"] = (string) $timeStamp;
+			    $jsApiObj["nonceStr"]  = $this->wxpay_model->createNoncestr();
+			    $jsApiObj["package"]   = "prepay_id=$prepay_id";
+			    $jsApiObj["signType"]  = "MD5";
+			    $jsApiObj["paySign"]   = $this->wxpay_model->getSign($jsApiObj, $pay_paras);
+			    $parameters = json_encode($jsApiObj);
+			    //print_r($parameters);die;
+			}
+			$data['success_url'] = Soma_const_url::inst()->get_payment_success( array('order_id'=> $order_id, 'id'=> $inter_id) );
+			$data['fail_url'] = Soma_const_url::inst()->get_payment_fail( array('order_id'=> $order_id, 'id'=> $inter_id) );
+			$data['jsApiParameters'] = $parameters;
+			//$this->display ( 'pay/mall_pay/wxpay', $data );
+			$this->load->view ( 'soma/payment/wxpay', $data);
+            
+        } else 
+            exit('参数错误，微信支付失败');
+    }
+
+    /**
+     * 	签名校验
+参数名ASCII码从小到大排序（字典序）
+如果参数的值为空不参与签名
+参数名区分大小写
+验证调用返回或微信主动通知签名时，传送的sign参数不参与签名，将生成的签名与该sign值作校验
+微信接口可能增加字段，验证签名时必须支持增加的扩展字段
+     * @see https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=4_3
+     */
+    public function get_sign( array $params, $key)
+    {
+        $fields= array('sign', 'id', );
+        foreach ($params as $k => $v) {
+            if( in_array($k, $fields) ) unset($params[$k]);
+            elseif( !$v ) unset($params[$k]); //参数为空不参与签名
+            
+        }
+        //签名步骤一：按字典序排序参数
+        ksort($params);
+        $string = http_build_query( $params, false ). "&key=". $key;
+        return strtoupper(md5($string));
+    }
+
+    public function write_log( $content, $tmpfile )
+    {
+        //echo $tmpfile;die;
+        $path= APPPATH. 'logs'. DS. 'payment'. DS;
+        if( !file_exists($path) ) {
+            @mkdir($path, 0777, TRUE);
+        }
+        $fp = fopen( $path. $tmpfile, 'a');
+
+        $CI = & get_instance();
+        $ip= $CI->input->ip_address();
+        $content= str_repeat('-', 40). "\n[". date('Y-m-d H:i:s'). ']'
+            ."\n". $ip. "\n". $content. "\n";
+        fwrite($fp, $content);
+        fclose($fp);
+    }
+    
+    /**
+     * 微信支付回调操作
+     * URL format: index.php/soma/payment/wxpay_return/15301616967
+     */
+    public function wxpay_return()
+    {
+		$xml = file_get_contents ( 'php://input' );
+        $this->load->model('soma/Sales_order_model');
+        
+		//$this->db->insert ( 'weixin_text', array('content'=>$xml, 'edit_date'=> time() ) );     //初步记录记录返回的内容
+		$result = (array) simplexml_load_string( $xml, 'SimpleXMLElement', LIBXML_NOCDATA );
+		$out_trade_no= $this->Sales_order_model->wx_out_trade_no_decode($result['out_trade_no']);
+		if( empty($result) ){
+		    Soma_base::inst()->show_exception($out_trade_no. '微信支付回调xml为空！');
+		}
+		
+		//解析前写入log
+		$file= 'soma_wxpay_return_'. date('Y-m-d'). '.txt';
+		$this->write_log($xml, $file);
+		
+        $order_id= $this->uri->segment(4);
+		if( empty($order_id) ){
+		    Soma_base::inst()->show_exception($out_trade_no. '微信支付回调缺少订单号！');
+		}
+        $order_simple= $this->Sales_order_model->get_order_simple($order_id);
+
+        //初始化数据库分片配置
+        if( $order_simple['inter_id'] ){
+            $this->load->model('soma/shard_config_model', 'model_shard_config');
+            $this->current_inter_id= $order_simple['inter_id'];
+            $this->db_shard_config= $this->model_shard_config->build_shard_config($order_simple['inter_id']);
+            //print_r($this->db_shard_config);
+        } else {
+            Soma_base::inst()->show_exception($out_trade_no. '微信支付回调数据分片配置失败！');
+        }
+
+		//签名校验数据的合法性
+		$this->load->model('pay/pay_model');
+		$pay_config= $this->pay_model->get_pay_paras($order_simple['inter_id']);
+		$pay_key= isset($pay_config['key'])? $pay_config['key']: '';
+		if( empty($pay_key) ){
+		    Soma_base::inst()->show_exception($out_trade_no. '微信支付回调商户配置信息不完整！');
+		}
+		$params= (array) $result;
+        $sign= $this->get_sign($params, $pay_key);
+        if($result['sign'] != $sign){
+            $file= 'soma_wxpay_return_signerr.txt';
+            $this->write_log($xml, $file);      //记录下签名失败的记录
+            Soma_base::inst()->show_exception($out_trade_no. '微信支付回调签名错误！');
+        }
+        
+        //========判断订单的order_id, openid, 总金额是否相符
+        $this->load->helper('soma/math');  //防止精度损失导致数额不匹配
+        $total_dif= float_precision_match($result['total_fee'], $order_simple['grand_total'] *100);
+        if( ! $total_dif ){
+            $file= 'soma_wxpay_return_exception.txt';
+            $this->write_log($xml, $file);      //记录下签名失败的记录
+            Soma_base::inst()->show_exception($out_trade_no. '微信支付回调返回total_fee['
+                . $result['total_fee'] .']与订单金额[' . $order_simple['grand_total']*100 .']不一致！');
+        }
+        /** //子商户号时无法匹配
+        if( $result['openid'] != $order_simple['openid']  ){
+            $file= 'soma_wxpay_return_exception.txt';
+            $this->write_log($xml, $file);      //记录下签名失败的记录
+            Soma_base::inst()->show_exception($out_trade_no. '微信支付回调返回openid['
+                . $result['openid'] .']与订单openid[' . $order_simple['openid'] .']不一致！');
+        } */
+        if( $out_trade_no != $order_id ){
+            $file= 'soma_wxpay_return_exception.txt';
+            $this->write_log($xml, $file);      //记录下签名失败的记录
+            Soma_base::inst()->show_exception($out_trade_no. '微信支付回调返回out_trade_no['
+                . $out_trade_no .']与订单号[' . $order_id .']不一致！');
+        }
+        //========判断订单的order_id, openid, 总金额是否相符
+
+		//处理结果成功与否
+        $this->load->helper('soma/package');
+		if ($result ["return_code"] == "FAIL") {
+		    //通信标识，非交易标识，返回失败处理
+            write_log($xml, 'wxpay_return_code_fail.txt' );
+		    
+		} elseif ($result ["result_code"] == "FAIL") {
+		    //业务结果，支付失败处理
+            write_log($xml, 'wxpay_result_code_fail.txt' );
+		    
+		} else {
+            $debug = true;
+            if ($debug) write_log('soma payment wxpay_return invoked');
+
+			//公共保存部分
+            $this->load->model('soma/sales_payment_model');
+            $payment_model= $this->sales_payment_model;
+            //取得商户/子商户的openid,
+            //$openid = empty ( $result['sub_openid'] ) ? $result['openid'] : $result['sub_openid'];
+            
+            $log_data= array();
+            $log_data['paid_ip']= $this->input->ip_address();
+            $log_data['paid_type']= $payment_model::PAY_TYPE_WX;
+            $log_data['order_id']= $order_id;
+            $log_data['openid']= $order_simple['openid'];
+            $log_data['business']= $order_simple['business'];
+            $log_data['settlement']= $order_simple['settlement'];
+            $log_data['inter_id']= $order_simple['inter_id'];
+            $log_data['hotel_id']= $order_simple['hotel_id'];
+            $log_data['grand_total']= $order_simple['grand_total'];
+            $log_data['transaction_id']= $result['transaction_id'];
+            /**
+             * @var Sales_order_model $order
+             */
+            $order = $this->Sales_order_model->load($out_trade_no);
+            if( empty($order) ){
+                Soma_base::inst()->show_exception($out_trade_no. '微信支付回调 Sales Model初始化失败！');
+            }
+
+            if( !in_array( $order->m_get('status'), $order->can_payment_status()) ) {
+                Soma_base::inst()->show_exception('订单号[' .$log_data['order_id'] .']不能重复支付，或目前处于不能支付的状态。');
+            }
+
+            $order->order_payment( $log_data );
+            $order->order_payment_post();
+            
+            $this->sales_payment_model->save_payment($log_data, NULL);  //校验签名时已经记录
+            //$this->sales_payment_model->save_payment($log_data, $xml);  //插入支付记录，并文件记录xml内容
+
+            if ($debug) write_log('soma payment wxpay_return invoked end');
+            
+		}
+		//告知微信成功接收到该通知信息 @see https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_2
+		echo 'SUCCESS';
+    }
+
+    /**
+     * wft微信支付回调操作
+     * URL format: index.php/soma/payment/wxpay_return/15301616967
+     */
+    public function wftpay_return()
+    {
+        $xml = file_get_contents('php://input');
+       
+        $result = (array) simplexml_load_string( $xml, 'SimpleXMLElement', LIBXML_NOCDATA );
+        if( empty($result) ){
+            Soma_base::inst()->show_exception('wft，微信支付回调xml为空！');
+        }
+
+        //初始化订单model
+        $this->load->model('soma/Sales_order_model','OrderModel');
+        $OrderModel = $this->OrderModel;
+
+        //解析前写入log
+        $file= 'soma_wftpay_return_'. date('Y-m-d'). '.txt';
+        $this->write_log($xml, $file);
+
+        $this->load->library('WftPay/ClientResponseHandler',null,'ClientResponseHandler');
+        $this->ClientResponseHandler->setContent($xml);
+        //var_dump($this->ClientResponseHandler->setContent($xml));
+
+        //获取支付返回的信息
+        $openid = $this->ClientResponseHandler->getParameter('sub_openid');
+        $out_trade_no = $this->ClientResponseHandler->getParameter('out_trade_no');
+        $out_trade_no= $OrderModel->wx_out_trade_no_decode($out_trade_no);
+        $transaction_id = $this->ClientResponseHandler->getParameter('transaction_id');
+
+        //获取订单号
+        $order_id = $this->uri->segment(4);
+        if( empty($order_id) ){
+            Soma_base::inst()->show_exception($out_trade_no. '，wft，微信支付回调缺少订单号！');
+        }
+
+        //获取订单信息
+        $order_simple = $OrderModel->get_order_simple($order_id);
+        if( empty($order_simple) ){
+            Soma_base::inst()->show_exception($out_trade_no. '，wft，微信支付回调简单订单信息为空！');
+        }
+
+        //初始化数据库分片配置
+        if( $order_simple['inter_id'] ){
+            $this->load->model('soma/shard_config_model', 'model_shard_config');
+            $this->current_inter_id= $order_simple['inter_id'];
+            $this->db_shard_config= $this->model_shard_config->build_shard_config($order_simple['inter_id']);
+        } else {
+            Soma_base::inst()->show_exception($out_trade_no. '，wft，微信支付回调数据分片配置失败！');
+        }
+
+        //========判断订单的order_id, openid, 总金额是否相符
+        $this->load->helper('soma/math');  //防止精度损失导致数额不匹配
+        $total_dif= float_precision_match($result['total_fee'], $order_simple['grand_total'] *100);
+        if( ! $total_dif ){
+            $file= 'soma_wftpay_return_exception.txt';
+            $this->write_log($xml, $file);      //记录下签名失败的记录
+            Soma_base::inst()->show_exception($out_trade_no. '，wft，微信支付回调返回total_fee['
+                . $result['total_fee'] .']与订单金额[' . $order_simple['grand_total']*100 .']不一致！');
+        }
+
+        //检查用户
+        // $openid = 'o9Vbtw5bgFCel1nuSugUG4uVVZ3k';
+        if( $openid != $order_simple['openid']  ){
+            $file= 'soma_wftpay_return_exception.txt';
+            $this->write_log($xml, $file);      //记录下签名失败的记录
+            Soma_base::inst()->show_exception($out_trade_no. '，wft，微信支付回调返回openid['
+                . $result['openid'] .']与订单openid[' . $order_simple['openid'] .']不一致！');
+        }
+
+        //检查订单号
+        if( $out_trade_no != $order_id ){
+            $file= 'soma_wxpay_return_exception.txt';
+            $this->write_log($xml, $file);      //记录下签名失败的记录
+            Soma_base::inst()->show_exception($out_trade_no. '，wft，微信支付回调返回out_trade_no['
+                . $out_trade_no .']与订单号[' . $order_id .']不一致！');
+        }
+        //========判断订单的order_id, openid, 总金额是否相符
+
+        //获取配置
+        $this->load->model ( 'pay/Pay_model' );
+        $inter_id = $order_simple['inter_id'];
+        // $inter_id = 'a463642921';
+        $pay_paras = $this->Pay_model->get_pay_paras ( $inter_id, 'weifutong' );
+        $pay_key= isset($pay_paras['key'])? $pay_paras['key']: '';
+        if( empty($pay_key) ){
+            Soma_base::inst()->show_exception($out_trade_no. '，wft，微信支付回调商户配置信息不完整！');
+        }
+
+        if(isset($pay_paras['sub_key_h_'.$order_simple['hotel_id']]) && !empty($pay_paras['sub_key_h_'.$order_simple['hotel_id']]))
+            $this->ClientResponseHandler->setKey($pay_paras['sub_key_h_'.$order_simple['hotel_id']]);
+        else
+            $this->ClientResponseHandler->setKey($pay_paras['key']);
+
+        if($this->ClientResponseHandler->isTenpaySign()){
+            if($this->ClientResponseHandler->getParameter('status') == 0 && $this->ClientResponseHandler->getParameter('result_code') == 0){
+                //echo $this->ClientResponseHandler->getParameter('status');
+                //此处可以在添加相关处理业务，校验通知参数中的商户订单号out_trade_no和金额total_fee是否和商户业务系统的单号和金额是否一致，一致后方可更新数据库表中的记录。 
+                //更改订单状态
+
+                //处理结果成功与否
+                $this->load->model('soma/Sales_order_model');
+                $this->load->model('soma/sales_payment_model');
+                $payment_model= $this->sales_payment_model;
+                
+                $CI = & get_instance();
+                $ip= $CI->input->ip_address();
+
+                $log_data= array();
+                $log_data['paid_ip']= $ip;
+                $log_data['paid_type']= $payment_model::PAY_TYPE_WFT;
+                $log_data['order_id']= $order_id;
+                $log_data['openid']= $order_simple['openid'];
+                $log_data['business']= $order_simple['business'];
+                $log_data['settlement']= $order_simple['settlement'];
+                $log_data['inter_id']= $order_simple['inter_id'];
+                $log_data['hotel_id']= $order_simple['hotel_id'];
+                $log_data['grand_total']= $order_simple['grand_total'];
+                $log_data['transaction_id']= $transaction_id;
+                $order= $this->Sales_order_model->load($out_trade_no);
+                if( !$order ){
+                    Soma_base::inst()->show_exception($out_trade_no. '，wft，微信支付回调 Sales Model初始化失败！');
+                }
+                
+                $order->order_payment( $log_data );
+                $order->order_payment_post( $log_data );
+                
+                $this->sales_payment_model->save_payment($log_data, NULL);  //校验签名时已经记录
+                //$this->sales_payment_model->save_payment($log_data, $xml);  //插入支付记录，并文件记录xml内容
+                echo 'success';
+                exit();
+            }else{
+                $this->load->helper('soma/package');
+                write_log($xml, 'wxpay_result_code_fail.txt' );
+                echo 'success';
+                exit();
+            }
+        }else{
+            Soma_base::inst()->show_exception($out_trade_no. '，wft，微信支付回调签名失败！');
+            echo 'failure';
+        }
+    }
+
+    
+    
+    
+    
+/* ------------------------ testing function----------------------- */
+    public function test()
+    {
+        $this->load->model('soma/shard_config_model', 'model_shard_config');
+        $this->current_inter_id= 'a429262687';
+        $this->db_shard_config= $this->model_shard_config->build_shard_config('a429262687');
+        
+        $this->load->model('soma/Sales_order_model');
+        $model= $this->Sales_order_model->load('1000001082');
+        var_dump($model);
+    }
+    public function test_return()
+    {
+        if( isset($_SERVER['CI_ENV']) && $_SERVER['CI_ENV']=='production' ){
+            Soma_base::inst()->show_exception('不能在此环境运行');
+            
+        } else {
+            //@file phpinput_xmlrpc.php
+            $http_entity_body = <<<EOF
+<xml><appid><![CDATA[wx9a938bc5cd0aeacc]]></appid>
+<bank_type><![CDATA[CFT]]></bank_type>
+<cash_fee><![CDATA[1]]></cash_fee>
+<fee_type><![CDATA[CNY]]></fee_type>
+<id><![CDATA[a450089706/1000001080]]></id>
+<is_subscribe><![CDATA[Y]]></is_subscribe>
+<mch_id><![CDATA[1295048101]]></mch_id>
+<nonce_str><![CDATA[vq3ol79quomsaw6t65phbbwioj82u0ur]]></nonce_str>
+<openid><![CDATA[o9Vbtw5bgFCel1nuSugUG4uVVZ3k]]></openid>
+<out_trade_no><![CDATA[1000001080]]></out_trade_no>
+<result_code><![CDATA[SUCCESS]]></result_code>
+<return_code><![CDATA[SUCCESS]]></return_code>
+<sign><![CDATA[B60DA8DD47242F0E6329701D34FC0870]]></sign>
+<time_end><![CDATA[20160509192302]]></time_end>
+<total_fee>1</total_fee>
+<trade_type><![CDATA[JSAPI]]></trade_type>
+<transaction_id><![CDATA[4004192001201605095678400604]]></transaction_id>
+</xml>
+EOF
+;
+            $this->load->helper('common');
+            $url= 'http://credit.iwide.cn/soma/payment/wxpay_return/1000001080';
+            // $url= 'http://tf.iwide.cn/soma/payment/wftpay_return/1000001080';
+            $result= doCurlPostRequest($url, $http_entity_body);
+            print_r($result);
+        }
+    }
+    
+    
+    
+}

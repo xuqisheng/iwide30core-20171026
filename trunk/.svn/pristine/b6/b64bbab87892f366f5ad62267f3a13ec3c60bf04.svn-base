@@ -1,0 +1,705 @@
+<?php
+use App\controllers\iapi\admin\traits\Soma;
+use App\services\soma\express\ExpressProvider;
+
+use App\libraries\Iapi\AdminConst;
+use App\services\Result;
+use \App\libraries\Support\Log;
+
+/**
+ * Class Express
+ * @author renshuai  <renshuai@mofly.cn>
+ *
+ */
+class Express extends MY_Admin_Iapi
+{
+    use Soma;
+
+    /**
+     * 订单列表类型
+     */
+    const OTHER_SHIPPING_TYPE = 1;
+
+    /**
+     * 顺丰订单列表类型
+     */
+    const SHUNFENG_TYPE = 2;
+
+
+    public function index() {
+        $data = [
+            '1' => 2
+        ];
+        $ext['count'] = 1;
+
+        $this->out_put_msg(1, '' , $data, 'hotel/goods/get_list', 200, $ext);
+    }
+
+    /**
+     * 顺丰快速下单
+     *
+     * POST request format array('shipping_id' => '557')
+     * @author daikanwu
+     */
+    public function create_shipping_order()
+    {
+        $post = json_decode($this->input->raw_input_stream, true);
+        $this->load->model('soma/Consumer_shipping_model', 'shipping_model');
+        $model = $this->shipping_model;
+        $pk= $model->table_primary_key();
+//        $post = array(
+//            'order_id' => '1000010892',
+//            'shipping_order' => '0',
+//            'shipping_fee' => '0.02',
+//            'address' => '广东佛山三水区测试',
+//            'contacts' => '小米',
+//            'phone' => '13553540712',
+//            'name' => 'iphon54',
+//            'shipping_id' => '546',
+//            'remark' => '备注629'
+//        );
+        if (empty($post[$pk])) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, 'shippingId不能为空', '', $this->route);
+        }
+
+        //检查订单是否存在
+        $model= $model->load($post[$pk]);
+        if(!$model){
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '该订单不存在', '', $this->route);
+        }
+
+        //检查订单状态
+        if ($model->m_get('status')== $model::STATUS_SHIPPED) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '该订单已发货', '', $this->route);
+        }
+
+        //检查货物名称
+        $name = $model->m_get('name');
+        if (empty($name)) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '货物名称不能为空', '', $this->route);
+        }
+
+        //检查地址
+        $address = $model->m_get('address');
+        if (empty($address)) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '地址不能为空', '', $this->route);
+        }
+
+        //检查联系人
+        $contacts = $model->m_get('contacts');
+        if (empty($contacts)) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '联系人不能为空', '', $this->route);
+        }
+
+        //检查联系人电话
+        $phone = $model->m_get('phone');
+        if (empty($phone)) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '联系人电话不能为空', '', $this->route);
+        }
+
+        //检查order_id
+        $order_id = $model->m_get('order_id');
+        if (empty($orderId)) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '订单号不能为空', '', $this->route);
+        }
+
+        $post['address'] = $address;
+        $post['contacts'] = $contacts;
+        $post['phone'] = $phone;
+        $post['name'] = $name;
+        $post['order_id'] = $order_id;
+
+        //调用顺丰下单接口
+        $provider = new ExpressProvider();
+        $express = $provider->resolve($provider::TYPE_SF);
+        $res = $express->createShippingOrder($post);
+        $res = $res->toArray();
+
+        //接口调用成功,更新订单状态
+        if ($res['status'] == Result::STATUS_OK) {
+            $post['post_admin']= $this->session->get_admin_username();
+            $post['remote_ip']= $this->input->ip_address();
+            $post['distributor'] = 'a_sf';
+            $post['tracking_no'] = $res['data'];
+            $result= $model->load($post[$pk])->post_shipping($post);
+            if (!$result) {
+                $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '本地更新订单状态失败', '', $this->route);
+            }
+            //发送模板消息 商品内容没有拼进去
+            $this->load->model('soma/Message_wxtemp_template_model','MessageWxtempTemplateModel');
+            $MessageWxtempTemplateModel = $this->MessageWxtempTemplateModel;
+            $inter_id= $this->inter_id;
+            $business = 'package';
+            $model = $model->load( $post[$pk] );
+            $openid = $model->m_get('openid');
+            $model->distributor = $post['distributor'];
+            $model->tracking_no = $post['tracking_no'];
+            $model->consumer_id = $model->m_get('consumer_id');
+            $MessageWxtempTemplateModel->send_template_by_shipping_success( $model, $openid, $inter_id, $business);
+        }
+        $this->out_put_msg($res['status'], $res['message'], $res['data'], $this->route);
+    }
+
+    /**
+     * 其他物流发货
+     *
+     * POST request format array('shipping_id' => '557', 'distributor' => '', 'tracking_no' => '')
+     * @author daikanwu
+     */
+    public function create_other_shipping_order()
+    {
+        $post = json_decode($this->input->raw_input_stream, true);
+        $this->load->model('soma/Consumer_shipping_model', 'shipping_model');
+        $model = $this->shipping_model;
+        $pk= $model->table_primary_key();
+//        $post = array(
+//            'shipping_order' => '0',
+//            'tracking_no' => '8888888',
+//            'shipping_id' => '561',
+//            'distributor' => 'a_db'
+//        );
+        if (empty($post[$pk])) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, 'shippingId不能为空', '', $this->route);
+        }
+
+        //检查物流商
+        if (empty($post['distributor'])) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '快递商不能为空', '', $this->route);
+        }
+
+        if (empty($post['tracking_no'])) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '快递单号不能为空', '', $this->route);
+        }
+
+        //检查订单是否存在
+        $model= $model->load($post[$pk]);
+        if(!$model){
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '该订单不存在', '', $this->route);
+        }
+
+        //检查订单状态
+        if ($model->m_get('status')== $model::STATUS_SHIPPED) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '该订单已发货', '', $this->route);
+        }
+
+        //更新订单状态
+        $post['post_admin']= $this->session->get_admin_username();
+        $post['remote_ip']= $this->input->ip_address();
+        $result= $model->load($post[$pk])->post_shipping($post);
+        if (!$result) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '本地更新订单状态失败', '', $this->route);
+        }
+        //发送模板消息
+        $this->load->model('soma/Message_wxtemp_template_model','MessageWxtempTemplateModel');
+        $MessageWxtempTemplateModel = $this->MessageWxtempTemplateModel;
+        $inter_id= $this->inter_id;
+        $business = 'package';
+        $model = $model->load( $post[$pk] );
+        $openid = $model->m_get('openid');
+        $model->distributor = $post['distributor'];
+        $model->tracking_no = $post['tracking_no'];
+        $model->consumer_id = $model->m_get('consumer_id');
+        $MessageWxtempTemplateModel->send_template_by_shipping_success( $model, $openid, $inter_id, $business);
+
+        $this->out_put_msg(AdminConst::OPER_STATUS_SUCCESS, '', '', $this->route);
+    }
+
+    /**
+     * 批量下单
+     * POST request format array('shipping_id' => '557,558')
+     * return json format
+     * <code>
+    {
+    "status": 1,
+    "msg": "",
+    "msg_type": "",
+    "web_data":{
+    "check_fail":[1224124,896843968],
+    "create_fail":[432434,54543653]
+    }
+    }
+     * </code>
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    public function batch_create_order()
+    {
+        $post = json_decode($this->input->raw_input_stream, true);
+//        $post = array(
+//            'shipping_id' => '557,558'
+//        );
+        $this->load->model('soma/Consumer_shipping_model', 'shipping_model');
+        $model = $this->shipping_model;
+        $pk= $model->table_primary_key();
+
+        $shipping_ids = explode(',', $post['shipping_id']);
+        if (empty($post[$pk])) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, 'shippingId不能为空', '', $this->route);
+        }
+
+        //获取shipping信息
+        $shipping_info = $model->get_shipping_info(array('shipping_id' => $shipping_ids), $this->inter_id);
+        if (empty($shipping_info)) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '订单不存在', '', $this->route);
+        }
+
+        //记录校验不通过的order
+        $check_fail = array();
+        foreach ($shipping_info as $v) {
+            if ($v['status'] == $model::STATUS_SHIPPED) {
+                $check_fail[$v['shipping_id']] = $v['order_id'];
+                continue;
+            }
+            if (empty($v['order_id'])) {
+                $check_fail[$v['shipping_id']] = $v['order_id'];
+                continue;
+            }
+            if (empty($v['name'])) {
+                $check_fail[$v['shipping_id']] = $v['order_id'];
+                continue;
+            }
+            if (empty($v['address'])) {
+                $check_fail[$v['shipping_id']] = $v['order_id'];
+                continue;
+            }
+            if (empty($v['contacts'])) {
+                $check_fail[$v['shipping_id']] = $v['order_id'];
+                continue;
+            }
+            if (empty($v['phone'])) {
+                $check_fail[$v['shipping_id']] = $v['order_id'];
+                continue;
+            }
+        }
+
+        //调顺丰的下单接口
+        $create_fail = array();
+        $provider = new ExpressProvider();
+        $express = $provider->resolve($provider::TYPE_SF);
+        foreach ($shipping_info as $v) {
+            if (!in_array($v['shipping_id'], array_keys($check_fail))) {
+                $res = $express->createShippingOrder($v);
+                if ($res->getStatus() == Result::STATUS_FAIL) {
+                    $create_fail[$v['shipping_id']] = $v['order_id'];
+                }
+            }
+        }
+
+        $tmp = array('check_fail'=>array_values($check_fail), 'create_fail'=>array_values($create_fail));
+        $count = count($shipping_info);
+        $success_count = $count - count($tmp);
+        $fail_count = count($tmp);
+        if ($fail_count == $count) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '选择'.$count.'单,全部发货失败', (object)$tmp, $this->route);
+        }
+
+        if (count($tmp) < count($shipping_info) && count($tmp) > 0)  {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '选择'.$count."单，{$success_count}单成功"."{$fail_count}单失败，失败订单可手动推送", (object)$tmp, $this->route);
+        }
+        $this->out_put_msg(AdminConst::OPER_STATUS_SUCCESS, '选择'.$count.'单，全部发货成功', '', $this->route);
+
+    }
+
+    /**
+     * 订单结果查询
+     * @param
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    public function check_order()
+    {
+        $post = array('shipping_id' => '559');
+        $provider = new ExpressProvider();
+        $express = $provider->resolve($provider::TYPE_SF);
+        $res = $express->getMailNum('1000011010');
+        $res = $res->toArray();
+
+
+        if ($res['status'] == Result::STATUS_FAIL) {
+            $this->out_put_msg(2, $res['message'], $res['data'], $this->route);
+        }
+        $this->load->model('soma/Consumer_shipping_model', 'shipping_model');
+        $model = $this->shipping_model;
+        $pk= $model->table_primary_key();
+        $model= $model->load($post[$pk]);
+        if(!$model){
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '该订单不存在', '', $this->route);
+        }
+        //
+        $post['post_admin']= $this->session->get_admin_username();
+        $post['remote_ip']= $this->input->ip_address();
+        $post['distributor'] = 'a_sf';
+        $post['tracking_no'] = $res['data'];
+        $result= $model->load($post[$pk])->post_shipping($post);
+        if (!$result) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '本地更新订单状态失败', '', $this->route);
+        }
+        //发送模板消息 商品内容没有拼进去
+        $this->load->model('soma/Message_wxtemp_template_model','MessageWxtempTemplateModel');
+        $MessageWxtempTemplateModel = $this->MessageWxtempTemplateModel;
+        $inter_id= $this->inter_id;
+        $business = 'package';
+        $model = $model->load( $post[$pk] );
+        $openid = $model->m_get('openid');
+        $model->distributor = $post['distributor'];
+        $model->tracking_no = $post['tracking_no'];
+        $model->consumer_id = array($model->m_get('consumer_id'));
+        $MessageWxtempTemplateModel->send_template_by_shipping_success( $model, $openid, $inter_id, $business);
+        $this->out_put_msg(1, $res['message'], $res['data'], $this->route);
+    }
+
+    /**
+     * 获取订单列表
+     *
+     * @example GET /index.php/iapi/v1/soma/express/get_order_list?like=77&status=1&begin_time=&end_time=&page_num=1&page_size=20&type=1
+     * $_GET['like'] 搜索条件
+     * $_GET['status'] 状态 传1未发货 2发货 空搜全部
+     * @author daikanwu
+     */
+    public function get_order_list()
+    {
+        $this->load->model('soma/Consumer_shipping_model', 'shipping_model');
+        $model = $this->shipping_model;
+        $data = $this->input->get();
+//        $data = array(
+//            'begin_time' => '',
+//            'end_time' => '',
+//            'like' => '77',
+//            'status' => 1
+//        );
+        // 分页
+        $page = array('page_num' => 1, 'page_size' => 20);
+        if ($page_size = $this->input->get('page_size', true)) {
+            $page['page_size'] = $page_size;
+        }
+        if ($page_num = $this->input->get('page_num', true)) {
+            $page['page_num'] = $page_num;
+        }
+        if (empty($data['type'])) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, 'type类型不能为空', '',  $this->route);
+        }
+        if (!in_array($data['type'], array(self::OTHER_SHIPPING_TYPE, self::SHUNFENG_TYPE))) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, 'type只能为1或2', '',  $this->route);
+        }
+
+        //组装搜索条件
+        $filter = array(
+            'inter_id' => $this->inter_id,
+        );
+        if (!empty($data['begin_time'])) {
+            $filter['create_time >='] = $data['begin_time'];
+        }
+        if (!empty($data['end_time'])) {
+            $filter['create_time <='] = $data['end_time'].' 23:59:59';
+        }
+        if (!empty($data['status'])) {
+            $filter['status'] = (int)$data['status'];
+        }
+        if ($data['type'] == self::SHUNFENG_TYPE && !empty($data['status'] )) {
+            $filter['distributor'] = 'a_sf';
+        }
+
+        $like_condition = trim($data['like']);
+        $like = array();
+        if (!empty($like_condition)) {
+            $like = [
+                ['and', 'order_id', $like_condition], ['or', 'name', $like_condition], ['or', 'contacts', $like_condition],
+                ['or', 'phone', $like_condition], ['or', 'tracking_no', $like_condition], ['or', 'distributor', $like_condition],
+            ];
+        }
+
+        $select = array('shipping_id,order_id,shipping_order,name,qty,inter_id,openid,address,contacts,phone,create_time,distributor,tracking_no,status');
+
+        //获取数据
+        $result = $model->get_list($filter, $this->inter_id, $select, $page, $like, $data['type']);
+        $ext['page'] = $result['page_num'];
+        $ext['size'] = $result['page_size'];
+        $ext['count'] = $result['total'];
+
+        $this->out_put_msg(AdminConst::OPER_STATUS_SUCCESS, '', (object)$result['data'],  $this->route, 200, $ext);
+    }
+
+
+    /**
+     * 导出订单列表
+     *
+     * @example GET /index.php/iapi/v1/soma/express/export_order_list?&like=&status=&begin_time=&end_time=&type
+     * $_GET['like'] 搜索条件
+     * $_GET['status'] 状态 传1未发货 2发货 空搜全部
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    public function export_order_list()
+    {
+        $this->load->model('soma/Consumer_shipping_model');
+        $start = $this->input->get('begin_time');
+        $end = $this->input->get('end_time');
+        $status = $this->input->get('status');
+        $like_condition = $this->input->get('like');
+        $type = (int)$this->input->get('type');
+        $inter_id = $this->inter_id;
+        if (empty($type)) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, 'type类型不能为空', '', $this->route);
+        }
+        if (!in_array($type, array(self::OTHER_SHIPPING_TYPE, self::SHUNFENG_TYPE))) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, 'type只能为1或2', '', $this->route);
+        }
+
+        if ($inter_id == FULL_ACCESS) {
+            $inter_id = $this->current_inter_id;
+        }
+
+        $filter = array();
+        if ($status) $filter['status'] = $status;
+        if ($start) $filter['create_time >='] = $start;
+        if ($end) $filter['create_time <='] = $end . ' 23:59:59';
+        if ($type == self::SHUNFENG_TYPE && !empty($data['status'])) {
+            $filter['distributor'] = 'a_sf';
+        }
+        $like = array();
+        if ($like_condition) {
+            $like = [
+                ['and', 'order_id', $like_condition], ['or', 'name', $like_condition], ['or', 'contacts', $like_condition],
+                ['or', 'phone', $like_condition], ['or', 'tracking_no', $like_condition], ['or', 'distributor', $like_condition],
+            ];
+        }
+        $select = array('shipping_id,order_id,shipping_order,name,qty,inter_id,openid,address,contacts,phone,create_time,distributor,tracking_no,status');
+
+        //如果hotel_id不为空，添加hotel_id条件
+        $ent_ids = $this->session->get_admin_hotels();
+        $hotel_ids = $ent_ids ? explode(',', $ent_ids) : array();
+        if (count($hotel_ids) > 0) $filter['hotel_id'] = $hotel_ids;
+        $data = $this->Consumer_shipping_model->export_order($filter, $inter_id, $select, $like, $type);
+
+        if (empty($data)) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '数据为空，无法导出', '');
+        }
+        $tmp = array();
+        foreach ($data as $v) {
+//            if ($type == 1) {
+//                $distributor = empty($v['tracking_no'])?'':$v['distributor'].'&'.$v['tracking_no'];
+//            } else {
+//                $distributor = empty($v['tracking_no'])?'':$v['tracking_no'];
+//            }
+            $tmp[] = array(
+                'shipping_id' => $v['shipping_id'],
+                'create_time' => $v['create_time'],
+                'name' => $v['name'],
+                'per_price' => $v['per_price'],
+                'qty' => $v['qty'],
+                'order_id' => $v['order_id'],
+                'real_pay' => $v['real_pay'],
+                'contacts' => $v['contacts'],
+                'phone' => $v['phone'],
+                'address' => $v['address'],
+                'saler' => ($type == self::OTHER_SHIPPING_TYPE) ? 'testsaler' : $v['status'],
+                'distributor' => empty($v['distributor']) ? '' : $v['distributor'],
+                'tracking_no' => empty($v['tracking_no']) ? '' : $v['tracking_no'],
+            );
+        }
+        $header = array('物流序号', '提交时间', '商品名称', '订单价格', '数量', '订单号', '订单实付', '收件人','联系电话', '地址');
+        if ($type == self::OTHER_SHIPPING_TYPE) {
+            array_push($header, '分销员&ID', '物流公司','快递单号');
+        } else {
+            array_push($header, '状态', '物流公司', '快递单号');
+        }
+        $this->_do_export($tmp, $header, 'csv', TRUE);
+    }
+
+
+    /**
+     * 批量导入订单
+     *
+     * @example POST /index.php/iapi/v1/soma/express/batch_post
+     * $_POST['distributor'] 快递商
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    public function batch_post()
+    {
+        $distributor = $this->input->post('distributor');
+        if( empty( $distributor ) ){
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '请选择快递商', '', $this->route);
+        }
+
+        if( isset( $_FILES['batch'] ) && $_FILES['batch']['error'] > 0 ){
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '上传的文件错误！', '', $this->route);
+        }
+
+        //检查上传文件的类型
+        $files_name = $_FILES['batch']['name'];
+        if( strpos( $files_name, 'csv' ) === false ){
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '上传的文件只限csv格式!', '', $this->route);
+        }
+
+        //检查文件大小
+        if (($_FILES["batch"]["size"] / 1024/1024) > 2 ) {
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '上传的文件不能大于2M', '', $this->route);
+        }
+
+        //组装上传的数据＝》array
+        $obj = fopen($_FILES['batch']['tmp_name'], 'r');
+        $batch_data = array ();
+        $n = 0;
+        while ($data = fgetcsv($obj)) {
+            $num = count($data);
+            for ($i = 0; $i < $num; $i++) {
+                $batch_data[$n][$i] = $data[$i];
+            }
+            $n++;
+        }
+
+        //组成shipping_id => tracking_no 映射
+        unset( $batch_data[0] );//第一行数据是中文描述头，第二行开始才是数据
+        $shippingIds = array();
+        foreach ($batch_data as $k => $v) {
+            $shippingIds[$v[0]] = isset( $v[12] ) ? htmlspecialchars( $v[12] ) : '';
+        }
+        if( count( $shippingIds ) == 0 ){
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '文件数据为空，请重选', '', $this->route);
+        }
+
+//        $this->label_action= '邮寄信息处理';
+//        $this->_init_breadcrumb($this->label_action);
+
+        $inter_id= $this->inter_id;
+        $this->load->model('soma/Consumer_shipping_model', 'shipping_model');
+        $model = $this->shipping_model;
+        $pk = $model->table_primary_key();
+
+        //查找适用数据
+        $select_arr = array('shipping_id','order_id','consumer_id','openid','inter_id','address','distributor','tracking_no','status');
+        $list = $model->get_apply_list_byIds( array_keys( $shippingIds ), $inter_id, $select_arr );
+
+        $update_data = array();
+        $update_data['distributor']= $distributor;
+        $update_data['status']= $model::STATUS_SHIPPED;
+        $update_data['post_admin']= $this->session->get_admin_username();
+        $update_data['remote_ip']= $this->input->ip_address();
+
+        $fail_data = $openids = array();
+        $n = 0;
+        foreach( $list as $k=>$v ){
+            if( !empty( $v['address'] ) ){
+                $update_data['tracking_no'] = $shippingIds[$v[$pk]];
+                if( !empty( $update_data['tracking_no'] ) ){
+                    if( strpos( $update_data['tracking_no'], 'E+') !== false ){
+                        $fail_data[$k]['message'] = '请查看csv文件的快递单号，不能有E+符号！';
+                        $fail_data[$k][$pk] = $v[$pk];
+                    }else{
+                        $update_data['post_time']= date('Y-m-d H:i:s');
+                        //更新数据
+                        $result = $model->load($v[$pk])->m_sets( $update_data )->m_save();
+
+                        //更新状态成功 组装需要发放消息的人员信息
+                        if( $result ){
+                            $n++;
+                            $openids[] = array(
+                                'openid'=>$v['openid'],
+                                'inter_id'=>$v['inter_id'],
+                                'shipping_id'=>$v[$pk],
+                                'tracking_no'=>$update_data['tracking_no'],
+                                'distributor'=>$distributor,
+                                'consumer_id'=>$v['consumer_id'],
+                            );
+                        }
+                    }
+                }else{
+                    $fail_data[$k]['message'] = '快递单不能为空';
+                    $fail_data[$k][$pk] = $v[$pk];
+                }
+            }else{
+                $fail_data[$k]['message'] = '地址信息不能为空';
+                $fail_data[$k][$pk] = $v[$pk];
+            }
+        }
+
+        //发送模版消息
+        if( count( $openids ) > 0 ){
+            $this->load->model('soma/Message_wxtemp_template_model');
+            $business = 'package';
+            foreach ($openids as $k=>$v) {
+                $model = $model->load( $v[$pk] );
+                if( $model ){
+                    $model->consumer_id = $v['consumer_id'];
+                    $model->distributor = $v['distributor'];
+                    $model->tracking_no = $v['tracking_no'];
+                    $this->Message_wxtemp_template_model->send_template_by_shipping_success( $model, $v['openid'], $v['inter_id'], $business);
+                }
+            }
+        }
+
+        if( count( $fail_data ) > 0 ){
+            $this->out_put_msg(AdminConst::OPER_STATUS_FAIL_TOAST, '部分发货失败', (object)$fail_data, $this->route);
+        }
+
+        $this->out_put_msg(AdminConst::OPER_STATUS_SUCCESS, '批量发货成功', '', $this->route);
+
+    }
+
+    /**
+     * 导出表格
+     * @param $data
+     * @param $header
+     * @param string $type
+     * @param bool $download
+     * @return string
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    protected function _do_export($data, $header, $type='csv', $download=TRUE )
+    {
+        switch ($type) {
+            case 'csv':
+            default:
+                $tmppath= FD_. 'export'. DS;
+                $urlpath= base_url('public/export'). '/';
+                if(!file_exists($tmppath)) @mkdir($tmppath, 0777, TRUE);
+                $tmpfile= $this->module. '_'. $this->controller. '_'. $this->action. '_'
+                    . date('ymdHis_'. rand(10, 99)). '.'. $type;
+
+                if($download== TRUE){
+                    header( 'Content-Type: text/csv' );
+                    header( 'Content-Disposition: attachment;filename='.$tmpfile);
+                }
+
+                $fp = fopen($tmppath. $tmpfile, 'w');
+
+                //转换字符集
+                array_unshift($data, $header);
+                foreach ($data as $k=> $v){
+                    foreach ($v as $sk=> $sv){
+                        $data[$k][$sk]= convert_to_gbk($sv);
+                    }
+                }
+                //print_r($data);die;
+
+                if($fp){
+                    //循环插入数据
+                    foreach ($data as $line) {
+                        if($download== TRUE){
+                            echo implode(',', $line). "\n";
+                        }
+                        fputcsv($fp, $line, ',', '"');
+                    }
+                    fclose($fp);
+                }
+
+                break;
+        }
+        //上传到ftp
+
+        //@unlink($tmppath. $tmpfile);
+        return $urlpath. $tmpfile;
+    }
+
+    /**
+     * 快递下拉列表
+     * @return mixed
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    public function get_express_list()
+    {
+        $this->load->model('soma/Consumer_shipping_model', 'shipping_model');
+        $shipping_model = $this->shipping_model;
+        $result = $shipping_model->get_express();
+        $this->out_put_msg(AdminConst::OPER_STATUS_SUCCESS, '', (object)$result, $this->route);
+
+    }
+
+}

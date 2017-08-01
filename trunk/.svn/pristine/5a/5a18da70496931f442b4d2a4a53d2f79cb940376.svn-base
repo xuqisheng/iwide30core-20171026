@@ -1,0 +1,14 @@
+@charset "utf-8";
+/* CSS Document */
+.hot{width:100%;margin-top:2%;}
+.hot .h_title{width:94%;margin:2% auto;border-left:4px solid #fe4e00;border-radius:0.05rem;text-indent:0.2rem;}
+.hot .h_title a{float:right;font-size:0.6rem;padding-top:0.1rem;}
+.hot .hot_con{width:94%;margin:auto}
+.hot ul li{width:48%;float:left;border-radius:0.2rem;background:#fff;}
+.hot ul li:nth-child(odd){margin-right:4%;}
+.hot ul li .l_img{width:100%;}
+.hot ul li p{text-indent:0.2rem;}
+.hot ul li .bed_tit{font-weight:bold;line-height:1.2rem;}
+.hot ul li .house_name{font-size:0.6rem;color:#999;}
+.hot ul li p font{font-size:1.2rem;color:#fe4e00;}
+

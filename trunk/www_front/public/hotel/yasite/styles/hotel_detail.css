@@ -1,0 +1,12 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;}
+.list_style{background:#fff; border-top:1px solid; border-bottom:1px solid; border-color:#e4e4e4; margin-bottom:5%;padding-left:3%}
+.list_style .item{border-bottom: 1px solid #e4e4e4; padding:3.5% 0; display:block}
+.list_style .item:last-child{border-bottom:0;}
+.list_style .sever li{ display:inline-block; width:23%; margin-top:3%}
+.list_style .sever li em{ margin-right:1%}
+.list_style .sever span{ vertical-align:middle}
+.hotel_intro .content{ text-align:justify; line-height:1.5; padding-right:3%; margin-top:2%; text-indent:2em;}
+.list_style .ui_btn_block{background-size:auto 40%}

@@ -1,0 +1,11 @@
+ERROR - 2017-07-24 13:48:12 --> Unable to connect to the database
+ERROR - 2017-07-24 13:52:12 --> Unable to connect to the database
+ERROR - 2017-07-24 13:55:12 --> Unable to connect to the database
+ERROR - 2017-07-24 13:56:12 --> Unable to connect to the database
+ERROR - 2017-07-24 13:59:13 --> Unable to connect to the database
+ERROR - 2017-07-24 14:07:15 --> Unable to connect to the database
+ERROR - 2017-07-24 14:24:20 --> Unable to connect to the database
+ERROR - 2017-07-24 14:41:12 --> Unable to connect to the database
+ERROR - 2017-07-24 14:49:13 --> Unable to connect to the database
+ERROR - 2017-07-24 15:41:15 --> Unable to connect to the database
+ERROR - 2017-07-24 22:21:04 --> Unable to connect to the database

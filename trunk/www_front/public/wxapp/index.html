@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" c ontent="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=320,user-scalable=0">
+<title>小程序 大未来</title>
+<link rel="stylesheet" type="text/css" href="styles/global.css">
+<link rel="stylesheet" type="text/css" href="styles/service.css">
+<script src="scripts/jquery.js"></script>
+<script src="scripts/ui_control.js"></script>
+<script src="scripts/alert.js"></script>
+</head>
+<body>
+<div class="pageloading"></div>
+<div class="ui_pull corelayer flex center" id="corelayer" onClick="toclose()" style="display:none">
+    <div><img src="" />微信扫一扫，使用小程序</div>
+</div>
+<page class="page">
+    <header>
+    	<div class="banner" style="font-size:0"><img src="images/banner.jpg" /></div>
+    	<div class="center bg_fff flex flexjustify tablayer color_main icontab">
+        	<div class="icon01 iscur" type="default"><tt>推荐</tt></div>
+        	<div class="icon02" type="hit"><tt>热门</tt></div>
+        	<div class="icon03" type="time"><tt>最新</tt></div>
+        	<div class="icon04 showsearch"><tt>全部</tt></div>
+        </div>
+    </header>
+    <section class="bd_top flex bd_color_d3 mainboxs">
+    	<div class="list_style flexgrow salelist"></div>
+	</section>
+    <footer></footer>
+</page>
+<page class="page absolute _w" style="top:100%; z-index:999">
+    <header>
+        <div class="title_main_bg" style="padding:5px 10px;">
+            <div class="flex">
+            	<div class="flexgrow"><input placeholder="输入关键字进行搜索" class="h28 _w center searchbox padding"></div>
+                <div class="padding color_888 cancel">返回</div>
+            </div>
+        </div>
+    </header>
+    <section class="bd_top flex bd_color_d3 mainboxs">
+    	<div class="list_style flexgrow salelist"></div>
+	</section>
+    <footer></footer>
+</page>
+<div class="model">
+    <div class="img"><div class="squareimg"><img src="images/default2.jpg" /></div></div>
+    <div class="flexgrow">
+        <div>碧桂园凤凰国际酒店</div>
+        <div class="h22 color_999 pad">6766人次体验</div>
+        <div class="h22 color_666">一句话简介，必须有</div>
+    </div>
+    <div class="icon05 color_main h22 showcore" core="images/default2.jpg">体验</div>
+</div>
+
+</body>
+<script>
+var  startX ,startY;
+$(document).bind('touchstart',function(e){
+    startX = e.originalEvent.changedTouches[0].pageX,
+    startY = e.originalEvent.changedTouches[0].pageY;
+});
+$(document).on('touchmove',function(e){
+    endX = e.originalEvent.changedTouches[0].pageX,
+    endY = e.originalEvent.changedTouches[0].pageY;
+    //获取滑动距离
+    distanceX = endX-startX;
+    distanceY = endY-startY;
+	if($('.salelist .img').length<=10||$('.page').eq(0).is(":hidden")) return false;
+	if(distanceY<0){
+		$('.banner').hide();
+	}
+	else
+		$('.banner').show();
+})
+$('.tablayer>*').click(function(){
+	if($(this).hasClass('showsearch')){
+		$('.page').eq(1).css('top',0);
+		return;
+	}
+	$(this).addClass('iscur').siblings().removeClass('iscur');
+	var type = $(this).attr('type');
+	pageloading();
+	pagedata({type:type})
+})
+$('.cancel').click(function(){
+	$('.page').eq(1).css('top','100%');
+})
+$('.mainboxs').on('click','.showcore',function(){
+	$('#corelayer img').attr('src','');
+	var src = $(this).attr('core');
+	var img = new Image();
+	img.onload=function(){$('#corelayer img').attr('src',this.src);}
+	img.src=src;
+	toshow($('#corelayer'))	
+});
+function pagedata(data){
+	$.ajax({
+		async:false,
+		url:'http://ihotels.iwide.cn/index.php/wxapp/navigation/search',
+		data:data,
+		dataType:"json",
+		success: function(data){
+			console.log(data);
+			removeload();
+		}
+	});
+}
+</script>
+</html>

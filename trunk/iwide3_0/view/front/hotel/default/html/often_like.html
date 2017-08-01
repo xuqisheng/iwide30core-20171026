@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- 全局控制 -->
+<script src="scripts/viewport.js?v=26"></script>
+<script src="scripts/jquery.js"></script>
+<script src="scripts/ui_control.js"></script>
+<link href="styles/global.css" rel="stylesheet">
+<link href="styles/ui.css" rel="stylesheet">
+<link href="styles/ui_ico.css" rel="stylesheet">
+<link href="styles/ui_style.css?v=28" rel="stylesheet">
+<link href="styles/ui_pull.css" rel="stylesheet">
+<!-- end -->
+<script src="scripts/touchwipe.js?v=28"></script>
+<link href="styles/search_result.css?v=27" rel="stylesheet">
+<link href="styles/tab_list.css" rel="stylesheet">
+<title>我的收藏</title>
+</head>
+<body>
+<header>
+	<div class="headfixed ui_tab">
+    	<div class="ofte_go cur">常住酒店</div>
+    	<div class="my_like">我的收藏</div>
+    </div>
+</header>
+<div class="hotel_list">
+	<div class="item">
+    	<a href="room_list.html" class="wipe">
+            <div class="ui_img_auto_cut"><img src="images/egimg/eg01.png" /></div>
+            <div class="allin_box">
+                <div class="name">广州天美酒店公寓体育中心店</div>
+                <div class="coupon">
+                    <div class="ui_price">398</div>
+                    <div class="backvote">入住返券</div>
+                </div>
+                <div class="ever"><span class="ui_color_gray">12条评论</span></div>
+                <div class="sever">
+                    <em class="ui_sever ui_sever_ico1"></em>
+                    <em class="ui_sever ui_sever_ico2"></em>
+                    <em class="ui_sever ui_sever_ico3"></em>
+                    <em class="ui_sever ui_sever_ico4"></em>
+                </div>
+        	</div>
+        </a>
+        <div class="delete">删除常住</div>
+    </div>
+</div>
+
+</body>
+<script>
+$(function(){
+	
+	$('.ui_tab div').click(function(){
+		$(this).addClass('cur').siblings().removeClass('cur');
+		if ( $(this).index()==1){
+			
+		}
+	})
+	var wipeleft = function(_this){
+		$(_this).siblings().css({'transform':'translateX(-6em)','line-height':$(_this).siblings().height()+'px'});
+		$(_this).css({'transform':'translateX(-6em)'});
+	}
+	var wiperight= function(_this){
+		$(_this).css({'transform':'translateX(0px)'});
+		$(_this).siblings().css({'transform':'translateX(0px)'});
+	}
+	$(".wipe").touchwipe({
+		 wipeLeft: function(_this) { wipeleft(_this);},
+		 wipeRight: function(_this) { wiperight(_this); },
+		 min_move_x: 15,
+		 min_move_y: 15,
+		 preventDefaultEvents: true
+	});
+	
+	$('.delete').on('click',function(){
+		var r=confirm('删除后不可恢复，确定删除？');
+		if( !r ) return false;
+		$(this).parent().remove();
+	})
+});
+</script>
+</html>

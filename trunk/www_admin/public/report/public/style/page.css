@@ -1,0 +1,80 @@
+@charset "utf-8";
+/* CSS Document */
+
+.paddingtop{ padding-top:4%}
+.paddingtop p{ line-height:1.5}
+.bold{ font-weight:bold}
+.small{ font-size:0.6rem;}
+.big{ font-size:0.8rem;}
+.bg_white{background:white}
+.mar_top{margin-top:5%}
+.important{ background:#595757; color:#f5f4f4; padding:1% 3%; font-size:0.6rem;display: inline-block; margin-bottom:3%;}
+.linkico{width:0.6rem; height:0.6rem; display:inline-block; background:url(../img/img2.png) no-repeat center center; background-size:100% 100%; margin:0 0.2em;}
+
+body,html,.page,.content,.index_page{width:100%;height:100%; position:relative;}
+body,html,.index_page.bg{background:url(../img/bg01_1.jpg); overflow:hidden; background-size:6% auto;}
+.page{-webkit-overflow-scrolling:touch; overflow:auto;}
+.index_page,.page{display:none; position:relative;}
+.index_page.bg{background-image:url(../img/bg01_2.jpg);}
+
+.txt0{width:auto; height:40%; padding-top:8%;}
+.fly{ width:100%; height:37%; margin-bottom:8%;}
+.fly p{ height:100%}
+.fly img{ width:auto; height:100%;}
+.fly .fire{ margin-top:-0.4rem; height:20%; display:none}
+
+.btn,.btn span{border-radius:0.3rem;display:inline-block;color:#333333;font-weight:bold; }
+.btn{background:#444444;border-radius:0.3rem; padding-bottom:1.5%;overflow:hidden; width:7em;border:1px solid #333;}
+.btn span{ background:#fff;border-radius:0.25rem; padding:0.5em 0; font-size:0.6rem; width:100%; text-align:center}
+.btn.hover span{background:#f2d303;}
+
+.footlogo{margin-top:10%}
+.footlogo p{ display:inline-block; width:32%;}
+.footlogo p:first-child{  margin-right:7%;}
+
+.clound p{ position:absolute;left:0%}
+.clound p._1{ width:10%;top:5%;}
+.clound p._2{ width:8%;top:12%;}
+.clound p._3{ width:8%;top:40%;}
+.clound p._4{ width:13%;top:50%;}
+
+.imgtitle{ padding:5% 0;margin-top:5%}
+.imgtitle img{ width:70%}
+.ac_focus{padding:6% 10%; overflow:hidden; text-align:center}
+.ac_focus.bg{background:url(../img/bg02.png) no-repeat center center; background-size:90% 100%}
+
+.cicle{display:inline-block; width:0.4rem; height:0.4rem;background:white;border:2px solid #333333; border-radius:50%}
+.ac_title {text-align:center;}
+.ac_title span,.ac_subtitle span{ background:white;border:2px solid #333333;font-weight:bold; display:inline-block}
+.ac_title span{ padding:3% 4%; width: 73%; font-size:0.8rem;}
+.ac_subtitle span{ background:#fade22; padding:2% 4%; }
+
+.ac_list {display:inline-block; overflow:hidden;margin-top:5%;}
+.ac_list .cicle,.ac_list ul{ float:left;}
+.ac_list .cicle{margin-top:0.15em}
+.ac_list ul{font-size:0.5rem; text-align:left; margin-left:0.3em}
+.ac_list ul li:first-child{font-weight:bold}
+.ac_head{padding:0 5%; text-align:center}
+.ac_head .bg{font-size:0}
+.ac_head p{ font-size:1.25rem; text-align:left; vertical-align:top; white-space:nowrap}
+.ac_head p span{ font-size:1.05rem; vertical-align:top;}
+.ac_head p:last-child{ margin-top:-0.15em;}
+.ac_head .bg{background:url(../img/img1.png) no-repeat left center; background-size:2.5rem 2.5rem; padding-left:3rem; display:inline-block}
+
+.ac_con{padding-left:5%; padding-bottom:5%; overflow:hidden;}
+.ac_con span.float{height:5em; padding-top:2%}
+.ac_con ul{ margin-left:0.7em}
+.ac_con ul li{ margin-top:4%;}
+.ac_con ul li .btn{ margin-bottom:4%; margin-right:2%}
+
+.nextimg{ display:block; color:#333;padding-top:20%;padding-bottom:10%; font-size:0.55rem;}
+.nextimg img{width:10%; padding-bottom:2%;}
+
+.share_bg .for input.isright,.share_bg .for input.iserror{ background:url(../img/right.png) no-repeat #fff; background-size:auto 50%; background-position:95% center;}
+.share_bg .for input.iserror{ background-image:url(../img/error.png)}
+
+
+
+
+
+

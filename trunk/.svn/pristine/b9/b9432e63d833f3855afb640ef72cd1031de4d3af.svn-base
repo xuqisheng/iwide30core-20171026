@@ -1,0 +1,296 @@
+<?php
+
+namespace App\services\soma;
+
+use App\models\soma\Activity_killsec_instance;
+use App\models\soma\Activity_killsec_user;
+use App\services\BaseService;
+use App\services\Result;
+
+/**
+ * Class KillsecService
+ * @package App\services\soma
+ * @author renshuai  <renshuai@mofly.cn>
+ *
+ */
+class KillsecService extends BaseService
+{
+    const ROB_STATUS_OK = 1;
+    const ROB_STATUS_FAIL = 2;
+
+
+    /**
+     * 获取服务实例方法
+     * @return KillsecService
+     */
+    public static function getInstance()
+    {
+        return self::init(self::class);
+    }
+
+
+    /**
+     * @param $interID
+     * @param $instanceID
+     * @param $openid
+     * @return array
+     * @author renshuai  <renshuai@mofly.cn>
+     */
+    public function getRedisKeys($interID, $instanceID, $openid = '')
+    {
+        return [
+            'key' => "soma_killsec2_$instanceID",
+            'robKey' => "soma_killsec2_{$instanceID}_{$interID}_{$openid}",
+            'hkey' => "soma_killsec2_hset_$instanceID",
+            'userKey' => "{$interID}_{$openid}",
+            'userKeyBlackList' => "{$interID}_{$openid}_black_list",
+        ];
+    }
+
+    private function initRedisData($instanceID)
+    {
+        $result = false;
+        $redis = $this->getCI()->get_redis_instance();
+        if (empty($redis)) {
+            return $result;
+        }
+
+        $instanceModel = new Activity_killsec_instance();
+        $instance = $instanceModel->getById($instanceID);
+
+        if (empty($instance)) {
+            return $result;
+        }
+
+        /**
+         * @var $key
+         * @var $hkey
+         */
+        $keys = $this->getRedisKeys($instance['inter_id'], $instanceID);
+        extract($keys);
+
+        //有缓存，初始化就算成功了
+        if ($redis->get($key)) {
+            $result = true;
+            return $result;
+        }
+
+        $expireTime = strtotime($instance['close_time']);
+
+        if (!$redis->setnx($key, $instance['killsec_count'])) {
+            return $result;
+        }
+
+        if (!$redis->expireAt($key, $expireTime)) {
+            return $result;
+        }
+
+        if (!$redis->hSetNx($hkey, '1', '1')) {
+            return $result;
+        }
+
+        if (!$redis->expireAt($hkey, $expireTime)) {
+            return $result;
+        }
+
+        $result = true;
+        return $result;
+    }
+
+    public function initData($actID)
+    {
+        $result = false;
+
+        $this->getCI()->load->model('soma/Activity_killsec_model');
+        $activitys = $this->getCI()->Activity_killsec_model->get('act_id', $actID);
+
+        if (empty($activitys)) {
+            return $result;
+        }
+
+        $activity = $activitys[0];
+
+        $instanceModel = new Activity_killsec_instance();
+        $instanceID = $instanceModel->checkAndSave($activity);
+
+        return $this->initRedisData($instanceID);
+    }
+
+    /**
+     * @param $interID
+     * @param $instanceID
+     * @param $openid
+     * @return Result
+     * @author renshuai  <renshuai@mofly.cn>
+     */
+    public function getOpporunity($interID, $instanceID, $openid)
+    {
+        $result = new Result();
+        $redis = $this->getCI()->get_redis_instance();
+        if (empty($redis)) {
+            return $result;
+        }
+
+        /**
+         * @var $key
+         * @var $robKey
+         * @var $hkey
+         * @var $userKey
+         */
+        $keys = $this->getRedisKeys($interID, $instanceID, $openid);
+        extract($keys);
+
+        $instanceModel = new Activity_killsec_instance();
+
+        if ($redis->get($robKey)) {
+            $result->setStatus(Result::STATUS_OK);
+            return $result;
+        }
+
+        $instance = $instanceModel->getById($instanceID);
+        if (empty($instance)) {
+            $result->setMessage('参数错误');
+            return $result;
+        }
+
+        $userModel = new Activity_killsec_user();
+        $usedCount = $userModel->getUsedCount($interID, $openid, $instanceID);
+        $availableCount = $instance['killsec_permax'] - $usedCount;
+
+        if ($availableCount < 1) {
+            $result->setMessage('没有可用名额了');
+            return $result;
+        }
+
+        $killsecCount = $redis->get($key);
+        if($killsecCount < $availableCount){
+            $result->setMessage('名额不足');
+            return $result;
+        }
+
+        $redis->watch($key);
+        $redis->multi();
+        $redis->set($key, $killsecCount - $availableCount);
+        $redis->hIncrBy($hkey, $userKey, 1);
+        $rob_result = $redis->exec();
+        if(empty($rob_result)){
+            $result->setMessage('系统错误 继续加油');
+            return $result;
+        }
+
+        $killsecUserID = $userModel->save($instanceID, $instance['act_id'], $interID, $openid, $availableCount);
+        if (empty($killsecUserID)) {
+            $result->setMessage('系统错误');
+            return $result;
+        }
+        $redis->set($robKey, $killsecUserID);
+        $redis->expire($robKey, 300);
+
+        $result->setStatus(Result::STATUS_OK);
+        return $result;
+    }
+
+    /**
+     * @param $actId
+     * @param $interID
+     * @param $openid
+     * @param $prev
+     * @return Result
+     * @author renshuai  <renshuai@mofly.cn>
+     */
+    public function getToken($actId, $interID, $openid, $prev)
+    {
+        $result = new Result();
+
+        $this->getCI()->load->model('soma/Activity_killsec_model', 'activityKillsecModel');
+
+        /**
+         * @var \Activity_killsec_model $activityKillsecModel
+         */
+        $activityKillsecModel = $this->activityKillsecModel;
+        $instances = $activityKillsecModel->get_aviliable_instance( array('act_id'=>$actId ) );
+
+        if (empty($instances) || empty($instances[0])) {
+            $result->setMessage($this->getCI()->lang->line('flash_sale_end_tip'));
+            return $result;
+        }
+
+        $instance = $instances[0];
+
+        $now_time = date('Y-m-d H:i:s');
+        if(strtotime($now_time) < strtotime($instance['start_time'])) {
+            $result->setMessage($this->getCI()->lang->line('activity_not_begin_tip'));
+            return $result;
+        }
+
+        $instance_id = $instance['instance_id'];
+        if( isset($instance['status']) && $instance['status'] == \Activity_killsec_model::INSTANCE_STATUS_PREVIEW ){
+            //token发放之前做提醒
+            if( $prev == 't' ) {
+                $activityKillsecModel->set_redis_white_user($instance_id, $openid );
+            }elseif( $prev =='f' ) {
+                $activityKillsecModel->set_redis_white_user($instance_id, $openid, TRUE );
+            }
+            $result->setMessage($this->getCI()->lang->line('activity_not_begin_tip'));
+
+        } else {
+
+            //检查是否处于黑名单
+            $in_blacklist = $activityKillsecModel->get_redis_black_user($instance_id, $openid);
+
+            //检查是否已经购买过
+            $join_data = $activityKillsecModel->get_redis_order_user($instance_id, $openid);
+
+            if( $in_blacklist ){
+                $result->setMessage($this->getCI()->lang->line('too_many_people_wait_tip'));
+
+            } elseif( $join_data ){
+                $result->setMessage($this->getCI()->lang->line('flash_sale_is_limit_tip'));
+
+            } else {
+                //未成功购买过 开始-------------------
+                $token = $activityKillsecModel->get_redis_token($instance_id, $openid);
+
+                if( $token ){
+                    $data = [
+                        'instance_id' => $instance_id,
+                    ];
+
+                    if($token == intval($token)){
+                        $data['token'] = $token;
+
+                        $insert_user= array(
+                            'instance_id'=> $instance_id,
+                            'inter_id'=> $interID,
+                            'business'=> 'package',
+                            'token'=> $token,
+                            'act_id'=> $actId,
+                            'openid'=> $openid,
+                            'join_time'=> date('Y-m-d H:i:s'),
+                            'remote_ip'=> $this->getCI()->input->ip_address(),
+                            'status'=> \Activity_killsec_model::USER_STATUS_JOIN,
+                        );
+                        $activityKillsecModel->save_instance_user($interID, $insert_user);
+
+                    } else {
+                        //从缓存中得到token
+                        $data['token'] = $token['token'];
+                    }
+                    $result->setData($data);
+
+                    $result->setStatus(Result::STATUS_OK);
+                    $result->setMessage($this->getCI()->lang->line('paying_and_release_tip'));
+
+
+                } else {
+                    $result->setMessage($this->getCI()->lang->line('paying_and_release_tip'));
+                }
+                //未成功购买过 结束-------------------
+            }
+        }
+
+        return $result;
+    }
+
+
+}

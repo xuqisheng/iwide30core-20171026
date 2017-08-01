@@ -1,0 +1,73 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;}
+.order_intro,.notic{ padding:2% 3%}
+.order_intro .hotelname{ margin-bottom:0.5%;}
+.order_intro .room_type{ margin-top:2%}
+
+.form_list .item,.form_list,.comment,.topoint{border-bottom:1px solid #e4e4e4;}
+.form_list .item:last-child{border-bottom:0}
+.form_list,.form_list .pay_way,.comment,.topoint{border-top:1px solid #e4e4e4;}
+.form_list,.comment,.topoint{background:#fff}
+
+.form_list #checkdate,.form_list .item>span:first-child{ display:inline-block;}
+.form_list{margin-bottom:3%; padding-left:3%;}
+.form_list .item>span:first-child{width:5em;}
+.form_list .item{ padding:3% 0; position:relative; overflow:hidden; display:block}
+.pay_way .ui_ico{width:1em;height:1em;border-width:1px;border-style:solid;border-radius:50%;background-size:50% auto; margin-right:0.5em; float:right}
+.pay_way{padding:3% 3% 3% 7%;}
+.pay_way span{vertical-align:middle}
+.pay_way{background-image:url(../images/yuer.png); background-repeat:no-repeat; background-size:auto 18px; background-position:left center;}
+.pay_way[pay_type=weixin]{ background-image:url(../images/weixin.png);}
+.pay_way[pay_type=daofu]{ background-image:url(../images/daofu.png);}
+.pay_way.gray em{border:0}
+.ui_btn_block.gray:before{content:''}
+.form_list input,
+.form_list select{width:70%}
+
+.form_list .room_img{float:left; width:75px; height:65px; overflow:hidden; margin-right:3%;padding:3% 0 3% 3%;}
+.form_list .room_img img{min-width:100%;height:100%; width:auto}
+.manysever .float_r{ margin-right:3%}
+.manysever .iconfont{ font-size:8px; margin-top:5px;}
+.manysever .sever_list{ clear:both; background:#fafafa;}
+.manysever .sever_list li{padding:0 3% 3% 3%; display:-webkit-box;}
+.manysever .sever_list li:first-child{padding-top:3%}
+.manysever .sever_list li>*,.u_d >*{ -webkit-box-flex:1; display:block}
+
+.u_d{display:-webkit-box !important;}
+.u_d,.u_d input{ border:1px solid #666; color:#666; background:#fff }
+.u_d {max-width:70px; border-radius:2px;}
+.u_d >*{width:33% !important;text-align:center !important;}
+.u_d input{ border-top:0; border-bottom:0; padding:4px 0;border-radius:0}
+
+.notic{padding-top:0; text-align:justify; background:#fff; padding:3%; border-bottom:1px solid #e4e4e4;}
+.notic >*{margin-bottom:2%}
+
+
+.comment,.topoint{padding:3%; margin-bottom:3%;}
+.comment textarea{width:100%}
+.addimg .ui_img_auto_cut{ width:10em; height:10em; background:url(../images/addimg.png) no-repeat center center; background-size:100%; margin-right:2%;}
+
+.topoint li{display:inline-block; margin-left:4%; text-align:center}
+.topoint li p{margin-top:0.5em}
+
+.ui_vote .bordertop_img{background:url(../../su8/images/bg03.png) repeat-x; background-size:auto 100%;}
+.vote_pull .list{height:91%}
+.price_detail{color:#989898}
+.price_detail .iconfont{font-size:5px;}
+
+.padding{padding:3%}
+.keeping_pull .list .item,
+.price_detail_pull .item{ font-size:12px;}
+.price_detail_pull .item_head{font-size:15px}
+
+.keeping_pull .box{text-align:center;}
+.keeping_pull .list .item{ border-image:url(border.gif) 2 stretch; border-width:1px 0 0 0; padding:2% 0}
+.keeping_pull .list .item input{display:none}
+.keeping_pull .list .ischeck span{padding:1%; min-width:7em; border-radius:1.5em; background:#d40f20; color:#fff; display:inline-block}
+.price_detail_pull .item{display:-webkit-box; text-align:center; padding:2% 3%}
+.price_detail_pull .item > *{-webkit-box-flex:1; display:block;}
+.price_detail_pull .item > *:first-child{text-align:left;}
+.price_detail_pull .item > *:last-child{text-align:right;}
+.price_detail_pull .item_head{ border-image:url(border.gif) 2 stretch; border-width:1px 0 ;}

@@ -1,0 +1,16 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;}
+.headfixed,.allorder_list .title { border-bottom:1px solid #e4e4e4;}
+header{ padding-top:11%;}
+
+.allorder_list{ padding:0 3%}
+.allorder_list .item{display:block; background:#fff; margin: 4% 0; border-radius:0.5em;padding:2% 3%; position:relative}
+.allorder_list .item,.allorder_list .foot *{ border:1px solid #d3d3d3; }
+.allorder_list .title {padding-bottom:2%; color:#555;}
+.allorder_list .title span{vertical-align:middle}
+.allorder_list .title span:last-child{ float:right; margin-top:2%;}
+.allorder_list .name{ padding:4% 0; color:#555;}
+.allorder_list .foot{ text-align:right}
+.allorder_list .foot *{ display:inline-block;border-radius:0.3em; padding:1% 2%; margin-top:2%;}

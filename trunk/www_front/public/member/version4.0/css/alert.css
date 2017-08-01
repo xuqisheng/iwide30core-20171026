@@ -1,0 +1,30 @@
+@charset "utf-8";
+/* CSS Document */
+#alert_dialog_show_3s_box .time1{box-shadow:-1px 0 1px #000,1px 0 1px #000,0 -1px 1px #000,0 1px 1px #000;}
+#alert_dialog_show_3s_box button[type="button"],#alert_dialog_show_msg_box button[type="button"],#alert_dialog_show_confirm_box button[type="button"]{width:100px;height:50px;line-height:50px;background-color:#FFF;color:#546a79;font-size:18px;box-shadow:none;border: 1px #eef0f1 solid;border-bottom: none;border-left: none;border-right: none;border-bottom-left-radius: 8px;border-bottom-right-radius: 8px;}
+#alert_dialog_show_3s_box button[type="button"]:focus,#alert_dialog_show_msg_box button[type="button"]:focus,#alert_dialog_show_confirm_box button[type="button"]:focus{outline:none;color: #3c4c56;background-color:#f9f7f7;}
+#alert_dialog_show_3s_box button[type="button"]:hover,#alert_dialog_show_msg_box button[type="button"]:hover,#alert_dialog_show_confirm_box button[type="button"]:hover{color: #3c4c56;background-color:#f9f7f7;}
+#alert_dialog_show_3s_box button[type="button"]:active,#alert_dialog_show_msg_box button[type="button"]:active,#alert_dialog_show_confirm_box button[type="button"]:active{color: #3c4c56;background-color:#f9f7f7;}
+#alert_show_3 .ttBox{padding: 5px 10px; font-size: 18px;border-bottom: solid 1px #eef0f1;}
+#alert_show_3 .ttBox .tt{font-size: 18px; display: block; color: #616060;}
+
+
+/*遮罩层*/
+.sweet-overlay{background-color:#000; opacity:0.4; position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index:1000;}
+
+/*提示框*/
+.show3s-msg{overflow:hidden;}
+.show3s-msg .show-box{height:auto; max-width:50%; padding:5px 8px; background-color:#000; color:#fff;border-radius:8px;font-size:14px; text-align:center;z-index: 2000; position:absolute;opacity:0;}
+.show-msg,.show-confirm-msg{overflow:hidden;width:63%;margin:auto;}
+.show-msg .show-box,.show-confirm-msg .show-box{height:auto; width:63%; background-color:#fff; color:#888; border-radius:8px;font-size:20px; text-align:center;z-index:2000;position:absolute;opacity: 0;}
+.show-msg .show-box p,.show-confirm-msg .show-box p{font-size:14px; margin:10px 20px 8px;word-wrap: break-word;}
+#alert_dialog_show_msg_box.show-msg .show-box button[type="button"].okButton,#alert_dialog_show_confirm_box.show-confirm-msg .show-box button[type="button"].okButton{width:100%; height:43px; line-height:30px;}
+#alert_dialog_show_confirm_box.show-confirm-msg .show-box button[type="button"].okButton{width:50%; height:43px; line-height:30px;}
+#alert_dialog_show_confirm_box.show-confirm-msg .show-box button[type="button"].cancelButton{width:50%; height:43px; line-height:30px;border-left: 1px #eef0f1 solid;border-bottom-left-radius: 0; color: #8c8b8b;}
+.show-loading-box{overflow:hidden;height:40px;width:40px;margin-left:50%;margin-top:20%;}
+.show-loading-box .show-box{position:absolute;z-index:2000;}
+
+
+/*加载动画*/
+.spinner{margin:0 auto;width:40px;height:40px;position:relative}.container1>div,.container2>div,.container3>div{width:10px;height:10px;background-color:#FFFFFF;border-radius:100%;position:absolute;-webkit-animation:bouncedelay 1.2s infinite ease-in-out;animation:bouncedelay 1.2s infinite ease-in-out;-webkit-animation-fill-mode:both;animation-fill-mode:both}.spinner .spinner-container{position:absolute;width:100%;height:100%}.container2{-webkit-transform:rotateZ(45deg);transform:rotateZ(45deg)}.container3{-webkit-transform:rotateZ(90deg);transform:rotateZ(90deg)}.circle1{top:0;left:0}.circle2{top:0;right:0}.circle3{right:0;bottom:0}.circle4{left:0;bottom:0}.container2 .circle1{-webkit-animation-delay:-1.1s;animation-delay:-1.1s}.container3 .circle1{-webkit-animation-delay:-1.0s;animation-delay:-1.0s}.container1 .circle2{-webkit-animation-delay:-0.9s;animation-delay:-0.9s}.container2 .circle2{-webkit-animation-delay:-0.8s;animation-delay:-0.8s}.container3 .circle2{-webkit-animation-delay:-0.7s;animation-delay:-0.7s}.container1 .circle3{-webkit-animation-delay:-0.6s;animation-delay:-0.6s}.container2 .circle3{-webkit-animation-delay:-0.5s;animation-delay:-0.5s}.container3 .circle3{-webkit-animation-delay:-0.4s;animation-delay:-0.4s}.container1 .circle4{-webkit-animation-delay:-0.3s;animation-delay:-0.3s}.container2 .circle4{-webkit-animation-delay:-0.2s;animation-delay:-0.2s}.container3 .circle4{-webkit-animation-delay:-0.1s;animation-delay:-0.1s}@-webkit-keyframes bouncedelay{0%,80%,100%{-webkit-transform:scale(0.0)}40%{-webkit-transform:scale(1.0)}}@keyframes bouncedelay{0%,80%,100%{transform:scale(0.0);-webkit-transform:scale(0.0)}40%{transform:scale(1.0);-webkit-transform:scale(1.0)}}
+.loading-text{margin-top:20px;color:#FFFFFF;}

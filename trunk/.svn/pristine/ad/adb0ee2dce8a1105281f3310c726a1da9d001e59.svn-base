@@ -1,0 +1,295 @@
+<?php
+    // 是否显示¥符号
+    $show_y_flag = true;
+    if($order_items[0]['type'] == MY_Model_Soma::PRODUCT_TYPE_POINT)
+    {
+        $show_y_flag = false;
+    }
+?>
+<!-- 以上为head -->
+<script>
+wx.config({
+    debug: false,
+    appId: '<?php echo $wx_config["appId"]?>',
+    timestamp: <?php echo $wx_config["timestamp"]?>,
+    nonceStr: '<?php echo $wx_config["nonceStr"]?>',
+    signature: '<?php echo $wx_config["signature"]?>',
+    jsApiList: [<?php echo $js_api_list; ?>]
+});
+wx.ready(function(){
+    <?php if( $js_menu_hide ): ?>wx.hideMenuItems({ menuList: [<?php echo $js_menu_hide; ?>] });<?php endif; ?>
+});
+</script>
+
+<div class="pageloading"><p class="isload" style="margin-top:150px"><?php echo $lang->line('loading');?></p></div>
+<form action="<?php echo $post_url; ?>" method="post" id="mailPost">
+<input type="hidden" value="<?php echo implode(',',$item_names); ?>" />
+<div class="list_style_1 bd">
+    <div class="input_item">
+        <span><?php echo $lang->line('item_details');?></span>
+        <span><?php echo implode(',',$item_names); ?></span>
+    </div>
+</div>
+<div class="list_style_1 bd martop">
+    <div class="input_item">
+        <span><?php echo $lang->line('payment');?></span>
+        <?php if($show_y_flag): ?><span class="y color_main"><?php else: ?><span class="color_main"><?php endif; ?><input type="text" class="color_main" readonly value="<?php echo $order->m_get('grand_total'); ?>" /></span>
+    </div>
+</div><div class="list_style_1 martop bd">
+    <div class="input_item">
+        <span><?php echo $lang->line('invoice_title');?></span>
+        <span><input type="text" placeholder="<?php echo $lang->line('enter_invoice_header_tip');?>" name="billTitle" value="<?php echo $invoice->m_get('invoice_title'); ?>" /></span>
+    </div>
+</div>
+</div><div class="list_style_1 martop bd">
+    <div class="input_item">
+        <span>纳税人识别号</span>
+        <span><input type="text" placeholder="请输入您司纳税人识别号，没有留空" name="taxId" value="<?php echo $invoice->m_get('tax_id'); ?>" /></span>
+    </div>
+</div>
+<div class="list_style_1 martop bd">
+    <div class="input_item">
+        <span><?php echo $lang->line('recipient');?></span>
+        <span><input type="text" placeholder="<?php echo $lang->line('fill_recipient_name_tip');?>"  name="name" value="<?php if( $address->m_get('address_id') ) : echo $address->m_get('contact'); endif;?>" /></span>
+    </div>
+    <div class="input_item">
+        <span><?php echo $lang->line('recipient_phone_number');?></span>
+        <span><input type="tel" placeholder="<?php echo $lang->line('fill_recipient_call_tip');?>"  name="mobile" value="<?php if( $address->m_get('address_id') ) : echo $address->m_get('phone'); endif;?>" /></span>
+    </div>
+</div>
+<div class="list_style_1 martop bd">
+    <div class="input_item arrow" id="select_area">
+        <span><?php echo $lang->line('district');?></span>
+        <span>
+            <input type="text" placeholder="<?php echo $lang->line('district');?>" class="area_fill"  name="area" readonly value="<?php if( $address->m_get('address_id') ) : echo $province.$city.$region; endif;?>" />
+        </span>
+    </div>
+    <div class="input_item">
+        <span><?php echo $lang->line('address');?></span>
+        <span><input type="text" placeholder="<?php echo $lang->line('fill_recipient_address_tip');?>"  name="address" value="<?php if( $address->m_get('address_id') ) : echo $address->m_get('address'); endif;?>" /></span>
+    </div>
+</div>
+<div class="martop center">
+    <div class="btn_main send_btn disable"><?php echo $lang->line('submit_for_mail');?></div>
+</div>
+
+<div class="ui_pull area_pull" style="display:none" onClick="toclose();">
+    <div class="relative _w" style="height:100%;">
+        <div class="area_box bg_fff absolute _w">
+            <p class="fcolor close_pull pad3" style="float:right" onClick="toclose();">&times;</p>
+            <p class="fcolor center pad3"><?php echo $lang->line('select_area_tip');?></p>
+            <p class="border_bottom area_head">
+                <span class="iscur" id="selectProvince"><?php if( !empty( $address->m_get('province') ) ) {echo $province;}else{echo $lang->line('choose');} ?></span>
+                <span id="selectCity"><?php if( !empty( $address->m_get('city')) ) { echo $city;} ?></span>
+                <span id="selectRegion"><?php if( !empty( $address->m_get('region') ) ) { echo $region;} ?></span>
+            </p>
+            <div class="area_data relative">
+                <ul class="province_box scroll" style="left:0;">
+                    <input id="province" name='province' type="hidden" value="<?php echo $address->m_get('province');?>">
+                    <?php foreach( $provinces as $k=>$v ): ?>
+                        <li onclick="area_data_click(this,event)"  val="<?php echo $v['region_id']; ?>" class="<?php if( $address->m_get('province') == $v['region_id'] ) echo 'iscur'; ?>"><?php echo $v['region_name']; ?></li>
+                    <?php endforeach; ?>
+                </ul>
+                <ul class="city_box scroll" url="<?php echo $citys_url; ?>">
+                    <input id='city' name="city" type="hidden" value="<?php echo $address->m_get('city');?>">
+                    <!-- iscur表示当前选择的城市
+                    <li onclick="area_data_click(this,event)"  val="id" class="iscur">城市</li>
+                    -->
+                    <?php foreach( $citys as $k=>$v ): ?>
+                        <li onclick="area_data_click(this,event)" val="<?php //echo $v['region_id']; ?>" class="<?php if( $address->m_get('city') == $v['region_id'] ) echo 'iscur'; ?>"><?php echo $v['region_name']; ?></li>
+                    <?php endforeach; ?>
+                </ul>
+                <ul class="region_box scroll" url="<?php echo $regions_url; ?>">
+                    <input id='region' name="region" type="hidden" value="<?php echo $address->m_get('region');?>">
+                    <!-- iscur表示当前选择的区域
+                    <li onclick="area_data_click(this,event)"  val="id" class="iscur">区域</li>
+                    -->
+                    <?php foreach( $regions as $k=>$v ): ?>
+                        <li onclick="area_data_click(this,event)" val="<?php echo $v['region_id']; ?>" class="<?php if( $address->m_get('region') == $v['region_id'] ) echo 'iscur'; ?>"><?php echo $v['region_name']; ?></li>
+                    <?php  endforeach; ?>
+                </ul>
+                <ul class="boxloading"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+<script>
+    var billTitle,name,mobile,area,province,city,region,address;
+    function getval(){
+        billTitle = $('input[name=billTitle]').val();
+        taxId = $('input[name=taxId]').val();
+        name = $("input[name=name]").val();
+        mobile = $("input[name=mobile]").val();
+        area = $('.area_fill').val();
+        province = $('#province').val();
+        city = $('#city').val();
+        region = $('#region').val();
+        address = $("input[name=address]").val();
+    }
+    function button_change(){
+        getval();
+        $('.send_btn').addClass('disable');
+        if(name=='' ||!reg_phone.test(mobile) ||area == '' || address == ''||billTitle=='')return;
+        $('.send_btn').removeClass('disable');
+    }
+    function test_val(){
+        getval();
+        if( name == '' ){
+            $.MsgBox.Confirm( '<?php echo $lang->line('enter_recipient_tip');?>' ,null,null, '<?php echo $lang->line('ok');?>', '<?php echo $lang->line('cancel');?>');
+            return false;
+        }
+        if( mobile == '' ){
+            $.MsgBox.Confirm( '<?php echo $lang->line('enter_contact_phone_tip');?>',null,null, '<?php echo $lang->line('ok');?>', '<?php echo $lang->line('cancel');?>');
+            return false;
+        }
+        if( !reg_phone.test(mobile)){
+            $.MsgBox.Confirm( '<?php echo $lang->line('phone_number_wrong');?>' ,null,null,'<?php echo $lang->line('ok');?>', '<?php echo $lang->line('cancel');?>');
+            return false;
+        }
+        if( province == '' ){
+            $.MsgBox.Confirm( '<?php echo $lang->line('select_area_tip');?>',null,null, '<?php echo $lang->line('ok');?>', '<?php echo $lang->line('cancel');?>');
+            return false;
+        }
+        if( address == '' ){
+            $.MsgBox.Confirm( '<?php echo $lang->line('enter_address_tip');?>',null,null, '<?php echo $lang->line('ok');?>', '<?php echo $lang->line('cancel');?>');
+            return false;
+        }
+        if( billTitle == '' ){
+            $.MsgBox.Confirm( '<?php echo $lang->line('enter_invoice_header_tip');?>' ,null,null, '<?php echo $lang->line('ok');?>', '<?php echo $lang->line('cancel');?>');
+            return false;
+        }
+        button_change();
+        return true;
+    }
+
+    function area_data_click(dom,e){
+        e.stopPropagation();
+        var _this =$(dom);
+        var _index = _this.parent().index();
+        var _length = $('.area_head *').length;
+        var _id = _this.attr('val');
+        for( var i=_index;i<_length;i++){
+            $('.area_head *').eq(i).html('');
+        }
+        _this.addClass('iscur').siblings().removeClass('iscur');
+        $('.area_head *').eq(_index).html(_this.html());
+        $('.boxloading').stop().show();
+        if ( _index+1<_length){
+            var _url = $('.area_data ul').eq(_index+1).attr('url');
+            var tmp_this=$('.area_head *').eq(_index+1);
+            tmp_this.html('请选择');
+            tmp_this.addClass('iscur').siblings().removeClass('iscur');
+            $.post( _url,  {"pid":_id},function(data){
+                var _html = '';
+                for (var i=0;i<data.length;i++){
+                    _html += '<li onclick="area_data_click(this,event)" val="'+data[i].region_id+'">'+data[i].region_name+'</li>';
+                }
+                $('.area_data ul').eq(_index+1).find('li').remove();
+                $('.area_data ul').eq(_index).animate({'left':'-100%'},300);
+                $('.area_data ul').eq(_index+1).append(_html).animate({'left':'0'},300);
+                $('.boxloading').stop().hide();
+            },'json');
+        }else{
+            var _html = '';
+            $('.area_box').stop().animate({'bottom':'-100%'},300,function(){
+                for(var i=0;i<$('.area_head *').length;i++)
+                    _html+=$('.area_head *').eq(i).html();
+                $('.area_fill').val(_html);
+				button_change();
+                $('.boxloading').stop().hide();
+            });
+            for( var i=0;i<_length;i++){
+                _id=$('.area_data ul').eq(i).find('li.iscur').attr('val');
+                $('.area_data ul').eq(i).find('input').val(_id);
+            }
+            toclose();
+        }
+    }
+    $(function(){
+                
+        $('#select_area').click(function(){
+            toshow($('.area_pull'));
+            $('.area_box').stop().animate({'bottom':0});
+        });
+        $('.area_box ').click(function(e){e.stopPropagation();});
+        $('.area_head *').click(function(e){
+            e.stopPropagation();
+            if($(this).html()=='')return;
+            var _index=$(this).index();
+            var old_index=$('.area_head .iscur').index();
+            var _left='0';
+            var _dir = '';
+            if(_index<old_index){_left='100%';}
+            if(_index>old_index){_left='-100%';_dir='-'}
+            $('.area_data ul').eq(old_index).animate({'left':_left},300);
+            $('.area_data ul').eq(_index).animate({'left':'0'},300);
+            for (var i=Math.min(_index,old_index);i<Math.max(_index,old_index);i++){
+                $('.area_data ul').eq(i).css('left',_dir+'100%');
+            }
+            $(this).addClass('iscur').siblings().removeClass('iscur');
+        })
+		$('input').change(button_change);
+        $('.send_btn').click(function(){
+            if( !test_val()) return;
+            if($(this).hasClass('disable'))return;
+            pageloading('<?php echo $lang->line('Submiting');?>');
+            $.post("<?php echo $post_url; ?>",{
+				billTitle:billTitle,
+                taxId:taxId,
+				name:name,
+				mobile:mobile,
+				area:area,
+				address:address,
+				province:province,
+				city:city,
+				region:region
+			},function(){
+				removeload();
+				$.MsgBox.Confirm( '<?php echo $lang->line('invoice_submittd');?>',function(){
+					window.location.href="<?php echo Soma_const_url::inst()->get_url('*/order/my_order_list',array('id'=>$inter_id));?>";/*页面中转*/
+				},null,'<?php echo $lang->line('ok');?>', '<?php echo $lang->line('cancel');?>');
+				$('#mb_btn_no').remove(); //移除取消按钮;
+			});
+        });
+    });
+
+    function checkFollow(){
+        //异步查询是否关注
+        $.ajax({
+            type: 'POST',
+            url: "<?php //echo $check_follow_ajax; ?>",
+            dataType: 'json',
+            success:function(json){
+                var tips = '';
+                var leftLink = '';
+                var leftUrl = '#';
+                var rightLink = '';
+                var rightUrl = '#';
+                if( json.status == 2 ){
+                    tips = json.message;
+                    leftLink = '<?php echo $lang->line('use_now');?>';
+                    rightLink = '<?php echo $lang->line('attention');?>';
+                    rightUrl = json.data;
+                }else{
+                    tips = json.message;
+                    leftLink = '<?php echo $lang->line('continue_use');?>';
+                    rightLink = '<?php echo $lang->line('to_online_shop');?>';
+                    rightUrl = json.data;
+                }
+				$.MsgBox.Confirm(tips,function(){
+					window.location.href=rightUrl;
+				},function(){
+					window.location.href=leftUrl;					
+				},rightLink,leftLink);
+            }
+        });
+    }
+
+    $("#addUrl").click(function(){
+        checkFollow();
+    });
+
+</script>
+</body>
+</html>

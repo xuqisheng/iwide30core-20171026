@@ -1,0 +1,26 @@
+.wrap{ background:#713bc2; padding-bottom:10px; }
+.main-pic { width:100%; }
+.detail-txts{ padding:22px 26px 30px; color:#fff; text-align:left; font-size:15px; line-height:24px; color:#fff; }
+.detail-txts b{ color:#ffd800; font-size:24px; padding:0 8px; }
+
+.btn-wrap{ padding:0 26px; }
+.btn-wrap .btns{ font-size:20px; margin-bottom:10px; }
+.btn-wechat{ background:#378e43; }
+.btn-app{ background:#ee6129 }
+
+.register-wrap{ background:#8d62ce; padding:5px 26px; text-align:center; color:#fff; margin-bottom:10px }
+.register-wrap li.item-li{ display:box; display:-webkit-box; display:-moz-box; width:100%; padding:7px 0; font-size:18px; line-height:46px }
+.register-wrap label{ width:70px; display:block }
+.register-wrap .i-txt-register{ box-flex:1; -webkit-box-flex:1; -moz-box-flex:1; display:block; border:1px solid #33185c; padding-left:5px; line-height:44px; font-size:14px; border-radius:5px; -webkit-border-radius:5px; -moz-border-radius:5px;  }
+.register-wrap .item-li p{ box-flex:1; -webkit-box-flex:1; -moz-box-flex:1; display:block; text-align:left }
+.register-wrap .btn-submit{ background:#ef2c43; }
+.register-wrap .submit-li p{ line-height:30px; font-size:12px; margin-bottom:5px }
+.register-wrap .submit-li p a{ color:#ddcff3; text-decoration:none }
+
+@media screen and (max-width:350px){
+	.btn-wrap .btns{ font-size:16px; }
+}
+
+@media screen and (min-width:410px){
+	.detail-txts{ padding:44px 26px 55px; }
+}

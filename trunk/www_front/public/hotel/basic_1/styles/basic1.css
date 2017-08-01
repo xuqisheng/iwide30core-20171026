@@ -1,0 +1,48 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{ background:#f7f7f7;}
+.ui_list,.often_like{ background:#fff;}
+.history_pull{text-align:center}
+
+.ui_btn_block {    padding-right:7%;}
+.ui_foot_btn { margin-top: 3%;}
+
+#checkdate hr{ width:2em; margin:3em 1.5em; border-bottom-width:2px;}
+#checkdate em{ padding-top:1%}
+#checkdate .border_circle { margin-top: 2.5%; }
+
+.padding_none,.often_like{ padding:0;}
+.location,.ui_list .near,.searchbox{padding-top:3.5%; padding-bottom:3.5%;}
+.ui_list .near{padding-top:4%;}
+.ui_list{ padding-left:0;border-width: 0 0 1px 0}
+.ui_item{ padding-left:3%;}
+
+.near > *,.location > *,.checkin > *,.checkout > *{display:inline-block;}
+.often_like{display:-webkit-box;}
+.often_like > *{-webkit-box-flex:1; text-align:center; padding:3% 0; display:block; width:auto;border-width: 0 0 0 1px;}
+.often_like > *:first-child{border-width:0}
+
+.near > *,.location > *,.searchbox > *{ vertical-align:middle}
+
+.ui_item,.checkout,.checkin,.checkin_time,.border_circle,.ui_item:first-child,.often_like{width:auto;}
+.ui_item:first-child .location { width:63%}
+.searchbox input {width: 80%;}
+.ui_list .near{width:26.6%}
+
+.local{float:right}
+
+.ui_list,.often_like,.often_like > *{border-image: url(border.gif) 2 stretch;}
+.checkin_time,.checkout,.checkin,.searchbox{border-width:0;}
+.often_like{border-radius:0;border-width: 1px 0 1px 0;}
+
+.date b{ font-weight:normal}
+
+.date b,.ui_btn_block .btn_title{ font-size:2em;}
+.often_like span{ font-size:2.2em;}
+.location .btn_title,.border_circle .checkin_time,.near p{ font-size:3.2em}
+.local{ font-size:3.6em}
+.often_like .iconfont {font-size:6em}
+
+.week{display:none}
+.checkin_time:before {    content: "住";}

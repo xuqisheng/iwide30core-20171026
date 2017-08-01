@@ -1,0 +1,70 @@
+<body>
+<style>
+.bg_F3F4F8, body, html {
+    background: #ffffff;
+}
+</style>
+<div class="box">
+    <div class="dc_txt">
+        <p>恭喜你成为“馅饼侠”招募者</p>
+        <p>转发申请链接给好友，好友申请成功</p>
+        <p>你将获得<span class="profit">50元</span>红包奖励</p>
+        <p>次日发至微信零钱包</p>
+        <!--最高<font class="profit">10%</font>收益</div>-->
+    <div class="btn_list">
+        <a href="<?php echo $origin_url; ?>">
+            <div class="money">马上赚钱</div>
+        </a>
+    </div>
+    <!-- <div class="what"><a class="what_txt" href="">什么是微宝客？</a></div> -->
+</div>
+<div class="bt_img">
+    <img src="<?php echo get_cdn_url('public/soma/fans_saler/imgs/bottom.png'); ?>" />
+</div>
+
+<!--<div class="fixe">-->
+    <!--<div class="f_con">-->
+        <!--<div class="btn_close">关闭</div>-->
+        <!--<div class="money_img"><img src="imgs/money.png"/></div>-->
+        <!--<div class="p_radius">-->
+            <!--<div class="people"><img src="imgs/people.png"/></div>-->
+        <!--</div>-->
+        <!--<div class="container">-->
+            <!--<div class="explain">激活“微宝客”后推荐好友购买成功即可获得<br>最高<font class="percentage">10%</font>收益</div>-->
+            <!--<div class="f_btn">-->
+                <!--<a href="">-->
+                    <!--<div class="f_money">马上赚钱</div>-->
+                <!--</a>-->
+                <!--<a href="">-->
+                    <!--<div class="f_recom">免费推荐</div>-->
+                <!--</a>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<a href="">-->
+        <!--<div class="what_txt">什么是微宝客？</div>-->
+    <!--</a>-->
+<!--</div>-->
+
+<script type="text/javascript">
+    if ($(window).height() == 416) {
+        $('.bt_img').css({"position": "static"});
+    }
+  /*弹窗苹果4兼容*/
+    if ($(window).height() == 416) {
+        $('.p_radius').css({"width": "110px", "height": "110px", "margin-left": "-55px"});
+        $('.container').css({"padding-top": "55%"});
+    }
+    $(function () {
+      /*弹窗消失*/
+        $(".btn_close").click(function () {
+            $(".fixe").fadeOut();
+        })
+      /*弹窗显示*/
+      /*$("").click(function(){
+       $(".fixe").fadeIn();
+       })*/
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+@charset "utf-8";
+/* CSS Document */
+
+.shaking{
+	animation-name: myfirst;
+	animation-duration: 0.3s;
+	animation-iteration-count: 2;
+	/* Safari and Chrome: */
+	-webkit-animation-name: myfirst;
+	-webkit-animation-duration: 0.3s;
+	-webkit-animation-iteration-count: 2;
+}
+@keyframes myfirst
+{
+0%   {transform: rotate(10deg);-webkit-transform: rotate(10deg);}
+50%  { transform: rotate(-15deg);-webkit-transform: rotate(-15deg);}
+100% { transform: rotate(5deg);-webkit-transform: rotate(5deg);}
+}
+@-webkit-keyframes myfirst /* Safari and Chrome */
+{
+0%   {transform: rotate(10deg);-webkit-transform: rotate(10deg);}
+50%  { transform: rotate(-15deg);-webkit-transform: rotate(-15deg);}
+100% { transform: rotate(5deg);-webkit-transform: rotate(5deg);}
+}
+.tap{
+	animation-name: tapgif;
+	animation-duration: 1.5s;
+	animation-iteration-count: infinite;
+	animation-direction: alternate;
+	/* Safari and Chrome: */
+	-webkit-animation-name: tapgif;
+	-webkit-animation-direction: alternate;
+	-webkit-animation-duration: 1.5s;
+	-webkit-animation-iteration-count: infinite;
+}
+@keyframes tapgif
+{
+from{opacity:0.6}
+to{opacity:1}
+}
+@-webkit-keyframes tapgif /* Safari and Chrome */
+{
+from{opacity:0.6}
+to{opacity:1}
+}
+@keyframes a
+{
+0%   {transform: scale(1.1,1.1);-webkit-transform: scale(1.1,1.1)}
+100% { transform: scale(1,1);-webkit-transform: scale(1,1);}
+}
+@-webkit-keyframes a /* Safari and Chrome */
+{
+0%   {transform: scale(1.1,1.1);-webkit-transform: scale(1.1,1.1)}
+100% { transform: scale(1,1);-webkit-transform: scale(1,1);}
+}

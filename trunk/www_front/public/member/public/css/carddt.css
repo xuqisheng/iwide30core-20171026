@@ -1,0 +1,40 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+
+*{font-size:inherit; }
+div,a,button{ font-size:16px;}
+body,html{width:100%;height:100%;background:#f99e12}
+.fixe{ width:90%; margin:auto; position:relative; padding-top:80px; max-width:640px; min-width:300px; font-size:0; padding-bottom:40px;}
+.fixe .itemimg{width:120px; height:120px; border-radius:50%; overflow:hidden; margin:auto; margin-top:-60px; margin-bottom:2%;}
+.fixe .itemimg img{width:120px; height:120px;}
+.fixe .er_log{display:block;position:relative;margin:auto;text-align:center; background:#fff; color:#000; text-align:center; border-radius:5px 5px 0 0; padding-top:15px; padding-bottom:2%; }
+.back{display:block;position:absolute; top:10%; right:5%; color:#999; font-size:18px;}
+.fixe .er_log h1{padding-top:5%;}
+.erwen_b{margin:auto; font-size:0;background:#fff;border-radius:0 0 5px 5px; }
+.detail{background:#fff; display:block;}
+.saoma { text-align:center;}
+.saoma img{width:60%;}
+.addto{background:#f99e12; color:#fff; padding:3% 4%; border-radius:5px; display:inline-block;}
+.hotelname,.valuetime{ color:#999}
+.votename{ font-size:30px}
+.votename,.hotelname,.valuetime{padding:1% 0;}
+.valuetime{ font:12px;}
+.rowbtn{  padding:3% 0;padding-left:3%; background:url(../images/ico13.png) no-repeat; background-position:95% center; background-size:auto 35%;}
+hr{ width:94%; border-color:#e4e4e4; margin:auto; opacity:0.4}
+.detail{ border-top:1px dashed #e4e4e4;}
+.detail_pull{ background:#fff; color:#555; overflow:auto; -webkit-overflow-scrolling:touch}
+
+
+@media only screen and (min-width: 300px) and (max-width:470px) {
+	.fixe{ padding-top:50px}
+	.fixe .itemimg,.fixe .itemimg img{width:60px; height:60px;}
+	.fixe .itemimg{ margin-top:-40px;}
+}
+@media only screen and (min-width: 480px) and (max-width:639px) {
+	.fixe{ padding-top:65px}
+	.fixe .itemimg{ margin-top:-55px;}
+	.fixe .itemimg,.fixe .itemimg img{width:90px; height:90px;}
+	
+}

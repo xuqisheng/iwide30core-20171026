@@ -1,0 +1,20 @@
+@charset "utf-8";
+/* CSS Document */
+.headr{padding:3%;background:#fff;}
+.h_nane font,.f_right{float:right;}
+.headr .Withdrawals{float:right;color:#fff;background:#d40f20;padding:1% 2%;margin-top:-0.2rem;border-radius:.2rem;}
+.headr font{color:#d40f20;}
+.h_nane font:before,.n_t_con >font:before,.headr div font:before{content:'¥';}
+.content{width:94%;padding:3%;}
+.content .box{border:1px solid #d3d3d3;border-radius:0.3rem;padding:2%;background:#fff;margin-bottom:3%;}
+.content .box .b_titl{padding:3% 0 3% 13%;background:url(../images/ico_5.png) no-repeat left center;
+color:#999;background-size:8%;border-bottom:1px solid #d3d3d3}
+.h_nane{padding:5% 0;}
+.h_nane font{float:right;}
+.n_t_con > p{font-size:0.6rem;padding:1% 0;}
+.h_nane font,.n_t_con >font{color:#d40f20;font-size:0.9rem;}
+.n_t_con{position:relative;}
+.n_t_con >font{position:absolute;bottom:0px;right:0px;}
+.li_btns{text-align:right;margin:3% 0 2% 0;width:100%;}
+.li_btns > span{float:left;font-size:0.4rem;color:#fea533;margin-top:1%;}
+.li_btns > a{border:1px solid #3e3e3e;font-size:0.5rem;padding:1% 3%;border-radius:0.2rem;color:#3e3e3e;}

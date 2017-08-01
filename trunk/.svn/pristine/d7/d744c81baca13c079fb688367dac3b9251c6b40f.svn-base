@@ -1,0 +1,368 @@
+<?php
+/**
+ * @desc : 预约核销接口
+ * @author : Shacaisheng
+ * @date  : 2017-05-12
+ * @version : V1.0
+ *
+ */
+if (! defined ( 'BASEPATH' ))
+	exit ( 'No direct script access allowed' );
+class TicketApi extends MY_Front {
+    public  $themeConfig;
+    public  $theme = 'default';//皮肤
+    public $openid;
+    public $module;
+    //protected $_token;
+	function __construct() {
+		parent::__construct ();
+        $this->inter_id = $this->session->userdata ( 'inter_id' );
+        $this->openid = $this->session->userdata ( $this->inter_id . 'openid' );
+        //统计探针
+        $this->load->library('MYLOG');
+        MYLOG::distribute_tracker($this->session->userdata ( $this->inter_id . 'openid' ),   $this->session->userdata ( 'inter_id' ));
+
+        $this->load->model('wx/Access_token_model');
+        $this->common_data = $this->Access_token_model->getSignPackage($this->inter_id);
+        $this->load->helper('appointment');
+    }
+
+    //店铺列表接口
+    public function scenic_list()
+    {
+        $this->load->helper('appointment');
+        $param = $this->input->post();
+        $data['inter_id'] = $this->inter_id;
+        $per_page = isset($param['page_show']) && $param['page_show'] ? $param['page_show'] : 20;
+        $cur_page = isset($param['page_num']) && $param['page_num'] ? $param['page_num'] : 1;
+        //获取店铺数量
+        $this->load->model('roomservice/roomservice_shop_model');
+
+        $filter = array();
+        $filter['sale_type']    = 4;
+        $filter['inter_id']     = $this->inter_id;
+        $filter['is_delete']    = 0;
+        $filter['status']       = 1;
+
+        $res = $this->roomservice_shop_model->get_page($filter,$cur_page,$per_page);
+        $list = isset($res[1]) ? $res[1] : array();
+        $total_count = isset($res[0]) ?$res[0] : 0;
+
+        $arr_page = get_page($total_count, $cur_page, $per_page);
+        $data = array(
+            'list' => $list,
+            'page' => $arr_page,
+        );
+
+        if ($list)
+        {
+            ajax_return(1,'成功',$data);
+        }
+        ajax_return(0,'暂无数据',$data);
+    }
+
+    /**
+     * 加入购物车
+     */
+    public function add_cart()
+    {
+
+    }
+
+    /**
+     * 编辑购物车
+     */
+    public function update_cart()
+    {
+
+    }
+
+    /**
+     * 删除购物车
+     */
+    public function del_cart()
+    {
+
+    }
+
+    /**
+     * 用户购物车
+     */
+    public function cart_list()
+    {
+        $param = $this->input->post();
+
+        # 获取购物车信息
+        $where_arr = array(
+            'shop_id'	=> $param['shop_id'],
+            'buy_type'	=> 2,
+            'openid'	=>  $this->openid,
+        );
+
+        $cart_goods =  $this->select_cart_goods($where_arr);
+
+        ajax_return(1,'获取成功',$cart_goods);
+    }
+
+    /**
+     * 清空购物车
+     */
+    public function clear_cart()
+    {
+
+    }
+
+    /**
+     * 获取商品
+     */
+    public function get_ticket_goods()
+    {
+        $inter_id   = $this->inter_id;
+        $shop_id    = $this->input->post('shop_id',true);
+        $group_id   = $this->input->post('group_id',true);
+        if(empty($inter_id) || empty($shop_id))
+        {
+            ajax_return(0,'参数错误');
+        }
+        //查询商铺是否营业
+        $shop = $this->shop_info($inter_id,'',$shop_id);
+        if(empty($shop))
+        {
+            ajax_return(0,'店铺不存在');
+        }
+
+        //查询分组下的商品信息
+        $goods_where = array(
+            'inter_id'  => $inter_id,
+            'shop_id'   => $shop_id,
+            'is_delete' => 0,
+            'sale_type' => 4,
+            'sale_now'  => 1,
+        );
+
+        if(!empty($group_id))
+        {
+            if(is_array($group_id))
+            {
+                $goods_where['in_group_id'] = $group_id;
+            }
+            else if($group_id == 'is_re')
+            {
+                $goods_where['is_recommend'] = 1;
+            }
+            else
+            {
+                $goods_where['group_id'] = $group_id;
+            }
+        }
+
+        $this->load->model('roomservice/roomservice_goods_model');
+        $goods_info = $this->roomservice_goods_model->get_front_goods_list($goods_where);
+        $goods_ids = $recommend_ids = array();
+        $group_arr = array();
+        if($goods_info)
+        {
+            //查询所有分组的信息
+            $group_where = array(
+                'inter_id'  => $this->inter_id,
+                'shop_id'   => $shop_id,
+                'status'    => 1,
+                'is_delete' => 0,
+                'sale_type' => 4,
+            );
+
+            $this->load->model('roomservice/roomservice_goods_group_model');
+            $group = $this->roomservice_goods_group_model->get_goods_group_info($group_where);
+            if(!empty($group))
+            {
+                foreach($group as $k=>$v)
+                {
+                    $group_arr[$v['group_id']] = $v;
+                }
+                unset($group);
+            }
+
+            //过滤掉没到时间开售的商品
+            foreach ($goods_info as $gk => $gv)
+            {
+                $goods_info[$gk]['btn_status'] = 1;
+                $curtime = date('H:i');
+                if($gv['sale_now'] ==3 || ($gv['sale_now'] == 2 && ($gv['sale_start_time'] > "{$curtime}" || $gv['sale_end_time'] < "{$curtime}" ) ) ||$gv['sale_status'] ==2){//定时开售
+
+                    $goods_info[$gk]['btn_status'] = 0;
+                }
+
+                $goods_ids[] = $gv['goods_id'];
+                if($gv['is_recommend'] == 1)
+                {
+                    //记录热门推荐id
+                    $recommend_ids[] = $gv['goods_id'];
+                }
+                //图片数据处理 取第一张
+                $goods_img = !empty($gv['goods_img']) ? json_decode($gv['goods_img'],true) : '';
+                if (!empty($goods_img))
+                {
+                    $goods_img = !empty($goods_img[0]) ? $goods_img[0] : '';
+                }
+
+                $goods_info[$gk]['goods_img'] = $goods_img ;
+            }
+        }
+
+        if(!empty($goods_ids))
+        {
+            //处理核销规格信息
+            $this->load->model('roomservice/roomservice_ticket_spu_model');
+            $this->load->model('roomservice/roomservice_ticket_dateprice_model');
+            $spec_arr = $this->roomservice_ticket_spu_model->get_goods_spu_info(array('inter_id' => $this->inter_id), $goods_ids);
+            $dateprice = $this->roomservice_ticket_dateprice_model->get_goods_dateprice_info(array('goods_id' => $goods_ids));
+            //print_r($spec_arr); print_r($dateprice);exit;
+            if (!empty($spec_arr))
+            {
+                foreach ($goods_info as $k => $v)
+                {
+                    $spec_list = array();//规格数组
+                    if (isset($spec_arr[$v['goods_id']]) && !empty($spec_arr[$v['goods_id']]) )
+                    {
+                        foreach ($spec_arr[$v['goods_id']] as $sk => $sv)
+                        {
+                            if (isset($dateprice[$v['goods_id']][$sv['spu_id']]) && !empty($dateprice[$v['goods_id']][$sv['spu_id']]))
+                            {
+                                $sv['date'] = $dateprice[$v['goods_id']][$sv['spu_id']]['date'];
+                                $sv['specprice'] = $dateprice[$v['goods_id']][$sv['spu_id']]['goods_price'];
+                                $sv['stock'] = $dateprice[$v['goods_id']][$sv['spu_id']]['goods_stock'];
+                                $sv['spec_id'] = $sk +1;
+                                $spec_list[$sv['spu_id']] = $sv;
+                            }
+                            //未设置日历价格
+                            else
+                            {
+                                $sv['date'] = '';
+                                $sv['specprice'] = 0;
+                                $sv['stock'] = 0;
+                                $sv['spec_id'] = $sk +1;
+                                $spec_list[$sv['spu_id']] = $sv;
+                            }
+                        }
+                    }
+                    $goods_info[$k]['spec_list'] = json_encode($spec_list, JSON_UNESCAPED_UNICODE);
+                }
+            }
+            //按照分组组装数据
+
+            foreach($goods_info as $k=>$v)
+            {
+                if(isset($group_arr[$v['group_id']]) && !empty($group_arr[$v['group_id']]))
+                {
+                    $group_arr[$v['group_id']]['goods_info'][] = $v;
+                }
+            }
+            $sort_arr = array();
+            foreach($group_arr as $k=>$v)
+            {
+                if(isset($v['goods_info']) && !empty($v['goods_info']))
+                {
+                    $sort_arr[] = $v; //去掉索引
+                }
+                else
+                {
+                    //删掉没数据的分组
+                    unset($group_arr[$k]);
+                }
+            }
+            unset($group_arr);
+        }
+
+        if($goods_info)
+        {
+            if(!empty($group_id) && $group_id == 'is_re')
+            {
+                $return['data'] = $goods_info;
+            }
+            else
+            {
+                $return['data'] = $sort_arr;
+            }
+            ajax_return('200','成功',$return['data']);
+        }
+        else
+        {
+            ajax_return('200','无商品');
+        }
+    }
+
+    /**
+     * 结算接口
+     */
+    public function checkout()
+    {
+
+    }
+
+    /**
+     * 生成订单接口
+     */
+    public function save_order()
+    {
+
+    }
+
+
+    /**
+     * 查询购物车商品
+     */
+    protected function select_cart_goods()
+    {
+
+    }
+
+
+    //获取商铺信息
+    private function shop_info($inter_id = '',$hotel_id = '',$shop_id = '')
+    {
+        $arr = array();
+        $arr['inter_id'] = $inter_id;
+        if($hotel_id)
+        {
+            $arr['hotel_id'] = $hotel_id;
+            //读取酒店信息
+            $this->load->model ( 'hotel/Hotel_model' );
+            $hotel = $this->Hotel_model->get_hotel_detail($inter_id,$hotel_id);
+            if(empty($hotel))
+            {
+                return false;//酒店不存在或者停用了
+            }
+        }
+        $arr['shop_id'] = $shop_id;
+        $arr['status'] = 1;//开业
+        $arr['is_delete'] = 0;//正常
+        $this->load->model ( 'roomservice/Roomservice_shop_model' );
+        $shop = $this->Roomservice_shop_model->get($arr);
+        if($shop)
+        {
+            //店铺是正常的状态  查看是否在营业时间
+            //判断店铺营业时间
+            $shop_status = 0;//歇业
+            $date = date('w')?date('w'):7;//星期几
+            $sale_days = empty($shop['sale_days'])?array():explode(',',$shop['sale_days']);
+            if(in_array($date,$sale_days))
+            {
+                $shop_status = 1;//正常营业
+            }
+            //优惠数据处理
+            if(!empty($shop['discount_type']) && !empty($shop['discount_config']))
+            {
+                $shop['discount_config'] = unserialize($shop['discount_config']);
+            }
+            $shop['shop_status'] = $shop_status;
+            return $shop;
+        }
+        else
+        {
+            return false;//店铺已经删除 或不存在
+        }
+    }
+
+
+
+}

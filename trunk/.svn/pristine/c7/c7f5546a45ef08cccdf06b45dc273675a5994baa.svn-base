@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- 全局控制 -->
+<script src="scripts/viewport.js?v=26"></script>
+<script src="scripts/jquery.js?v=27"></script>
+<script src="scripts/ui_control.js?v=27"></script>
+<link href="styles/global.css?v=27" rel="stylesheet">
+<link href="styles/ui.css?v=27" rel="stylesheet">
+<link href="styles/ui_ico.css?v=27" rel="stylesheet">
+<link href="styles/ui_style.css?v=27" rel="stylesheet">
+<link href="styles/ui_pull.css?v=27" rel="stylesheet">
+<!-- end -->
+<script src="scripts/calendar.js"></script>
+<script src="scripts/date.js"></script>
+<script src="scripts/load_more.js?v=26"></script>
+<link href="styles/calendar.css" rel="stylesheet">
+<link href="styles/search_result.css?v=27" rel="stylesheet">
+<title>查找酒店</title>
+</head>
+<style>
+.checkin .date:after{content:"入住"}
+.checkout .date:after{content:"离店"}
+.checkin_time:before{ content:"共"}
+.checkin_time:after{ content:"晚"}
+.ui_price:after{ content:"起";}
+</style>
+<body>
+
+<input type="hidden" id="startdate" name="startdate" value="" />
+<input type="hidden" id="enddate" name="enddate" value="" />
+<header>
+	<div class="headfixed">
+    	<div class="ui_btn_block float checkdate" id='checkdate'>
+            <span class="checkin" id='checkin'><span class="date">1月1日</span></span>
+            <span class="checkout" id='checkout'><span class="date">1月1日</span></span>
+            <span class="checkin_time ui_color">1</span>
+        </div>
+        <a class="map">
+        	<em class="ui_ico ui_ico2"></em>
+            <span class="ui_color">地图预览</span>
+        </a>
+    </div>
+</header>
+<div class="hotel_list">
+	<a href="room_list.html" class="item">
+        <div class="ui_img_auto_cut"><img src="images/egimg/eg01.png" /></div>
+        <div class="allin_box">
+            <div class="name">广州天美酒店公寓体育中心店</div>
+            <div class="coupon">
+            	<div class="ui_price">398</div>
+                <div class="backvote">入住返券</div>
+            </div>
+            <div class="ever"><span class="ui_color_gray">12条评论</span></div>
+            <div class="sever">
+            	<em class="ui_sever ui_sever_ico1"></em>
+            	<em class="ui_sever ui_sever_ico2"></em>
+            	<em class="ui_sever ui_sever_ico3"></em>
+            	<em class="ui_sever ui_sever_ico4"></em>
+            </div>
+        </div>
+    </a>
+	<a href="room_list.html" class="item">
+        <div class="ui_img_auto_cut ui_square_h"><img src="images/egimg/eg01.png" /></div>
+        <div class="allin_box">
+            <div class="name">广州天美酒店公寓体育中心店</div>
+            <div class="coupon">
+            	<div class="ui_price">398</div>
+                <div class="backvote">入住返券</div>
+            </div>
+            <div class="ever"><span class="ui_color_gray">12条评论</span></div>
+            <div class="sever">
+            	<em class="ui_sever ui_sever_ico1"></em>
+            	<em class="ui_sever ui_sever_ico2"></em>
+            	<em class="ui_sever ui_sever_ico3"></em>
+            	<em class="ui_sever ui_sever_ico4"></em>
+            </div>
+        </div>
+    </a>
+</div>
+
+</body>
+<script>
+var setheight=0
+var server_item=['24小时热水','无线上网','吹风机','行李寄存','叫醒服务','接机服务','免费停车','有线上网'];
+
+var isfirst=true;
+$(function(){		
+	setheight=$('.ui_img_auto_cut').width();	
+	$(document).on('touchmove',function(e){
+		if($(document).height()-$(window).height()-4<=$(document).scrollTop()){;
+			if (!isfirst){
+				e.preventDefault();
+				isfirst = true;
+				showload('正在加载',true);
+				window.setTimeout(function(){  //模拟加载
+					add_hotel_to(
+						'room_list.html',   		   //  链接地址
+						'images/egimg/eg01.png',   //  图片地址
+						'广州天美酒店公寓体育中心店',   //  酒店名
+						'398',  				   //  价格
+						true,   				   //  是否返券,不返券传false
+						'12',   				   //  评论数,没有评论数传 null 
+						'24小时热水,无线上网,行李寄存'  // 服务项,没有服务项传 null 
+					);
+					showload('无更多结果');
+					removeload();
+				},2000);
+			}
+			else{
+				showload();
+				isfirst = false;
+			}
+		}
+	})
+});
+</script>
+</html>

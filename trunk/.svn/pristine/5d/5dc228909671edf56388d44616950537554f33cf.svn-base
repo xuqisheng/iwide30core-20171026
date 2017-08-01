@@ -1,0 +1,17 @@
+@charset "utf-8";
+/* CSS Document transparent*/
+/* 商城 5.0 */
+
+
+.img{width:95px;min-width:95px;max-width:90px; margin-right:10px}
+.progress{background:#f0f0f0; margin-right:5%; width:50px}
+.progress, .progress>*{height:8px}
+.list_style_1 { padding:0px 8px 0px 0}
+.list_style_1 >*{padding-left:8px}
+.list_style_1 .btn_minor{width:5rem; text-align:center}
+
+.tp_list { padding:4px}
+.tp_list .item{ margin-bottom:4px; background:none; box-shadow:none; padding:0}
+.tp_list .squareimg{padding-bottom:56%; border-radius:4px; overflow:hidden}
+.tp_list .bn_title{background:rgba(255,255,255,0.8); color:#3d3935;  width:95%; left:2.5%}
+.tp_list .bn_title_name{ max-width:70%}

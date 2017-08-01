@@ -1,0 +1,46 @@
+@charset "utf-8";
+/* CSS Document */
+
+*{margin:0;padding:0;font-size:0.55rem; -webkit-tap-highlight-color: transparent;}
+
+html{height:100%;-webkit-text-size-adjust:100%;}
+html,body{width:100%;color:#333;background:#f8f8f8;font-family:Helvetica Neue,sans-serif}
+html *{outline:0;-webkit-text-size-adjust:none;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+
+input,select,textarea,button{font-size:0.65rem; outline:none; border:none; resize:none; background:none;-webkit-appearance:none;}
+table{border-collapse:collapse;border-spacing:0}
+fieldset,img{border:0; width:100%;}
+abbr,acronym{border:0;font-variant:normal}
+del{text-decoration:line-through}
+address,caption,cite,code,dfn,em,th,var{font-style:normal;font-weight:500}
+ol,ul{list-style:none}
+
+a,a:active,a:visited{text-decoration: none;font-weight:normal !important; text-shadow:none !important;color:#444;}
+hr{ border:none; border-bottom:1px solid #999999;}
+.padding{padding:3% 4%}
+.float{float:left;}
+.float_r{float:right}
+.clear{clear:both}
+.static{position:static !important;}
+.relative{position:relative}
+.absolute{position:absolute;}
+.border{ border:1px solid #d3d6d9;}
+.radius{border-radius:0.2rem}
+.txtclip{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.txt_r{text-align:right}
+.hide{display:none !important}
+.pull{ height:100%;width:100%;position:fixed; z-index:999; top:0; left:0; background:rgba(0,0,0,0.9); color:#fff;}
+.fixpidding{padding-top:21%}
+.center{text-align:center}
+.overflow{overflow:hidden}
+.overscroll{overflow-y:scroll}
+.light{color:#ca2929;}
+.close{ text-align:center; position:fixed; bottom:0; z-index:999; color:#fff; width:100%; font-size:1.6rem; padding:4% 0;}
+.ico{ display:inline-block; width:0.5rem;font-size:0;vertical-align:middle}
+.alpha{opacity:0.5}
+
+
+.page_loading{position:fixed;height:100%; z-index:999999999; width:100%; text-align:center; background:#fff; }
+.page_loading p{margin-top:45%;display:inline-block; border-radius:0.5em; color:#ccc; font-size:0.6rem;background:rgba(0,0,0,0.5)}
+.page_loading p.isload{padding-top:4em;width:6em;padding-bottom:0.5em;background:url(../images/ico/loading.gif) no-repeat rgba(0,0,0,0.5); background-position:center 20%;background-size:40%;}
+.page_loading p.error{width:auto; padding:4%;}

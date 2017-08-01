@@ -1,0 +1,87 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+body,html{background:#f8f8f8}
+.bg_fb4947{background:#fb4947}
+.bg_4bc1f8{background:#4bc1f8}
+.color_3e{color:#3e3e3e}
+.c_989898{color:#989898;}
+.c_2ac833{color:#2ac833;}
+.c_fb4947{color:#fb4947;}
+
+/*搜索页面*/
+.search{padding:10px;}
+.search >div{display:inline-block;}
+.in_input{width:83%;border:1px solid #c9c9c9;border-radius:50px;padding-left:0.714rem;}
+.in_input >input{ padding:4px;}
+.in_input i{font-size:1.214rem;vertical-align:middle;}
+.confirm{padding:0 2.3%;}
+.con_list .img{width:90px;max-width:90px;min-width:90px;margin-right:10px; overflow:hidden}
+.con_list .btn_main{margin:8px; padding:1px 8px;}
+.con_txt{padding-top:15px;}
+.con_txt>p{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;}
+.c_btn{padding:2px 8px;margin-right:4%;border-radius:3px;}
+
+
+/*日历页面*/
+.title_con{width:92%;margin:auto;color:#000;padding:10px 0;}
+.explain{text-align:center;padding:12px 0;}
+.explain div{display:inline-block;margin-right:5%;}
+.explain div:last-child{margin-right:0%}
+.explain div >span{display:inline-block;width:14px;height:14px;border:1px solid #e5e5e5;vertical-align:text-bottom;}
+
+.check{padding-left:3%;}
+.on_rows{padding:5px 0;}
+.on_rows span:nth-of-type(1){display:inline-block;width:85px;}
+.book_btn{width:31%;margin:10px auto;padding:10px 0;color:#fff;border-radius:3px;text-align:center;}
+
+.f_con{width:67%;margin:auto;margin-top:10%;border-radius:7px;padding:5% 6%; }
+.spot{width:11%;margin:auto;height:5px;border-radius:5px;}
+.f_txt{padding:10px 0;}
+.f_txt_box{margin:10px 0;}
+.f_txt_box >div{margin-bottom:10px;}
+.f_txt_box >div span:nth-of-type(1){margin-right:1%;display:inline-block;width:55px;}
+.prompt{color:#989898;padding-left:1.5em;text-indent:-1.5em}
+.prompt i{margin-right:2%}
+.btn_lists{}
+.btn_lists >*{display:inline-block;margin-right:18px;border-radius:2px;padding:3px 8px; line-height:1.5}
+.btn_lists >*:last-child{margin-right:0px;}
+.btn_lists >a{padding:3px 12px;}
+.cancel{border:1px solid;}
+.determine{border:1px solid transparent;}
+.close{margin-top:3%;}
+.close >i{font-size:30px;}
+
+
+/*日历*/
+table{width:100%;text-align:center;}
+tr td div{margin:5px;padding:5px 0;}
+tr td div.full{color:#fff;background:#fb4947}
+tr td div.no_holet{color:#fff;background:#3d98fb}
+tr td div.hook{background: url(../images/hook.png) no-repeat;background-size:65%;background-position:58% 98%;}
+.bottom_btn{vertical-align:text-top;margin-left:5px;}
+.left_btn{margin-right:10px;}
+.right_btn{margin-left:10px;}
+.theads >tr{height:30px;}
+tbody .titl_btn{height:40px !important;}
+.bom_select{position:absolute;bottom:-14px;left:50%;display:none;}
+select{font-size:15px;padding-right:20px;background:url(../images/three.png) no-repeat;background-size:26%;background-position:center right;}
+
+
+
+/*预订失败  预订成功*/
+.heads{padding:3% 0;}
+.heads >i{font-size:40px;}
+.relevant_t{padding:5px 0;margin-left:3%;}
+.relevant_t img{height:14px;width:16px;vertical-align:middle;margin-right:2%;}
+.relevant_con{margin:3%;}
+.r_c_box{display:inline-block;width:48.3%;margin-right:2%;}
+.r_c_box:nth-of-type(2n){margin-right:0px;}
+.box_img{width:100%;height:auto;}
+.box_img img{width:100%;height:100%;}
+.box_txt2 i{margin:0 5%;font-style:normal;}
+
+
+
+

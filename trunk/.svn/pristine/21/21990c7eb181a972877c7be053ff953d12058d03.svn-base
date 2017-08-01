@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- 全局控制 -->
+<script src="scripts/viewport.js"></script>
+<script src="scripts/jquery.js"></script>
+<script src="scripts/ui_control.js"></script>
+<link href="styles/global.css" rel="stylesheet">
+<link href="styles/ui.css" rel="stylesheet">
+<link href="styles/ui_ico.css" rel="stylesheet">
+<link href="styles/ui_style.css" rel="stylesheet">
+<link href="styles/ui_pull.css" rel="stylesheet">
+<!-- end -->
+<script src="scripts/touchwipe.js"></script>
+<script src="scripts/imgscroll.js"></script>
+<script src="scripts/calendar.js"></script>
+<script src="scripts/date.js"></script>
+<link href="styles/calendar.css" rel="stylesheet">
+<link href="styles/index.css" rel="stylesheet">
+<title>查找酒店</title>
+</head>
+<style>
+.checkin_time:after{ content:"晚"}
+</style>
+<body>
+<header class="headers"> 
+  <div class="headerslide">
+  	  <a class="slideson ui_img_auto_cut" href="#">
+     	 <img src="images/egimg/eg_banner01.png" />
+      </a>
+  	  <a class="slideson ui_img_auto_cut" href="#">
+     	 <img src="images/egimg/eg_banner02.png" />
+      </a>
+  </div>
+</header>
+<form action="seach_results.html">
+<input type="hidden" id="startdate" name="startdate" value="1/1" />
+<input type="hidden" id="enddate" name="enddate" value="1/1" />
+<input type="hidden" id="city" name="city" value="" />
+<div class="ui_list">
+	<div class="ui_item">
+        <div class="location ui_btn_block">
+            <div class="btn_title">入住城市</div>
+            <div class="local txtclip">广州(定位：广州市天河区天河路)</div>
+        </div>
+        <div class="near"><em class="ui_ico ui_ico8"></em><p>附近酒店</p></div>
+    </div>
+	<div class="ui_item" id="checkdate">
+        <div class="checkin ui_btn_block float" id='checkin'>
+            <div class="btn_title">入住日期</div>
+            <span class="date">1月1日</span>
+            <span class="week">一</span>
+        </div>
+        <div class="border_circle float">
+            <div class="checkin_time ui_square_h align_middle">1</div>
+        </div>
+        <div class="checkout ui_btn_block float_r" id='checkout'>
+            <div class="btn_title">离店日期</div>
+            <span class="date">1月1日</span>
+            <span class="week">一</span>
+        </div>
+    </div>
+	<div class="ui_item">
+        <div class="searchbox">
+            <input placeholder="关键字/位置/名称" class="keyword">
+        </div>
+    </div>
+</div>
+<div class="ui_foot_btn">
+	<button class="ui_btn isable">搜索</button>
+</div>
+</form>
+<div class="often_like">
+	<div class="often">
+    	<em class="ui_ico ui_ico3"></em><span>常住酒店</span>
+    </div>
+	<div class="like">
+    	<em class="ui_ico ui_ico9"></em><span>我的收藏</span>
+    </div>
+</div>
+<div class="ui_pull like_pull" style="display:none;">
+    <div class="pull_box">
+        <div class="ui_color pull_title">我的收藏</div>
+        <ul>
+            <li>广州碧桂园凤凰酒店</li>
+            <li>广州碧桂园凤凰酒店</li>
+            <li>广州碧桂园凤凰酒店</li>
+            <li>广州碧桂园凤凰酒店</li>
+            <li>广州碧桂园凤凰酒店</li>
+        </ul>
+        <a href="often_like.html" class="pull_more">查看更多</a>
+        <div class="close"><em class="ui_ico ui_ico7"></em><p>关闭</p></div>
+    </div>
+</div>
+<div class="ui_pull often_pull" style="display:none;">
+    <div class="pull_box">
+        <div class="ui_color pull_title">常住酒店</div>
+        <ul>
+            <li>广州碧桂园凤凰酒店</li>
+            <li>广州碧桂园凤凰酒店</li>
+            <li>广州碧桂园凤凰酒店</li>
+            <li>广州碧桂园凤凰酒店</li>
+            <li>广州碧桂园凤凰酒店</li>
+        </ul>
+        <a href="often_like.html" class="pull_more">查看更多</a>
+        <div class="close"><em class="ui_ico ui_ico7"></em><p>关闭</p></div>
+    </div>
+</div>
+<div class="ui_pull address_pull" style="display:none"><!-- 地址列表 -->
+	<div class="pull_searchbox"><input type="search" placeholder="输入城市名称或者拼音" class="search"></div>
+    <div class="content_pull">
+    	<div class="title">当前城市</div>
+        <div class="around ui_color">我附近的酒店</div>
+        <ul class="address_list">
+        	<li>广州</li>
+        	<li>深圳</li>
+        </ul>
+        
+    	<div class="title">历史城市</div>
+        <ul class="address_list">
+        	<li>广州</li>
+        	<li>深圳</li>
+        	<li>杭州</li>
+        </ul>
+        
+    	<div class="title">热门城市</div>
+        <ul class="address_list">
+        	<li>广州</li>
+        	<li>深圳</li>
+        	<li>杭州</li>
+        </ul>
+        
+    	<div class="title">A</div>
+        <ul class="address_list">
+        	<li>广州</li>
+        	<li>深圳</li>
+        	<li>杭州</li>
+        </ul>
+    </div>
+</div>
+<div class="history">
+	<div class="title"><hr><span>浏览历史</span><hr></div>
+    <ul>
+    	<li>碧桂园广州凤凰城酒店</li>
+    	<li>碧桂园十里银滩酒店</li>
+    	<li>广州碧桂园空港凤凰酒店</li>
+    </ul>
+    <div class="clear_history">清除历史</div>
+</div>
+</body>
+<script>
+
+var address_search = function(_str){
+	if(!_str)_str='全部';
+	var tmp='';	
+	
+	tmp+='广州,高州';
+	address_fill(tmp);
+}
+var address_fill = function(_str){
+	var adrs = _str.split(',');
+	if ( _str=='')
+		adrs='';
+	var tmp  ='<div class="title">搜索到'+adrs.length+'个城市</div>';
+	if ( adrs.length){
+		tmp +='<ul class="address_list">';
+		for(var i=0; i<adrs.length; i++)
+			tmp+='<li>'+adrs[i]+'</li>';
+		tmp+='</ul>';
+	}
+	$('.address_pull .content_pull').html(tmp);
+}
+$(function(){
+	
+	$('.often').on('touchstart',function(e){
+		toshow($('.often_pull'));
+	});
+	$('.like').on('click',function(){
+		toshow($('.like_pull'));
+	});
+	$('.close').on('click',function(){
+		toclose();
+	});
+	$('.location').on('click',function(){
+		toshow($('.address_pull'));
+	});
+	$('.address_list li').on('click',function(){
+		toclose();
+		$('.location .local').html($(this).html());
+	});
+	$('.search').on('blur',function(){
+		address_search($(this).val());
+	});
+	$('.clear_history').on('click',function(){
+		var $confirm = confirm("历史记录清除后将不可恢复，是否继续？");
+		if( $confirm ){
+			$('.history').fadeOut();
+		}
+	});
+})
+</script>
+</html>

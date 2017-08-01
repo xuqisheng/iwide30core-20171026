@@ -1,0 +1,75 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;}
+header{padding-top:10%}
+.headfixed,.hotel_list .item{border-width:0 0 1px 0; border-image:url(border.gif) 2 stretch;}
+
+.checkdate{padding-top:3%; padding-bottom:3%; padding-left:3%; width:60%;}
+.checkdate *{vertical-align:middle}
+.checkdate .checkin_time{float:right; margin-right:3%;}
+.map{float:right;width:30%; display:block; text-align:center; margin-top:2.5%; border-left:1px solid #e4e4e4}
+.map .ui_ico{ width:3.8em; height:3.8em}
+.map span{vertical-align:middle}
+
+.ui_price:after{color:#999; font-size:0.7em;}
+
+.hotel_list{min-height:78%}
+.hotel_list .item{overflow:hidden; background:#fff; display:block;position:relative}
+.hotel_list .ui_img_auto_cut{width:75px;height:75px; float:left; margin:2%;}
+.hotel_list .ui_img_auto_cut img{ min-height:100%;}
+.hotel_list .allin_box{padding:2%;}
+.hotel_list .allin_box>div{padding-bottom:1.5%;}
+.hotel_list .allin_box>div:last-child{padding-bottom:0;}
+.hotel_list .coupon{float:right; text-align:center; margin-top:-1em}
+
+
+.ui_price:before{ font-size:0.7em;}
+
+.curlocal{ padding:3%; padding-right:5%; border-top:1px solid #e4e4e4}
+.filter_option{ border-top:1px solid #e4e4e4;display:-webkit-box; position:fixed; width:100%; text-align:center; bottom:0; background:rgba(255,153,0,0.9); color:#fff; z-index:99999}
+.filter_option>*{-webkit-box-flex:1; padding:4% 0;}
+.backvote{ padding:0 5px}
+
+.sort_list_pull .relative{height:100%; width:100%;}
+.sort_list_pull ul{position:absolute; bottom:9%; background:#fff;width:100%; font-size:12px}
+.sort_list_pull ul li{padding:4%; border-bottom:1px solid #e4e4e4; text-align:center}
+.sort_list_pull ul li:last-child{border:0}
+
+.filter_pull {z-index:99999999}
+
+.get_result{background:#fff;}
+.get_result ul{padding-left:8%}
+.get_result li{border:0; padding:3% 0;}
+.get_result .title{background:none; font-size:3em;padding:10px;}
+.get_result .title p{padding:5px 10px; background:#efefef; color:#000; border-radius:1em;}
+.get_result .title p:after{ content:'\20\34'; font-family:iconfont; font-size:5px; vertical-align:middle;}
+.get_result ul{ margin-bottom:3%;}
+.result_list{position:absolute; background:rgba(239,239,239,1); left:0; top:100%; height:300px;z-index:990; width:100%; overflow:auto; -webkit-overflow-scrolling:touch; text-align:left; }
+.result_list ul{ padding:0 3%}
+.result_list li{ background:#fff; border:solid #e4e4e4; border-width:1px 1px 0 1px; padding:3%;}
+.result_list li:last-child{ border-width:1px;}
+
+
+
+/* 搜索筛选 */
+.filter_pull .tab_list{width:30%; background:#efefef;}
+.filter_pull .tab_list .address_list{ padding-left:0;}
+.filter_pull .tab_list li{ padding:15px 0; text-align:center; background:none;}
+.filter_pull .tab_list li span{padding:5px 10px; border-radius:1em;}
+.filter_pull .tab_list li.cur span{ background:#f23030; color:#fff;}
+
+.get_result{background:#fff;}
+.get_result ul{padding-left:8%}
+.get_result li{border:0; padding:3% 0;}
+.get_result .title{background:none; font-size:3em;padding:10px;}
+.get_result .title p{padding:5px 10px; background:#efefef; color:#000; border-radius:1em;}
+.get_result .title p:after{ content:'\20\34'; font-family:iconfont; font-size:5px; vertical-align:middle;}
+.get_result ul{ margin-bottom:3%;}
+.result_list{position:absolute; background:rgba(239,239,239,1); left:0; top:100%; height:300px;z-index:990; width:100%; overflow:auto; -webkit-overflow-scrolling:touch; text-align:left; }
+.result_list ul{ padding:0 3%}
+.result_list li{ background:#fff; border:solid #e4e4e4; border-width:1px 1px 0 1px; padding:3%;}
+.result_list li:last-child{ border-width:1px;}
+
+
+.new_store{position:absolute; -webkit-transform:rotate(45deg); background:#d61b2b;font-size:8px; width:70px; text-align:center; padding-top:20px; padding-bottom:2px;color:#fff; right:-31px; top:-11px;}

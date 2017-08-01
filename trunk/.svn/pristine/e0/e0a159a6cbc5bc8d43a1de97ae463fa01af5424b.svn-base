@@ -1,0 +1,139 @@
+@charset "utf-8";
+/* CSS Document */
+
+/*皮肤颜色*/
+.title_main_bg{ background:#f8f8f8}
+.title_minor_bg{}
+.title_main_color{color:#fff}
+
+/*公共样式*/
+body,html{background:#f8f8f8;width:100%; height:100%;}
+body,html,a{color:#000;}
+.flexlist .flex {display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex}
+.color_555,a.color_555{color:#6e6e6e;}
+.flexlayer{ display:-webkit-box; display:-webkit-flex; display:-ms-flexbox; display:flex; -webkit-box-align:center; -webkit-align-items:center; -ms-flex-align:center; align-items:center; -webkit-justify-content:space-around; -ms-flex-pack:distribute; justify-content:space-around}
+.flexlayer .layerbox{height:auto; width:67%; border-radius:4px; overflow:hidden; padding:8px;}
+.flexlayerBtm{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-flow:column;-ms-flex-flow:column;flex-flow:column; -webkit-box-align:center; -webkit-align-items:center; -ms-flex-align:center; align-items:center;-webkit-box-pack:end;-webkit-justify-content:flex-end;-ms-flex-pack:end;justify-content:flex-end}
+.flexlayerBtm .layerbox{width:100%; max-height:50%;overflow:auto;-webkit-overflow-scrolling:touch}
+
+/*首页*/
+.searchbox{background:#fff; border:0.5px solid #d6d6d6; border-radius:2em;}
+.searchbox input{ padding:6px 8px; width:200px;}
+#btm_tips{position:absolute; width:100%; background:rgba(255, 233, 176,0.9); border-top:0.5px solid #FFBD52; color:#EA0000; font-size:10px;  padding:5px; text-align:center}
+/*首页列表*/
+.mainboxs{-webkit-box-align: stretch;-webkit-align-items: stretch;-ms-flex-align: stretch;align-items: stretch; -webkit-box-flex:1; -webkit-flex-grow:1; -ms-flex-positive:1; flex-grow:1}
+.search_result{position:absolute; width:100%; left:0; top:0;height:100%; min-height:200px; z-index:99; display:none}
+.search_result .scroll{ box-shadow:0px 8px 8px rgba(0,0,0,0.1);max-height:60%}
+.salelist >*,.search_result ul>*{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex; padding:12px 10px 8px 10px}
+.salelist .img,.search_result .img{width:45px;min-width:45px; overflow:hidden; margin-right:10px;}
+.btn_void.xsbtn,.btn_main.xsbtn{ padding:3px 8px; border-radius:2em; margin-bottom:5px}
+/*首页公共样式*/
+.tabmenus>*,.tabmenus>*:first-child,.salelist >*,.salelist >*:first-child{ border-width:0px 0px 1px 0px;}
+/*首页左菜单*/
+.tabmenus{padding-bottom:44px; min-width:22%; max-width:22%}
+.tabmenus>*{ padding:8px 0;}
+.tabmenus>* span{padding:3px 10px; color:#555; display:block}
+.tabmenus .iscur{ background:#fff;}
+.tabmenus .iscur>*{border-left:2px solid; color:inherit; font-weight:600}
+/*首页底部*/
+.bottomfixed{z-index:666}
+.tmplayer{z-index:999; border:1px solid #ff9900;}
+.shopcart{margin:-10px 0px 0 10px;}
+.shopcart,.shopcart em{ width:38px; height:38px; line-height:35px; position:relative; text-align:center; border-radius:50%; display:block}
+
+.shopcart ._num,.tmplayer{position:absolute; width:1.8em; height:1.8em; line-height:1.8em; right:0;top:0; border-radius:50%; font-size:9px; overflow:hidden}
+.shopcart em{margin-top:3px; font-size:25px;}
+.layer1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;}
+.layer1, .shopcart{background:rgba(56,56,56,0.9); color:#fff;}
+.layer1 .flexgrow{ -webkit-box-pack:justify; -webkit-justify-content:space-between; -ms-flex-pack:justify; justify-content:space-between; padding:0 10px;}
+.layer1 .btn_main{padding:13px 25px}
+.layer1 .submit{height:43px;min-width:31.25%; padding:0 10px; -webkit-box-pack:center; -webkit-justify-content:center; -ms-flex-pack:center; justify-content:center;}
+.layer1 .disable{opacity:1; background:#ddd; color:#fff}
+
+/*订座首页*/
+.scenic_img{width: 100%;    overflow: hidden;position: relative;}
+.scenic_img .squareimg{padding-bottom: 50%;}
+.scenic_img img{height: 100%;}
+.scenic_rows{    background-color: white;margin: 10px;}
+.scenic_flexgrow{padding: 10px;}
+.scenic_title{margin-bottom: 5px;}
+.scenic_word{margin-bottom: 10px;}
+.scenic_mine{position: fixed;width: 39px;height: 39px;bottom: 5px;left: 10px;}
+/*商品规格*/
+#speclayer .layerbox{margin-bottom:50px;width: 77%;height: 73%;margin-bottom: 12%;position: relative;}
+#speclayer .flex{-webkit-box-pack:justify;-webkit-justify-content:space-between;-ms-flex-pack:justify;justify-content:space-between;}
+#speclayer .btn_main{ border:1px solid transparent}
+#speclayer .squareimg{margin-bottom: 9%;}
+#speclayer .martop_big{margin: 4% 0; }
+#specIscroll { height: 92%}
+/*#specscroll #specWrap {margin: 0}*/
+
+
+/*购物车*/
+#pre_orderlist>*{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-align:center;-webkit-align-items:center;-ms-flex-align:center;align-items:center; padding-top:16px; padding-bottom:16px;}
+#pre_orderlist>*>*{padding-right:12px;}
+#pre_orderlist>*>*:last-child{padding-right:0}
+/*商品详情*/
+#contentclayer .layerbox{color: #6e6e6e;width: 77%; height: 75%; margin-bottom: 12%;}
+#contentclayer .contentclayer-word{margin: 8px 0;}
+#contentclayer .contentclayer-title{text-align: center;color: #000;margin-bottom: 8px;}
+#contentclayer .scroll{overflow: auto; -webkit-overflow-scrolling: touch;}
+.contentclayer-content{height: 95%;overflow: hidden;}
+/*订单确认*/
+.goods>*{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex; padding:10px 0;-webkit-box-pack:justify;-webkit-justify-content:space-between;-ms-flex-pack:justify;justify-content:space-between}
+.goods>*:last-child{padding:14px 0; display:block; text-align:right;}
+.goods .item>*{min-width:50px; text-align:right}
+.goods .item>*:first-child{text-align:left; min-width:62.5%; max-width:62.5%}
+/*订单详情*/
+.btnlayer{ -webkit-justify-content:space-around; -ms-flex-pack:distribute; justify-content:space-around; -webkit-flex-wrap:wrap; -ms-flex-wrap:wrap; flex-wrap:wrap;}
+.btnlayer>*,.btnlayer>a{ min-width:5em; text-align:center; border-radius:4px; padding:3px 0; margin:0 5px}
+.btnlayer .bg_main,.btnlayer .bg_link{border:1px solid transparent; background-clip:border-box}
+/*我的订单*/
+.tablayer{ width:100%; overflow:scroll;-webkit-overflow-scrolling:touch}
+.tablayer>*{padding:8px 5px;margin:0 10px; white-space:nowrap; border-bottom:2px solid transparent}
+.tablayer>* tt{ color:#000; display:block}
+.tablayer .iscur{ color:inherit; border-bottom:2px solid}
+
+.orders .img{max-width:30px;min-width:30px; border:0.5px solid #ebebeb; border-radius:50%; overflow:hidden; margin:0 10px; display:inline-block; vertical-align:middle}
+.orders .leftmargin{ margin-left:50px; padding:15px 0}
+.orders .flex ._width{ max-width:75%}
+.orders .justify>*:last-child{-webkit-box-flex:1}
+.orders .btnlayer{display:block; padding:8px 0; text-align:right}
+/*地图*/
+.mapsearch{padding:10px 16px; position:absolute; top:0; z-index:99}
+.map{background:#eee; height:250px; width:100%}
+
+/*配送状态*/
+.delivered{ -webkit-box-align:baseline; -webkit-align-items:baseline; -ms-flex-align:baseline; align-items:baseline; padding:15px;}
+.delivered > *{margin-left:15px}
+.delivered_status{  position:relative; border:2px solid transparent; border-radius:50%;}
+.delivered_status span{width:8px; height:8px; border-radius:50%;background:#dddddd; display:block}
+.delivered_status:after{content:''; border-left:1px solid #979797; height:38px; position:absolute; top:15px; right:4px; transform:scaleX(0.5);-webkit-transform:scaleX(0.5)}
+.delivered:first-child .delivered_status span{ background:#ff9900;}
+.delivered:first-child .delivered_status{border-color:#fed6b7}
+.delivered:last-child .delivered_status:after{border:0}
+/*动画 */
+.scale{
+	/* Safari and Chrome: */
+	-webkit-animation-name: scale;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.1s;
+	-webkit-animation-iteration-count:1;
+}
+@-webkit-keyframes scale /* Safari and Chrome */
+{
+	from{ -webkit-transform:scale(1.5,1.5)}
+	to{ -webkit-transform:scale(1,1)}
+}
+.rotate{
+	/* Safari and Chrome: */
+	-webkit-animation-name: scan;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.5s;
+	-webkit-animation-iteration-count:1;
+}
+@-webkit-keyframes scan /* Safari and Chrome */
+{
+	from{ -webkit-transform:rotate(0deg)}
+	to{-webkit-transform:rotate(180deg)}
+}

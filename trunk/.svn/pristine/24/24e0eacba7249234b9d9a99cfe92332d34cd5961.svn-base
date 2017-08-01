@@ -1,0 +1,226 @@
+<?php
+defined('BASEPATH') or exit('No direct script access allowed');
+
+/**
+ * 碧桂园凤凰礼卡定制
+ *
+ * @author 杨成峰
+ * @copyright www.iwide.cn
+ * @version 4.0
+ *          @Email 445315045@qq.com
+ *         
+ */
+class Giftcards extends MY_Front_Member
+{
+
+    private $center_data;
+
+    function __construct()
+    {
+        parent::__construct();
+        $post_center_url = PMS_PATH_URL . "member/center";
+        $post_center_data = array(
+            'inter_id' => $this->inter_id,
+            'openid' => $this->openid
+        );
+        $center_data = $this->doCurlPostRequest($post_center_url, $post_center_data)['data'];
+        if ($center_data['is_login'] == 'f' && $center_data['value'] == 'login') {
+            redirect('membervip/login?id=' . $this->inter_id);
+        }
+        $this->center_data = $center_data;
+        $this->load->model('membervip/common/Public_model', 'pm_model');
+    }
+
+    public function index()
+    {
+        // 查询是否有绑定凤凰礼卡
+        $gift_card = $this->pm_model->_shard_db()
+            ->where([
+//             'open_id' => $this->openid,
+            'inter_id' => $this->inter_id,
+            'member_info_id' => $this->center_data['member_info_id'],
+            'status' => 1
+        ])
+            ->get('member_gift_card')
+            ->row_array();
+        if (empty($gift_card)) {
+            $this->bind();
+        } else {
+            // 已经绑定
+            $this->template_show('member', $this->_template, 'vcardlist', $gift_card);
+        }
+    }
+
+    public function qrcode()
+    {
+        if (isset($_GET["data"])) {
+            // 展示二维码
+            $this->load->helper('phpqrcode');
+            $url = urldecode($_GET["data"]);
+            QRcode::png($url);
+            exit();
+        }
+        
+        // 展示二维码页面
+        
+        // 查询是否有绑定凤凰礼卡
+        
+        $gift_card = $this->pm_model->_shard_db()
+            ->where([
+//             'open_id' => $this->openid,
+            'inter_id' => $this->inter_id,
+            'member_info_id' => $this->center_data['member_info_id'],
+            'status' => 1
+        ])
+            ->get('member_gift_card')
+            ->row_array();
+        if (empty($gift_card)) {
+            // 未绑定跳转到绑定页
+            $this->bind();
+        } else {
+            // 已经绑定
+            $this->template_show('member', $this->_template, 'vqrcode', $gift_card);
+        }
+    }
+
+    function updatepassword()
+    {
+        $gift_card = $this->pm_model->_shard_db()
+            ->where([
+//             'open_id' => $this->openid,
+            'inter_id' => $this->inter_id,
+            'member_info_id' => $this->center_data['member_info_id'],
+            'status' => 1
+        ])
+            ->get('member_gift_card')
+            ->row_array();
+        if (empty($gift_card)) {
+            // 未绑定跳转到绑定页
+            $this->bind();
+        } else {
+            // 已经绑定
+            $this->template_show('member', $this->_template, 'giftcard_modpassword', '');
+        }
+    }
+
+    function updatepasswordsave()
+    {
+        $gift_card = $this->pm_model->_shard_db()
+            ->where([
+//             'open_id' => $this->openid,
+            'inter_id' => $this->inter_id,
+            'member_info_id' => $this->center_data['member_info_id'],
+            'status' => 1
+        ])
+            ->get('member_gift_card')
+            ->row_array();
+        if (empty($gift_card)) {
+            // 未绑定跳转到绑定页
+            $this->bind();
+        } else {
+            /*
+             * 'oldpassword' => string '1' (length=1)
+             * 'password' => string '1' (length=1)
+             * 'resetpassword' => string '1' (length=1)
+             */
+            if ($_POST['oldpassword'] == $_POST['password']) {
+                echo json_encode([
+                    'err' => 40003,
+                    'msg' => '新旧密码一致，修改失败'
+                ]);
+                exit();
+            }
+            if ($_POST['password'] != $_POST['resetpassword']) {
+                echo json_encode([
+                    'err' => 40003,
+                    'msg' => '两次输入的密码不一致，修改失败'
+                ]);
+                exit();
+            }
+            $post_updatepassword = [
+                'inter_id' => $this->inter_id,
+                'openid' => $this->openid,
+                'newpassword' => $_POST['password'],
+                'oldpassword' => $_POST['oldpassword']
+            ];
+            $post_save_url = PMS_PATH_URL . "member/update_password_gift_card";
+            
+            echo json_encode($this->doCurlPostRequest($post_save_url, $post_updatepassword));
+            
+            
+        }
+    }
+
+    public function dounbind()
+    {
+        if ($this->center_data['is_login'] == 'f' && $this->center_data['value'] == 'login') {
+            echo json_encode([
+                'err' => 40003,
+                'msg' => '请先登陆再执行解绑操作'
+            ]);
+            exit();
+        } else {
+            $post_unbind = [
+                'inter_id' => $this->inter_id,
+//                 'openid' => $this->openid,
+                'code' => $_POST['code'],
+                'password' => $_POST['password']
+            ];
+            $post_save_url = PMS_PATH_URL . "member/unbind_gift_card";
+            
+            echo json_encode($this->doCurlPostRequest($post_save_url, $post_unbind));
+        }
+    }
+
+    public function unbind()
+    {
+        $gift_card = $this->pm_model->_shard_db()
+            ->where([
+//             'open_id' => $this->openid,
+            'inter_id' => $this->inter_id,
+            'member_info_id' => $this->center_data['member_info_id'],
+            'status' => 1
+        ])
+            ->get('member_gift_card')
+            ->row_array();
+        if (empty($gift_card)) {
+            // 未绑定跳转到绑定页
+            $this->bind();
+        } else {
+            // 已经绑定
+            $this->template_show('member', $this->_template, 'giftcard_unbind', $gift_card);
+        }
+    }
+
+    public function bind()
+    {
+        $this->template_show('member', $this->_template, 'giftcard', '');
+    }
+
+    public function save()
+    {
+        if ($this->center_data['is_login'] == 'f' && $this->center_data['value'] == 'login') {
+            $res = [
+                'err' => 40003,
+                'msg' => '请先登陆再执行绑卡操作'
+            ];
+        } else {
+            $post_bind = [
+                'inter_id' => $this->inter_id,
+                'openid' => $this->openid,
+                'code' => $_POST['code'],
+                'password' => $_POST['password']
+            ];
+            $post_save_url = PMS_PATH_URL . "member/bind_gift_card_save";
+            
+            $res = $this->doCurlPostRequest($post_save_url, $post_bind);
+            echo json_encode($res);
+            exit();
+        }
+        $res = [
+            'err' => 40003,
+            'msg' => '未知错误'
+        ];
+        echo json_encode($res);
+    }
+}

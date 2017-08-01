@@ -1,0 +1,78 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{ background:#f7f7f7;}
+.ui_list,.livein_type{ background:#fff;}
+.history_pull,.livein_type{text-align:center}
+
+.ui_btn_block {padding-right:7%;}
+.ui_foot_btn { margin-top: 3%;}
+
+#checkdate hr{ width:2em; margin:3em 1.5em; border-bottom-width:2px;}
+#checkdate em{ padding-top:1%}
+#checkdate .border_circle { margin-top: 2.5%; }
+
+.padding_none,.often_like{ padding:0;}
+.location,.ui_list .near,.searchbox input{padding-top:3.5%; padding-bottom:3.5%;}
+.ui_list .near{padding-top:4%;}
+.ui_list{ padding-left:0;border-width: 0 0 1px 0}
+.ui_item{ padding-left:3%;}
+
+.near > *,.location > *{display:inline-block;}
+.often_like{display:-webkit-box;}
+.often_like > *{-webkit-box-flex:1; text-align:center;display:block; width:auto;}
+
+.ui_item em,.ui_item div,.ui_item span,.ui_item input{ vertical-align:middle}
+
+.ui_item,.checkout,.checkin,.checkin_time,.border_circle,.ui_item:first-child,.often_like{width:auto;}
+.ui_item:first-child .location { width:45%}
+.ui_list .near{width:45%; border-left:0;}
+
+.bod{border-image: url(border.gif) 2 stretch;}
+.checkin_time,.checkout,.checkin{border-width:0;}
+
+.date b{ font-weight:normal}
+.ui_btn em{font-size:16px}
+.ui_btn_block .btn_title{ font-size:2em;}
+.often_like span{ font-size:2.2em;}
+.location .btn_title,.border_circle .checkin_time,.near p{ font-size:3.2em}
+.local{ font-size:3.2em}
+.date{font-size:17px}
+
+.often_like a:visited{color:#555;}
+.often_like p{padding-top:5px}
+.often_like .iconfont {font-size:4em;color:#fff; border-radius:50%; width:55px; height:55px; line-height:55px;}
+.checkin_time:before {content: "共";}
+.week:before {content: "周";}
+
+.checkin,.checkout{padding-right:3%}
+.iconfont{width:1.5em; text-align:center}
+.livein_type{ display:-webkit-box; font-size:14px; margin-top:3%; border:solid #e4e4e4; border-width:1px 0; }
+.livein_type>*:first-child{border-right:1px solid #e4e4e4}
+.livein_type>*{ -webkit-box-flex:1; padding:3% 0; box-sizing:border-box}
+.livein_type>*.cur{border-bottom:4px solid #d21527;}
+a.ui_btn { display:inline-block; background:none; border:1px solid #d21527;}
+.often_pull li{ padding:1% 4%; border:0; text-align:left}
+.often_pull li:first-child{padding-left:0; color:#999}
+
+.filter_pull .content_pull{margin:0}
+.filter_pull .pull_searchbox{ padding-right:10px; position:relative;}
+.filter_pull .pull_searchbox .search{ width:100%;}
+/* 搜索筛选 */
+.filter_pull .tab_list{width:30%; background:#efefef;}
+.filter_pull .tab_list .address_list{ padding-left:0;}
+.filter_pull .tab_list li{ padding:15px 0; text-align:center; background:none;}
+.filter_pull .tab_list li span{padding:5px 10px; border-radius:1em;}
+.filter_pull .tab_list li.cur span{ background:#f23030; color:#fff;}
+
+.get_result{background:#fff;}
+.get_result ul{padding-left:8%}
+.get_result li{border:0; padding:3% 0;}
+.get_result .title{background:none; font-size:3em;padding:10px;}
+.get_result .title p{padding:5px 10px; background:#efefef; color:#000; border-radius:1em;}
+.get_result .title p:after{ content:'\20\34'; font-family:iconfont; font-size:5px; vertical-align:middle;}
+.get_result ul{ margin-bottom:3%;}
+.result_list{position:absolute; background:rgba(239,239,239,1); left:0; top:100%; height:300px;z-index:990; width:100%; overflow:auto; -webkit-overflow-scrolling:touch; text-align:left; }
+.result_list ul{ padding:0 3%}
+.result_list li{ background:#fff; border:solid #e4e4e4; border-width:1px 1px 0 1px; padding:3%;}
+.result_list li:last-child{ border-width:1px;}

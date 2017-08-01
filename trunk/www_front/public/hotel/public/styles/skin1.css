@@ -1,0 +1,19 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f7f7f7}
+.week:before{content:'周'}
+
+.logo{height:40px; margin:2px 10px; width:auto; max-width:200px;}
+
+.index_list .webkitbox{ margin-left:30px; padding:0}
+.index_list div.iconfont{ max-width:20px; margin-left:-25px; margin-right:10px}
+
+.history>*{padding-top:8px}
+.submitbtn,a.submitbtn{border-radius:3px;}
+
+.hotel_list>*{padding:0 8px 0 0}
+.hotel_list .img{width:80px;max-width:80px; min-width:80px}
+.hotel_list .price{width:auto}
+
+

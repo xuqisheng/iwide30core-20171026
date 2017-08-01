@@ -1,0 +1,16 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+.ui_border{margin-top:0}
+.ui_normal_list .item tt{ display:inline-block; width:6em;}
+.list_title{ padding:2% 3%; background:#e4e4e4; color:#555555; font-size:0.5rem;}
+.notic{padding:4%; margin-top:4%;}
+.notic p{ background:#f8e6ca; padding:4%; border-radius:0.3rem; color:#fe811b;}
+.bind_status{ background-repeat:no-repeat; background-size:auto 3rem; background-position: center 1rem; text-align:center;}
+.bind_status p{margin-top:2%;}
+.bind_status.success{ background-image:url(../images/success_2.png);}
+.bind_status.fail{ background-image:url(../images/success_1.png);}
+.bind_status.success p{ color:#7bb928}
+.bind_status.fail p{ color:#ff0000}
+.bind_status p:first-child{ font-size:0.8rem; padding-top:4.5rem;}

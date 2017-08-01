@@ -1,0 +1,68 @@
+<!doctype html>
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="js/viewport.js"></script>
+<script src="js/jquery.js"></script>
+<script src="js/ui_control.js"></script>
+<script src="js/imgscroll.js"></script>
+<script src="js/addcount.js"></script>
+<script src="js/jquery.touchwipe.min.js"></script>
+<link href="css/global.css" rel="stylesheet">
+<link href="css/ui.css" rel="stylesheet">
+<link href="css/ui_style.css" rel="stylesheet">
+<link href="css/imgscroll.css" rel="stylesheet">
+<link href="css/store.css" rel="stylesheet">
+<link href="css/addcount.css" rel="stylesheet">
+<title>标题</title>
+</head>
+<body>
+  
+<div class="headers"> 
+  <div class="headerslide">
+  	  <a class="slideson imgshow relative" href="#">
+     	 <img src="attachment/userimg02.jpg">
+      </a>
+  </div><!-- headerslide---end--->
+</div><!-- headers---end--->
+<div class="detail">
+	<div class="goods_name">5000元凤凰礼卡</div>
+	<div class="goods_dec">内含5680元碧桂园凤凰酒店消费金额</div>
+    <div class=" ui_border erweima">
+    	<div>消费二维码</div>
+        <div class="saoma"><img src="images/saoma.jpg" ></div>
+    	<div>消费密码：123456</div>
+    </div>
+    <div class="how_use">
+    	<p>使用说明</p>
+    	<p>1.高级海景大床房－碧桂园十里银滩凤凰酒店</p>
+		<p>2.高级海景大床房－碧桂园十里银滩凤凰酒店</p>
+    </div>
+</div>
+<div class="pull pull_erweima" style="display:none">
+    <div class="erweima">
+    	<div>消费二维码</div>
+        <div class="saoma"><img src="" ></div>
+    	<div>请向酒店服务员出示此二维码进行消费</div>
+    </div>
+</div>
+</body>
+<script>
+$(function(){
+	$('.detail .erweima').click(function(){
+		var src=$(this).find('img').attr('src');
+		$('.pull_erweima .saoma img').attr('src',src);
+		toshow($('.pull_erweima'));		
+	})
+	$('.pull').click(function(){
+		toclose()
+	});
+});
+</script>
+</html>

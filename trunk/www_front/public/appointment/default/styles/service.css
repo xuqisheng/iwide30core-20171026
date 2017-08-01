@@ -1,0 +1,91 @@
+@charset "utf-8";
+/* CSS Document */
+
+/*皮肤颜色*/
+.title_main_bg{ background:#f8f8f8}
+.title_minor_bg{}
+.title_main_color{color:#fff}
+
+/*公共样式*/
+body,html{background:#f8f8f8;width:100%; height:100%;}
+body,html,a{color:#000;}
+.color_999,a.color_999{color:#9b9b9b}
+.flexlist .flex,.list_style_2 .flex{display:flex; display:-webkit-flex;}
+.color_555,a.color_555{color:#6e6e6e;}
+.flexlayer{ display:flex; align-items:center; justify-content:space-around}
+.flexlayer .layerbox{height:auto; width:67%; border-radius:4px; overflow:hidden; padding:8px}
+.flexlayerBtm{display:flex;flex-flow:column; align-items:center;justify-content:flex-end}
+.flexlayerBtm .layerbox{width:100%; max-height:50%;overflow:auto;-webkit-overflow-scrolling:touch}
+.shrink{flex-shrink:0}
+
+/*首页*/
+.mainboxs{align-items: stretch; flex-grow:1}
+.salelist {padding:10px 10px 0 10px}
+.salelist >*{padding:10px; display:block; background:#fff; margin-bottom:10px}
+.salelist .squareimg{padding-bottom:56%; overflow:hidden}
+.salelist .pad{margin:8px 0}
+.salelist .img{ margin-bottom:10px;}
+.salelist .btn_main{ padding:8px 15px; line-height:1}
+.floatlayer{ position:fixed; width:35px; bottom:23px; left:12px; z-index:99;}
+.floatlayer .squareimg{ border-radius:50%;display:block; overflow:hidden}
+/*首页公共样式*/
+
+/*取号等待*/
+.waitList>*{ justify-content:space-around}
+.waitList>*>*{width:30%}
+
+.salelist >*,.salelist >*:first-child{ border-width:0px 0px 1px 0px;}
+/*订单确认*/
+.goods>*{display:flex; padding:10px 0;justify-content:space-between}
+.goods>*:last-child{padding:14px 0; display:block; text-align:right;}
+.goods .item>*{min-width:50px; text-align:right}
+.goods .item>*:first-child{text-align:left; min-width:62.5%; max-width:62.5%}
+/*订单详情*/
+.btnlayer{ justify-content:space-around; flex-wrap:wrap;}
+.btnlayer>*,.btnlayer>a{ min-width:5em; text-align:center; border-radius:4px; padding:3px 0; margin:0 5px}
+.btnlayer .bg_main,.btnlayer .bg_link{border:1px solid transparent; background-clip:border-box}
+/*我的订单*/
+.tablayer{ width:100%; overflow:scroll;-webkit-overflow-scrolling:touch}
+.tablayer>*{padding:8px 5px;margin:0 10px; white-space:nowrap; border-bottom:2px solid transparent}
+.tablayer>* tt{ color:#6e6e6e; display:block}
+.tablayer .iscur{ color:inherit; border-bottom:2px solid #ff9900}
+.tablayer .iscur tt{color:#000}
+
+.orders .img{max-width:60px;min-width:60px;overflow:hidden; margin-right:10px; display:inline-block; vertical-align:middle}
+.orders .squareimg{padding-bottom:56.7%}
+.orders .justify>*:last-child{-webkit-box-flex:1}
+.orders .btnlayer{display:block; text-align:right}
+
+/*弹窗*/
+.dialog{justify-content:center}
+.dialog .box{background:#fff; border-radius:5px; width:72%;min-height:220px; max-height:80%; padding:10px 0 10px 10px;flex-flow:column;}
+.select_num{width:100%; flex-grow:1; align-content:flex-start;}
+.select_num>*{ background:#f6f6f6; border:0.5px solid #e1e1e1;width:20%; border-radius:4px; margin:10px 10px 0 0; padding:8px 0;}
+.select_num>*.iscur{background:#fef2dc; border-color:#f9941e;color:#f9941e;}
+.dialog .btn{ padding:10px 0; border-radius:3px;margin-top:10px; margin-right:10px;flex-grow: 1}
+
+/*动画 */
+.scale{
+	/* Safari and Chrome: */
+	-webkit-animation-name: scale;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.1s;
+	-webkit-animation-iteration-count:1;
+}
+@-webkit-keyframes scale /* Safari and Chrome */
+{
+	from{ -webkit-transform:scale(1.5,1.5)}
+	to{ -webkit-transform:scale(1,1)}
+}
+.rotate{
+	/* Safari and Chrome: */
+	-webkit-animation-name: scan;
+	-webkit-animation-timing-function:linear;
+	-webkit-animation-duration: 0.5s;
+	-webkit-animation-iteration-count:1;
+}
+@-webkit-keyframes scan /* Safari and Chrome */
+{
+	from{ -webkit-transform:rotate(0deg)}
+	to{-webkit-transform:rotate(180deg)}
+}

@@ -1,0 +1,42 @@
+@charset "utf-8";
+/* CSS Document */
+
+.page{overflow-x:hidden}
+.ui_canvas .user_img{width:2rem; height:2rem; border-radius:50%; display:inline-block; position:absolute; z-index:15}
+.ui_canvas .user_img img{ border-radius:50%; }
+.ui_canvas_min .user_img{ width:1.4rem; height:1.4rem;}
+.ui_canvas_mid .user_img{ width:1.7rem; height:1.7rem;}
+.ui_canvas_min .ui_canvas_center{ width:2.4rem; height:2.4rem;}
+.ui_canvas{ padding:10%;width:60%; margin:5% auto; margin-bottom:15%}
+.ui_canvas_bg{ position:absolute;background:url(../images/bg04.png) no-repeat; background-size:100%; width:100%; height:100%;top:0; left:0}
+.ui_canvas,.ui_canvas_min,.ui_canvas_mid{position:relative;}
+.ui_canvas_mid{ padding:18%}
+.ciycle{border:1px solid #b4dcaf; border-radius:50%; }
+
+.again_btn{width:92%; margin:3% auto; border-radius:0.3rem; background:#43a939; color:#fff; text-align:center; padding:4% 0; font-size:0.7rem;}
+.get_bonus_btn{ position:absolute; right:1%; bottom:100%}
+
+.foot_btn{ position:fixed; bottom:2%; text-align:center; width:100%;}
+.foot_btn>div,.foot_btn>a{ display:inline-block; width:30%; line-height:1.5; color:#444;}
+.foot_btn>div span,.foot_btn>a span{ display:inline-block; position:relative}
+.foot_btn>div img,.foot_btn>a img{width:1.8rem;}
+
+.pull .pull_close{ position:absolute; right:4%; top:2%; z-index:10; font-size:1rem; color:#b1b1b1; text-shadow:1px 1px 10px rgba(0,0,0,0.5);}
+
+.user_detail,.bonus_detail{ width:90%; margin:5% auto; background:#f8f8f8; border-radius:0.3rem; height:90%; color:#444; overflow:hidden; position:relative; text-align:center;}
+.user_detail .pull_user_img{ width:100%; height:60%; overflow:hidden; border-radius:0;}
+.user_detail .pull_user_img img{ }
+.user_detail .user_name{ font-size:0.8rem; padding:3% 0;}
+.user_detail .send_btn,.bonus_detail .send_btn{ position:absolute; bottom:5%; left:5%; background:#43a939; display:inline-block; max-width:90%; width:90%; margin-top:15%; padding:3% 0; font-size:0.7rem;}
+.bonus_detail .send_btn{ background:#fa6352;}
+.user_detail .send_btn:hover{background:#34832d; color:#ccc}
+.bonus_detail .send_btn:hover{ background:#df5748; color:#ccc;}
+
+.bonus_detail .pull_close{ text-shadow:0px 0px 0px #fff;}
+.bonus_detail form{ text-align:left; padding:5%; font-size:0.8rem; padding-top:0;}
+.bonus_detail form input[type=tel]{ text-align:right}
+.bonus_detail form .input_box,.bonus_detail form textarea{ background:#ececec; border-radius:0.3rem; padding:4% 3%;}
+.bonus_detail form .input_box span:first-child{float:right}
+.bonus_detail form .input_title{padding:3% 0%; font-size:0.55rem; color:#666;}
+.bonus_detail form textarea{ width:94%;}
+.bonus_detail form .ui_price{font-size:1.7rem; color:#000; text-align:center; padding:3% 0;}

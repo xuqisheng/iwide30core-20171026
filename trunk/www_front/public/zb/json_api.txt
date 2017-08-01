@@ -1,0 +1,124 @@
+首页：
+接口名称：getChannel
+    "data": {
+    	"play_url": "http://hls.wsdemo.zego.im/livestream/zegotest-3469991060-stream-0001/playlist.m3u8",
+        "pic_url": "http://pic.wsdemo.zego.im/livestream/zegotest-3469991060-stream-0001.jpg",
+        "qrcode_url";“二维码"
+        "Live_time": 1491363554596, 
+        "audience": 5000, 
+        "audience_photo": ["img/0.jpg", "img/0.jpg", "img/0.jpg", "img/0.jpg"],
+        "user_info": {
+            "mibi": 1000, 
+            "daxia": 1000, 
+        },
+        "goods_quantity": 6, 
+        "goods": [{
+            "number": 10, 
+            "name": "金房卡酒店", 
+            "info": "随时可用，可退款", 
+            "price": 168, 
+            "gift": false, 
+            "img": "img/0.jpg"
+        }, {
+            "number": 10,
+            "name": "金房卡酒店11大师翁群翁1",
+            "info": "随时可用，可退款",
+            "price": 168,
+            "gift": 1000,
+            "img": "img/0.jpg"
+        }, {
+            "number": 10,
+            "name": "金房卡酒店111打碎厚度爱上",
+            "info": "随时可用，可退款",
+            "price": 168,
+            "gift": 1000,
+            "img": "img/0.jpg"
+        }, {
+            "number": 10,
+            "name": "金房卡酒店",
+            "info": "随时可用，可退款",
+            "price": 168,
+            "gift": 1000,
+            "img": "img/0.jpg"
+        }],
+        "gift1_price": 100, 
+        "gift2_price": 1000
+    },
+    msg:"",
+    "status": 1
+}
+
+
+接口名称：refreshChannel
+{
+data: {
+       "play_url": "http://hls.wsdemo.zego.im/livestream/zegotest-3469991060-stream-0001/playlist.m3u8",
+        "pic_url": "http://pic.wsdemo.zego.im/livestream/zegotest-3469991060-stream-0001.jpg",
+        "qrcode_url";“二维码"
+        "Live_time": 1491363554596, 
+        "audience": 5000, 
+        "audience_photo": ["img/0.jpg", "img/0.jpg", "img/0.jpg", "img/0.jpg"],
+        "user_info": {
+            "mibi": 1000, 
+            "daxia": 1000, 
+        }
+    },
+    msg:"",
+    status: 1
+}
+
+
+消息接口
+getMsg:
+{
+data:
+[{
+ msg_id:1001
+	name : "金宝宝2号",
+	msg : "好吃啊！"
+ msg_type:'user' // system
+	type : 1,//   1or 2
+},
+{
+ msg_id:1001
+	name : "金宝宝2号",
+	msg : "好吃啊！"
+ msg_type:'user' // system
+	type : 1,//   1or 2
+}],
+ msg:"",
+status:1
+}
+
+
+
+发消息：
+sendMsg:
+post:
+data = {
+ msg:"内容"
+}
+
+return:
+{
+data:null,
+msg:"",
+status:1
+}
+
+
+
+送礼：
+sendGift:
+post:
+data = {
+ gift_id:1 / /1虾米 2 大虾
+ send_num:1
+}
+
+return:
+{
+data:null,
+msg:"",
+status:1
+}

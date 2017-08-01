@@ -1,0 +1,77 @@
+<?php
+use App\services\soma\ScopeDiscountService;
+use App\models\soma\ScopeDiscount as ScopeDiscountModel;
+use App\libraries\Support\Log;
+
+/**
+ * User: daikanwu
+ * Date: 2017/6/21
+ * Time: 18:48
+ */
+class Third_api extends MY_Controller
+{
+    /**
+     * Inner_api constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->load->somaDatabase($this->db_soma);
+        $this->load->somaDatabaseRead($this->db_soma_read);
+
+        //没有到这个model，不过index的方法的model在命名空间里，无法加载父类model所以只能随便找个父类load出来了。
+        $this->load->model('soma/adv_model');
+    }
+
+    /**
+     * 顺丰返回订单通知的地址
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    public function callback_sf()
+    {
+
+        $result = new Result();
+
+        //身份校验 todo
+        $orderId = filter_var($_POST['orderId'], FILTER_SANITIZE_STRING);
+        $mailNo = filter_var($_POST['mailNo'], FILTER_SANITIZE_STRING);
+        $this->load->model('soma/Consumer_shipping_model', 'shipping_model');
+        $model = $this->shipping_model;
+        $filter = array('order_id' => $orderId);
+        $inter_id = $this->session->get_admin_inter_id ();
+        $model= $model->get_shipping_info($filter, $inter_id);
+        if ($model->m_get('tracking_no') !== $mailNo) {
+            $result->setMessage('运单号与查询的不一样');
+        }
+        return $result;
+    }
+
+    public function callsback_msg()
+    {
+        $params = $this->input->get();
+
+        $params['title'] = 'title';
+        $params['data'] = [
+            'value' => 'data',
+            'color' => '#173177'
+        ];
+        $params['inter_id'] = 'a469428180';
+        $result = \App\services\soma\WxService::getInstance()->sendMsg($params);
+
+        var_dump($result);
+    }
+
+    public function callsback_msg_()
+    {
+        $params = $this->input->get();
+        $params['title'] = 'title';
+        $params['data'] = [
+            'value' => 'data',
+            'color' => '#173177'
+        ];
+        $params['inter_id'] = 'a450089706';
+        $result = \App\services\soma\WxService::getInstance()->sendMsg($params);
+        var_dump($result);
+    }
+}

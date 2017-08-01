@@ -1,0 +1,37 @@
+@charset "utf-8";
+/* CSS Document */
+
+.ui_ico{width:4em; height:4em;}
+.ui_ico,.ui_sever,.ui_star{ display:inline-block; vertical-align:middle; text-align:center; background-repeat:no-repeat; background-position:center center; background-size:auto 90%}
+
+
+.ui_ico1{background-image:url(../images/ico01.png);}
+.ui_ico2{background-image:url(../images/ico02.png);}
+.ui_ico3{background-image:url(../images/ico03.png);}
+.ui_ico4{background-image:url(../images/ico04.png);}
+.ui_ico5{background-image:url(../images/ico05.png);}
+.ui_ico6{background-image:url(../images/btn01.png);}
+.ui_ico7{background-image:url(../images/btn01_1.png);}
+.ui_ico8{background-image:url(../images/local.png);}
+.ui_ico9{background-image:url(../images/like_2.png);}
+.ui_ico10{background-image:url(../images/like.png);}
+.ui_ico11{background-image:url(../images/like_1.png);}
+.ui_ico12{background-image:url(../images/ico06.png);}
+.ui_ico13{background-image:url(../images/right_1.png);}
+
+.ui_sever{ width:2em; height:2em; background-size:90%}
+.ui_sever_ico1{background-image:url(../images/severico/sever01.png);}
+.ui_sever_ico2{background-image:url(../images/severico/sever02.png);}
+.ui_sever_ico3{background-image:url(../images/severico/sever03.png);}
+.ui_sever_ico4{background-image:url(../images/severico/sever04.png);}
+.ui_sever_ico5{background-image:url(../images/severico/sever05.png);}
+.ui_sever_ico6{background-image:url(../images/severico/sever06.png);}
+.ui_sever_ico7{background-image:url(../images/severico/sever07.png);}
+.ui_sever_ico8{background-image:url(../images/severico/sever08.png);}
+.ui_sever_ico9{background-image:url(../images/severico/sever09.png);}
+
+.ui_star{background-image:url(../images/star_0.png); width:4em; height:4em;}
+.ui_star1{background-image:url(../images/star_1.png);}
+.ui_star2{background-image:url(../images/star_2.png);}
+
+

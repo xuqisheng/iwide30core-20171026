@@ -1,0 +1,48 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{background:#f8f8f8;}
+.order_intro,.notic{ padding:2% 3%}
+.order_intro .hotelname{ margin-bottom:0.5%;}
+.order_intro .room_type{ margin-top:2%}
+
+.form_list .item,.form_list,.comment,.topoint{border-bottom:1px solid #e4e4e4;}
+.form_list .item:last-child{border-bottom:0}
+.form_list,.form_list .pay_way:nth-child(3n),.comment,.topoint{border-top:1px solid #e4e4e4;}
+.form_list,.comment,.topoint{background:#fff}
+
+.form_list .pay_list li,.form_list #checkdate,.form_list .item>span:first-child{ display:inline-block;}
+.form_list{margin-bottom:3%; padding-left:3%;}
+.form_list .item{ padding:3% 0; position:relative}
+.form_list .item>span:first-child{width:5em;}
+.form_list .pay_list ul{margin-left:5em;}
+.form_list .pay_way{padding-right:3%}
+.form_list .pay_list>span{float:left}
+.form_list .pay_way .ui_ico{width:1em;height:1em;border-width:1px;border-style:solid;border-radius:50%;background-size:50% auto; margin-right:0.5em;}
+.form_list .pay_way:nth-child(3n){ padding-top:2%; margin-top:3%; width:97%;}
+.form_list .pay_way span{vertical-align:middle}
+.form_list input,
+.form_list select{width:70%;}
+.notic{padding-top:0; text-align:justify; background:#fff; padding:3%; border-bottom:1px solid #e4e4e4;}
+.notic >*{margin-bottom:2%}
+
+
+.comment,.topoint{padding:3%; margin-bottom:3%;}
+.comment textarea{width:100%}
+.addimg .ui_img_auto_cut{ width:10em; height:10em; background:url(../images/addimg.png) no-repeat center center; background-size:100%; margin-right:2%;}
+
+.topoint li{display:inline-block; margin-left:4%; text-align:center}
+.topoint li p{margin-top:0.5em}
+.submit_btn{ float:right; width:29%}
+
+
+.addhour_date_pull,.addhour_server_pull{ background:#fff; font-size:2.2em;}
+.addhour_date_pull .pulltitle ,.addhour_server_pull .pulltitle{ padding: 2% 0 2% 5%;background: #f3f4f8;}
+.addhour_date_pull  ul,.addhour_server_pull ul{ padding-left: 5%; border-width: 0 0 1px 0;border-image: url(border.gif) 1 stretch;overflow: auto;-webkit-overflow-scrolling: touch; height: 90%;}
+.addhour_date_pull li,.addhour_server_pull li{ padding: 2% 0; border-width: 0 0 1px 0;border-image: url(border.gif) 1 stretch;}
+.addhour_date_pull li:last-child ,.addhour_server_pull li:last-child { border-width: 0;}
+.addhour_server_pull dt,.form_list dt{ display:inline}
+
+
+.ui_vote .bordertop_img{background:url(../images/bg03.png) repeat-x; background-size:auto 100%;}
+

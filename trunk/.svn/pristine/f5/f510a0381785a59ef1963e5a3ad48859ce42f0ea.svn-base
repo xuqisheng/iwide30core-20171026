@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- 全局控制 -->
+<script src="scripts/viewport.js"></script>
+<script src="scripts/jquery.js"></script>
+<script src="scripts/ui_control.js"></script>
+<link href="styles/global.css" rel="stylesheet">
+<link href="styles/ui.css" rel="stylesheet">
+<link href="styles/ui_ico.css" rel="stylesheet">
+<link href="styles/ui_style.css" rel="stylesheet">
+<link href="styles/ui_pull.css" rel="stylesheet">
+<!-- end -->
+<script src="scripts/touchwipe.js"></script>
+<link href="styles/photo.css" rel="stylesheet">
+<title>酒店相册</title>
+</head>
+<body>
+<div class="total_photo big"><span class="cur">78</span>/<span class="all">98</span></div>
+<ul class="imgbox">
+	<li class="preimg"><img src="images/egimg/eg_banner01.png" /></li>
+    <li class="curimg"><img src="images/egimg/eg_banner02.png" /></li>
+    <li class="nextimg"><img src="images/egimg/eg_banner01.png" /></li>
+    <div class="imgloading"><img src="images/loading.gif" /></div>
+</ul>
+
+<div class="photo_name big">酒店外景</div>
+<ul class="photo_class normal">
+	<li class="cur">酒店(<span>98</span>)</li>
+	<li>大堂(<span>55</span>)</li>
+	<li>房间(<span>66</span>)</li>
+	<li>设施(<span>77</span>)</li>
+	<li>网友上传(<span>22</span>)</li>
+</ul>
+</body>
+<script>
+function imagePreview(srcList) {
+	if(!srcList) return false;
+	if(srcList.indexOf('http://')<0){
+		
+		if(srcList.indexOf('/')==0){
+			
+			srcList = location.protocol+'//'+window.location.host+location.port+srcList;
+			
+		}
+	}
+	srcListu = [srcList];
+	if(typeof(WeixinJSBridge)!='undefined'){
+		WeixinJSBridge.invoke('imagePreview', { 
+			'current' : srcList,
+			'urls' : srcListu
+		});
+	}
+};
+function newimg(url){
+	var $img=new Image();
+	$img.onload = function(){
+		$('.imgloading').hide();
+		$('.curimg img').attr('src',$img.src);
+	}
+	$img.src=url;
+}
+var $scroll;
+function swipe(dir,_this){
+	var direction = dir?1:-1;
+	var _w=_this.width();
+	var i =_w;
+	window.clearInterval($scroll);
+	$scroll = window.setInterval(function(){
+		i+=10*direction;
+		_this.find('li').css('transform','translateX(-'+i+'px)');
+		if ( i>=_this.width()*2 || i<=0){
+			window.clearInterval($scroll);
+			_this.find('li').css('transform','translateX(-'+_w+'px)');
+			$('.imgloading').show();
+		}
+	},10);
+}
+$(function(){
+	$('.imgbox li').css('transform','translateX(-'+$(".imgbox li").width()+'px)');
+	$(".imgbox").click(function() { swipe(false,$(this));})
+	$(".imgbox").touchwipe({
+		 wipeLeft  : function(_this) { swipe(false,$(_this));},
+		 wipeRight : function(_this) { swipe(true,$(_this)); },
+		 min_move_x: 15,
+		 min_move_y: 15,
+		 preventDefaultEvents: true
+	});
+})
+</script>
+</html>

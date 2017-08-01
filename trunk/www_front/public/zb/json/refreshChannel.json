@@ -1,0 +1,16 @@
+{
+"data": {
+       "play_url": "http://hls.wsdemo.zego.im/livestream/zegotest-3469991060-stream-0001/playlist.m3u8",
+        "pic_url": "http://pic.wsdemo.zego.im/livestream/zegotest-3469991060-stream-0001.jpg",
+        "qrcode_url":"二维码",
+        "Live_time": 1491363554596, 
+        "audience": 6000, 
+        "audience_photo": ["img/0.jpg", "img/0.jpg", "img/0.jpg", "img/0.jpg"],
+        "user_info": {
+            "mibi": 22330, 
+            "daxia": 1000, 
+        }
+    },
+    "msg":"",
+    "status": 1
+}

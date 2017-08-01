@@ -1,0 +1,14 @@
+.wrap{ background:url(../../images/tips-bottom-bgpic.jpg) no-repeat 0 bottom #ec8558; background-size:100% auto; }
+
+.tips-wrap { background:url(../../images/tips-top-bgpic.jpg) no-repeat 0 0; background-size:100% auto; }
+.tips-wrap .sa-logo{ width:9%; padding-top:14px; display:block; margin:0 auto }
+.tips-wrap .icon-tips{ width:44%; padding-top:62px; display:block; margin:0 auto }
+.tips-wrap .tips-txts{ display:block; padding-top:24px; color:#fff; font-size:15px; line-height:24px; }
+
+@media screen and (max-height:485px){
+	.tips-wrap .sa-logo{ width:9%; padding-top:14px; }
+	.tips-wrap .icon-tips{ width:38%; padding-top:40px; }
+}
+@media screen and (max-width:321px){
+	.tips-wrap .tips-txts{ font-size:14px; line-height:24px; }
+}

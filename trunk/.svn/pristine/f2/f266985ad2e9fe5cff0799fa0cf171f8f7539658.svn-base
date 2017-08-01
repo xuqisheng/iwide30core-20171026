@@ -1,0 +1,302 @@
+<?php
+if (! defined ( 'BASEPATH' ))
+	exit ( 'No direct script access allowed' );
+
+class Pay extends MY_Controller {
+	public function __construct() {
+		parent::__construct ();
+		// 开发模式下开启性能分析
+		$this->output->enable_profiler ( false );
+		$this->load->library('IwidePay/IwidePayApi',null,'IwidePayApi');
+	}
+
+	public function hotel_pay(){
+    		$arr = array(
+            'commodityName' => '测试产品',
+            // 'merNo' => '850440053991050',
+            // 'notifyUrl' => $notifyUrl,
+            'openid' => $this->input->get('openid'),//$this->session->userdata($this->inter_id.'openid'),
+            'orderDate' => date('Ymd'),
+            'orderNo' => time(),
+            'productId' => '0105',
+            'requestNo' => time(),
+            'transAmt' => 1,
+            'transId' => '10',
+            'subMerNo'=>'21434543535',
+            'subMerName'=>'酒店名称',
+            // 'version' => 'V2.0',
+            'returnUrl' => 'http://cmbcpaytest.jinfangka.com/index.php/iwidepay/cmbc/pay/success',
+        );
+        $this->load->library('MYLOG');
+        MYLOG::w(json_encode($arr),'iwidepaypay');
+        // var_dump($arr);exit;
+        $data = $this->IwidePayApi->unifyPayRequest($arr);
+        MYLOG::w($data,'iwidepaypay');
+        // var_dump($data);exit;
+        $url = IwidePayConfig::REQUEST_URL;
+        if(!empty($arr['requestUrl'])){
+        	$url = $arr['requestUrl'];
+        }
+        $res = parse_url($url . "?" . $data); 
+        $arr_query = convertUrlQuery($res['query']);
+        $payinfo = explode("payInfo=", $arr_query[6]);
+        $data = array();
+        $data ['jsApiParameters'] = json_decode($payinfo[1],1);
+        $data ['returnUrl'] = $arr['returnUrl'];
+        $this->load->view ( 'iwidepay/default/pay', $data );
+        // var_dump(json_decode($payinfo[1]),true);exit;
+	}
+
+    //订房支付
+    public function hotel_order(){
+        //统计探针
+        $this->load->library('MYLOG');
+        $inter_id = $this->input->get ( 'id', true );
+
+        $parameters = '';
+        $data = array ();
+        $orderid = $this->input->get ( 'orderid', true );
+        if ($orderid) {
+            // $this->load->model ( 'pay/Wxpay_model' );
+            // $this->load->model ( 'pay/Pay_model' );
+            $this->load->model ( 'hotel/Order_model' );
+            $this->load->model ( 'wx/Publics_model' );
+            $this->load->model('iwidepay/Iwidepay_model');
+            // 公众号
+            $public = $this->Publics_model->get_public_by_id ( $inter_id );
+            if (! empty ( $public ['app_id'] )) {
+                $order_details = $this->Order_model->get_main_order ( $inter_id, array (
+                    'orderid' => $orderid,
+                    'idetail' => array (
+                        'i'
+                    )
+                ) );
+                if ($order_details) {
+                    $order_details = $order_details [0];
+                    $openid = $order_details['openid'];
+                    MYLOG::hotel_tracker($openid,   $inter_id);
+                    //若订单已取消，跳转再次预定页面
+                    $this->load->model ( 'hotel/Order_check_model' );
+                    $re = $this->Order_check_model->check_order_state($order_details);
+                    if($re['re_pay']!=1){
+                        redirect ( 'http://'.$public['domain']. '/index.php/hotel/hotel/index?id=' . $inter_id .'&h=' .$order_details['hotel_id'] );
+                    }
+
+                    //配置采用pms单号还是本地单号进行支付
+                    $pay_orderid=$order_details ['orderid'];
+                    $this->load->model ( 'hotel/Hotel_config_model' );
+                    $config_data = $this->Hotel_config_model->get_hotel_config ( $order_details ['inter_id'], 'HOTEL', 0, array (
+                        'ORDER_PAY_ORDERID'
+                    ) );
+                    if(!empty($config_data['ORDER_PAY_ORDERID'])&&$config_data['ORDER_PAY_ORDERID']=='web'){
+                        $pay_orderid=$order_details['web_orderid'];
+                    }
+
+                    //生成分账订单
+                    $split_order = array(
+                        'inter_id' => $inter_id,
+                        'hotel_id' => $order_details['hotel_id'],
+                        'openid' => $openid,
+                        'order_no' => $pay_orderid,
+                        'order_status' => 0,
+                        'trans_amt' => $order_details ['price'] * 100,
+                        'order_date' => date('Ymd'),
+                        'module' => 'hotel',
+                        'pay_type' => 'weixin',
+                        'transfer_status' => 0,
+                        'add_time' => date('Y-m-d H:i:s'),
+                        'update_time' => date('Y-m-d H:i:s'),
+                        'is_dist' => 0,
+                        );
+                    MYLOG::w('分账订单入库数据：'.json_encode($split_order),'iwidepaypay');
+                    $res = $this->Iwidepay_model->save_iwidepay_order($split_order);
+                    if(!$res){
+                        MYLOG::w('分账订单入库失败：'.json_encode($res),'iwidepaypay');
+                        exit('程序错误，微信支付失败');
+                    }
+                    $data ['fail_url'] = 'http://'.$public['domain']. '/index.php/hotel/hotel/myorder?id=' . $inter_id;
+                    $data ['success_url'] = $data ['fail_url'];
+                    $data ['fail_url'] .= '&fro='.$orderid . '&type=' . $order_details ['price_type'].'&lsaler='.$order_details['link_saler'];
+                    $data ['success_url'] = 'http://'.$public['domain']. '/index.php/hotel/hotel/orderdetail?id=' . $inter_id . '&oid=' . $order_details ['id'].'&lsaler='.$order_details['link_saler'];
+                    $jsApiArr = array(
+                        'commodityName' => $order_details ['hname'] . ' - ' .$order_details ['first_detail'] ['roomname'],
+                        'openid' => $openid,
+                        'orderDate' => date('Ymd'),
+                        'orderNo' => $pay_orderid,
+                        'productId' => '0105',
+                        'requestNo' => time().rand(10000,99999),
+                        'transAmt' => $order_details ['price'] * 100,
+                        'transId' => '10',
+                        'subMerNo'=> IwidePayConfig::MERNO,
+                        'subMerName'=> '酒店名称',
+                        // 'version' => 'V2.0',
+                        'returnUrl' => site_url ( 'hotel/hotel/orderdetail' ) . '?id=' . $inter_id ,
+                        );
+                    MYLOG::w('支付下单参数：'.json_encode($jsApiArr),'iwidepaypay');
+                    $result = $this->IwidePayApi->unifyPayRequest($jsApiArr);
+                    MYLOG::w('支付参数：'.$result,'iwidepaypay');
+                    // $url = IwidePayConfig::REQUEST_URL;
+                    // if(!empty($jsApiArr['requestUrl'])){
+                    //     $url = $jsApiArr['requestUrl'];
+                    // }
+                    // $res = parse_url($url . "?" . $result); 
+                    // $arr_query = convertUrlQuery($res['query']);
+                    // $payinfo = explode("payInfo=", $arr_query[6]);
+                    // $parameters = $payinfo[1];
+                    parse_str($result,$result_arr);
+                    $parameters = $result_arr['payInfo'];
+                }
+            }
+        }
+        $data ['jsApiParameters'] = $parameters;
+        $this->load->view ( 'pay/default/wxpay', $data );
+    }
+
+    //商城支付
+    public function soma_pay(){
+        $this->load->somaDatabase($this->db_soma);
+        $this->load->somaDatabaseRead($this->db_soma_read);
+
+        $inter_id = $this->input->get('id');
+        $order_id= $this->input->get('orderid');
+        //初始化数据库分片配置
+        if( $inter_id ){
+            $this->load->model('soma/shard_config_model', 'model_shard_config');
+            $this->current_inter_id= $inter_id;
+            $this->db_shard_config= $this->model_shard_config->build_shard_config($inter_id);
+            //print_r($this->db_shard_config);
+        }
+
+        $this->load->model('soma/Sales_order_model');
+        $order_detail= $this->Sales_order_model->get_order_simple($order_id);
+        $openid= $order_detail['openid'];
+        MYLOG::soma_tracker($openid,   $inter_id);
+
+        if( $order_id && $inter_id && $openid && $order_detail ){
+            $this->load->model('pay/wxpay_model');
+            $this->load->model('pay/pay_model' );
+            $this->load->model('wx/publics_model');
+            $this->load->model('iwidepay/Iwidepay_model');
+            $public = $this->publics_model->get_public_by_id($inter_id);
+
+            if(!empty($public['app_id'])){
+
+                $this->load->model('soma/Sales_order_model');
+                $business_type= $this->Sales_order_model->get_business_type();  //各种业务类型中文标识：套票|
+
+                if( defined('PROJECT_AREA') && PROJECT_AREA=='mooncake' )
+                    $business_type= '月饼';
+
+                $settle_type= $this->Sales_order_model->get_settle_label();  //各种结算方式中文标识：普通购买|拼团购买
+                $order_desc= $public['name']. '_';
+                $order_desc.= array_key_exists($order_detail['business'], $business_type)? $business_type[$order_detail['business']]: '';
+                $order_desc.= array_key_exists($order_detail['settlement'], $settle_type)? $settle_type[$order_detail['settlement']]: '';
+                $order_desc.= '#'. $order_id;
+
+                // if( $order_detail['settlement']== Sales_order_model::SETTLE_KILLSEC ){
+                //     //对于秒杀限定其支付有效期
+                //     $this->wxpay_model->setParameter("time_expire", date('YmdHis')+ 300);
+                // }
+
+                $wx_order_id= $this->Sales_order_model->wx_out_trade_no_encode($order_id, $order_detail['settlement'], $order_detail['business']);
+            }
+
+            //生成分账订单
+            $split_order = array(
+                'inter_id' => $inter_id,
+                'hotel_id' => $order_detail['hotel_id'],
+                'openid' => $openid,
+                'order_no' => $order_id,
+                'order_status' => $order_detail['status'],
+                'trans_amt' => $order_detail['grand_total']* 100,
+                'order_date' => date('Ymd'),
+                'module' => 'mall',
+                'pay_type' => 'weixin',
+                'transfer_status' => 0,
+                'add_time' => date('Y-m-d H:i:s'),
+                'update_time' => date('Y-m-d H:i:s'),
+                'is_dist' => 0,
+                );
+            MYLOG::w('分账订单入库数据：'.json_encode($split_order),'iwidepaypay');
+            $res = $this->Iwidepay_model->save_iwidepay_order($split_order);
+            if(!$res){
+                MYLOG::w('分账订单入库失败：'.json_encode($res),'iwidepaypay');
+                exit('程序错误，微信支付失败');
+            }
+
+            $urlParams = array(
+                'id'=> $inter_id,
+                'order_id'=> $order_id,
+                'settlement'=>$order_detail['settlement']
+            );
+
+            $successUrl = Soma_const_url::inst()->get_payment_success($order_detail['business'],$urlParams);
+            //回跳链接域名替换
+            $purl = parse_url($successUrl);
+            $successUrl = 'http://'.$public['domain'].$purl['path'];
+            $successUrl .= !empty($purl['query'])?'?'.$purl['query']:'';
+
+            $buyType= $this->input->get('bType');
+            if(empty($buyType)){
+                $data['success_url'] = $successUrl;
+            }else{
+                $data['success_url'] = $this->Sales_order_model->success_payment_path($inter_id,$buyType,$order_detail,$successUrl);
+                //回跳链接域名替换
+                $surl = parse_url($data['success_url']);
+                $data['success_url'] = 'http://'.$public['domain'].$surl['path'];
+                $data['success_url'] .= !empty($surl['query'])?'?'.$surl['query']:'';
+            }
+
+            if($this->input->get('wxpay_order_type') == 2) {
+                // 邮费订单，成功跳转链接为邮寄详情
+                // $spid = $this->session->userdata('spid');
+                if( false && $spid ){   
+                    $data['success_url'] = 'http://'.$public['domain']. '/index.php/soma/consumer/shipping_detail?id='.$inter_id.'&spid='.$spid;
+                }else{
+                    $data['success_url'] = 'http://'.$public['domain']. 'index.php/soma/consumer/my_shipping_list?id='.$inter_id;
+                }
+            }
+            $data['fail_url'] = Soma_const_url::inst()->get_payment_fail($order_detail['business'], $urlParams);
+            //回跳链接域名替换
+            $furl = parse_url($data['fail_url']);
+            $data['fail_url'] = 'http://'.$public['domain'].$furl['path'];
+            $data['fail_url'] .= !empty($furl['query'])?'?'.$furl['query']:'';
+
+            $jsApiArr = array(
+                'commodityName' => $order_desc,
+                'openid' => $openid,
+                'orderDate' => date('Ymd'),
+                'orderNo' => $wx_order_id,
+                'productId' => '0105',
+                'requestNo' => time().rand(10000,99999),
+                'transAmt' => $order_detail['grand_total']* 100,
+                'transId' => '10',
+                'subMerNo'=> IwidePayConfig::MERNO,
+                'subMerName'=> '酒店名称',
+                // 'version' => 'V2.0',
+                'returnUrl' => Soma_const_url::inst()->get_url('soma/consumer/my_shipping_list', array('id'=> $inter_id ) ) ,
+                );
+            MYLOG::w('支付下单参数：'.json_encode($jsApiArr),'iwidepaypay');
+            $result = $this->IwidePayApi->unifyPayRequest($jsApiArr);
+            MYLOG::w('支付参数：'.$result,'iwidepaypay');
+            // $url = IwidePayConfig::REQUEST_URL;
+            // if(!empty($jsApiArr['requestUrl'])){
+            //     $url = $jsApiArr['requestUrl'];
+            // }
+            // $res = parse_url($url . "?" . $result);
+            // $arr_query = convertUrlQuery($res['query']);
+            // $payinfo = explode("payInfo=", $arr_query[6]);
+            // $parameters = $payinfo[1];
+            parse_str($result,$result_arr);
+            $parameters = $result_arr['payInfo'];
+            $data['jsApiParameters'] = $parameters;
+            $this->load->view ( 'pay/default/wxpay', $data );
+
+        } else
+            exit('参数错误，微信支付失败');
+    }
+
+    public function success(){
+        echo 'pay successfully';
+    }
+}

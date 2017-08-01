@@ -1,0 +1,118 @@
+<!-- DataTables -->
+<link rel="stylesheet" href="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datatables/dataTables.bootstrap.css">
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+    <script src="<?php echo base_url(FD_PUBLIC) ?>/js/html5shiv.min.js"></script>
+    <script src="<?php echo base_url(FD_PUBLIC) ?>/js/respond.min.js"></script>
+<![endif]-->
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+<?php 
+/* 顶部导航 */
+echo $block_top;
+?>
+
+<?php 
+/* 左栏菜单 */
+echo $block_left;
+?>
+
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            <small></small>
+          </h1>
+          <ol class="breadcrumb"></ol>
+        </section>
+        <!-- Main content -->
+        <section class="content">
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="box">
+                <?php echo $this->session->show_put_msg(); ?>
+              <!-- 
+                <div class="box-header">
+                  <h3 class="box-title">Data Table With Full Features</h3>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                   <?php echo form_open('hotel/ads/index',array('method'=>'get'));?>
+                  <div class="row">
+                  	<div class="col-xs-3 form-group">
+						    <label for="hotel">请选择酒店</label>
+                            <div class="input-group">
+						    <select id="hotel" name="hotel" class="form-control">
+						    <option value='0'>公共广告</option>
+						    <?php foreach ($hotels as $hotel):?><option value="<?=$hotel['hotel_id']?>"<?php if($hotel_id == $hotel['hotel_id']):?> selected<?php endif;?>><?=$hotel['name']?></option><?php endforeach;?>
+						    </select>
+                            <span class="input-group-btn">
+                                <input type="submit" value="检索" class="btn btn-default" />
+                            </span>
+						</div>
+	                </div>
+                  	
+                  </div>
+                  
+                  <?php echo form_close();?>
+                </div><!-- /.box-body -->
+              </div><!-- /.box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+        </section><!-- /.content -->
+		
+		 <section class="content">
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="box">
+                <div class="box-body">
+		
+			 <table id="data-grid" class="table table-bordered table-striped table-condensed dataTable">
+             <thead><tr>
+             <?php foreach ($fields_config as $k=> $v):?>
+             <th <?php if(isset($v['grid_width'])) echo 'width="'. $v['grid_width']. '"'; ?> >
+             <?php echo $v['label'];?></th>
+             <?php endforeach; ?>
+             <th></th>
+             </tr></thead>
+                    <?php if(!empty($list)){ foreach($list as $lt){ ?>
+                    <tr>
+                    <?php foreach ($fields_config as $k=> $v):?>
+             <td><?php echo $lt[$k];?></td>
+             <?php endforeach; ?>
+             <td><a href="<?php echo site_url('hotel/ads/edit').'?h='.$hotel_id.'&aid='.$lt['code'];?>">修改</a></td>
+             </tr>
+                    <?php }}?>
+                  </table>
+		</div><!-- /.box-body -->
+              </div><!-- /.box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+        </section><!-- /.content -->
+		
+      </div><!-- /.content-wrapper -->
+<?php 
+/* Footer Block @see footer.php */
+require_once VIEWPATH. $tpl .DS .'privilege'. DS. 'footer.php';
+?>
+
+<?php 
+/* Right Block @see right.php */
+require_once VIEWPATH. $tpl .DS .'privilege'. DS. 'right.php';
+?>
+
+</div><!-- ./wrapper -->
+
+<?php 
+/* Right Block @see right.php */
+require_once VIEWPATH. $tpl .DS .'privilege'. DS. 'commonjs.php';
+?>
+<script>
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+ERROR - 2017-07-25 00:03:35 --> 404 Page Not Found: admin/Stathtm/index
+ERROR - 2017-07-25 15:32:28 --> Unable to connect to the database
+ERROR - 2017-07-25 17:06:02 --> 404 Page Not Found: admin/Stathtm/index
+ERROR - 2017-07-25 17:10:00 --> 404 Page Not Found: admin/Stathtm/index

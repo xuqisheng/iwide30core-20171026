@@ -1,0 +1,78 @@
+<?php
+//error_reporting ( 0 );
+if (! defined ( 'BASEPATH' ))
+	exit ( 'No direct script access allowed' );
+
+class Refund extends MY_Front {
+
+	protected $_request_url = '';
+	//protected $_common_data = array();
+    
+	public function __construct() {
+		parent::__construct ();
+		// 开发模式下开启性能分析
+		$this->output->enable_profiler ( false );
+		$this->load->library('IwidePay/IwidePayApi',null,'IwidePayApi');
+		//$this->load->library('IwidePay/IwidePayData');
+
+		$this->_request_url = 'https://gzwkzftest.cmbc.com.cn/payment-gate-web/gateway/api/backTransReq';
+
+
+	}
+	
+	//退款接口
+	public function refund(){
+		//装装数据
+		$arr = array(
+            'commodityName' => 'test',
+            'merNo' => '850440053991272',
+            'orderDate' => '20170523',
+            'orderNo' => 'tuikuan123'.time(),
+            'requestNo' => md5(time()),
+            'transAmt' => 600,//单位：分
+            'transId' => '02',
+            'origOrderDate' => '20170523',
+            'origOrderNo' =>'1495541854',
+            'returnUrl' => 'http://www.baidu.com',
+           // 'notifyUrl' => 'http://www.baidu.com',
+            'refundReson' => '不爽',
+        );
+         //发起退款请求
+         $data = $this->IwidePayApi->refundRequest($arr,$this->_request_url);
+         //解析返回
+         $res = parse_url($this->_request_url . "?" . $data);
+         $arr_query = convertUrlQuery($res['query'],true);echo 'SUCCESS';var_dump($arr_query);die;
+         //先判断返回状态
+         if(empty($arr_query)){
+         	exit('error');
+         }
+         if(isset($arr_query['respCode']) && $arr_query['respCode'] == '0000'){//成功的
+         	exit('success');
+         }else{
+         	//记录log
+         	//输出原因？
+         	$msg = isset($arr_query['respDesc'])?$arr_query['respDesc']:'失败';
+         	exit('error');
+         }
+	}	
+
+	//退款回调 先写这里吧
+	public function refuncCallback(){
+		//通过URL传值？
+		$data = $_GET;
+		//记录log
+		//$this->db->insert('iwidepay_log',$data);
+		//验签
+		$res = $this->IwidePayApi->payreturnCallBack($data);
+		if(!$res){//验签失败
+			return false;
+		}
+		//业务逻辑代码
+		
+		//最后返回success
+		echo 'succes';
+		die;
+	}
+
+	
+}

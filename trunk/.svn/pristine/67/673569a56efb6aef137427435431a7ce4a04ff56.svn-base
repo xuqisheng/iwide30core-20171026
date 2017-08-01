@@ -1,0 +1,13 @@
+@charset "utf-8";
+/* CSS Document */
+.box{width:96%;background:#fff;border-top:1px solid #e4e4e4;border-bottom:1px solid #e4e4e4;
+padding:0 2%;}
+.check{width:100%;padding:2% 0;border-bottom:1px solid #e4e4e4;}
+.check:last-child{border:0;}
+.check .ch_img{width:3.6rem;height:3.6rem;float:left;margin-right:0.4rem;border-radius:0.2rem;}
+.ch_text .ch_titl{font-size:0.7rem;padding:2% 0;}
+.ch_text > p{padding:1% 0;font-size:0.3rem;color:#e4e4e4;}
+.ch_text > p em{color:#ff7200}
+.ch_text .sum > a{background:#ff7200;color:#fff;float:right;padding:1% 2%;font-size:0.5rem;border-radius:0.2rem;}
+.ch_text .sales > a{color:#ff7200;float:right;font-size:0.5rem;margin-top:2%;padding-right:2%;}
+.ch_text .sales font{font-size:0.8rem;color:#ff7200;}

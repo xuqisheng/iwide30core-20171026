@@ -1,0 +1,35 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+#ncalendar{background:#fff; font-size:12px;}
+
+#ncalendar tbody td.current,
+#ncalendar tbody td.begin,
+#ncalendar tbody td.end,
+#ncalendar tbody td.begin .ct{color:#fff;}
+
+#ncalendar thead td:first-child,
+#ncalendar thead td:last-child,
+#ncalendar tbody td.span{ color:#ff9900;}
+
+#ncalendar tbody td.unable{	color:#999;}
+
+#ncalendar tbody td.current,
+#ncalendar tbody td.begin,
+#ncalendar tbody td.end{background:#ff9900;}
+
+#ncalendar{	position:fixed;top:0;height:100%;width:100%;overflow-y:scroll; -webkit-overflow-scrolling:touch;z-index:999999;}
+#ncalendar table{	width:100%;border-collapse:collapse;border-spacing:0}
+#ncalendar thead tr{	border-bottom: 1px solid #c3c3c3;}
+#ncalendar tbody td{	text-align: center;color: #333;cursor: pointer;width: 2em;position: relative;height:3.5em;}
+#ncalendar tbody td span{	display:block;}
+#ncalendar thead td{	background: #f9f9f9;line-height: 2em;text-align: center;}
+
+#ncalendar tbody td.span{	background: #eee;box-sizing:border-box;}
+#ncalendar tbody td.span:last-child{border-right:0}
+#ncalendar tbody td.timename{	text-align: center;padding:2%;background:#f7f7f7;color:#444;height:1em;}
+#ncalendar tbody td div.wh{	position: relative;margin-top:100%;}
+#ncalendar tbody td div.ct{	position: absolute;top:15%;left: 15%;padding:.5em;width: 1em;overflow: hidden;}
+#ncalendar ._tips{position:fixed; width:100%; bottom:3%;z-index:999999; text-align:center}
+#ncalendar ._tips span{background:rgba(0,0,0,0.6); color:#fff; padding:2% 5%; font-size:15px;}

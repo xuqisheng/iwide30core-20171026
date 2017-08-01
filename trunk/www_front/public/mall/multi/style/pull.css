@@ -1,0 +1,36 @@
+@charset "utf-8";
+/* CSS Document */
+
+.pull {padding-bottom:4%;}
+.pull .padding{padding:4%}
+.pull .title{font-size:0.7rem; padding-bottom:2%;}
+.pull .box{ position:relative;color:#333;width:90%; margin:5% auto;  border-radius:0.3rem;padding-bottom:4%; height:90%}
+.pull .shut{float:right; margin-top:1%;}
+
+.pull .btn {position:relative;text-align:right; padding:5%; width:90%;}
+.pull .btn a{border:1px solid #d3d3d3;display:inline-block; width:47%; text-align:center; padding:4% 0; font-size:0.7rem; background:#fff; color:#333; border-radius:0.2rem;}
+.pull .btn a:first-child{ float:left;background:#04be02; color:#fff;border-color:#058104}
+.pull .spec{height:40%; overflow:scroll; font-size:0.7rem; -webkit-overflow-scrolling:touch}
+.pull .spec p{ padding-left:0%; list-style:disc; font-size:0.6rem; color:#999; margin-bottom:1%;}
+
+.pull .btn .choose{ background:rgba(255,255,255,0.9); border:1px solid #adaaa8; border-radius:0.3rem;
+ position:absolute; bottom:90%; left:5%; width:43%;}
+.pull .btn .choose div{ padding:10% 0; font-size:0.7rem; text-align:center; color:#444; border-radius:0.1rem; border-bottom:1px solid #adaaa8; position:relative}
+.pull .btn .choose div:last-child{ border-bottom:0;}
+.pull .btn .choose img{ position:absolute; top:100%; left:45%; width:6%;}
+
+.pull .page{overflow:scroll; -webkit-overflow-scrolling:touch;  height: 87%; text-align:center}
+.pull .page .imgbox { text-align:center; height:9rem; overflow:hidden}
+.pull .page img{width:100% !important; height:auto !important}
+.pull .page .imgbox img{ width:auto; height:9rem;}
+.pull .title .giftname,.pull .title .price{color:#813750 !important}
+.pull .notic {background:#eeeeee; padding:3%; margin-top:3%;}
+.pull .notic p {padding-top:3%; line-height:1.5em;}
+.pull .notic p:first-child{padding-top:0}
+.pull .notic p span{ display:table-cell}
+.pull .notic p span:first-child{ width:5em;}
+
+
+
+
+

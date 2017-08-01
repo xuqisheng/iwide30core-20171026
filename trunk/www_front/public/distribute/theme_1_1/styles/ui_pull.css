@@ -1,0 +1,7 @@
+@charset "utf-8";
+/* CSS Document */
+
+.alert_box{ border-radius:0.3rem; background:#fff; margin:40% auto; width:80%; color:#000;font-size:0.6rem}
+.alert_box .alert_title{ padding:5% 0; text-align:center; font-size:0.8rem; color:#6fcd6e}
+.alert_box .alert_content{ padding:5%; padding-top:0;}
+.alert_box .alert_btn{border-top:1px solid #e1e1e1; padding:5% 0; text-align:center; color:#559fe3;}

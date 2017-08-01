@@ -1,0 +1,46 @@
+/*!
+ *   AdminMember
+ * -------------------------
+ */
+/*会员中心导航栏配置*/
+.nav-icon{width: 74px;  height: 90px;  display: inline-block;border: 5px solid #ffffff;}.nav-box{margin: 8px;}
+.nav-icon:hover{border: 5px solid #ddd;}
+.nav-icon p.icon-box{width: 100%;  height: 73%;background-position:center center;background-repeat: no-repeat; background-size: 100% 100%; margin: 0; cursor: pointer;}
+.nav-icon p.ui_icon1{background-image: url("/public/AdminLTE/media/member/icon/icon1.png");}
+.nav-icon p.ui_icon2{background-image: url("/public/AdminLTE/media/member/icon/icon2.png");}
+.nav-icon p.ui_icon3{background-image: url("/public/AdminLTE/media/member/icon/icon3.png");}
+.nav-icon p.ui_icon4{background-image: url("/public/AdminLTE/media/member/icon/icon4.png");}
+.nav-icon p.ui_icon5{background-image: url("/public/AdminLTE/media/member/icon/icon5.png");}
+.nav-icon p.ui_icon6{background-image: url("/public/AdminLTE/media/member/icon/icon6.png");}
+.nav-icon p.ui_icon7{background-image: url("/public/AdminLTE/media/member/icon/icon7.png");}
+.nav-icon p.ui_icon8{background-image: url("/public/AdminLTE/media/member/icon/icon8.png");}
+.nav-icon p.ui_icon9{background-image: url("/public/AdminLTE/media/member/icon/icon9.png");}
+.nav-icon p.ui_icon10{background-image: url("/public/AdminLTE/media/member/icon/icon10.png");}
+.nav-icon p.ui_icon11{background-image: url("/public/AdminLTE/media/member/icon/icon11.png");}
+.nav-icon p.ui_icon12{background-image: url("/public/AdminLTE/media/member/icon/icon12.png");}
+.nav-icon p.ui_icon13{background-image: url("/public/AdminLTE/media/member/icon/icon13.png");}
+.nav-icon p.ui_icon14{background-image: url("/public/AdminLTE/media/member/icon/icon14.png");}
+.nav-icon p.ui_icon15{background-image: url("/public/AdminLTE/media/member/icon/icon15.png");}
+.nav-icon p.ui_icon16{background-image: url("/public/AdminLTE/media/member/icon/icon16.png");}
+.nav-icon p.ui_icon17{background-image: url("/public/AdminLTE/media/member/icon/icon17.png");}
+.nav-icon p.ui_icon18{background-image: url("/public/AdminLTE/media/member/icon/icon17.png");}
+.nav-icon p.ui_icon19{background-image: url("/public/AdminLTE/media/member/icon/icon18.png");}
+.nav-icon p.text{text-align: center;margin: 0;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;}
+.modal-body{overflow-y: scroll;height: 500px;}
+.rewrte{width: 54px;height: 50px; cursor: pointer;}
+.rewrte p{background-size: 100% 100%;}.nav-icon p.rewrte-icon{height: 100%;}
+.table-bordered>tbody>tr>td{text-align: center;vertical-align: middle;}
+
+/*等级图标*/
+.nav-icon p.lvl_icon_collect{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_collect.png");}
+.nav-icon p.lvl_icon_crown{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_crown.png");}
+.nav-icon p.lvl_icon_diamond{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_diamond.png");}
+.nav-icon p.lvl_icon_flower{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_flower.png");}
+.nav-icon p.lvl_icon_gift{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_gift.png");}
+.nav-icon p.lvl_icon_heart{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_heart.png");}
+.nav-icon p.lvl_icon_like{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_like.png");}
+.nav-icon p.lvl_icon_octagon{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_octagon.png");}
+.nav-icon p.lvl_icon_person{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_person.png");}
+.nav-icon p.lvl_icon_rice{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_rice.png");}
+.nav-icon p.lvl_icon_star{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_star.png");}
+.nav-icon p.lvl_icon_v{background-image: url("/public/AdminLTE/media/member/lvl_icon/icon_v.png");}

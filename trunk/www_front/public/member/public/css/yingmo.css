@@ -1,0 +1,115 @@
+@charset "utf-8";
+body{font-family:microsoft Yahei; background:#f7f7f7; }
+*{padding:0; margin:0; }
+ul,li{ list-style:none; }
+a,input{-webkit-tap-highlight-color:rgba(0,0,0,0);}
+
+.wrap{ width:100%; background:#f7f7f7; padding-bottom:20px; }
+.sale-wrap{ min-height:94%; position:relative; padding-bottom:30px; }
+.header{ background:#fd2508; height:40px; color:#fff; font:bold 18px/40px microsoft Yahei; text-align:center; }
+.header-black{ background:#322b2a; }
+.sale-tip{ color:#ccc; font-size:11px; line-height:24px; position:absolute; bottom:0; text-align:center; width:100%; padding-bottom:6px; }
+
+/*会员介绍*/
+.tab-menu{ border-bottom:2px solid #bd4d3d; height:55px; background:#fbf1d7; display:box;display:-webkit-box; }
+.tab-menu li{ -webkit-box-flex:1; box-flex:1; border-right:1px solid #e7cbb4; margin-left:-1px; height:55px; text-align:center;  }
+.tab-menu li:last-child{border-right:none;}
+.tab-menu li a{ display:block;  padding-top:12px; line-height:17px; font-size:12px; color:#d22929; text-decoration:none; }
+.tab-menu li b{ font-size:14px; }
+.tab-menu li a b{ color:#994646; }
+.tab-menu .current{ background:#e53c3c; }
+.tab-menu .current a,.tab-menu .current a b { color:#fff; }
+
+.cards-wrap {
+	background:url(../images/card-bg.jpg) no-repeat center top;
+	background-size:auto 103px;
+	padding-top:20px;
+}
+.cards{
+	display:block;
+	margin:0 auto;
+	padding:113px 0 0 12px;
+	width:200px;
+	height:21px;
+	color:#fff100;
+	font-size:14px;
+	line-height:18px;
+	font-weight:bold;
+}
+.super-card{
+	background: url(../images/card-bg.png) 0 0 no-repeat;
+	color:#e8ba41;
+	background-size:213px;
+}
+.gold-card{
+	background: url(../images/card-bg.png) 0 -139px no-repeat;
+	color:#000;
+	background-size:213px;
+}
+.vip-card{
+	background: url(../images/card-bg.png) 0 -278px no-repeat;
+	color:#fff100;
+	background-size:213px;
+}
+.e-card{
+	background: url(../images/card-bg.png) 0 -417px no-repeat;
+	color:#fff100;
+	background-size:213px;
+	padding-left:17px;
+	padding-top:108px;
+	width:197px;
+	height:26px;
+}
+
+.main-info{ padding:20px 0 5px; }
+.main-info hr{
+	border:none;
+	border-top:1px solid #db884b;
+	box-shadow:0 1px #fff;
+	-moz-box-shadow:0 1px #fff;
+	-webkit-box-shadow:0 1px #fff;
+	margin:0;
+}
+.main-info h2{
+	font:bold 20px/45px "microsoft Yahei";
+	color:#05578b;
+	text-align:center;
+	background:#fbf1d7;
+}
+.main-info h2 b{
+	color:#d7000f;
+	font-size:20px;
+}
+.main-info h4{
+	font:normal 12px/18px "microsoft Yahei";
+	color:#221815;
+	margin:10px;
+}
+.main-info h4 b{
+	color:#05578b;
+	font-weight:bold;
+}
+.main-info h4 em{
+	color:#d7000f;
+	font-weight:bold;
+	font-style: normal;
+}
+.yenum-wrap{
+	padding:0 10px;
+}
+.yenum-wrap h5{
+	color:#d7000f;
+	font-weight:normal;
+	line-height:30px;
+}
+.yenum-wrap dl{ font-size:12px; line-height:18px; padding-left:72px; clear:both; overflow:hidden; }
+.yenum-wrap dl dt{ color:#e60012; font-weight:bold; margin-left:-72px; float:left;  }
+.yenum-wrap dl dd{ float:left; }
+
+.mem-bottom{ background:#322b2a; padding:10px 0 10px 30px; overflow:hidden; }
+.mem-bottom img{ float:left; margin-right:10px; }
+.mem-bottom .rght{ margin-top:30px; }
+
+.tip-mem-intro{ color:#999; background:#000; text-align:center; position:static; }
+
+

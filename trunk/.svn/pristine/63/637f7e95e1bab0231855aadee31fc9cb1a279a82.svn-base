@@ -1,0 +1,62 @@
+@charset "utf-8";
+/* CSS Document */
+body,html{background:#e5e5e5;}
+.c_b5b{color:#555;}
+.p_r_66{padding-left:0.66rem;}
+.c_ff9{color:#ff950d;}
+.j_txt_list li,.j_box_list .p_r_66 .y,.f_s_68{font-size:0.73rem;}
+.f_s_8{font-size:0.8rem;}
+.f_s_85{font-size:0.85rem;}
+.f_s_91{font-size:0.91rem;}
+.p_lr_2{padding:0 2%;}
+.bg_fcf{background:#fcfcfc;}
+.j_box_list{padding-bottom:0.67rem;}
+.j_class_list .item img{width:26px;height:26px;}
+.j_class_list .item p{font-size:0.8rem;}
+.j_box_list{background:#fff;}
+.j_box_list img{display:block;width:100%;height:auto;}
+.j_padd{padding:2%;width:100%;}
+.j_padd .item{width:49%;float:left;margin:1%;}
+
+/**/
+.headers img{display:block;}
+.j_li_txt{font-size:10px;display:block;}
+.j_li_txt img{width:17px;height:auto;vertical-align:bottom;margin-right:10px}
+.j_li_txt p{display:inline-block;}
+.m_tb_1{margin:2% 0;}
+.f_s_14{font-size:14px;}
+.f_s_12{font-size:12px;}
+.c_989{color:#989898;}
+.j_buy_list li:last-child{border-image:0;}
+.j_txt_list li{padding:2% 3%;}
+.j_r_txt{float:right}
+
+.j_bor_bg{border:1px solid #ff9900;border-radius:4px;}
+.bg_eee{background:#eee;}
+.bg_ff9{background:#ff9900;}
+.j_ico_btn,.j_ico_btn img{width:29px;height:29px;}
+.c_ff9{color:#ff9900;}
+.m_t_2{margin-top:2%;}
+.p_tb_10{padding:4px 0;}
+
+.j_class_list .item,.j_class_list .j_li_txt{
+    -webkit-box-flex: 1;
+	box-flex: 1;
+}
+.j_class_list .item{
+    display: block;
+	padding:3% 0;
+}
+.tp_list {padding:1% 0; overflow:hidden;}
+.tp_list .item{width:47.9%; margin:1%; float:left; padding:0; display:flex;flex-flow:column;justify-content:space-between; align-items: stretch}
+.tp_list_box1 .item,.tp_list_box2 .item{width:100%;margin:2% 0;}
+.tp_list .img{height:0 !important; padding-bottom:100%; position:relative}
+.tp_list img{position:absolute;left:0;top:0; width:100%; height:100%;} 
+.tp_list .item p{padding:11px 11px 0 11px; text-align:justify;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+.tp_list .item p:last-child{padding:11px;}
+.tp_list .item_foot em { display:inline-block; margin:0 8px; opacity:0.5}
+.foot_fixed .webkitbox{padding:3% 1%}
+.foot_fixed .webkitbox>*{display:block; margin:0 3px; padding:5px;text-align:center; height:33px; box-sizing:border-box;}
+.foot_fixed .img_link {max-width:33px; padding:0}
+
+.j_label{position:absolute;top:0px;right:5px;width:60px;height:30px;background:url(../images/img/ico30.png) no-repeat;background-size:100%;text-align:center;}

@@ -1,0 +1,22 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{height:100%; background:#f8f8f8;}
+.ui_normal_list .item div:last-child{ color:#999;}
+.ui_normal_list{margin-top:0; border-top:0 !important}
+.history tt:nth-child(2n),.point tt:nth-child(2n){ float:right}
+
+.power .ui_img_auto_cut{ width:3.5rem; height:2.5rem; border-radius:0.2rem; float:left; margin-right:3%;}
+.power tt{ display:inline-block}
+.power tt.float_r{ width:7em; text-align:right}
+.power tt,.power div > div:last-child{margin-top:2%;}
+.power div > div tt{margin-top:0;}
+
+
+
+
+
+
+
+
+

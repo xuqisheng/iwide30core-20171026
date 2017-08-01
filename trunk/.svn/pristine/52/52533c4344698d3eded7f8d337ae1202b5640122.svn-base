@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- 全局控制 -->
+<script src="scripts/viewport.js?v=26"></script>
+<script src="scripts/jquery.js"></script>
+<script src="scripts/ui_control.js"></script>
+<link href="styles/global.css" rel="stylesheet">
+<link href="styles/ui.css" rel="stylesheet">
+<link href="styles/ui_ico.css" rel="stylesheet">
+<link href="styles/ui_style.css" rel="stylesheet">
+<link href="styles/ui_pull.css" rel="stylesheet">
+<!-- end -->
+<link href="styles/submit_results.css" rel="stylesheet">
+<title>提交成功</title>
+</head>
+<body>
+<header class="order_detail">
+	<div class="order_status">提交成功，等待酒店审核...</div>
+    <ul>
+    	<li><span>订单编号</span><span>1023456789</span></li>
+        <li><span>订单总价</span><span class="ui_price">389</span></li>
+        <li><span>支付类型</span><span>到店支付</span></li>
+        <li><span>订单状态</span><span>待酒店确认</span></li>
+    </ul>
+</header>
+<div class="order_person">
+	<div class="block_title">订单会通知以下客户</div>
+    <div class="block_content">
+        <span>用户名</span>
+        <span>13013001300</span>
+    </div>
+</div>
+<div class="book_intro">
+	<div class="block_title">预订信息</div>
+    <div class="block_content">
+    	<div class="hotelname">广州天美酒店公寓</div>
+        <ul>
+            <li><span>入住房型</span><span>豪华双床房</span></li>
+            <li><span>入住时间</span><span>9月16日</span></li>
+            <li><span>离店时间</span><span>9月17日</span></li>
+            <li><span>房间数</span><span>1</span></li>
+            <li><span>保留时间</span><span>9月16日 18:00:00</span></li>
+        </ul>
+        <div class="notic">
+            <div class="title">温馨提示</div>
+            <div class="content">
+                <p>1.支付说明：微信支付或积分支付不可取消，房间将整晚为您保留；到店支付房间保留至入住当天18:00，钟点房仅限8～10点入住。</p>
+                <p>2.返券说明：本单使用优惠券后不可获取返券，未使用优惠券情况下可获得200元住房优惠券。</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="footfixed">
+	<a href="order_detail.html" class="footbtn">订单详情</a>
+</div>
+</body>
+</html>

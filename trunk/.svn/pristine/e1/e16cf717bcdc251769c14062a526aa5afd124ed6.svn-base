@@ -1,0 +1,207 @@
+<?php
+class Fans_model extends CI_Model {
+	function __construct() {
+		parent::__construct ();
+	}
+
+    /**
+     * 关注;
+     */
+    const CUR_STATUS_YES = 1;
+    /**
+     * 取消关注
+     */
+    const CUR_STATUS_NO = 2;
+
+    const TAB_FANS = 'fans';
+    const TAB_FANS_SUBS = 'fans_subs';
+
+    /**
+     * @return string
+     * @author renshuai  <renshuai@jperation.cn>
+     */
+    private function table_name()
+    {
+        return 'iwide_fans_subs';
+    }
+
+    function count_all_fans($inter_id){
+
+        $db = $this->load->database('iwide_r1',true);
+
+        $sql = "
+                SELECT
+                    t1.id,t1.event,t1.source,t1.cur_status,t2.name,t2.hotel_id,t2.is_distributed,t1.event_time
+                FROM
+                    `iwide_fans_subs` t1
+                LEFT JOIN
+                    `iwide_hotel_staff` t2
+                ON
+                   t1.source = t2.qrcode_id
+                WHERE
+                   t1.inter_id = '{$inter_id}'
+                AND
+                   t1.inter_id = t2.inter_id
+                AND
+                   t1.source > 0
+                GROUP BY
+                    t1.openid
+                ORDER BY
+                    t1.event_time
+                DESC
+        ";
+
+
+       return  $db->query($sql)->result_array();
+
+    }
+
+
+    function get_all_fans($inter_id,$offset=array(),$keyword=''){
+
+        $db = $this->load->database('iwide_r1',true);
+
+        $condition = '';
+
+        $sql = "
+                SELECT
+                    t1.*,t2.event,t2.source,t2.cur_status
+                FROM
+                    `iwide_fans` t1,
+                    `iwide_fans_subs` t2
+                WHERE
+                   t1.inter_id = '{$inter_id}'
+                AND
+                   t2.inter_id = '{$inter_id}'
+                AND
+                   t1.openid = t2.openid
+        ";
+
+        if(!empty($keyword)){
+            $condition .=" AND t1.nickname like '%$keyword%'";
+        }
+
+        $condition .=' GROUP BY t1.id';
+
+        if(!empty($offset)){
+            $page = $offset['page'];
+            $nums = $offset['nums'];
+            $total = ($offset['page']-1)*$offset['nums'];
+            $limit=" LIMIT {$total},{$nums}";
+        }
+
+
+        $res['data']=$db->query($sql.$condition.$limit)->result_array();
+
+        $count_sql = "SELECT count(id) total FROM ({$sql}{$condition}) c1";
+
+        $res['count'] = $db->query($count_sql)->row_array();
+
+        return $res;
+
+
+    }
+
+
+    function count_self_fans($inter_id){
+
+        $db = $this->load->database('iwide_r1',true);
+
+        $sql = "SELECT count(fans.id) total FROM (SELECT id FROM `iwide_fans_subs` WHERE inter_id = '{$inter_id}' and source < 0 group by openid) fans";
+
+       return  $db->query($sql)->row_array();
+
+    }
+
+
+
+    /**
+     * @param $interID
+     * @param $openid
+     * @return bool
+     * @author renshuai  <renshuai@mofly.cn>
+     */
+    public function subscribeStatus($interID, $openid)
+    {
+        $where = [
+            'inter_id' => $interID,
+            'openid' => $openid
+        ];
+        $row = $this->db->where($where)->order_by('event_time desc')->limit(1)->get($this->table_name())->result_array();
+
+        if (!empty($row) && !empty($row[0]) && $row[0]['cur_status'] == self::CUR_STATUS_YES) {
+            return true;
+        }
+        return false;
+    }
+
+
+    public function count_hotel_fans($inter_id){
+
+        $db = $this->load->database('iwide_r1',true);
+
+        $db->select("count('id') total");
+        $db->select('hotel_id');
+        $db->from('iwide_fans_subs');
+        $db->where('inter_id',$inter_id);
+        $db->where('cur_status',1);
+        $db->group_by('hotel_id');
+
+        return $db->get()->result_array();
+
+    }
+
+
+    public function  lastday_cancel($inter_id,$today,$last_day){
+
+        $db = $this->load->database('iwide_r1',true);
+
+        $db->select("count('id') total");
+        $db->select('hotel_id');
+        $db->from('iwide_fans_subs');
+        $db->where('inter_id',$inter_id);
+        $db->where('cur_status',2);
+        $db->where('unsubcribe_time >=',$last_day);
+        $db->where('unsubcribe_time <=',$today);
+
+        $db->group_by('hotel_id');
+
+        $res = $db->get()->result_array();
+
+        return $res;
+
+    }
+
+    public function distributed_fans($inter_id){
+
+        $db = $this->load->database('iwide_r1',true);
+
+        $sql = "
+        SELECT
+          count(*) total,c1.hotel_id
+        FROM
+          (SELECT
+              t2.*
+          FROM
+              `iwide_fans_subs` t1,
+              `iwide_hotel_staff` t2
+          WHERE
+              t1.inter_id ='{$inter_id}'
+          AND
+              t1.cur_status=1
+          AND
+              t1.inter_id = t2.inter_id
+          AND
+              t1.source = t2.qrcode_id
+          AND
+              t2.is_distributed = 1) c1
+          GROUP BY c1.hotel_id
+        ";
+
+        $res = $db->query($sql)->result_array($sql);
+
+        return $res;
+
+    }
+
+}

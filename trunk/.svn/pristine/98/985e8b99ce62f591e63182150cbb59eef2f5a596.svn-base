@@ -1,0 +1,28 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+.notic{padding-top:0; text-align:justify; background:#fff; padding:3%; border-bottom:1px solid #e4e4e4;}
+.notic >*{margin-bottom:2%}
+
+
+.votelist{text-align:center}
+.ui_vote{background:#fff; overflow:hidden;border-radius:0.3rem;text-align:left;display:inline-block; width:85%;margin-top:3%}
+.ui_vote .bordertop_img{background:url(../images/bg03.png) repeat-x;padding-top:0.3rem; background-size:auto 100%;}
+.ui_vote .vote_con{ padding:4%; padding-top:7%; overflow:hidden;}
+.ui_vote .vote_con b{font-size:0.8rem; font-weight:normal}
+.ui_vote .ui_price{float:right; font-size:1.5rem;}
+.ui_vote .ui_price:before{font-size:0.5rem;}
+.ui_vote .val_date{padding:4%; border-top:1px solid #e4e4e4; display:-webkit-box;}
+.ui_vote .val_date>*{-webkit-box-flex:1}
+.ui_vote .val_date>*:last-child{text-align:right}
+.footbtn{width:100%; position:fixed; bottom:0;text-align: center;padding: 3.3% 0; background:#d40f20; color:#fff;}
+.checkbox,.checkbox em{width:0.4rem;height:0.4rem; display:block;border-radius:50%;}
+.checkbox{border:1px solid #d40f20;float:left;margin-left:2%;margin-top:2rem; padding:0.1rem;}
+.ischeck .checkbox em{ background:#d40f20;}
+
+.timeout{
+    -webkit-filter: grayscale(100%);
+    filter: gray;
+	opacity:0.5
+}

@@ -1,0 +1,32 @@
+.box{width:90%;padding:0 5%;}
+.box .book{width:4.2rem;height:4.6rem;margin:auto;border-radius:0.5rem;display:block !important;
+border:1px solid #e5e5e5;margin-top:10%;}
+.box .cen{text-align:center;}
+.box .tit{padding:2% 0;}
+.box .t_txt{width:88%;margin:auto;color:#999;}
+.box .money{padding:2% 0;color:#fe8f00;}
+.box .pin_lu{width:92%;border:1px solid #e5e5e5;background:#fef5e7;border-radius:0.3rem;
+padding:4%;}
+.box .pin_lu > font{color:#fe8f00;}
+.coupon{margin:4% auto;background:#fe8f00;padding-bottom:2%;
+	border-radius:0.2rem;}
+.coupon .cou_con{background:#fff;padding:3%;position:relative;border:1px solid #e4e4e4;border-top:none;}
+.coupon .cou_con .bg_1{width:100%;height:0.3rem;background:url(../images/bor_bg.png) repeat-x;position:absolute;top:-0.2rem;left:0;background-size:.5rem;}
+.coupon .cou_con font{float:right;margin-top:8%;font-size:1.2rem;color:#fe8f00;}
+.coupon .cou_con .cou_titl{font-size:.9rem;color:#fe8f00;}
+.coupon .cou_con .cou_text{color:#fe8f00;}
+.coupon .cou_con > p{padding:1% 0;}
+.coupon .cou_con .cou_time{color:#a3a3a3;}
+.coupon_state{text-align:center;font-size:0.6rem;}
+.f_btn{width:100%;margin-top:10%;}
+.f_btn a > .btn{color:#fff;background:#fe8f00;text-align:center;padding:3% 0;border-radius:0.2rem;font-size:0.7rem;}
+.f_btn .togg{text-align:center;color:#fe8f00;padding:3% 0;font-size:0.5rem;background:url(../images/ico/bg_liner.png) no-repeat center;
+background-size:100%;}
+.luck_list{width:100%;display:none;}
+.item{border-bottom:1px solid #e4e4e4;padding:2% 0;}
+.item:last-child{border:0;}
+.item .n_img{float:left;width:3rem;height:3rem;border-radius:50%;margin-right:3%;}
+.item .n_txt{padding-top:3%;}
+.item .n_txt > p{padding:1% 0;color:#999;}
+.item .n_txt > p > font{color:#000;padding-right:2%;}
+.item .n_txt .n_moy{float:right;padding-top:1%;}

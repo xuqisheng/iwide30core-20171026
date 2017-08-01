@@ -1,0 +1,15 @@
+@charset "utf-8";
+/* CSS Document */
+.special{width:100%;margin:0.2rem 0;}
+.special .special_con{width:100%;position:relative;}
+.special .special_con .s_txt{position:absolute;top:2.3%;left:3.3%;color:#227dda;}
+.rankimg{width:100%;background:#fff;}
+.rankimg .r_title{color:#227dda;text-indent:3.3%;line-height:2rem;}
+.rankimg .r_con{width:96%;margin:auto;}
+.rankimg .r_con ul li{width:46%;float:left;padding:1.8%;margin-top:1%;}
+.rankimg .r_con .rankimg_li li:nth-child(odd){border-right:1px solid #d3d3d3;}
+.rankimg .r_con ul li a{display:block;width:100%;}
+.rankimg .r_con ul li a p{width:60%;}
+.rankimg .r_con ul li a .t_top{padding-top:7%;}
+.rankimg .r_con ul li a .g_na{font-size:0.5rem;color:#999;line-height:1.2rem;}
+.rankimg .r_con ul li a .goods{display:block;width:39%;float:right;}

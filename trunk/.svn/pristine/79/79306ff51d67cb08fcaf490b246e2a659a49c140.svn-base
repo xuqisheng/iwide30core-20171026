@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!-- 全局控制 -->
+<script src="scripts/viewport.js?v=26"></script>
+<script src="scripts/jquery.js"></script>
+<script src="scripts/ui_control.js"></script>
+<link href="styles/global.css" rel="stylesheet">
+<link href="styles/ui.css" rel="stylesheet">
+<link href="styles/ui_ico.css" rel="stylesheet">
+<link href="styles/ui_style.css" rel="stylesheet">
+<link href="styles/ui_pull.css" rel="stylesheet">
+<!-- end -->
+<link href="styles/submit_order.css" rel="stylesheet">
+<title>酒店评价</title>
+</head>
+<body>
+<header class="order_intro">
+	<div class="hotelname">广州天美酒店公寓</div>
+    <div class="datetime">09月15日-09月16日  共1晚</div>
+    <div class="room_type">房型:高级双人房</div>
+	<div class="sever">双床  25㎡  宽带 双早</div>
+</header>
+<form action="submit_success.html" onSubmit="return totest()">
+<div class="comment">
+<input type="hidden" name='point' id='point' value='5'>
+	<textarea placeholder="亲～住的舒服吗？服务满意吗？留下个脚印吧～" id="msg" required maxlength="100" rows="3" oninput="changerow(this)"></textarea>
+    <div class="addimg">
+    	<div class="ui_img_auto_cut"><img src="images/egimg/eg_banner02.png" /></div>
+    	<div class="ui_img_auto_cut"></div>
+    </div>
+</div>
+<div class="topoint">
+	<span class="big ui_color_gray float">酒店评分&nbsp;</span>
+    <ul>
+    	<li><em class="ui_star"></em><p class="">很差</p></li>
+    	<li><em class="ui_star"></em><p class="">不太好</p></li>
+    	<li><em class="ui_star"></em><p class="">一般</p></li>
+    	<li><em class="ui_star"></em><p class="">不错</p></li>
+    	<li><em class="ui_star"></em><p class="">很赞</p></li>
+    </ul>
+</div>
+<div style="padding-top:12%;">
+	<button type="submit" class="footbtn disable">提交评价</button>
+</div>
+</form>
+</body>
+<script>
+function totest(){
+	if ($('#msg').val()==''){
+		$('.footbtn').html('还未填写评论内容').addClass('disable');
+		return false;
+	}
+	if ($('#msg').get(0).value.length<=5){
+		$('.footbtn').html('评论内容不得少于5个字符').addClass('disable');
+		return false;
+	}
+	$('.footbtn').removeClass('disable');
+}
+$(function(){
+	$('#msg').blur(function(){
+		totest()
+	})
+	$('.topoint li').click(function(){
+		$('.ui_star').removeClass('ui_star1');
+		for ( var i=0; i<=$(this).index(); i++){
+			$('.ui_star').eq(i).addClass('ui_star1');
+		}
+		$('#point').val($(this).index());
+	})
+})
+</script>
+</html>

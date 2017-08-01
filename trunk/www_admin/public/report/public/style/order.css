@@ -1,0 +1,22 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,html{overflow:auto;-webkit-overflow-scrolling:touch;}
+.ac_title{padding:5% 0; text-align:center; font-size:1.9em;}
+.tic_count{position:absolute; top:2em; right:3%}
+.orderlist{padding:0 3%;}
+.orderlist .item{background:url(../img/bg03.png) #fff; border-radius:5px; overflow:hidden; margin-bottom:5%}
+.top_part{padding:4% 6%;}
+.top_part{background:url(../img/status.png) no-repeat; background-position:102% -6%; background-size:auto 50%;}
+.top_part img{ float:left; width:30%; margin-top:2%; margin-right:3%;}
+.top_part h1{margin-bottom:2%; font-size:0.7rem}
+.top_part div{line-height:1.4}
+
+.borderimg{background:url(../img/bg04.png) repeat-x; padding-top:4px; background-size:auto 6px; }
+.bottom_part{background:url(../img/bg03.png) #ffde03; padding:2% 6%; padding-right:2%;}
+
+.bottom_part .status,.bottom_part .btn{float:right; margin-top:1%;}
+.bottom_part .status{margin-top:0.5em}
+.ispay{font-weight:bold; font-size:0.7rem;}
+.ispay .price{background:url(../img/ico.png) no-repeat;font-size:0.8rem; vertical-align:middle; background-size:auto 80%; padding-left:1em;}
+.bottom_part .ac_time{color:#666666; font-size:0.5rem;}

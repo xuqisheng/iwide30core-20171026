@@ -1,0 +1,16 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+/* 梯形 
+.trapezoid{ display:inline-block;border-bottom:3rem solid #000;border-left:1rem solid transparent;border-right: 1rem solid transparent;height:0;width:85%; opacity:0.7; border-radius:0.3rem; }*/
+
+body,html,.page{ height:100%;}
+.page{ text-align:center; background:#177cc4 url(../images/bg01.jpg) bottom left no-repeat; background-size:100%;}
+
+.foot_btn{ bottom:0; position:absolute; width:100%;}
+.foot_btn .trapezoid{ background:url(../images/bg02.png) bottom center no-repeat; background-size:100%; color:#fff; padding-bottom:1.5%;}
+.foot_btn .trapezoid div,.foot_btn .trapezoid a{ display:inline-block; width:31%;font-size:0.6rem;  text-align:center; color:#fff;}
+.foot_btn .trapezoid div p:first-child,.foot_btn .trapezoid a p:first-child{ font-size:0;}
+.foot_btn .trapezoid img{ width:auto;}
+

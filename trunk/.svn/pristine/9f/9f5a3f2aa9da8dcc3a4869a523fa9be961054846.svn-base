@@ -1,0 +1,18 @@
+@charset "utf-8";
+/* CSS Document */
+
+.ui_red{ color:#de3734 !important}
+.ui_gray{ color:#999 !important;}
+
+
+.ui_ico{ height:0.8rem; width:1rem; display:inline-block;vertical-align:middle; background:no-repeat top center; background-size:auto 100%; vertical-align:middle}
+.ui_ico.ui_ico1{background-image:url(../images/ico04.png);}
+.ui_ico.ui_ico2{background-image:url(../images/ico05.png);}
+.ui_ico.ui_ico3{background-image:url(../images/ico06.png);}
+.ui_ico.ui_ico4{background-image:url(../images/ico07.png);}
+.ui_ico.ui_ico5{background-image:url(../images/ico08.png);}
+.ui_ico.ui_ico6{background-image:url(../images/ico09.png);}
+.ui_ico.ui_ico7{background-image:url(../images/ico11.png);}
+.ui_ico.ui_ico8{background-image:url(../images/ico14.jpg);}
+.ui_ico.ui_ico9{background-image:url(../images/ico15.png);}
+.ui_ico.ui_ico10{background-image:url(../images/ico16.png);}

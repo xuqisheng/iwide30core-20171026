@@ -1,0 +1,36 @@
+a,input{-webkit-tap-highlight-color:rgba(255,0,0,0);}
+.clearfix:after {visibility:hidden;display:block;font-size:0;content:" ";clear:both;height:0;}
+.box{width:100%;background:url(../../../images/225092790926960050.png) no-repeat;background-size:cover;min-height:5rem;padding:2%;border:1px solid #c1c1c1;position:relative;overflow:hidden;box-sizing:border-box;}
+.b_top{width:100%;}
+.logo_txt{line-height:1;margin-top:3%;font-size:0.7rem;}
+.blue{color:#47b2de}
+.l_h_1{line-height:1;}
+.price{margin-top:2%;}
+.price > font{font-size:2.3rem;padding-left:0.3rem;}
+.bgc_73e{background:#fb8e35;}
+.bgc_f64{background:#f64f57;}
+.color_f64{color:#f64f57;}
+.color_ff7{color:#ff7200}
+.b_rig{float:right;font-size:0.8rem;width:6rem;text-align:center;padding:5% 1.8%;color:#444;}
+.sign{position:absolute;font-size:0.5rem;padding:1% 8%;color:#fff;transform:rotate(40deg);-webkit-transform:rotate(40deg);right:-1.3rem;top:0.3rem;}
+.r_title{padding-right:2%;box-sizing:content-box}
+.arrow{width:100%;height:1rem;background:url(../../../images/arrow.png) no-repeat;background-size:100%;}
+.ra_inline{margin:3% auto 2%;height:0.3rem;background:url(../../../images/bg_ra.png) repeat-x;background-size:12px }
+.f_date{text-align:right;font-size:0.5rem;color:#797979;}
+
+*{margin:0px;padding:0px;}
+.c_868{color:#868686;}
+.ellipsis{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.m_r_4{margin-right:4%;}
+html,body{height:100%;width:100%;}
+.ticket{width:80%;margin:4% auto;border-radius:0.3rem;box-shadow:0px 0px 8px #e9ebea;background:#fff;border:1px solid #e9ebea}
+.t_head{width:2.8rem;height:0.6rem;background:#fa990e;margin:5% auto;border-radius:0.5rem;}
+.ticket h1{font-size:1.2rem;color:#fa990e;text-align:center;font-weight:normal;}
+.t_img{width:100%;height:auto;margin-top:5%;}
+.t_img img{display:black;width:100%;height:auto;}
+.con_list{width:96%;margin:auto;}
+.c_l_c{font-size:0.8rem;width:90%;margin:auto;border-bottom:1px solid #868686;padding:2% 0;}
+.btn_lst{text-align:center;margin:5% 0;}
+.btn_lst span{color:#fff;background:#fc9328;font-size:0.9rem;text-align:center;border-radius:0.2rem;display:inline-block;width:6rem;padding:3% 0;}
+.fixed{width:100%;height:100%;position:fixed;left:0px;top:0px;background:rgba(0,0,0,0.8) url(../../../images/62714544492951331.png) no-repeat center top;
+background-size:94%;display:none;}

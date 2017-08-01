@@ -1,0 +1,26 @@
+@charset "utf-8";
+/* CSS Document */
+
+html,body{background:#9fc04d !important;}
+.headimg{ height:20%; padding:3% 0; text-align:center; overflow:hidden;}
+.headimg img{ height:80%; width:auto;}
+
+body,html,.body_1{ height:100%;}
+.body_1{width:100%;background:url('../attachment/bg01.jpg') center center no-repeat;background-size:contain;
+	position:relative; display:block;}
+.body_1 .Top{width:92%;margin:auto;}
+.body_1 .Top .t_lef{float:left;width:40%;}
+.body_1 .Top .t_rig{float:right;width:50%;margin-top:2rem;}
+.body_1 .banner{width:60%;margin:auto;}
+.body_1 .banner .ban_img{width:80%;margin:auto;position:relative;}
+.body_1 .banner .ban_img .radiu{width:2.5rem;height:2.5rem;border-radius:50%;background:#93ba44;position:absolute;bottom:0.5rem;
+			right:-0.5rem;}
+.body_1 .banner .ban_img .radiu p{font-size:0.5rem;color:#fff;text-align:center;line-height:1rem;}
+.body_1 .banner .ban_img .radiu .p_t{margin-top:0.2rem;border-bottom:1px solid #fff;}
+.body_1 .banner .tex_lis{width:80%;margin:auto;}
+.body_1 .banner .tex_lis span{color:#81a33c;font-size:0.5rem;display:inline-block;width:30%;text-align:center;}
+.body_1 .banner .t_name{text-align:center;color:#81a33c;font-size:0.5rem;line-height:1rem;}
+.body_1 .t_content{width:94%;margin:auto;}
+.body_1 .t_content p{text-indent:1.3rem;color:#fff;}
+.body_1 .btns{width:100%;text-align:center;line-height:3rem;}
+.body_1 .btns a{font-size:0.7rem;color:#dee4b0;}

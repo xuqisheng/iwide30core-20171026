@@ -1,0 +1,47 @@
+@charset "utf-8";
+/* CSS Document */
+
+.ui_list,.orderlist,.ui_border{ border-bottom:1px solid #e4e4e4; border-top:1px solid #e4e4e4;}
+.ui_list .item,.content .item,.receive{ border-bottom:1px solid #e4e4e4;}
+
+.ui_price:before{ content:"¥" ;font-family:Arial;}
+
+.bg_orange{ background:#fe4e00; color:#fff;}
+.bg_white{ background:#fff;}
+.color,a.color{ color:#fe8f00; font-size:inherit}
+.gray{ color:#888; font-size:0.55rem;}
+.blue,a.blue{ color:#227dda; font-size:inherit}
+.black{ color:#000; font-weight:bold}
+.normal{ font-size:0.65rem}
+.small{font-size:0.55rem;}
+
+.img_auto_cut{position:relative; overflow:hidden; display:inline-block}
+.img_auto_cut img{ position:absolute}
+.img_auto_cut ._w_h{ width:100%; height:auto; left:0 !important;}
+.img_auto_cut ._h_w{ height:100%; width:auto; top:0 !important;}
+
+.ui_tab{overflow:hidden; border-bottom:2px solid #fe4e00;}
+.ui_tab li{ float:left; text-align:center; padding:4% 0; width:33%;}
+.ui_tab li.cur{ background:#fe4e00; color:#fff;}
+.ui_tab li:last-child{float:right}
+
+.ui_list{ padding-left:2%; margin-bottom:3%;}
+.ui_list .item{ display:block; padding-right:3%;}
+.ui_list .item:last-child{ border-bottom:0}
+
+.ui_btn_list,.ui_normal_list{padding-left:3%; background:#fff;}
+.ui_btn_list a,.ui_normal_list a{ color:#000;}
+.ui_btn_list .item,.ui_normal_list .item{padding:4%; padding-left:0;display:block; border-top:1px solid #e1e1e1; position:relative; color:#000; overflow:hidden}
+.ui_btn_list .item{ background: url(../images/ico/nextIco2.png) no-repeat; background-position: 96% center;background-size: auto 30%;}
+.ui_btn_list .item span,.ui_normal_list .item span{float:right; margin-right:4%; color:#999;}
+.ui_btn_list .item:first-child,.ui_normal_list .item:first-child{ border:0}
+.ui_normal_list .item span{font-size:0.6rem; margin-right:0}
+
+.rowsbtn{display:block; padding:4%; color:#000; background:url(../images/ico/nextIco2.png) no-repeat #fff; background-position:97% center; background-size:auto 0.7rem;}
+
+.footfixed{ position:fixed; bottom:0; width:100%; text-align:center}
+.footfixed > a{ display:block;}
+.footfixed > a,.footfixed > div{ padding:4% 0}
+
+.ui_none{top:0; left:0; z-index:9999; position:fixed; width:100%; height:100%; background:url(../images/success_1.png) #f8f8f8 no-repeat center 5em; background-size:auto 5em; text-align:center;}
+.ui_none>*{padding-top:11em; display:block;}

@@ -1,0 +1,410 @@
+<?php
+
+/**
+ * 蜂鸟配送开放平台接口调用工具类
+ * 详情：签名，接口调用
+ * 版本：1.0
+ * 日期：2017-6-13
+ * 说明：
+ * 以下代码只是为了方便对接商户测试而提供的样例代码，对接商户可以根据自己的需求，按照技术文档编写，代码仅供参考。
+ */
+class EleOpenapi
+{
+    private $open_url = 'https://exam-anubis.ele.me/anubis-webapi';//测试环境
+    private $work_url = 'http://open-anubis.beta.elenet.me/anubis-webapi';//生产环境
+    private $app_id = '';//app_id
+    private $secret_key = '';//secret_key
+
+    /**
+     * 初始化配置
+     * ELEOpenapi constructor.
+     * @param $_config
+     */
+    public function __construct($_config)
+    {
+        $this->app_id       = $_config['source_id'];
+        $this->secret_key   = $_config['app_secret'];
+        $this->api_url      = $_config['api_status'] == 2 ? $this->work_url : $this->open_url;//1-开发环境，2-生产环境
+    }
+
+    /**
+     * 获取当前环境HOST名称
+     * @param $status
+     * @return mixed
+     */
+    public function getCallbackUrl($status)
+    {
+        $arr = array(
+            1 => 'http://credit.iwide.cn/', //测试环境
+            2 => 'http://dc.jinfangka.cn/',
+            3 => 'http://true.iwide.cn/',
+            4 => 'http://ihotels.iwide.cn/',//开发环境
+
+        );
+        return !empty($arr[$status]) ? $arr[$status] : $arr[1];
+    }
+
+
+    /**
+     * 生成签名 => 获取 token
+     * @param $appId
+     * @param $salt
+     * @param $secretKey
+     * @return string
+     */
+    public static function generateSign($appId, $salt, $secretKey)
+    {
+        $seed = 'app_id=' . $appId . '&salt=' . $salt . '&secret_key=' . $secretKey;
+        return md5(urlencode($seed));
+    }
+
+    /**
+     * 生成签名 => 操作订单
+     * @param $appId
+     * @param $token
+     * @param $urlencodeData
+     * @param $salt
+     * @return string
+     */
+    public static function generateBusinessSign($appId, $token, $urlencodeData, $salt)
+    {
+        $seed = 'app_id=' . $appId . '&access_token=' . $token
+            . '&data=' . $urlencodeData . '&salt=' . $salt;
+        return md5($seed);
+    }
+
+    /**
+     * 获取 access_token
+     * @return mixed
+     */
+    public function requestToken()
+    {
+        $cache = $this->_load_cache();
+        $redis = $cache->redis->redis_instance();
+        $key_redis = 'ele_shipping_get_access_token';
+        $redis->select(10);
+        $access_token = $redis->get($key_redis);
+        if (empty($access_token))
+        {
+            $salt = mt_rand(1000, 9999);
+            // 获取签名
+            $sig = self::generateSign($this->app_id, $salt, $this->secret_key);
+            $url = $this->api_url . '/get_access_token';
+            $tokenStr = self::doGet($url, array('app_id' => $this->app_id, 'salt' => $salt, 'signature' => $sig));
+            $access_token = json_decode($tokenStr, true)['data']['access_token'];
+            $expire_time = json_decode($tokenStr, true)['data']['expire_time'];
+            $out_time = intval($expire_time/1000) - time();
+            $redis->set($key_redis,$access_token,$out_time - 10);//过期时间
+        }
+
+        // 获取token
+        return $access_token;
+    }
+
+    /**
+     * 生成订单
+     * @param $order 拼接的数据
+     * @param $token 缓存 TOKEN
+     * @return bool|mixed
+     */
+    public function sendOrder($order,$token)
+    {
+        /**
+         * 拼装 $order 数据
+        $dataArray = array(
+        'transport_info' => array(
+        'transport_name' => '饿了么Bod上海普陀1站',
+        'transport_address' => '上海市普陀区近铁城市广场5楼',
+        'transport_longitude' => 121.5156496362,
+        'transport_latitude' => 31.2331643501,
+        'position_source' => 1,
+        'transport_tel' => '13900000000',
+        'transport_remark' => '备注'
+        ),
+        'receiver_info' => array(
+        'receiver_name' => 'jiabuchong',
+        'receiver_primary_phone' => '13900000000',
+        'receiver_second_phone' => '13911111111',
+        'receiver_address' => '太阳',
+        'receiver_longitude' => 121.5156496362,
+        'position_source' => 3,
+        'receiver_latitude' => 31.2331643501
+        ),
+        'items_json' => array(
+        array(
+        'item_name' => '苹果',
+        'item_quantity'=> 5,
+        'item_price' => 9.50,
+        'item_actual_price' => 10.00,
+        'is_need_package' => 1,
+        'is_agent_purchase' => 1
+        ),
+        array(
+        'item_name' => '香蕉',
+        'item_quantity'=> 20,
+        'item_price' => 100.00,
+        'item_actual_price' => 300.59,
+        'is_need_package' => 1,
+        'is_agent_purchase' => 1
+        )
+        ),
+        'partner_remark' => '天下萨拉',
+        'partner_order_code' => '1234567890xx124',     // 第三方订单号, 需唯一
+        'notify_url' => 'http://vpcb-anubis-web-base-2.vm.elenet.me:5000',     //第三方回调 url地址
+        'order_type' => 2,
+        'order_total_amount' => 50.00,
+        'order_actual_amount' => 48.00,
+        'order_weight'=> 12.0,
+        'is_invoiced' => 1,
+        'invoice' => '饿了么',
+        'order_payment_status' => 1,
+        'order_payment_method' => 1,
+        'require_payment_pay' => 50.00,
+        'goods_count' => 4,
+        'is_agent_payment' => 1,
+        'require_receive_time' => strtotime('+1 day') * 1000  //注意这是毫秒数
+        );
+         **/
+
+        $salt = mt_rand(1000, 9999);
+        $dataJson = json_encode($order, JSON_UNESCAPED_UNICODE);
+
+        $urlencodeData = urlencode($dataJson);
+
+        if (empty($token))
+        {
+            $token = $this->requestToken();//重新获取token
+        }
+
+        $sig = self::generateBusinessSign($this->app_id, $token, $urlencodeData, $salt); //生成签名
+        $requestJson = json_encode(array(
+            'app_id'    => $this->app_id,
+            'salt'      => $salt,
+            'data'      => $urlencodeData,
+            'signature' => $sig
+        ));
+
+        $url = $this->api_url . '/v2/order';
+        return self::doPost($url, $requestJson);
+    }
+
+
+    /**
+     * 同步取消订单
+     * @param $order 订单信息
+     * @param $token 缓存token
+     * @return bool|mixed
+     */
+    public function cancelOrder($order, $token)
+    {
+        $url = $this->api_url . "/v2/order/cancel";
+
+        if (empty($token))
+        {
+            $token = $this->requestToken();//重新获取token
+        }
+
+        $data = array(
+            "partner_order_code"        => $order['order_sn'],//推单时 第三方订单号
+            "order_cancel_reason_code"  => 2,//2-商家取消
+            "order_cancel_description"  => '商家取消',
+            "order_cancel_code"         => '5',
+            "order_cancel_time"         => time() * 1000
+        );
+
+        $dataJson = json_encode($data);
+        $urlencodeData = urlencode($dataJson);
+        $salt = mt_rand(1000, 9999);
+
+        $sig = self::generateBusinessSign($this->app_id, $token, $urlencodeData, $salt); //生成签名
+
+        $requestJson = json_encode(array(
+            'app_id' => $this->app_id,
+            'salt' => $salt,
+            'data' => $urlencodeData,
+            'signature' => $sig
+        ));
+
+        return self::doPost($url, $requestJson);
+    }
+
+    /**
+     * 查询订单
+     * @param $order 订单信息
+     * @param $token 缓存 TOKEN
+     * @return bool|mixed
+     */
+    public function queryOrder($order,$token)
+    {
+        $url = $this->api_url . "/v2/order/query";
+
+        $data = array("partner_order_code" => $order['order_sn']);//推单时 第三方订单号
+        $dataJson = json_encode($data, JSON_UNESCAPED_UNICODE);
+
+        $salt = mt_rand(1000, 9999);
+        $urlencodeData = urlencode($dataJson);
+
+        if (empty($token))
+        {
+            $token = $this->requestToken();//重新获取token
+        }
+
+        $sig = self::generateBusinessSign($this->app_id, $token, $urlencodeData, $salt);   //生成签名
+
+        $requestJson = json_encode(array(
+            'app_id'    => $this->app_id,
+            'salt'      => $salt,
+            'data'      => $urlencodeData,
+            'signature' => $sig
+        ));
+
+        return self::doPost($url, $requestJson); //发送请求
+    }
+
+    /**
+     * 投诉订单
+     * @param $order 订单信息
+     * @param $token 缓存 TOKEN
+     * @return bool|mixed
+     */
+    public function complaintOrder($order,$token)
+    {
+        $url = $this->api_url . "/v2/order/complaint";
+
+        $partner_complaint_code = 150;//230:其他, 150:未保持餐品完整,
+        $order_complaint_time = time() * 1000;
+
+        $data = array("partner_order_code"  => $order['order_sn'],//推单时 第三方订单号
+            "order_complaint_code"          => $partner_complaint_code,
+            "order_complaint_desc"          => '未保持餐品完整',
+            "order_complaint_time"          => $order_complaint_time);
+        $dataJson = json_encode($data, JSON_UNESCAPED_UNICODE);
+
+        $salt = mt_rand(1000, 9999);
+        $urlencodeData = urlencode($dataJson);
+
+        if (empty($token))
+        {
+            $token = $this->requestToken();//重新获取token
+        }
+
+        $sig = self::generateBusinessSign($this->app_id, $token, $urlencodeData, $salt);   //生成签名
+
+        $requestJson = json_encode(array(
+            'app_id'    => $this->app_id,
+            'salt'      => $salt,
+            'data'      => $urlencodeData,
+            'signature' => $sig
+        ));
+
+        return self::doPost($url, $requestJson);   //发送请求
+    }
+
+    /**
+     * 发送GET请求
+     * @param string $url
+     * @param array $param
+     * @return bool|mixed
+     */
+    public static function doGet($url, $param = null)
+    {
+        if (empty($url) or (!empty($param) and !is_array($param)))
+        {
+            throw new InvalidArgumentException('Params is not of the expected type');
+        }
+
+        if (!empty($param))
+        {
+            $url = trim($url, '?') . '?' . http_build_query($param);
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); //  不进行ssl 认证
+        // curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        $result = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if (!empty($result) and $code == 200)
+        {
+            return $result;
+        }
+        return false;
+    }
+
+    /**
+     * POST请求
+     * @param $url
+     * @param $param
+     * @param string $method
+     * @return bool|mixed
+     */
+    public static function doPost($url, $param, $method = 'POST')
+    {
+        if (empty($url) or empty($param))
+        {
+            throw new InvalidArgumentException('Params is not of the expected type');
+        }
+
+        if (!empty($param) and is_array($param))
+        {
+            $param = urldecode(json_encode($param));
+        }
+        else
+        {
+            $param = strval($param);
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        // curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); //  不进行ssl 认证
+
+        if (strcmp($method, "POST") == 0)
+        {
+            // POST 操作
+            curl_setopt($ch, CURLOPT_POST, true);
+        }
+        else if (strcmp($method, "DELETE") == 0)
+        {
+            // DELETE操作
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+        }
+        else
+        {
+            throw new InvalidArgumentException('Please input correct http method, such as POST or DELETE');
+        }
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: Application/json'));
+        $result = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if (!empty($result) and $code == '200')
+        {
+            return $result;
+        }
+        return false;
+    }
+
+    /**
+     * 加载缓存
+     * @param string $name
+     * @return mixed
+     */
+    protected function _load_cache($name='Cache')
+    {
+        $CI = & get_instance();
+        if(!$name || $name=='cache')
+            $name='Cache';
+        $CI->load->driver('cache', array('adapter' => 'redis', 'backup' => 'file', 'key_prefix' => 'dis_ato_'), $name );
+        return $CI->$name;
+    }
+}

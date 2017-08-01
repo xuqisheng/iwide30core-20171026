@@ -1,0 +1,130 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Swagger Petstore",
+        "description": "This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters.",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "email": "a@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "host": "api.iwide.cn",
+    "basePath": "/iapi/soma/",
+    "schemes": [
+        "http"
+    ],
+    "paths": {
+        "index/test": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "tags",
+                        "in": "query",
+                        "description": "Tags to filter by",
+                        "required": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "$ref": "#/definitions/ApiResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid tag value"
+                    }
+                }
+            }
+        },
+        "index/test2": {
+            "get": {
+                "summary": "Returns pet inventories by status",
+                "description": "Returns a map of status codes to quantities",
+                "operationId": "getInventory",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "properties": {
+                                "a": {
+                                    "title": "id",
+                                    "type": "integer",
+                                    "format": "int32"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "index/test3": {
+            "get": {
+                "summary": "Returns pet inventories by status",
+                "description": "Returns a map of status codes to quantities",
+                "operationId": "getInventory",
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "order_id": {
+                                        "title": "order_id",
+                                        "type": "integer",
+                                        "format": "int32"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "ApiResponse": {
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "msg": {
+                    "type": "string"
+                },
+                "msg_type": {
+                    "type": "string"
+                },
+                "web_data": {
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "externalDocs": {
+        "description": "Find out more about Swagger",
+        "url": "http://swagger.io"
+    }
+}

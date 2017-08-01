@@ -1,0 +1,161 @@
+<?php
+/**
+ * @author Shacaisheng
+ * @since 2017/7/11
+ * @desc 彩虹跑活动
+ *
+ */
+class Rainbowrun_order_model extends MY_Model
+{
+	const TABLE_RO = 'activity_rainbowrun_order';
+ 	const PRIMARY_KEY = 'act_id';
+    private $write_db;
+    private $read_db;
+    public function __construct()
+    {
+        parent::__construct ();
+        $this->write_db = $this->_db('iwide_rw');
+        $this->read_db  = $this->_db('iwide_r1');
+    }
+
+	public function get_resource_name()
+	{
+		return '预约分组';
+	}
+
+	public static function model($className=__CLASS__)
+	{
+		return parent::model($className);
+	}
+
+
+	/**
+	 * @return string the associated database table name
+	 */
+	public function table_name()
+	{
+		return 'activity_rainbowrun_order';
+	}
+
+    /**
+     *
+     * @author Shacaisheng
+     * @param array $filter 搜索条件
+     * @return array $data
+     * @date 2017-3-3
+     */
+    public function get_count($filter = array())
+    {
+        $sql = "SELECT count(*) as num FROM {$this->db->dbprefix(Self::TABLE_RO)}";
+
+        $where = " inter_id = '{$filter['inter_id']}'";
+
+        $sql .= " WHERE {$where}";
+        $data = $this->read_db->query($sql)->row_array();
+        return $data['num'];
+    }
+
+	/**
+	 *
+	 * @author Shacaisheng
+	 * @param array $filter 搜索条件
+	 * @return array $data
+	 * @date 2017-3-3
+	 */
+	public function get_list($filter = array(),$order_by = array(),$cur_page = 1,$page_size = 15)
+	{
+		$sql = "SELECT * FROM {$this->db->dbprefix(Self::TABLE_RO)} AS adm";
+
+		$where = " inter_id = '{$filter['inter_id']}'";
+
+		$sql .= " WHERE {$where}";
+		$sql .= $this->set_order_by($order_by);
+		$sql .= $this->set_limit($cur_page,$page_size);
+		$data = $this->read_db->query($sql)->result_array();
+		return $data;
+	}
+
+
+    /**
+     * 获取餐厅信息
+     * @author Shacaisheng
+     * @param array $filter 订单号
+     * @param int $pay_status 状态
+     * @return array $data
+     * @date 2017-3-3
+     */
+	public function get_one($filter,$pay_status = 0)
+	{
+		$sql = 'select * from ' . $this->db->dbprefix (self::TABLE_RO) . ' WHERE pay_status = '.$pay_status;
+        if (!empty($filter['inter_id']))
+        {
+            $sql .=  ' AND inter_id = ?';
+            $bind[] = $filter['inter_id'];
+        }
+        if (!empty($filter['openid']))
+        {
+            $sql .=  ' AND openid = ?';
+            $bind[] = $filter['openid'];
+        }
+        if (!empty($filter['order_no']))
+        {
+            $sql .=  ' AND order_no = ?';
+            $bind[] = $filter['order_no'];
+        }
+		$data = $this->read_db->query($sql,$bind)->row_array();
+		return $data;
+	}
+
+
+
+	/**
+	 * 创建订单
+	 * @author Shacaisheng
+	 * @param array $data 保存数据
+	 * @return int $res
+	 */
+	public function insert_order($data)
+	{
+	 	$this->write_db->insert(self::TABLE_RO,$data);
+		return $this->write_db->insert_id();
+	}
+
+
+    /**
+     * 更改订单
+     * @param $where
+     * @param $data
+     * @return mixed
+     */
+    public function update_order($where,$data)
+    {
+        $this->write_db->where($where);
+        $this->write_db->update(self::TABLE_RO,$data);
+        return $this->write_db->affected_rows();
+    }
+
+
+    //设置分段
+	private function set_limit($page,$page_size)
+	{
+		return $page_size > 0 ? (' LIMIT ' . max(0, ($page-1)*$page_size) . ', ' . max(1, $page_size)) : '';
+	}
+
+    //设置排序
+	private function set_order_by($data = array())
+	{
+		$arr_order_by = array();
+        if (!empty($data))
+        {
+            foreach($data as $k=>$v)
+            {
+                //需要在字段前加表别名的，在这里写代码判断
+                $arr_order_by[] = $k . ' ' . $v;
+            }
+
+        }
+
+		return ' ORDER BY ' . (empty($arr_order_by) ? self::PRIMARY_KEY  : implode(' , ', $data) ).' DESC ';
+	}
+
+}

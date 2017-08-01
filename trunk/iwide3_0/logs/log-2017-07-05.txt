@@ -1,0 +1,26 @@
+ERROR - 2017-07-05 10:45:23 --> Unable to connect to the database
+ERROR - 2017-07-05 10:45:36 --> Unable to connect to the database
+ERROR - 2017-07-05 10:46:53 --> Unable to connect to the database
+ERROR - 2017-07-05 10:47:45 --> Unable to connect to the database
+ERROR - 2017-07-05 11:06:31 --> Unable to connect to the database
+ERROR - 2017-07-05 11:06:43 --> Unable to connect to the database
+ERROR - 2017-07-05 11:07:06 --> Unable to connect to the database
+ERROR - 2017-07-05 11:07:40 --> Unable to connect to the database
+ERROR - 2017-07-05 11:08:03 --> Unable to connect to the database
+ERROR - 2017-07-05 11:08:15 --> Unable to connect to the database
+ERROR - 2017-07-05 11:08:30 --> Unable to connect to the database
+ERROR - 2017-07-05 11:08:52 --> Unable to connect to the database
+ERROR - 2017-07-05 11:09:41 --> Unable to connect to the database
+ERROR - 2017-07-05 11:10:53 --> Unable to connect to the database
+ERROR - 2017-07-05 11:11:14 --> Unable to connect to the database
+ERROR - 2017-07-05 11:11:30 --> Unable to connect to the database
+ERROR - 2017-07-05 11:12:26 --> Unable to connect to the database
+ERROR - 2017-07-05 11:12:39 --> Unable to connect to the database
+ERROR - 2017-07-05 11:13:34 --> Unable to connect to the database
+ERROR - 2017-07-05 11:13:51 --> Unable to connect to the database
+ERROR - 2017-07-05 11:14:20 --> Unable to connect to the database
+ERROR - 2017-07-05 11:14:53 --> Unable to connect to the database
+ERROR - 2017-07-05 11:15:13 --> Unable to connect to the database
+ERROR - 2017-07-05 11:17:22 --> Unable to connect to the database
+ERROR - 2017-07-05 11:18:13 --> Unable to connect to the database
+ERROR - 2017-07-05 11:52:53 --> 404 Page Not Found: admin/Iapi/membervip

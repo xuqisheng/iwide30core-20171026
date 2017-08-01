@@ -1,0 +1,2 @@
+.pagination > a, .pagination >span{    position: relative; float: left; padding: 6px 12px; margin-left: -1px; line-height: 1.42857143; text-decoration: none; border: 1px solid #ddd; background: #ffffff; color: #666; margin-right: 5px; }
+.pagination .active{background: #cececf; border-color: #cececf;color: white;}

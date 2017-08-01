@@ -1,0 +1,483 @@
+<?php
+namespace App\services\soma\express;
+
+use App\services\Result;
+use App\services\soma\contract\ExpressContract;
+use App\libraries\Http;
+use \App\libraries\Support\Log;
+use App\services\soma\ExpressService;
+use GuzzleHttp\Middleware;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+
+
+/**
+ * Class ShunFeng
+ * @package App\services\express
+ * @author renshuai  <renshuai@mofly.cn>
+ *
+ */
+class ShunFeng extends Express implements ExpressContract
+{
+
+    /**
+     * @var string $appId 顺丰appid
+     */
+    private $appId;
+
+    /**
+     * @var string $appKey 顺丰appKey
+     */
+    private $appKey;
+
+    /**
+     * 初始配置的key
+     */
+    const CONFIG_KEY = 'shunfeng';
+
+    /**
+     * 刷新token调用地址
+     */
+    const REFRESH_ACCESS_TOKNE_URL = 'https://open-sbox.sf-express.com/public/v1.0/security/refresh_token/access_token/%s/refresh_token/%s/sf_appid/%s/sf_appkey/%s';
+
+    /**
+     * 刷新token类型
+     */
+    const REFRESH_TOKEN_TYPE = 302;
+
+    /**
+     * 顺丰测试环境快速下单的调用地址
+     */
+    const CREATE_ORDER_URL = "https://open-sbox.sf-express.com/rest/v1.0/order/";
+//    const CREATE_ORDER_URL = "https://open-sbox.sf-express.com/rest/v1.0/order/access_token/%s/sf_appid/%s/sf_appkey/%s";
+
+    /**
+     * 顺丰生产环境快速下单的调用地址
+     */
+    const CREATE_PRODUCTION_ORDER_URL = 'https://open-prod.sf-express.com/rest/v1.0/order/';
+
+    /**
+     * 获取运单类型
+     */
+    const GET_MAILNO_TYPE = 203;
+    /**
+     * 顺丰测试环境获取运单号
+     */
+    const GET_MAILNO_URL = 'https://open-sbox.sf-express.com/rest/v1.0/order/query/';
+//    const GET_MAILNO_URL = 'https://open-sbox.sf-express.com/rest/v1.0/order/query/access_token/%s/sf_appid/%s/sf_appkey/%s';
+
+    /**
+     * 顺丰正式环境获取运单号
+     */
+    const GET_PRODUCTION_MAILNO_URL = 'https://open-prod.sf-express.com/rest/v1.0/order/query/';
+
+    /**
+     * 快速下单类型
+     */
+    const CREATE_ORDER_TYPE = 200;
+
+    /**
+     * 成功调用接口的代码
+     */
+    const EX_CODE_OPENAPI_0200 = 'EX_CODE_OPENAPI_0200';
+
+    /**
+     * @var ShunFengToken
+     */
+    public $accessToken;
+
+    /**
+     * ShunFeng constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+
+        $this->getCI()->config->load('express', true, true);
+        $this->config = $this->getCI()->config->item('express');
+
+        Log::debug('Shun Feng configs', $this->config)[self::CONFIG_KEY];
+
+        $this->appId = $this->config[self::CONFIG_KEY]['appID'];
+        $this->appKey = $this->config[self::CONFIG_KEY]['appKey'];
+
+        $this->accessToken = new ShunFengToken($this->appId, $this->appKey);
+    }
+
+    /**
+     * Register Guzzle middlewares.
+     */
+    protected function registerHttpMiddlewares()
+    {
+        parent::registerHttpMiddlewares();
+
+        //retry
+        $this->http->addMiddleware($this->retryMiddleware());
+
+        //access_token
+        $this->http->addMiddleware($this->accessTokenMiddleware());
+    }
+
+    /**
+     * Attache access token to request query.
+     *
+     * @return \Closure
+     */
+    protected function accessTokenMiddleware()
+    {
+        return function (callable $handler) {
+            return function (RequestInterface $request, array $options) use ($handler) {
+                if (!$this->accessToken) {
+                    return $handler($request, $options);
+                }
+                $token = $this->accessToken->getToken();
+
+                $uri = $request->getUri();
+                $path = $uri->getPath();
+                $path .= 'access_token/' . $token . '/sf_appid/' . $this->appId .  '/sf_appkey/' . $this->appKey;
+                $uri = $uri->withPath($path);
+                $request = $request->withUri($uri);
+
+
+                Log::debug("attache access token : {$uri}");
+                Log::debug("attache path : {$path}");
+                return $handler($request, $options);
+            };
+        };
+    }
+
+    /**
+     * Return retry middleware.
+     *
+     * @return \Closure
+     */
+    protected function retryMiddleware()
+    {
+        return Middleware::retry(function (
+            $retries,
+            RequestInterface $request,
+            ResponseInterface $response = null
+        ) {
+            // Limit the number of retries to 2
+            if ($retries <= 2 && $response && $body = $response->getBody()) {
+                // Retry on server errors
+                $body = $response->getBody();
+                if (stripos($body, 'code') && (stripos($body, 'EX_CODE_OPENAPI_0103') || stripos($body, 'EX_CODE_OPENAPI_0105'))) {
+                    $token = $this->accessToken->getToken(true);
+
+                    $uri = $request->getUri();
+                    $path = $uri->getPath();
+                    $path .= 'access_token/' . $token . '/sf_appid/' . $this->appId .  '/sf_appkey/' . $this->appKey;
+                    $newUri = $uri->withPath($path);
+                    $request->withUri($newUri);
+
+                    Log::debug("Retry with Request Token: {$token}");
+                    Log::debug("Retry with Request Uri: {$newUri}");
+
+                    return true;
+                }
+            }
+
+            return false;
+        });
+    }
+
+    /**
+     * 刷新token
+     * @param string $token
+     * @author daikanwu <daikanwu@jperation.com>
+     * @return string
+     */
+    public function refreshAccessToken($token)
+    {
+        $result = new Result();
+        try {
+            $postData = array(
+                "head" => [
+                    "transMessageId" => $this->getTranMessageId(),
+                    "transType" => self::REFRESH_TOKEN_TYPE
+                ],
+                "body" => null
+            );
+            $client = new Http();
+            $url = sprintf(self::REFRESH_ACCESS_TOKNE_URL, $token, $token, $this->appId, $this->appKey);
+            $response = $client->json($url, $postData);
+            $body = $client->parseJSON($response);
+            if ($body && $body['head']['code'] == self::EX_CODE_OPENAPI_0200) {
+                $token = $body['body']['accessToken'];
+                $result->setStatus(Result::STATUS_OK);
+                $result->setData($token);
+            } else {
+                $result->setMessage($body['head']['message']);
+            }
+        } catch (\Exception $e) {
+            $result->setMessage($e->getMessage());
+        }
+
+        return $result;
+
+    }
+
+    /**
+     * 快速下单
+     * @param array $data 上传的数据
+     * @return mixed
+     * @author daikanwu
+     */
+    public function createShippingOrder_online(Array $data)
+    {
+        $result = new Result();
+        try{
+
+            $postData = $this->getPostData($data);
+            if (empty($postData)) {
+                $result->setMessage('收件人地址信息不存在');
+                return $result;
+            }
+
+            if (ENVIRONMENT == 'production' ) {
+                $body = $this->parseJSON('json', [self::CREATE_PRODUCTION_ORDER_URL, $postData]);
+            } else {
+                $body = $this->parseJSON('json', [self::CREATE_ORDER_URL, $postData]);
+            }
+
+            Log::debug('createShippingOrder body', $body->toArray());
+            if ($body && $body['head']['code'] == self::EX_CODE_OPENAPI_0200) {
+//                $orderId = $body['body']['orderId'];
+
+                //根据订单号获取运单号
+                if ($this->getMailNum($data['order_id'])->getStatus() == Result::STATUS_FAIL) {
+                    $result->setMessage($this->getMailNum($data['order_id'])->getMessage());
+                } else {
+                    $mailNo = $this->getMailNum($data['order_id'])->getData();
+                    Log::debug('mailno-' . $mailNo);
+                    $result->setStatus(Result::STATUS_OK);
+                    $result->setData($mailNo);
+                }
+            } else {
+                $result->setMessage($body['head']['message']);
+            }
+        } catch(\Exception $e){
+            $result->setMessage($e->getMessage());
+        }
+        Log::debug('result', (array)$result);
+        return $result;
+    }
+
+    /**
+     * 快速下单 顺丰测试环境有问题
+     * @param array $data 上传的数据
+     * @return mixed|Result
+     * @author daikanwu
+     *
+     *
+     * todo 最好把两个方法分开
+     */
+    public function createShippingOrder(Array $data)
+    {
+        $result = new Result();
+        try{
+            $postData = $this->getPostData($data);
+            if (empty($postData)) {
+                $result->setMessage('收件人地址信息不存在');
+                return $result;
+            }
+            //获取url
+            $requestUrl = $this->getRequestUrl(self::GET_MAILNO_TYPE);
+            $body = $this->parseJSON('json', [$requestUrl, $postData]);
+            Log::debug('createUrl--'.$requestUrl);
+            Log::debug('createShippingOrder body', $body->toArray());
+            if ($body && $body['head']['code'] == 'EX_CODE_OPENAPI_0500') {
+//                $orderId = $body['body']['orderId'];
+
+                //根据订单号获取运单号
+                if ($this->getMailNum($data['order_id'])->getStatus() == Result::STATUS_FAIL) {
+                    $result->setMessage($this->getMailNum($data['order_id'])->getMessage());
+                } else {
+                    $mailNo = $this->getMailNum($data['order_id'])->getData();
+                    Log::debug('mailno-' . $mailNo);
+                    $result->setStatus(Result::STATUS_OK);
+                    $result->setData($mailNo);
+                }
+            } else {
+                $result->setMessage($body['head']['message']);
+            }
+        } catch(\Exception $e){
+            $result->setMessage($e->getMessage());
+        }
+        Log::debug('result', (array)$result);
+        return $result;
+    }
+
+    /**
+     * 获取运单号
+     * @param $orderId
+     * @return Result
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    public function getMailNum($orderId)
+    {
+        $result = new Result();
+        try {
+            $postData = array(
+                "head" => [
+                    "transMessageId" => $this->getTranMessageId(),
+                    "transType" => self::GET_MAILNO_TYPE
+                ],
+                "body" => array('orderId' => $orderId)
+            );
+
+            $requestUrl = $this->getRequestUrl(self::GET_MAILNO_TYPE);
+            Log::debug('mailUrl--'.$requestUrl);
+            $body = $this->parseJson('json', [$requestUrl, $postData]);
+
+            Log::debug('getMailNum body', $body->toArray());
+            if ($body && $body['head']['code'] == self::EX_CODE_OPENAPI_0200) {
+                $mailNo = $body['body']['mailNo'];
+                $result->setStatus(Result::STATUS_OK);
+                $result->setData($mailNo);
+            } else {
+                $result->setMessage($body['head']['message']);
+            }
+        } catch(\Exception $e) {
+            $result->setMessage($e->getMessage());
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param $type
+     * @return string
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    protected function getRequestUrl($type)
+    {
+        if ($type = self::CREATE_ORDER_TYPE) {
+            if (ENVIRONMENT == 'production') {
+                return self::CREATE_PRODUCTION_ORDER_URL;
+            } else {
+                return self::CREATE_ORDER_URL;
+            }
+        } elseif ($type = self::GET_MAILNO_TYPE) {
+            if (ENVIRONMENT == 'production') {
+                return self::GET_PRODUCTION_MAILNO_URL;
+            } else {
+                return self::GET_MAILNO_URL;
+            }
+        } else {
+            return '';
+        }
+    }
+
+    /**
+     * 组装接口的请求数据，线上的
+     * @param $data
+     * @return array
+     * @author daikanwu
+     *
+     * todo 有没有更好的拼参数的的方法
+     */
+    protected function getPostData($data)
+    {
+        $this->load->model('soma/Sales_order_idx_model', 'orderModel');
+        $this->getCI()->load->model('soma/Cms_region_model','cmsRegionModel');
+        $cmsRegionModel = $this->getCI()->cmsRegionModel;
+        $regionDetail = $this->orderModel->get_extra_value($data['order_id']);
+        if (empty($regionDetail)) {
+            $region = ExpressService::getInstance()->getRegion($data['openid'], $data['inter_id'], $data['address_id']);
+            if (empty($region)) {
+                return array();
+            }
+            $tmp = $region;
+        } else {
+            $regionIds = array($regionDetail['mail']['province'], $regionDetail['mail']['city'], $regionDetail['mail']['region']);
+            $regionList = $cmsRegionModel->get(
+                ['region_id', 'region_id', 'region_id'],
+                [$regionIds],
+                'region_id, region_name',
+                ['limit' => count($regionIds), 'offset' => 0]
+            );
+            $region_map = array_column($regionList, 'region_name', 'region_id');
+            $tmp = array(
+                $region_map[$regionDetail['mail']['province']],
+                $region_map[$regionDetail['mail']['city']],
+                $region_map[$regionDetail['mail']['region']],
+            );
+
+        }
+
+        //获取月结卡号
+        if (ENVIRONMENT == 'production') {
+            $custId = $this->config[self::CONFIG_KEY]['productCustid'][$data['inter_id']];
+        } else {
+            $custId = $this->config[self::CONFIG_KEY]['devCustid'][$data['inter_id']];
+        }
+
+        return array(
+            "head" => [
+                "transMessageId" => $this->getTranMessageId(),
+                "transType" => self::CREATE_ORDER_TYPE
+            ],
+            "body" => array(
+                "addedServices" => [
+                    [
+                        "name" => "CUSTID",
+//                        "value" => "7550010173"// todo 月结卡号
+                        "value" => $custId
+                    ]
+                ],
+                "cargoInfo" => [
+                    "cargo" => $data['name'],
+                    "cargoAmount" => "",
+                    "cargoCount" => "",
+                    "cargoTotalWeight" => "",
+                    "cargoUnit" => "",
+                    "cargoWeight" => "",
+                    "parcelQuantity" => 1
+                ],
+                "consigneeInfo" => [
+                    "address" => $data['address'],
+                    "city" => $tmp[1],
+                    "company" => $data['contacts'], //todo
+                    "contact" => $data['contacts'],
+                    "mobile" => $data['phone'],
+                    "province" => $tmp[0],
+                    "county" => $tmp[2],
+                    "shipperCode" => "",
+                    "tel" => $data['phone']
+                ],
+                "custId" => $custId, // todo
+                "payArea" => "755A", // todo
+                "deliverInfo" => [
+                    "address" => "",
+                    "city" => "",
+                    "company" => "",
+                    "contact" => "",
+                    "country" => "",
+                    "mobile" => "",
+                    "province" => "",
+                    "shipperCode" => "",
+                    "tel" => ""
+                ],
+                "expressType" => 1,
+                "isDoCall" => 1,
+                "isGenBillNo" => 1,
+                "needReturnTrackingNo" => 1,
+                "orderId" => $data['order_id'],
+                "payMethod" => 3,
+                "remark" => isset($data['remark']) ? $data['remark'] : "易碎物品，小心轻放",
+                "sendStartTime" => date('Y-m-d H:i:s', time())
+            ));
+    }
+
+    /**
+     * 获取交易流水号
+     * @author daikanwu
+     */
+    protected function getTranMessageId()
+    {
+        return date('YmdHis', time()).mt_rand(1000, 9999);
+    }
+}

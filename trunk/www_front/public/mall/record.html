@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="apple-mobile-web-app-capable" content="yes" >
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no,email=no">
+<meta name="ML-Config" content="fullscreen=yes,preventMove=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>无标题文档</title>
+<script type="text/javascript" src="multi/script/jquery.js"></script>
+<script type="text/javascript" src="multi/script/viewport.js"></script>
+<link rel="stylesheet" type="text/css" href="multi/style/global.css">
+<link rel="stylesheet" type="text/css" href="multi/style/ui.css">
+<link rel="stylesheet" type="text/css" href="multi/style/mail.css">
+<link rel="stylesheet" type="text/css" href="multi/style/mailstatus.css">
+<link rel="stylesheet" type="text/css" href="multi/style/card.css">
+</head>
+<body>
+<audio style="display:none" id="start" src="start.wav"></audio>
+<audio style="display:none" id="end" src="end.wav"></audio>
+<audio style="display:none" id="audio"></audio>
+
+<header style="background:#fff; overflow:hidden; padding:0 4%;border-bottom:1px solid #e4e4e4;">
+    <div class="from_user">
+        <div><img src="multi/images/logo2.png" /></div>
+        <div>用户名</div>
+    </div>
+    <div class="layout change_txt"><em></em><div>换一句</div></div>
+    <div class="layout"><textarea placeholder="为了你，花光了近半年的积蓄，买张礼卡送给你。" maxlength="45" rows="3"></textarea></div>
+    <div class="layout img_select">
+    	<div class="pre_btn"><i></i></div>
+        <div class="img_list">
+        	<ul>
+            	<li>无</li>
+                <li><img src="multi/images/bg03.jpg" /></li>
+                <li><img src="multi/images/gift01.png" /></li>
+                <li><img src="multi/images/bg03.jpg" /></li>
+                <li><img src="multi/images/gift01.png" /></li>
+                <li><img src="multi/images/bg03.jpg" /></li>
+                <li><img src="multi/images/gift01.png" /></li>
+                <li><img src="multi/images/bg03.jpg" /></li>
+                <li><img src="multi/images/gift01.png" /></li>
+            </ul>
+        </div>
+        <div class="next_btn"><i></i></div>
+    </div>
+    <div class="layout addimg_box"><span>您可从右侧图册中选择一张图片送给您的好友</span></div>
+    <div class="layout record_again"><em></em><div>重新录</div></div>
+    <div class="layout record"><p>按住开始录音</p></div>
+</header>
+
+<div class="orderlist" style=" margin-top:3%;">
+    <div class="ordertitle bg_white">
+        <span class="float_r">2015-09-30  16:00:00</span>
+        <span>订单号：123456789</span>
+    </div>
+    <div class="content">
+        <div class="item">
+            <div class="itemimg img_auto_cut"><img src="multi/images/bg03.jpg" /></div>
+            <div class="hotelname txtclip">广州天美酒店公寓体育中心店</div>
+            <div class="desc gray txtclip">内含5680元碧桂园凤凰酒店消费金额</div>
+            <div style="margin-top:3%">
+                <span class="ui_price color">4780</span>
+                <span class="count gray">4</span>
+            </div>
+        </div>
+     </div>
+    <div class="orderfoot bg_white" style="text-align:left; padding-right:3%; text-align:justify">
+        <span>送给朋友后，此订单内所有商品将归该好友所有，您可在“<a class="blue" href="" >个人中心</a>－<a class="blue" href="" >我的订单</a>”中查看此订单状态。</span>
+    </div>
+</div>
+<div class="foot_btn couple">
+	<div>送给朋友</div>
+	<div>送给自己</div>
+</div>
+
+
+<!---  以下为弹层 --->
+<div class="pull pullshare" style="text-align:right; display:none" onClick="toclose();">
+    <div style="padding-right:3%">
+        <img src="multi/images/ico/arrow.png" style="width:10%"/>
+    </div>
+    <p style="padding-right:12%; font-size:0.8rem;">点击并发送给自己或朋友</p>
+</div>
+<div style="padding-top:15%"></div>
+</body>
+<script>
+// addimg_box 图片尺寸;
+var imgrate = 520/290;
+
+//初始化界面
+function setting(){
+	$('.addimg_box').height($('.addimg_box').width()/imgrate);
+	$('.addimg_box span').css('padding-top',$('.addimg_box').height()*0.7);
+	$('.record p').css('padding-top',$('.record').height()*0.7);
+	$('.img_list li').height($('.img_list li').width());
+	$('.img_list li').css('line-height',$('.img_list li').height()+'px');
+	$('.img_list ul').css('max-height',$('.img_list li').outerHeight()*3);
+}
+setting();
+window.onresize=setting;
+
+//录音
+var recording,recordtime;
+function un_bind(){
+	$('.record').unbind('touchstart');
+	$('.record').unbind('touchend');
+}
+function bind_record(){
+	un_bind();
+	$('.record').bind('touchstart',record);
+	$('.record').bind('touchend',record_end);
+}
+function bind_listen(){
+	un_bind();
+	$('.record').bind('touchstart',listen);
+}
+function play_start(){	$('#start').get(0).play();}  //播放开始音;
+function play_end(){	$('#start').get(0).stop();$('#end').get(0).play();}  //播放结束音;
+function record(event){    //开始录音
+	event.preventDefault();
+	$(this).css('background-color','#f8f8f8');
+	recordtime=0;
+	var tips='正在录音';
+	$('.record p').html(tips);
+	recording = window.setInterval(function(){    //录音监控
+		recordtime++;
+		if ( recordtime % 4 !=0 )tips+='.';
+		else tips ='正在录音';
+		if(recordtime>=60){
+			window.clearTimeout(recording);
+			alert('录音结束');
+		}
+		$('.record p').html(tips);
+	},1000);
+}
+function record_end(){       //录音结束
+	$(this).css('background-color','#ffffff');
+	window.clearTimeout(recording);
+	if (recordtime <=1){
+		alert('录音失败');
+		$('.record p').html('按住开始录音');
+	}
+	else{
+		$('.record').addClass('listen');
+		$('.listen p').html('试听录音');
+		un_bind();
+		$('.record').bind('touchstart',listen);
+		$('.record').bind('touchend',listen);
+	}
+}
+function listen(event){    //录音试听
+	event.preventDefault();
+	$('#audio').get(0).play();
+}
+$('.record_again').click(function(){     //重新录音
+	var clear=confirm('此操作将删除本订单已保存的录音, 是否继续?');
+	if ( clear){
+		$('.record').removeClass('listen');
+		$('.record p').html('按住开始录音');
+		bind_record();
+	}
+})
+bind_record();   //初始化绑定事件
+
+// 选择图片
+var scrollimg;
+$('.next_btn').click(function(){
+	window.clearInterval(scrollimg);
+	
+	var count =0;
+	var scrollTop = $('.img_list ul').scrollTop();
+	var selectimg_height =$('.img_list li').outerHeight();
+	
+	scrollimg = window.setInterval(function(){
+		$('.img_list ul').scrollTop(scrollTop+count);
+		count+= selectimg_height/5;
+		if (count > selectimg_height*3)window.clearInterval(scrollimg);
+	},10);
+})
+
+$('.pre_btn').click(function(){
+	window.clearInterval(scrollimg);
+	var count =0;
+	var scrollTop = $('.img_list ul').scrollTop();
+	var selectimg_height =$('.img_list li').outerHeight();
+	
+	scrollimg = window.setInterval(function(){
+		$('.img_list ul').scrollTop(scrollTop-count);
+		count += selectimg_height/5;
+		if (count <=0)window.clearInterval(scrollimg);
+	},10);
+})
+$('.img_list li').click(function(){
+	var tmp= '<span style="padding-top:'+($('.addimg_box').height()*0.7)+'px">您可从右侧图册中选择一张图片送给您的好友</span>';
+	if ( $(this).find('img').length >0)
+		tmp= $(this).html();
+	$('.addimg_box').html(tmp);
+})
+
+//分享
+$('.foot_btn').click(function(){
+	toshow($('.pull'));
+})
+</script>
+</html>

@@ -1,0 +1,410 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Theme_config_use extends MY_Admin_Soma {
+
+	//protected $label_module= NAV_MALL;		//统一在 constants.php 定义
+	protected $label_controller= '皮肤选择';		//在文件定义
+	protected $label_action= '';				//在方法中定义
+	
+	protected function main_model_name()
+	{
+		return 'soma/Theme_config_use_model';
+	}
+
+	public function grid()
+	{
+
+		$this->_redirect(Soma_const_url::inst()->get_url('*/*/theme'));
+
+
+		
+	    $this->label_action= '皮肤选择';
+	    $inter_id= $this->session->get_admin_inter_id();
+	    if($inter_id== FULL_ACCESS) $filter= array();
+	    else if($inter_id) $filter= array('inter_id'=>$inter_id );
+	    else $filter= array('inter_id'=>'deny' );
+	    //print_r($filter);die;
+
+	    $ent_ids= $this->session->get_admin_hotels();
+	    $hotel_ids= $ent_ids? explode(',', $ent_ids ): array();
+	    if( count($hotel_ids)>0 ) $filter+= array('hotel_id'=> $hotel_ids );
+
+	    $model_name= $this->main_model_name();
+	    $model= $this->_load_model($model_name);
+	     
+/* 兼容grid变为ajax加载加这一段 */
+	    if(is_ajax_request())
+	        //处理ajax请求，参数规格不一样
+	        $get_filter= $this->_ajax_params_parse( $this->input->post(), $model );
+	    else
+	        $get_filter= $this->input->get('filter');
+	     
+	    if( !$get_filter) $get_filter= $this->input->get('filter');
+	     
+	    if(is_array($get_filter)) $filter= $get_filter+ $filter;
+/* 兼容grid变为ajax加载加这一段 */
+	    	  
+	    $this->_grid($filter);
+	}
+
+	public function edit()
+	{
+
+	    $this->label_action= '皮肤编辑';
+	    $this->_init_breadcrumb($this->label_action);
+	
+	    $model_name= $this->main_model_name();
+	    $model= $this->_load_model($model_name);
+	
+	    //$id= intval($this->input->get('ids'));//theme_use_id
+		$result = $model->find(['inter_id' => $this->input->get('inter_id'), 'theme_id' => $this->input->get('tid')]);
+	    if($result){
+	        $model= $model->load($result['theme_use_id']);
+	    }
+
+	    if(!$model) $model= $this->_load_model();
+	    $fields_config= $model->get_field_config('form');
+	
+	    //越权查看数据跳转
+	    if( !$this->_can_edit($model) ){
+	        $this->session->put_error_msg('找不到该数据');
+	        $this->_redirect(Soma_const_url::inst()->get_url('*/*/grid'));
+	    }
+
+	
+	    $temp_id= $this->session->get_temp_inter_id();
+	    if($temp_id) $inter_id= $temp_id;
+	    else $inter_id= $this->session->get_admin_inter_id();
+
+	    $this->load->model('soma/Product_package_model');
+	    $product_model= $this->Product_package_model;
+	    $products= $product_model->get_package_list($inter_id, array('inter_id'=>$inter_id));
+	    
+	    //取出皮肤列表
+	    $tid= intval($this->input->get('tid'));//theme_id
+// var_dump( $_GET );
+	    $this->load->model('soma/Theme_config_model');
+	    $ThemeModel = $this->Theme_config_model->load( $tid );
+	    // $themes = $this->Theme_config_model->get_themes( $inter_id );
+	    // $data = array();
+	    // if( $themes ){
+	    // 	$i = 0;
+	    // 	foreach ($themes as $k => $v) {
+
+	    // 		if( $i%4 == 0 && $i != 0 ){
+	    // 			$i += 1;
+	    // 		}
+
+	    // 		$data[$i][] = $v;
+	    // 	}
+	    // }
+	    
+	    $view_params= array(
+	        'model'=> $model,
+	        'products'=> $products,
+	        'fields_config'=> $fields_config,
+	        'check_data'=> FALSE,
+	        // 'themes'=> $data,
+	        'ThemeModel'=> $ThemeModel,
+	        'theme_id' => $tid,
+	        // 'len'=> $len,
+	    );
+	
+	    $html= $this->_render_content($this->_load_view_file('edit'), $view_params, TRUE);
+	    //echo $html;die;
+	    echo $html;
+	}
+
+	public function edit_post()
+	{
+	    $this->label_action= '皮肤编辑';
+	    $this->_init_breadcrumb($this->label_action);
+    	
+	    $model_name= $this->main_model_name();
+	    $model= $this->_load_model($model_name);
+	    $pk= $model->table_primary_key();
+	
+	    $this->load->library('form_validation');
+	    $post= $this->input->post();
+// var_dump( $post );exit;
+	    $temp_id= $this->session->get_temp_inter_id();
+	    if($temp_id) $inter_id= $temp_id;
+	    else $inter_id= $this->session->get_admin_inter_id();
+		if( $inter_id==FULL_ACCESS || empty($post['inter_id']) ) 
+		    // $post['inter_id'] = $inter_id;
+     
+	    $labels= $model->attribute_labels();
+	    $base_rules= array(
+	        'theme_title'=> array(
+	            'field' => 'theme_title',
+	            'label' => $labels['theme_title'],
+	            'rules' => 'trim|required',
+	        ),
+	    );
+        
+        if( $post ){
+	    	$post['inter_id'] = $inter_id;
+
+	    	//检测并上传文件。
+	    	$post= $this->_do_upload($post, 'index_bg');
+	    	$post= $this->_do_upload($post, 'cat_bg');
+	    	$post= $this->_do_upload($post, 'buy_btn');
+	    	$post= $this->_do_upload($post, 'to_friend_btn');
+	    	$post= $this->_do_upload($post, 'to_group_btn');
+	    	$post= $this->_do_upload($post, 'more_btn');
+
+	    	// 赠送主题的设置
+	    	$post= $this->_do_upload($post, 'receive_bg');
+	    	$post= $this->_do_upload($post, 'receive_preview_bg');
+	    	// $post= $this->_do_upload($post, 'receive_mail_btn');
+	    	// $post= $this->_do_upload($post, 'receive_to_friend_btn');
+	    	// $post= $this->_do_upload($post, 'receive_usage_btn');
+	    	// $post= $this->_do_upload($post, 'receive_buy_btn');
+
+	    	$themeConfig = array();
+		    if( empty($post[$pk]) ){
+		        //add data.
+	            $result= $model->m_sets( $post )->m_save( $post );
+		        $themeConfig = $model->load($result)->m_data();
+		    } else {
+	        	// unset( $post['inter_id'] );
+	        	// var_dump( $model->load($post[$pk])->m_data() );exit;
+	            $result= $model->load($post[$pk])->m_sets( $post )->m_save( $post );
+	            $themeConfig = $model->load($post[$pk])->m_data();
+		    }
+
+		    //把公众号配置的特殊信息放入配置
+		    $this->load->model('wx/publics_model');
+		    $public_info= $this->publics_model->get_public_by_id($post['inter_id']);
+		    if( !empty($public_info['statis_code']) ){
+		        $themeConfig['statis_code']= $public_info['statis_code'];
+		        //print_r($themeConfig);die;
+		    }
+
+		    //更新redis
+		    $this->load->model('soma/Theme_config_model');
+	    	$this->Theme_config_model->update_redis_theme($inter_id,$themeConfig);
+// var_dump( $model->load($post[$pk])->m_data() );exit;
+
+		    $message= ($result)?
+            $this->session->put_success_msg('已保存数据！'):
+            $this->session->put_notice_msg('此次数据修改失败！');
+	        $this->_log($model);
+	        // $this->_redirect(Soma_const_url::inst()->get_url('*/*/*'));
+	        if( isset( $post['is_hide_theme'] ) && $post['is_hide_theme'] ){
+				$this->_redirect(Soma_const_url::inst()->get_url('*/*/receive'));
+			}else{
+	        	$this->_redirect(Soma_const_url::inst()->get_url('*/*/*'));
+			}
+		}
+
+        $this->_redirect(Soma_const_url::inst()->get_url('*/*/theme'));
+
+	}
+
+	public function theme()
+	{
+	    $this->label_action= '皮肤选择';
+	    $this->_init_breadcrumb($this->label_action);
+	
+	    $model_name= $this->main_model_name();
+	    $model= $this->_load_model($model_name);
+	    $pk= $model->table_primary_key();
+	
+	    $id= intval($this->input->get('ids'));
+	    if($id){
+	        $model= $model->load($id);
+	    }
+	    
+	    $temp_id= $this->session->get_temp_inter_id();
+	    if($temp_id) $inter_id= $temp_id;
+	    else $inter_id= $this->session->get_admin_inter_id();
+	     
+	    $disabled = FALSE;
+	    if( $inter_id == FULL_ACCESS ){
+	    	$disabled = TRUE;
+	    }
+
+	    $post= $this->input->post();
+		
+		$themeId = isset( $post['theme_id'] ) ? $post['theme_id'] : NULL;
+	    if( $post && !$disabled ){
+	    	$post['inter_id'] = $inter_id;
+	    	
+	    	$post['is_show_navigation'] = $post['is_show_navigation'] + 0;
+// var_dump( $post );die;
+
+			//取出皮肤列表
+		    $this->load->model('soma/Theme_config_model');
+		    $ThemeModel = $this->Theme_config_model->load( $themeId );
+		    $data = array();
+		    if( $ThemeModel ){
+		    	$post['inter_id'] = $inter_id;
+		    	$post['theme_name'] = $ThemeModel->m_get('theme_name');
+		    	$post['theme_path'] = $ThemeModel->m_get('theme_path');
+		    }else{
+				$this->session->put_notice_msg('此次数据修改失败！');
+				$this->_redirect(Soma_const_url::inst()->get_url('*/*/*'));
+		    }
+
+		    $themeConfig = array();
+			if(isset($post['csrf_token'])) {
+				unset($post['csrf_token']);
+			}
+		    if( empty($post[$pk]) ){
+		        //add data.
+	            $result= $model->m_sets( $post )->m_save( $post );
+		        $themeConfig = $model->load($result)->m_data();
+		    } else {
+		    	$old_data = $model->filter(
+		    		array('inter_id' => $post['inter_id'], 'theme_id' => $post['theme_id']));
+		    	if($old_data['total'] > 0) {
+		    		// 本次是更新主题记录
+	        		// unset( $post['inter_id'] );
+	            	$result= $model->load($post[$pk])->m_sets( $post )->m_save( $post );
+		            $themeConfig = $model->load($post[$pk])->m_data();
+		        } else {
+		        	// 替换数据
+		        	$result = $model->m_replace($post);
+		        	$themeConfig = $model->load($post[$pk])->m_data();
+		        }
+		    }
+
+		    //更新redis
+		    $this->load->model('soma/Theme_config_model');
+	    	$ThemeModel->update_redis_theme($inter_id,$themeConfig);
+
+		    $message= ($result)?
+            $this->session->put_success_msg('已保存数据！'):
+            $this->session->put_notice_msg('此次数据修改失败！');
+	        // $this->_log($model);
+	        $this->_redirect(Soma_const_url::inst()->get_url('*/*/*'));
+		}
+	
+	
+	    //越权查看数据跳转
+	    if( !$this->_can_edit($model) ){
+	        $this->session->put_error_msg('找不到该数据');
+	        $this->_redirect(Soma_const_url::inst()->get_url('*/*/grid'));
+	    }
+	    
+	    //已选择的皮肤
+	    $use_theme = $model->get_use_theme($inter_id);
+	    $is_show_navigation = Soma_base::STATUS_FALSE;
+	    $is_show_lang_btn = Soma_base::STATUS_FALSE;
+	    $theme_id = 0;
+		if(isset( $use_theme[$pk] )){
+	        $model= $model->load($use_theme[$pk]);
+	        $is_show_navigation = isset( $use_theme['is_show_navigation'] ) ? $use_theme['is_show_navigation'] : '';
+	        $is_show_lang_btn = isset( $use_theme['is_show_lang_btn'] ) ? $use_theme['is_show_lang_btn'] : '';
+	        $theme_id = $use_theme['theme_id'];
+	    }
+	    if(!$model) $model= $this->_load_model();
+	    $fields_config= $model->get_field_config('form');
+
+	    //取出皮肤列表
+	    $this->load->model('soma/Theme_config_model');
+	    $themes = $this->Theme_config_model->get_themes( $inter_id );
+
+	    $data = array();
+	    if( $themes ){
+	    	$i = 0;
+	    	foreach ($themes as $k => $v) {
+	    		if( $i%4 == 0 && $i != 0 ){
+	    			$i += 1;
+	    		}
+	    		if( $v['theme_name'] == $use_theme['theme_name'] ){
+	    			$themeId = $v['theme_id'];
+	    		}
+	    		$data[$i][] = $v;
+	    	}
+	    }
+
+	    $url = Soma_const_url::inst()->get_url('*/*/edit',array('inter_id'=>$inter_id,'ids'=>$use_theme[$pk],'tid'=>$themeId));
+	    $view_params= array(
+	        'disabled'=> $disabled,
+	        'use_theme'=> $use_theme,
+	        'is_show_navigation'=> $is_show_navigation,
+	        'is_show_lang_btn'=> $is_show_lang_btn,
+	        'model'=> $model,
+	        // 'products'=> $products,
+	        'fields_config'=> $fields_config,
+	        'check_data'=> FALSE,
+	        'themes'=> $data,
+	        'theme_id'=> $theme_id,
+	        'url'=> $url,
+			'inter_id' => $inter_id,
+	        // 'len'=> $len,
+	    );
+	
+	    $html= $this->_render_content($this->_load_view_file('theme'), $view_params, TRUE);
+	    //echo $html;die;
+	    echo $html;
+	}
+
+	//赠送主题管理
+	public function receive()
+	{
+		$this->label_action= '赠送主题设置';
+	    $this->_init_breadcrumb($this->label_action);
+	
+	    $model_name= $this->main_model_name();
+	    $model= $this->_load_model($model_name);
+	    $pk = $model->table_primary_key();
+	
+	    $id= intval($this->input->get('ids'));//theme_use_id
+	    if($id){
+	        $model= $model->load($id);
+	    }
+	
+	    if(!$model) $model= $this->_load_model();
+	    $fields_config= $model->get_field_config('form');
+	
+	    //越权查看数据跳转
+	    if( !$this->_can_edit($model) ){
+	        $this->session->put_error_msg('找不到该数据');
+	        $this->_redirect(Soma_const_url::inst()->get_url('*/*/grid'));
+	    }
+
+	
+	    $temp_id= $this->session->get_temp_inter_id();
+	    if($temp_id) $inter_id= $temp_id;
+	    else $inter_id= $this->session->get_admin_inter_id();
+
+		//已选择的皮肤
+	    $use_theme = $model->get_use_theme($inter_id);
+		if(isset( $use_theme[$pk] )){
+	        $model= $model->load($use_theme[$pk]);
+	    }else{
+	    	$this->session->put_notice_msg('请先选择皮肤');
+	        $this->_redirect(Soma_const_url::inst()->get_url('*/*/theme'));
+	    }
+
+	    $this->load->model('soma/Product_package_model');
+	    $product_model= $this->Product_package_model;
+	    $products= $product_model->get_package_list($inter_id, array('inter_id'=>$inter_id));
+	    
+	    //取出皮肤列表
+	    $tid= isset( $use_theme['theme_id'] ) ? $use_theme['theme_id'] : '';
+	    $this->load->model('soma/Theme_config_model');
+	    $ThemeModel = $this->Theme_config_model->load( $tid );
+
+	    $view_params= array(
+	        'model'=> $model,
+	        'products'=> $products,
+	        'fields_config'=> $fields_config,
+	        'check_data'=> FALSE,
+	        // 'themes'=> $data,
+	        'ThemeModel'=> $ThemeModel,
+	        'theme_id' => $tid,
+	        'is_hide_theme' => TRUE,
+	        // 'len'=> $len,
+	    );
+	
+	    $html= $this->_render_content($this->_load_view_file('edit'), $view_params, TRUE);
+	    //echo $html;die;
+	    echo $html;
+	}
+	
+}

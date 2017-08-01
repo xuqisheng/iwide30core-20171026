@@ -1,0 +1,26 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+body,html{background:#f8f8f8}
+.cards_list .item .ui_img_auto_cut {height:auto}
+.cards_list .item .ui_img_auto_cut img{ position:static}
+.ui_foot_btn{ margin:0; width:100%; border-radius:0}
+
+.votelist{ text-align:center;    padding: 3% 0; }
+.votelist li{margin-bottom:3%}
+.ui_vote{ display:inline-block; overflow:hidden;border-radius:0 0 0.6em 0.6em; width:90%; border-left:1px solid; border-right:1px solid; border-color:#e4e4e4; vertical-align:middle; color:#555;}
+.votelist li{margin-bottom:3%}
+.ui_vote .bordertop_img{background:url(../images/bg03.png) repeat-x;padding-top:0.2rem; background-size:auto 0.2rem;}
+.ui_vote .borderbtom_img{ background:#fe8f00; padding-top:2.5%;}
+.ui_vote .vote_con{background:#fff; padding:5% 4%; text-align:left}
+.ui_vote .status{float:right; margin-top:0.4rem; color:#FA4545}
+.ui_vote .moneys{color:#fe8f00;font-size:1.4rem;float:right;}
+.ui_none{top:0; left:0; z-index:9999; width:100%; height:100%; background:url(../images/success_1.png) #f8f8f8 no-repeat center 5em; background-size:auto 5em; text-align:center;}
+.ui_none>div{padding-top:11em}
+.votename{color:#fe8f00}
+.val_date{ color:#000}
+.ui_color{color:#fe8f00}
+.addto,.isadd{ float:right;border:1px solid #fe8f00;  padding:1% 3%; color:#fe8f00; border-radius:0.2rem;}
+.isadd{ border:none;}
+
