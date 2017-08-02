@@ -42,12 +42,20 @@ class Center extends MY_Front_Member_Iapi
         MYLOG::w(@json_encode(array('args' => $this->args, 'client_ip' => $this->client_ip)), 'iapi/front/membervip/debug-log', 'center-call');
     }
 
+    //会员卡用户中心
+    public function index(){
+        $this->extra['links']['shop'] = EA_const_url::inst()->get_url('soma/order/my_order_list',array('inter_id'=>$this->inter_id));
+        $this->extra['links']['hotel'] = EA_const_url::inst()->get_url('hotel/hotel/myorder',array('inter_id'=>$this->inter_id));
+        $member_center_result = CenterService::getInstance()->index($this->inter_id,$this->openid,$this->_template_filed_names);
+        $this->out_put_msg($member_center_result['status'],$member_center_result['msg'],$member_center_result['data'],'membervip/center/index',$this->extra);
+    }
+
 
     //会员卡用户中心
     public function member_center(){
         $this->extra['links']['shop'] = EA_const_url::inst()->get_url('soma/order/my_order_list',array('inter_id'=>$this->inter_id));
         $this->extra['links']['hotel'] = EA_const_url::inst()->get_url('hotel/hotel/myorder',array('inter_id'=>$this->inter_id));
-        $member_center_result = CenterService::getInstance()->member_center($this->inter_id,$this->openid,$this->_template_filed_names);
+        $member_center_result = CenterService::getInstance()->member_center($this->inter_id,$this->openid,$this->_template_filed_names,true);
         $this->out_put_msg($member_center_result['status'],$member_center_result['msg'],$member_center_result['data'],'membervip/center/member_center',$this->extra);
     }
 

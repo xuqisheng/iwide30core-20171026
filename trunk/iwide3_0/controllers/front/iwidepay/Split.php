@@ -259,7 +259,7 @@ class Split extends MY_Controller {
                                 //当前是最后一个门店分成或全部门店分成都在此计算
                                 if(($order['bill_num']-$hotel_count)==1){
                                     $last_amt = $order['trans_amt'];
-                                }elseif($order['bill_num']==count($soma_bank_infos)){
+                                }elseif(($order['bill_num']-$hotel_count)==count($soma_bank_infos)){
                                     $last_amt = $order['trans_amt']-(count($soma_bank_infos)-1)*$trans_amt_p;
                                 }
                             }
@@ -395,7 +395,7 @@ class Split extends MY_Controller {
                                     //当前是最后一个门店分成或全部门店分成都在此计算
                                     if(($order['bill_num']-$hotel_count)==1){
                                         $last_amt = $order['trans_amt']-$all_amt;
-                                    }elseif($order['bill_num']==count($soma_bank_infos)){
+                                    }elseif(($order['bill_num']-$hotel_count)==count($soma_bank_infos)){
                                         $last_amt = ($order['trans_amt']-$all_amt)-(count($soma_bank_infos)-1)*$trans_amt_p;
                                     }
                                 }

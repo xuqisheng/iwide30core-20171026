@@ -15,7 +15,7 @@ class Autorun extends MY_Controller {
 	}
     private function check_arrow(){//访问限制
         //var_dump($_SERVER['REMOTE_ADDR']);die;
-        $arrow_ip = array('118.178.228.168','118.178.133.17','114.55.234.45');//只允许服务器自动访问，不能手动
+        $arrow_ip = array('118.178.228.168','118.178.133.170','114.55.234.45');//只允许服务器自动访问，不能手动
         if(!in_array($_SERVER['REMOTE_ADDR'],$arrow_ip)/*&&$_SERVER['SERVER_ADDR']!=$_SERVER['REMOTE_ADDR']*/){
             exit('非法访问！');
         }
@@ -103,6 +103,8 @@ class Autorun extends MY_Controller {
             MYLOG::w('err:'.__FUNCTION__ . ' lock fail!', 'iwidepay_transfer/sum_info');
             die('FAILURE!');
         }
+        set_time_limit ( 0 );
+        @ini_set('memory_limit','512M');
         MYLOG::w('-开始处理汇总脚本', 'iwidepay/transfer_auto');
         $this->load->model ( 'iwidepay/iwidepay_transfer_model' );
         $data = array();

@@ -660,11 +660,13 @@ class Zhongruan_hotel_model extends CI_Model {
                 $remark .= ',总价：' . $order ['price'] . '元';
                 $remark .= ',支付方式：' . '其他';
             }
-            if(0&&!empty($order['first_detail']['club_id'])){
+            if(!empty($order['first_detail']['club_id'])){
                 $this->load->model ( 'club/Clubs_model' );
-                $club_info = $this->Clubs_model->get_club_by_id($order['first_detail']['club_id'],$inter_id);
+                $club_info = $this->Clubs_model->get_club_by_id($order['first_detail']['club_id']);
                 if(!empty($club_info)){
                     $remark .= ',社群客名称：' .$club_info['club_name'];
+                    isset ( $pms_set ['pms_auth'] ['club_org_cd'] ) and $ri_add->org_cd = $pms_set ['pms_auth'] ['club_org_cd'];
+                    isset ( $pms_set ['pms_auth'] ['club_acct_typ'] ) and $ri_add->acct_typ = $pms_set ['pms_auth'] ['club_acct_typ'];
                 }
                 if(!empty($club_info['remark'])){
                     $remark .= ',社群客协议代码：' .$club_info['remark'];

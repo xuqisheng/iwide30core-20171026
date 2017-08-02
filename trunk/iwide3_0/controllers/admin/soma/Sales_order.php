@@ -523,17 +523,14 @@ EOF;
 		/* @var Sales_order_model $model */
 		$model = $this->_load_model($model_name);
 		if(empty($model)){
-			echo $this->_return_json_error('参数错误，请稍后重试');
-			exit();
+			return $this->_ajaxReturn('参数错误，请稍后重试');
 		}
 		$res = $model->save_remark($inter_id, $id, $remark);
 		if(!$res['res']){
-			echo $this->_return_json_success('编辑失败');
-			exit();
+			return $this->_ajaxReturn($res['msg']);
 		}
 
-		echo $this->_return_json_success('编辑成功');
-		exit();
+		return $this->_ajaxReturn('编辑成功', array(), 1);
 	}
 	
 	public function edit_post()

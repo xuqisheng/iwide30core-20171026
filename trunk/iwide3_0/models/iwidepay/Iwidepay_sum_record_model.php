@@ -43,8 +43,14 @@ class Iwidepay_sum_record_model extends MY_Model{
         $sql .= " LEFT JOIN ".self::TAB_IWIDEPAY_BANK." as mi ON sr.m_id = mi.id";
         $sql .= " LEFT JOIN iwide_hotels as H ON H.inter_id = mi.inter_id AND H.hotel_id = mi.hotel_id";
         $sql .= " LEFT JOIN iwide_publics as P ON P.inter_id = mi.inter_id";
-        $where = "sr.status > 0";
-
+        if (empty($filter['status']))
+        {
+            $where = "sr.status >= 0";
+        }
+        else
+        {
+            $where = "sr.status = {$filter['status']}";
+        }
         if(!empty($filter['inter_id']) && $filter['inter_id'] !='ALL_PRIVILEGES')
         {
             $where .= " and  mi.inter_id = '{$filter['inter_id']}'";
@@ -65,6 +71,7 @@ class Iwidepay_sum_record_model extends MY_Model{
         }
 
         $sql .= " WHERE {$where}";
+
         $data = $this->db_read()->query($sql)->row_array();
         return $data ? $data['num'] : 0;
     }
@@ -75,12 +82,21 @@ class Iwidepay_sum_record_model extends MY_Model{
      */
     public function get_sum_record($select = 'mi.*',$filter,$cur_page,$page_size)
     {
-        $sql = "SELECT {$select},H.name as hotel_name,P.name,mi.type
+        $sql = "SELECT {$select},H.name as hotel_name,P.name,mi.type,mi.inter_id,mi.hotel_id
                 FROM ".self::TAB_IWIDEPAY_SUM." AS sr";
         $sql .= " LEFT JOIN ".self::TAB_IWIDEPAY_BANK." as mi ON sr.m_id = mi.id";
         $sql .= " LEFT JOIN iwide_hotels as H ON H.inter_id = mi.inter_id AND H.hotel_id = mi.hotel_id";
         $sql .= " LEFT JOIN iwide_publics as P ON P.inter_id = mi.inter_id";
-        $where = "sr.status > 0";
+
+        if (empty($filter['status']))
+        {
+            $where = "sr.status >= 0";
+        }
+        else
+        {
+            $where = "sr.status = {$filter['status']}";
+        }
+
         if(!empty($filter['inter_id']) && $filter['inter_id'] !='ALL_PRIVILEGES')
         {
             $where .= " and  mi.inter_id = '{$filter['inter_id']}'";

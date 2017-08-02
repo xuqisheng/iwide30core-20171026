@@ -572,7 +572,7 @@ class IwidepayApi extends MY_Controller
         $list = array();
         if ($total > 0)
         {
-            $status = array(0=>'--',1=>'成功',2=>'失败',3=>'异常');
+            $status = array(0=>'待转账',1=>'成功',2=>'失败',3=>'异常');
             $list = $this->iwidepay_sum_record_model->get_sum_record($select,$filter,$cur_page,$per_page);
             if ($list)
             {
@@ -841,6 +841,7 @@ class IwidepayApi extends MY_Controller
     {
         $param = request();
         $inter_id = !empty($param['inter_id']) ? addslashes($param['inter_id']) : '';
+        $type = !empty($param['type']) ? intval($param['type']) : 0;
         if (empty($inter_id))
         {
             ajax_return(self::SUCCESS,'无数据',array());
@@ -1484,7 +1485,7 @@ class IwidepayApi extends MY_Controller
 
         $this->load->model('iwidepay/iwidepay_refund_model' );
         $total = $this->iwidepay_refund_model->count_refund($filter);
-
+        $list = array();
         if ($total > 0)
         {
             $select = 'R.inter_id,R.hotel_id,R.module,R.hotel_id,R.amount,R.orig_order_no,R.refund_amt,R.add_time,R.charge,R.type,R.refund_status';

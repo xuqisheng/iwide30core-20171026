@@ -148,7 +148,7 @@ class Check extends MY_Controller {
 					return false;
 				}
 				$dist_amts = $dist_amt;
-			}{
+			}else{
 				return true;
 			}
 		}

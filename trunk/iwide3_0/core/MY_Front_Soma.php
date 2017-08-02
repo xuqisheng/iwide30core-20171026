@@ -55,6 +55,7 @@ class MY_Front_Soma extends MY_Front
         'a498545803',
         'a484533415',
         'a498095405',
+        'a499177502',
     ];
 
     /**

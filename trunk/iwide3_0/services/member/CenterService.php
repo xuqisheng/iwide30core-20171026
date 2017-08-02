@@ -192,9 +192,10 @@ class CenterService extends MemberBaseService
      * @param string $inter_id 微信酒店集团ID
      * @param string $openid 微信用户ID
      * @param array $filed_names 字典
+     * @param boolean $is_restful 皮肤类型「false: view ，true: api」
      * @return array
      */
-    public function member_center($inter_id = '',$openid = '', $filed_names = array()){
+    public function member_center($inter_id = '',$openid = '', $filed_names = array(),$is_restful = false){
         $this->getBase(); //加载基本类、设置基础信息
 
         $this->getCI()->load->model('membervip/common/Public_model','common_model');
@@ -311,15 +312,10 @@ class CenterService extends MemberBaseService
         $this->getCI()->load->model ( 'club/Clubs_model' );
         $show_club= $this->getCI()->Clubs_model->show_club_reg ($inter_id, $openid, $center_data['data']['member_lvl_id']);
         if(!empty($web_data['menu'])){
-            $modelnames = array('全员营销','分销注册','分销中心','我的凤凰礼卡','快速订房','会员权益','套票订单','客房订单','社群客','我的订单','商城订单','酒店订单','扫码核销');
-
             $g_key = 0;
             foreach($web_data['menu'] as $group_key => &$group_menu){
                 $g_key = $group_key;
                 foreach($group_menu as $menu_key => &$menu_link){
-                    /*if(in_array($menu_link['modelname'],$modelnames)){
-                        $menu_link['is_login'] = 2;
-                    }*/
                     switch($menu_link['modelname']){
                         case '我的电子会员卡':
                             if(isset($web_data['centerinfo']['is_login']) && $web_data['centerinfo']['is_login']=='f')
@@ -400,6 +396,8 @@ class CenterService extends MemberBaseService
                     'listorder'=>0
                 );
             }
+
+            $web_data['menu'] = self::parseMenuKeyMaping($web_data['menu'],$is_restful);
         }
 
         $web_data['inter_id'] = $inter_id;
@@ -475,5 +473,30 @@ class CenterService extends MemberBaseService
         $this->res_data['msg'] = 'ok';
         $this->res_data['data'] = $data;
         return $this->res_data;
+    }
+
+    static private function parseMenuKeyMaping($menus = array(),$flag = false){
+        if(!$flag OR empty($menus)) return $menus;
+        foreach ($menus as $key => &$menu){
+            if(!empty($menu)){
+                $menu_icon_conf = self::menu_icon_conf();
+                foreach ($menu as  &$men){
+                    $men['icon'] = !empty($menu_icon_conf[$men['icon']])?$menu_icon_conf[$men['icon']]:$men['icon'];
+                }
+            }
+        }
+        return $menus;
+    }
+
+    static private function menu_icon_conf(){
+        return array(
+            'ui_icon3' => '&#xe629;', //商城订单
+            'ui_icon14' => '&#xe62c;', //充值
+            'ui_icon8' => '&#xe621;', //社群客
+            'ui_icon15' => '&#xe620;', //购买会员卡
+            'ui_icon4' => '&#xe628;', //在线预订
+            'ui_icon16' => '&#xe632;', //扫码核销
+            'ui_icon10' => '&#xe61b;', //签到
+        );
     }
 }

@@ -738,7 +738,7 @@ class Prices extends MY_Admin_Iapi {
 				$data ['add_service_set'] = json_encode ( $data ['add_service_set'] );
 		}
 		
-		$data ['must_date'] = 3;//默认不限制
+		isset($post['must_date']) and $data ['must_date'] = intval($post['must_date']);//默认3不限制
 		
 		$entity_id = $this->session->get_admin_hotels ();
 		if(!empty($entity_id)){

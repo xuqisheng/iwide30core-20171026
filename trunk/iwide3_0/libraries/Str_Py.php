@@ -20,6 +20,7 @@ class Str_Py{
 		'郓'=>'Y',
         '兖'=>'Y',
 		'鄄'=>'J',
+        '茌'=>'C',
 	];
 
 	public static function getPy($str){

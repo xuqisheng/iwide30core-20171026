@@ -36,7 +36,7 @@ class Center extends MY_Front_Member
     public function member_center(){
         $data['data'] = array();
         if(!$this->is_restful()){
-            $data = CenterService::getInstance()->member_center($this->inter_id,$this->openid,$this->_template_filed_names);
+            $data = CenterService::getInstance()->member_center($this->inter_id,$this->openid,$this->_template_filed_names,false);
         }
         if ($this->inter_id=='a476756979'){
             $this->_template='yinzuo';//银座测试用强制转换皮肤

@@ -22,7 +22,7 @@ class Refund extends MY_Controller {
 	}
 
     private function check_arrow(){//访问限制
-    	return true;
+    	//return true;
         //var_dump($_SERVER['REMOTE_ADDR']);die;
         if(ENVIRONMENT === 'production'){
 	        $arrow_ip = array(//内网IP

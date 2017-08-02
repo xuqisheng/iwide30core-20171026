@@ -484,7 +484,7 @@ class Xiruaniw_hotel_model extends MY_Model{
 		$remark = '';
 		
 		if($order['customer_remark']!=''){
-			$remark.='客人备注：【'.$order['customer_remark'].'】';
+			$remark.='客人备注：'.$order['customer_remark'].'!';
 		}
 		
 		$room_count = $order['roomnums'];
@@ -522,6 +522,11 @@ class Xiruaniw_hotel_model extends MY_Model{
 		}
 		if($order['point_favour'] > 0){
 			$remark .= '积分扣减：' . $order['point_favour'] . '元。';
+		}
+		
+		if(mb_strlen($remark,'utf-8')>=250){
+			$remark=mb_substr($remark, 0,230);
+			$remark.='【注：备注过长，截取过长部分】';
 		}
 		
 		$daily_price = explode(',', $order ['first_detail'] ['allprice']);

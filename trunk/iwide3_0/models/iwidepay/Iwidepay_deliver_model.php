@@ -32,7 +32,7 @@ class Iwidepay_Deliver_Model extends MY_Model{
 
     //获取当天汇总待发放的数据
     public function get_deliver_data(){
-        $date = date('Ymd');
+        $date = date('Ymd',strtotime('-1 days'));
         $sql = "SELECT id,m_id,amount,bank_card_no,bank_user_name,handle_date,bank_city,bank_code,is_company,clearBankNo,accBankNo FROM " . self::TAB_IWIDEPAY_SUM . " WHERE handle_date = '{$date}' and status = 0 ";
         $res = $this->db_read()->query($sql)->result_array();
         return $res;
@@ -40,14 +40,27 @@ class Iwidepay_Deliver_Model extends MY_Model{
 
     //转账 查询单条
     public function single_send($id){
-        $date = date('Ymd');
-        $this->db->where(array('id'=>$id,'status'=>0,'handle_date'=>$date));
+        //$date = date('Ymd');
+        $ok = $this->redis_lock('setnx','_MP_TRANSFER_SEND_LOCK');
+        if(!$ok){
+            MYLOG::w('后台转账发起锁住redis，id：' . $id,'iwidepay/send');
+        }   
+        MYLOG::w('后台转账发起，id：' . $id,'iwidepay/send');
+        $this->db->where(array('id'=>$id,'status'=>0));
         $res = $this->db->get('iwidepay_sum_record')->row_array();
+        if(empty($res)){
+            $this->redis_lock('delete','_MP_TRANSFER_SEND_LOCK');
+            return false;
+        }
+        $this->redis_lock('delete','_MP_TRANSFER_SEND_LOCK');
         return $this->handle_transfer($res);
     }
 
     //处理转账 对公对私
     public function handle_transfer($data){
+        if($this->redis_lock('get')){
+            return false;
+        }
         $res = $this->transfer_pay($data);
         if($res['errmsg'] == 'ok'){//成功的 更新transfer表状态
             $up_param['send_status'] = 1;//转账成功
@@ -57,7 +70,8 @@ class Iwidepay_Deliver_Model extends MY_Model{
             $update_st = $this->db->update('iwidepay_transfer',$up_param);
             if(!$update_st){
                 MYLOG::w('转账后续update失败' . json_encode($data),'iwidepay/send');
-                die;
+                $this->redis_lock('set');
+                return false;
             }
         }elseif($res['errmsg'] == 'duplicate'){//重复插入 报错
 
@@ -69,7 +83,8 @@ class Iwidepay_Deliver_Model extends MY_Model{
             $update_st = $this->db->update('iwidepay_transfer',$up_param);
             if(!$update_st){
                 MYLOG::w('转账后续update失败' . json_encode($data),'iwidepay/send');
-                die;
+                $this->redis_lock('set');
+                return false;
             }
         }else{//失败的 记录日志
             MYLOG::w('转账失败' . json_encode($data),'iwidepay/send');
@@ -79,7 +94,8 @@ class Iwidepay_Deliver_Model extends MY_Model{
             $update_st = $this->db->update('iwidepay_transfer',$up_param);
             if(!$update_st){
                 MYLOG::w('转账后续update失败' . json_encode($data),'iwidepay/send');
-                die;
+                $this->redis_lock('set');
+                return false;
             }
         }
         return true;
@@ -200,5 +216,32 @@ class Iwidepay_Deliver_Model extends MY_Model{
            // $return['partner_trade_no'] = $partner_trade_no;
             return $return;
         }
+    }
+
+    /**
+     * [redis_lock redis上/解锁]
+     * @param [type] [操作类型，set/delete]
+     * @param [key] [键]
+     * @param [value] [type为set时，value是值]
+     * @return [boolean] [操作结果]
+     */
+    protected function redis_lock($type='set' ,$key='_TRANSFER_SENDING_LOCK' ,$value='lock'){
+        $this->load->library ( 'Cache/Redis_proxy', array (
+                'not_init' => FALSE,
+                'module' => 'common',
+                'refresh' => FALSE,
+                'environment' => ENVIRONMENT
+        ), 'redis_proxy' );
+        $ok = false;
+        if($type == 'setnx'){
+            $ok = $this->redis_proxy->setNX ( $key, $value );
+        }elseif($type == 'delete' ){
+            $ok = $this->redis_proxy->del ( $key );
+        }elseif($type == 'set'){
+            $ok = $this->redis_proxy->set ( $key ,$value);
+        }elseif($type == 'get'){
+            $ok = $this->redis_proxy->get ( $key );
+        }
+        return $ok;
     }
 }

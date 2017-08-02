@@ -4250,6 +4250,10 @@ class Sales_order_model extends MY_Model_Soma {
         $order_id = (int)$order_id;
         $remark = addslashes($remark);
 
+        if(mb_strlen($remark, 'utf-8') > 256){
+            return array('res' => false, 'msg' => '备注最多只能256个字符数');
+        }
+
         $res = $this->_shard_db($inter_id)
             ->set(array('remark' => $remark))
             ->where(array('order_id' => $order_id))
