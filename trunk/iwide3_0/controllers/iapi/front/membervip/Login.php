@@ -85,8 +85,8 @@ class Login extends MY_Front_Member_Iapi
         
         $login_result = $this->parse_curl_msg($login_result);
         if($login_result['code']==1000){
-            $ext['links']['next'] = site_url('membervip/center')."?id=$this->inter_id";
-            $this->out_put_msg(1,$login_result['msg'],$login_result['data'],'membervip/login/outlogin');
+            $ext['links']['login'] = site_url('membervip/center')."?id=$this->inter_id";
+            $this->out_put_msg(1,$login_result['msg'],$login_result['data'],'membervip/login/outlogin',$ext);
         }else{
             $this->out_put_msg(3,$login_result['msg'],$login_result['data'],'membervip/login/outlogin');
         }

@@ -23,7 +23,8 @@ class Depositcard extends MY_Front_Member_Iapi
         if(isset($data['err']) && $data['err']>0){
             $this->out_put_msg(3,$data['msg'],'','membervip/depositcard/index');
         }
-        $ext['links']['buycard'] = site_url('membervip/depositcard/buycard')."?id=$this->inter_id";
+        $ext['links']['buycard'] = site_url('iapi/membervip/depositcard/buycard')."?id=$this->inter_id";
+        $ext['links']['info'] = site_url('membervip/depositcard/info')."?id=$this->inter_id";
         $this->out_put_msg(1,'',$data,'membervip/depositcard/index',$ext);
 
     }
@@ -38,7 +39,7 @@ class Depositcard extends MY_Front_Member_Iapi
         if(isset($data['err']) && $data['err']>0){
             $this->out_put_msg(3,$data['msg'],'','membervip/depositcard/info');
         }
-        $ext['links']['buycard'] = site_url('membervip/depositcard/buycard')."?id=$this->inter_id";
+        $ext['links']['buycard'] = site_url('iapi/membervip/depositcard/buycard')."?id=$this->inter_id";
         $this->out_put_msg(1,'',$data,'membervip/depositcard/info',$ext);
     }
 

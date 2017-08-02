@@ -250,24 +250,18 @@ class Split extends MY_Controller {
                             $split_record = $this->Iwidepay_split_model->get_split_record($order['inter_id'],$order['order_no'],'soma');
                             $last_amt = 0;
                             if(!empty($split_record)){
-                                $no_hotel_amt = 0;
                                 $hotel_count = 0;
-                                $all_amt = 0;
                                 foreach ($split_record as $ks => $vs) {
-                                    if($vs['type']!='hotel'){
-                                        $no_hotel_amt += $vs['amount'];
-                                    }else{
+                                    if($vs['type']=='hotel'){
                                         $hotel_count++;
                                     }
-                                    $all_amt += $vs['amount'];
                                 }
                                 //当前是最后一个门店分成或全部门店分成都在此计算
                                 if(($order['bill_num']-$hotel_count)==1){
-                                    $last_amt = $order['trans_amt']-$all_amt;
+                                    $last_amt = $order['trans_amt'];
                                 }elseif($order['bill_num']==count($soma_bank_infos)){
-                                    $last_amt = ($order['trans_amt']-$all_amt)-(count($soma_bank_infos)-1)*$trans_amt_p;
+                                    $last_amt = $order['trans_amt']-(count($soma_bank_infos)-1)*$trans_amt_p;
                                 }
-                                echo $last_amt.' '.$order['trans_amt'].' '.$all_amt;
                             }
                         }
                     }
@@ -392,16 +386,11 @@ class Split extends MY_Controller {
                                 $split_record = $this->Iwidepay_split_model->get_split_record($order['inter_id'],$order['order_no'],'soma');
                                 $last_amt = 0;
                                 if(!empty($split_record)){
-                                    $no_hotel_amt = 0;
                                     $hotel_count = 0;
-                                    $all_amt = 0;
                                     foreach ($split_record as $ks => $vs) {
-                                        if($vs['type']!='hotel'){
-                                            $no_hotel_amt += $vs['amount'];
-                                        }else{
+                                        if($vs['type']=='hotel'){
                                             $hotel_count++;
                                         }
-                                        $all_amt += $vs['amount'];
                                     }
                                     //当前是最后一个门店分成或全部门店分成都在此计算
                                     if(($order['bill_num']-$hotel_count)==1){
@@ -409,7 +398,6 @@ class Split extends MY_Controller {
                                     }elseif($order['bill_num']==count($soma_bank_infos)){
                                         $last_amt = ($order['trans_amt']-$all_amt)-(count($soma_bank_infos)-1)*$trans_amt_p;
                                     }
-                                    echo $last_amt.' '.$order['trans_amt'].' '.$all_amt;
                                 }
                             }
                         }

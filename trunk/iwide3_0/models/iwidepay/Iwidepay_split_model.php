@@ -116,8 +116,8 @@ class Iwidepay_split_model extends MY_Model{
     function get_remain_amt($order){
     	$this->db->where(array(
     		'inter_id' => $order['inter_id'],
-    		'hotel_id' => $order['hotel_id'],
     		'order_no' => $order['order_no'],
+            'module' => $order['module'],
     		));
     	$res = $this->db->get(self::TAB_IIP_S)->result_array();
     	$sum = 0;
