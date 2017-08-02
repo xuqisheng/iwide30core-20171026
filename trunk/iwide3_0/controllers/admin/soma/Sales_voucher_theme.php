@@ -48,6 +48,16 @@ class Sales_voucher_theme extends MY_Admin_Soma {
 	            	'label' => '首页文字内容',
 		            'rules' => 'trim|max_length[20]',
 				),
+				'redeem_content' => array(
+					'field' => 'recommended_links',
+					'label' => '兑换说明',
+					'rules' => 'trim|min_length[1]|max_length[140]',
+				),
+				'recommended_links' => array(
+					'field' => 'recommended_links',
+					'label' => '更多推荐',
+					'rules' => 'trim|valid_url|max_length[256]',
+				),
 			);
 
 			$this->load->library('form_validation');

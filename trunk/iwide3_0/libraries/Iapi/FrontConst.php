@@ -95,6 +95,68 @@ class FrontConst extends BaseConst
                 'type' => 'keys',
             ),
         ),
+        'membervip' => array(
+            'public' => array(
+                'type' => 'arr',
+                'keys' => array(
+                    'app_id',
+                    'inter_id',
+                    'name',
+                    'wechat_name',
+                    'create_time',
+                    'email',
+                    'logo',
+                    'domain'
+                ),
+            ),
+        ),
+        'membervip_center' => array(
+            'info' => array(
+                'type' => 'arr',
+                'keys' => array(
+                    'nickname',
+                    'sex',
+                    'headimgurl',
+                    'subscribe_time',
+                    'fans_key'
+                )
+            ),
+            'centerinfo' => array(
+                'type' => 'arr',
+                'keys' => array(
+                    'member_id',
+                    'mem_card_no',
+                    'member_info_id',
+                    'member_mode',
+                    'name',
+                    'sex',
+                    'birth',
+                    'telephone',
+                    'cellphone',
+                    'qq',
+                    'email',
+                    'id_card_no',
+                    'is_active',
+                    'is_login',
+                    'member_lvl_id',
+                    'lvl_pms_code',
+                    'membership_number',
+                    'nickname',
+                    'balance',
+                    'balance_accumulate',
+                    'credit',
+                    'member_type',
+                    'employee_id',
+                    'company_name',
+                    'type_code',
+                    'value',
+                    'lvl_name',
+                    'card_count',
+                    'lvl_icon',
+                    'wx_lvl_bg_url'
+                )
+            )
+        )
     );
     static $dehydrate_samples = array(
         'hotel/hotel/search'               => array(
@@ -263,6 +325,179 @@ class FrontConst extends BaseConst
             ),
             'mul_arr' => array(
                 'orders' => array(),
+            ),
+        ),
+        'membervip_center/member_center' => array(
+            'common'  => array(
+                'info',
+                'centerinfo'
+            ),
+            'keys' => array(
+                'assets_bottons',
+                'inter_id',
+                'filed_name',
+                'isDistribution',
+                'is_club',
+                'menu'
+            )
+        ),
+        'membervip_center/center/info' => array(
+            'common'  => array(
+                'info',
+                'centerinfo'
+            ),
+            'keys' => array(
+                'modify_config',
+                'inter_id',
+            )
+        ),
+        'membervip_center/qrcode' => array(
+            'common'  => array(
+                'centerinfo'
+            )
+        ),
+        'membervip/card/index' => array(
+            'common'  => array(
+                'public',
+            ),
+            'keys'=>array(
+                'all',
+                'usableCardLists',
+                'unusedCardLists',
+                'expiredCardLists',
+                'next_id',
+                'inter_id'
+            ),
+        ),
+        'membervip/card/cardinfo' => array(
+            'common'  => array(
+                'public',
+            ),
+            'keys'=>array(
+                'user',
+                'inter_id',
+                'openid',
+                'card_info',
+                'my_card',
+                'auth_useoff',
+                'wx_config',
+                'base_api_list',
+                'js_api_list',
+                'js_menu_show',
+                'js_menu_hide',
+                'js_share_config',
+                'auth_gift',
+            ),
+        ),
+        'membervip/card/pcardinfo' => array(
+            'common'  => array(
+                'public',
+            ),
+            'keys'=>array(
+                'user',
+                'inter_id',
+                'openid',
+                'card_info',
+                'my_card',
+                'auth_useoff',
+                'signpackage',
+                'auth_gift',
+                'next_id'
+            ),
+        ),
+        'membervip/card/getcard' => array(
+            'common'  => array(
+                'public',
+            ),
+            'keys'=>array(
+                'card_info',
+                'err_msg',
+                'gain_count',
+                'card_url',
+                'signpackage',
+                'card_rule_id',
+                'inter_id',
+                'filed_name',
+            ),
+        ),
+        'membervip/card/receive' => array(
+            'common'  => array(
+                'public',
+            ),
+            'keys'=>array(
+                'ec_code',
+                'gift_mem_info',
+                'user',
+                'inter_id',
+                'openid',
+                'card_info',
+            ),
+        ),
+        'membervip/card/codeuseoff' => array(
+            'common'  => array(
+                'public',
+            ),
+            'keys'=>array(
+                'title',
+                'type',
+                'message',
+                'callback',
+                'js_api_list',
+                'openid',
+                't',
+                'signpackage'
+            ),
+        ),
+        'membervip/depositcard/edituser'               => array(
+            'keys'    => array(
+                'info',
+                'card_id',
+                'card_info',
+                'signpackage',
+                'pay_type',
+            ),
+            'arr' => array(
+                'public'      => array(
+                    'keys' => array(
+                        'name',
+                        'logo',
+                    ),
+                ),
+            ),
+        ),
+        'membervip/balance/pay'               => array(
+            'keys'    => array(
+                'user_info',
+                'orderid',
+                'order',
+                'links',
+                'signpackage',
+                'filed_name',
+            ),
+            'arr' => array(
+                'public'      => array(
+                    'keys' => array(
+                        'name',
+                        'logo',
+                    ),
+                ),
+            ),
+        ),
+        'membervip/reg/index'               => array(
+            'keys'    => array(
+                'login_config',
+                'inter_id',
+                'sales_id',
+                'succ_url',
+                'redir',
+            ),
+            'arr' => array(
+                'public'      => array(
+                    'keys' => array(
+                        'name',
+                        'logo',
+                    ),
+                ),
             ),
         ),
     );

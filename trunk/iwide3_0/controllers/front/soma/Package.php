@@ -98,6 +98,9 @@ class Package extends MY_Front_Soma
      */
     public function package_list()
     {
+
+        $this->getTicketTheme();
+
         $is_show_navigation = isset($this->themeConfig['is_show_navigation']) ? $this->themeConfig['is_show_navigation'] : Soma_base::STATUS_FALSE;
         $is_show_lang_btn = isset($this->themeConfig['is_show_lang_btn']) ? $this->themeConfig['is_show_lang_btn'] : Soma_base::STATUS_FALSE;
 

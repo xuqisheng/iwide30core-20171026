@@ -47,7 +47,7 @@ class Center extends MY_Front_Member_Iapi
         $this->extra['links']['shop'] = EA_const_url::inst()->get_url('soma/order/my_order_list',array('inter_id'=>$this->inter_id));
         $this->extra['links']['hotel'] = EA_const_url::inst()->get_url('hotel/hotel/myorder',array('inter_id'=>$this->inter_id));
         $member_center_result = CenterService::getInstance()->index($this->inter_id,$this->openid,$this->_template_filed_names);
-        $this->out_put_msg($member_center_result['status'],$member_center_result['msg'],$member_center_result['data'],'membervip/center/index',$this->extra);
+        $this->out_put_msg($member_center_result['status'],$member_center_result['msg'],$member_center_result['data'],'membervip_center/center/index',$this->extra);
     }
 
 
@@ -56,14 +56,14 @@ class Center extends MY_Front_Member_Iapi
         $this->extra['links']['shop'] = EA_const_url::inst()->get_url('soma/order/my_order_list',array('inter_id'=>$this->inter_id));
         $this->extra['links']['hotel'] = EA_const_url::inst()->get_url('hotel/hotel/myorder',array('inter_id'=>$this->inter_id));
         $member_center_result = CenterService::getInstance()->member_center($this->inter_id,$this->openid,$this->_template_filed_names,true);
-        $this->out_put_msg($member_center_result['status'],$member_center_result['msg'],$member_center_result['data'],'membervip/center/member_center',$this->extra);
+        $this->out_put_msg($member_center_result['status'],$member_center_result['msg'],$member_center_result['data'],'membervip_center/center/member_center',$this->extra);
     }
 
 	//会员卡用户资料
 	public function info(){
         $this->extra['links']['outlogin'] = EA_const_url::inst()->get_url('membervip/login/outlogin',array('inter_id'=>$this->inter_id));
         $member_info = CenterService::getInstance()->info($this->inter_id,$this->openid);
-        $this->sp_out_put_msg('countent',$member_info['data'],'membervip/center/info',$this->extra);
+        $this->sp_out_put_msg('countent',$member_info['data'],'membervip_center/center/info',$this->extra);
     }
 
     //储值卡二维码页面
@@ -77,6 +77,6 @@ class Center extends MY_Front_Member_Iapi
                 $this->extra['links']['qrcode_url'] = isset($centerinfo['id_card_no'])?base_url("index.php/membervip/center/qrcodecon?data=").$centerinfo['id_card_no']:0;
             }
         }
-        $this->sp_out_put_msg('countent',$qrcode['data'],'membervip/center/qrcode',$this->extra);
+        $this->sp_out_put_msg('countent',$qrcode['data'],'membervip_center/center/qrcode',$this->extra);
     }
 }

@@ -1,1 +1,0 @@
-# iwide30core

@@ -44,6 +44,7 @@ class CenterService extends MemberBaseService
         );
         $card_host_info = $this->getCI()->member_public->get_info($where,'inter_member_config');
         $card_host = !empty($card_host_info['value'])?$card_host_info['value']:'';
+        $card_url = \EA_const_url::inst()->get_url('membervip/card');
         if(!empty($card_host)){
             $_card_host = explode(',',$card_host);
             $public_host = !empty($_card_host[0])?$_card_host[0]:'';
@@ -85,7 +86,7 @@ class CenterService extends MemberBaseService
             'assets_bottons'=>$assets_bottons,
         );
 
-        $data['info'] = $this->getCI()->Publics_model->get_fans_info($openid);
+        $data['info'] = $this->getCI()->Publics_model->get_fans_info_one($inter_id,$openid);
         $post_center_url = PMS_PATH_URL."member/center";
         $post_center_data =  array(
             'inter_id'=>$inter_id,
@@ -248,7 +249,7 @@ class CenterService extends MemberBaseService
         );
 
 
-        $web_data['info'] = $this->getCI()->Publics_model->get_fans_info($openid);
+        $web_data['info'] = $this->getCI()->Publics_model->get_fans_info_one($inter_id,$openid);
         $post_center_url = PMS_PATH_URL."member/center";
         $post_center_data =  array(
             'inter_id'=>$inter_id,
@@ -430,7 +431,7 @@ class CenterService extends MemberBaseService
             'openid' =>$openid,
         );
         //请求用户登录(默认)会员卡信息
-        $data['info'] =$this->getCI()->Publics_model->get_fans_info($openid);
+        $data['info'] =$this->getCI()->Publics_model->get_fans_info_one($inter_id,$openid);
         $curl_result = $this->doCurlPostRequest( $post_center_url , $post_center_data );
         if($type == 'iapi')
             $data['curl_data']['centerinfo'] = $curl_result;

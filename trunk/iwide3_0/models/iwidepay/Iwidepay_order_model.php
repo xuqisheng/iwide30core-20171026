@@ -2,6 +2,7 @@
 class Iwidepay_order_model extends MY_Model{
 
 	const TAB_IIP_O = 'iwide_iwidepay_order';
+	const TAB_TRANSFER = 'iwide_iwidepay_transfer';
 	function __construct() {
 		parent::__construct ();
 	}
@@ -106,6 +107,31 @@ class Iwidepay_order_model extends MY_Model{
         $sql .= " WHERE {$where}";
         $sql .= " ORDER BY o.id desc";
         $sql .= $this->gen_limit($cur_page,$page_size);
+        $data = $this->db_read()->query($sql)->result_array();
+        return $data;
+    }
+
+
+    /**
+     * 获取转账财务对账表订单
+     * @param string $select
+     * @param $filter
+     * @param string $cur_page
+     * @param string $page_size
+     * @return
+     */
+    public function get_financial_orders($select = 'mi.*',$filter,$cur_page = '',$page_size = '')
+    {
+        $sql = "SELECT {$select},H.name as hotel_name,P.name
+                FROM ".self::TAB_TRANSFER." AS T";
+        $sql .= " LEFT JOIN iwide_iwidepay_order AS o ON o.order_no = T.order_no AND o.module = T.module";
+        $sql .= " LEFT JOIN iwide_hotels as H ON H.inter_id = o.inter_id AND H.hotel_id = o.hotel_id";
+        $sql .= " LEFT JOIN iwide_publics as P ON P.inter_id = o.inter_id";
+
+        $sql .= " WHERE T.record_id = {$filter['record_id']}";
+        $sql .= " GROUP BY T.order_no";
+        $sql .= " ORDER BY o.id desc";
+        //$sql .= $this->gen_limit($cur_page,$page_size);
         $data = $this->db_read()->query($sql)->result_array();
         return $data;
     }

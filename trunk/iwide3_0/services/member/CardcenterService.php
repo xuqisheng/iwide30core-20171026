@@ -1027,7 +1027,7 @@ class CardcenterService extends MemberBaseService
     //扫码核销异步请求
     public function card_callback($inter_id = '',$openid = '',$code = ''){
         //获取用户的信息
-        $userinfo = $this->getCI()->Publics_model->get_fans_info($openid);
+        $userinfo = $this->getCI()->Publics_model->get_fans_info_one($inter_id,$openid);
         $post_code_useoff_url = INTER_PATH_URL.'membercard/useoff_code';
         $post_card_useoff_data = array(
             'inter_id'=>$inter_id,

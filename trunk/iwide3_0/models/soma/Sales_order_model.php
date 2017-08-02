@@ -2673,10 +2673,6 @@ class Sales_order_model extends MY_Model_Soma {
             $result[$k]['settlement'] = $ids[$v['order_id']]['settlement'];
             $result[$k]['consume_status'] = $consume_arr[$ids[$v['order_id']]['consume_status']];
             $result[$k]['refund_status'] = $ids[$v['order_id']]['refund_status'];
-            $result[$k]['balance_total'] = $ids[$v['order_id']]['balance_total'];
-            $result[$k]['point_total'] = $ids[$v['order_id']]['point_total'];
-            $result[$k]['conpon_total'] = $ids[$v['order_id']]['conpon_total'];
-            $result[$k]['real_grand_total'] = $ids[$v['order_id']]['real_grand_total'];
 
             if( empty($item_field) ){
                 $result[$k][]= $items[$k];
@@ -2705,6 +2701,10 @@ class Sales_order_model extends MY_Model_Soma {
                 $result[$k]['row_qty'] = $v['qty'] / $v['use_cnt'];
             }
             $result[$k]['total'] = $result[$k]['row_qty'] * $v['price_package'];
+            $result[$k]['balance_total'] = $ids[$v['order_id']]['balance_total'];
+            $result[$k]['point_total'] = $ids[$v['order_id']]['point_total'];
+            $result[$k]['conpon_total'] = $ids[$v['order_id']]['conpon_total'];
+            $result[$k]['real_grand_total'] = $ids[$v['order_id']]['real_grand_total'];
 
             // 调整qty的位置
             $qty = $result[$k]['qty'];
@@ -2718,7 +2718,7 @@ class Sales_order_model extends MY_Model_Soma {
             $result[$k]['consumer_total'] = $ids[$v['order_id']]['consumer_total'];//已自提
             /** edit by chencong <chencong@mofly.cn> 2017/07/28 增加导出字段 start  **/
 //            $result[$k]['shipment_total'] = $ids[$v['order_id']]['shipping_total'] + $ids[$v['order_id']]['consumer_total'];//已出货总数
-            $per_amount = $result[$k]['total'] / $result[$k]['qty'];// 每份金额
+            $per_amount = $result[$k]['real_grand_total'] / $result[$k]['qty'];// 每份金额
             $result[$k]['not_verificated_num'] = $ids[$v['order_id']]['not_verificated_num'];// 未核销总数
             $result[$k]['not_verificated_amount'] = round($per_amount * $result[$k]['not_verificated_num'], 2);// 未核销总金额
             $result[$k]['overdue_num'] = $ids[$v['order_id']]['overdue_num'];// 已过期总数
@@ -3762,16 +3762,16 @@ class Sales_order_model extends MY_Model_Soma {
             '购买方式', 
             '消费状态',
             '退款状态', 
+            '酒店名称',
+            '商品名称',
+            'SKU',
+            '单价',
+            '购买件数',
+            '订单总额',
             '储值支付金额',
             '积分使用',
             '优惠券抵用金额',
             '实付金额（含储值）', // edit by chencong <chencong@mofly.cn> 2017/07/28 修改导出字段名称
-            '酒店名称', 
-            '商品名称', 
-            'SKU',
-            '单价', 
-            '购买件数', 
-            '订单总额',
             '获得数量',
             // '未使用数量', 
             '已赠送', //全部已赠送              思路：使用单号去赠送表查询。一个数量不论被赠送多少次，数量都是1

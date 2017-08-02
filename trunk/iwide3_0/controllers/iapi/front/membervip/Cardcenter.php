@@ -143,7 +143,7 @@ class Cardcenter extends MY_Front_Member_Iapi
     //会员卡券列表
 	public function index(){
         $card_result = CardcenterService::getInstance()->index($this->show_inter_id,$this->show_openid,$this->inter_id,$this->_template,$this->url_group);
-        $this->out_put_msg($card_result['status'],$card_result['msg'],$card_result['data'],'membervip/cardcenter/index',$this->extra);
+        $this->out_put_msg($card_result['status'],$card_result['msg'],$card_result['data'],'membervip/card/index',$this->extra);
 	}
 
 
@@ -155,7 +155,7 @@ class Cardcenter extends MY_Front_Member_Iapi
             'segments'=>$this->segments
         );
         $card_result = CardcenterService::getInstance()->cardinfo($this->show_inter_id,$this->show_openid,$this->inter_id,$member_card_id,$this->url_group,$extra);
-        $this->out_put_msg($card_result['status'],$card_result['msg'],$card_result['data'],'membervip/cardcenter/cardinfo',$this->extra);
+        $this->out_put_msg($card_result['status'],$card_result['msg'],$card_result['data'],'membervip/card/cardinfo',$this->extra);
     }
 
     //转赠优惠券挂起
@@ -181,7 +181,7 @@ class Cardcenter extends MY_Front_Member_Iapi
     public function pcardinfo(){
         $member_card_id = !empty($this->args['member_card_id']) ? $this->args['member_card_id'] : 0;
         $card_result = CardcenterService::getInstance()->pcardinfo($this->show_inter_id,$this->show_openid,$member_card_id,$this->url_group);
-        $this->out_put_msg($card_result['status'],$card_result['msg'],$card_result['data'],'membervip/cardcenter/pcardinfo',$this->extra);
+        $this->out_put_msg($card_result['status'],$card_result['msg'],$card_result['data'],'membervip/card/pcardinfo',$this->extra);
     }
 
     //领取卡券
@@ -260,7 +260,7 @@ class Cardcenter extends MY_Front_Member_Iapi
             'org_domain'=>$this->org_domain
         );
         $card_result = CardcenterService::getInstance()->receive($this->show_inter_id,$this->show_openid,$ec_code,$this->url_group,$extra);
-        $this->out_put_msg($card_result['status'],$card_result['msg'],$card_result['data'],'membervip/cardcenter/receive',$this->extra);
+        $this->out_put_msg($card_result['status'],$card_result['msg'],$card_result['data'],'membervip/card/receive',$this->extra);
     }
 
 

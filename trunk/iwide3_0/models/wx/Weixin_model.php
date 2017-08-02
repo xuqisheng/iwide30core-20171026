@@ -359,35 +359,21 @@ class Weixin_model extends CI_Model {
 	protected function transCusService(){
 		$this->load->helper('common');
 		$this->setCusMsgOn();
-// 		echo $this->content;
-// 		var_dump( doCurlPostRequest('http://localhost/30wap/index.php/wxapi/rec', $this->content));
-// 		echo '------';
-// 		var_dump( doCurlPostRequest('http://credit.iwide.cn/index.php/wxapi/rec', $this->content,null,10030));
-// 		var_dump( file_get_contents(, false, $this->content));
 // 		$ch = curl_init('http://cllweixintest.ngrok.cc/WeiChat/SinoWeixinServer');
 // 		$ch = curl_init('https://183.63.190.230/WeiChat/SinoWeixinServer');
 		$ch = curl_init('https://hotelservice.evergrande.com/WeiChat/SinoWeixinServer');
 // 		$ch = curl_init('http://localhost:8080/tn/TestAction');
+// 		$ch = curl_init('https://hotelservice.evergrande.com/WeiChat/TestDemo');
+		$body = str_ireplace('<Content><![CDATA[人工客服]]></Content>', '<Content><![CDATA[kf]]></Content>', $this->content);
 		curl_setopt ( $ch, CURLOPT_HEADER, false );
-		curl_setopt ( $ch, CURLOPT_POSTFIELDS, str_ireplace('<Content><![CDATA[人工客服]]></Content>', '<Content><![CDATA[kf]]></Content>', $this->content) );
+		curl_setopt ( $ch, CURLOPT_POSTFIELDS, $body );
 		curl_setopt ( $ch, CURLOPT_NOBODY, true);
 		curl_setopt ( $ch, CURLOPT_POST, true );
 		curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
-		// 	curl_setopt ( $con, CURLOPT_CUSTOMREQUEST, 'HEAD');
+		curl_setopt ( $ch, CURLOPT_HTTPHEADER, array('Content-Type: application/xml', 'Content-Length: ' . strlen($body)));
 		curl_setopt ( $ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY); 
 		curl_setopt ( $ch, CURLOPT_SSL_VERIFYHOST, false); // don't check certificate
 		curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, false); // don't check certificate
-// 		curl_setopt ( $ch, CURLOPT_SSL_VERIFYHOST, 0 );
-		
-// 		curl_setopt($ch, CURLOPT_URL, 'http://localhost:8080/tn/TestAction');
-// // 		curl_setopt($ch, CURLOPT_URL, 'http://credit.iwide.cn/index.php/wxapi/rec');
-// // 		curl_setopt($ch, CURLOPT_URL, 'http://cllweixintest.ngrok.cc/WeiChat/SinoWeixinServer');
-// 		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)');
-// 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-// 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-// 		curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false);
-// 		curl_setopt ( $ch, CURLOPT_POSTFIELDS, $this->content );
-// 		curl_setopt($ch, CURLOPT_TIMEOUT, 5);
 		$data = curl_exec($ch);
 		log_message('error', 'TRANS | '.$this->content.' | '.$data.' | '.date('Y-m-d H:i:s').' | '.curl_error($ch));
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -417,7 +403,7 @@ class Weixin_model extends CI_Model {
 			$openid = $this->data['FromUserName'];
 		$obj = json_decode($redids->get($openid));
 		//会话时效15分钟
-		return intval($obj && $obj->timeout) > 0 && (time() - intval($obj->timeout) < 90); 
+		return intval($obj && $obj->timeout) > 0 && (time() - intval($obj->timeout) < 900); 
 	}
 	
 	/**

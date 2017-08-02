@@ -1,0 +1,298 @@
+<!-- DataTables -->
+<link rel="stylesheet" href="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datatables/dataTables.bootstrap.css">
+<script src="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datepicker/bootstrap-datepicker.js"></script>
+<link rel="stylesheet" href="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datepicker/datepicker3.css">
+ <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+<script src="<?php echo base_url(FD_PUBLIC) ?>/js/html5shiv.min.js"></script>
+<script src="<?php echo base_url(FD_PUBLIC) ?>/js/respond.min.js"></script>
+<![endif]-->
+</head>
+<style>
+
+
+    .blue{color:#2d87e2}
+    .red{color:#e22e3b}
+    .gray{color:gray}
+    .pointer{cursor:pointer}
+    .pointer:hover{text-decoration:underline}
+
+    .Pagination{
+        float: right;
+    }
+
+    #pages
+    {
+        height: 40px;
+        text-align: right;
+        font-family: \u5b8b\u4f53,Arial;
+        display: inline-block;
+        padding-left: 0;
+        margin: 20px 0;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    #pages span {
+        float: left;
+        display: inline;
+        margin: 1px 4px;
+        display: block;
+        border-radius: 3px;
+
+    }
+
+    #pages span.span {
+        color: #666;
+        padding: 6px;
+        background-color: #FFFFFF;
+    }
+    #pages span.nolink {
+        color: #666;
+        border: 1px solid #e3e3e3;
+        padding: 6px;
+        background-color: #FFFFFF;
+    }
+    #pages span.current {
+        color: #fff;
+        background: #ffac59;
+        border: 1px solid #e6e6e6;
+        padding: 11px 13px;
+        font-size: 14px;
+        display: inline;
+    }
+
+    #pages a {
+        float: left;
+        display: inline;
+        padding: 11px 13px;
+        border: 1px solid #e6e6e6;
+        border-right: none;
+        background: #f6f6f6;
+        color: #666666;
+        font-family: \u5b8b\u4f53,Arial;
+        font-size: 14px;
+        cursor: pointer;
+
+    }
+    .bg_ff9900 {
+        background: #ff9900;
+    }
+    select, input, .moba {
+        height: 30px;
+        border: 1px solid #d7e0f1;
+        text-indent: 3px;
+    }
+</style>
+<body class="hold-transition skin-blue sidebar-mini">
+
+<div class="wrapper">
+
+    <?php
+    /* 顶部导航 */
+    echo $block_top;
+    ?>
+
+    <?php
+    /* 左栏菜单 */
+    echo $block_left;
+    ?>
+
+    <div style="color:#92a0ae;">
+        <div class="over_x">
+            <div class="content-wrapper" style="min-width:1130px;" >
+                <div class="banner bg_fff p_0_20">转账信息</div>
+                <div class="contents p_0_20" style="    padding: 20px;">
+                    <div class="hottel_name ">
+                        <?php echo $this->session->show_put_msg(); ?>
+                        <div class="input_txt">
+                            <form class="form" method='get' id="" action='<?php echo site_url('iwidepay/settlement/transfer_accounts')?>'>
+                                <div style="text-align:right;">
+                                    <span>转账时间</span>
+                                    <span class="t_time"><input name="start_time"  data-date-format="yyyy-mm-dd" class="datepicker moba" value="<?php echo $param['start_time'] ? addslashes($param['start_time']) : '';?>"></span>
+                                    <font>至</font>
+                                    <span class="t_time"><input name="end_time"  data-date-format="yyyy-mm-dd" class="datepicker moba" value="<?php echo addslashes($param['end_time']);?>"></span>
+                                    <span>酒店筛选</span>
+                                     <span>
+                                        <select onchange="change_inter(this.value)" class="w_90" name="inter_id">
+                                            <option value="">所有公众号</option>
+                                            <?php
+                                            if (!empty($publics))
+                                            {
+                                                foreach ($publics as $value) {
+                                                    ?>
+                                                    <option <?php echo $param['inter_id'] == $value['inter_id']?'selected':''; ?> value="<?php echo $value['inter_id']?>"><?php echo $value['name']?></option>
+                                                    <?php
+                                                }}
+                                            ?>
+                                        </select>
+                                    </span>
+                                    <span>
+                                        <select class="w_90" name="hotel_id" id="hotel_id">
+                                            <option value="">所有门店</option>
+                                            <?php
+                                            if (!empty($hotels))
+                                            {
+                                                foreach ($hotels as $value) {
+                                                    ?>
+                                                    <option <?php echo $param['hotel_id'] == $value['hotel_id']?'selected':''; ?> value="<?php echo $value['hotel_id']?>"><?php echo $value['hotel_name']?></option>
+                                                    <?php
+                                                }}
+                                            ?>
+                                        </select>
+                                    </span>
+                                    <input type="submit" class="btn btn-sm bg-green" value="搜索"/>
+                                    <input type="submit" name="export" class="bg_ff9900 color_fff" value="导出">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="box-body">
+                        <table id="coupons_table" class="table-striped table-condensed dataTable no-footer" style="width:100%;">
+                            <thead class="bg_f8f9fb form_thead">
+                            <tr class="bg_f8f9fb form_title">
+                                <th>账单时间</th>
+                                <th>所属公众号</th>
+                                <th>所属门店</th>
+                                <th>转账金额</th>
+                                <th>返回状态时间</th>
+                                <th>转账状态</th>
+                                <th>备注</th>
+                                <th>操作</th>
+                            </tr>
+                            <tbody class="containers dataTables_wrapper form-inline dt-bootstrap">
+
+                            <?php
+                            if (!empty($list))
+                            {
+                                foreach ($list as $key => $value)
+                                {
+                                    ?>
+                                    <tr class=" form_con">
+                                        <td><?php echo $value['add_time'];?></td>
+                                        <td><?php echo $value['name'] ? $value['name'] : '--';?></td>
+                                        <td><?php echo $value['hotel_name'] ? $value['hotel_name'] : '--';?></td>
+                                        <td><?php echo $value['amount'] ? $value['amount'] : '--' ;?></td>
+                                        <td><?php echo $value['update_time'] ? $value['update_time'] : '--' ;?></td>
+                                        <td><?php echo $value['status_name'] ? $value['status_name'] : '--' ;?></td>
+                                        <td><?php echo $value['remark'] ? $value['remark'] : '--' ;?></td>
+                                        <td>
+                                            <?php
+                                            if ($value['status'] == 0) {
+                                            ?>
+                                                <span class="blue pointer" onClick="single_send('<?php echo $value['id'];?>','send')">发起转账</span>
+                                                <?php
+                                            }else if($value['status'] == 3 || $value['status'] == 1) {
+                                                ?>
+                                                <span class="gray pointer">重新转账</span>
+                                                <?php
+                                            }
+                                            else if($value['status'] == 2) {
+                                                ?>
+                                                <span class="red pointer" onClick="single_send('<?php echo $value['id'];?>','resend')">重新转账</span>
+                                                <?php
+                                            }
+                                            ?>
+                                            &nbsp;
+                                            <a class="blue" href="<?php echo site_url('/iwidepay/settlement/ext_financial?record_id='.$value['id']);?>">对账单</a>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
+                            }
+                            ?>
+
+                        </table>
+
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <!--                                <div class="dataTables_info" id="data-grid_info" role="status" aria-live="polite">共1条</div>-->
+                            </div>
+                            <div class="col-sm-7">
+                                <div class="dataTables_paginate paging_simple_numbers" id="data-grid_paginate">
+                                    <ul class="Pagination"><?php echo $pagehtml;?></ul>
+                                </div>
+                            </div>
+                        </div><!-- /.box-body -->
+                    </div><!-- /.box -->
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.content -->
+    </div><!-- /.content-wrapper -->
+    <?php
+    /* Footer Block @see footer.php */
+    require_once VIEWPATH. $tpl .DS .'privilege'. DS. 'footer.php';
+    ?>
+
+    <?php
+    /* Right Block @see right.php */
+    require_once VIEWPATH. $tpl .DS .'privilege'. DS. 'right.php';
+    ?>
+
+</div><!-- ./wrapper -->
+
+<?php
+/* Right Block @see right.php */
+require_once VIEWPATH. $tpl .DS .'privilege'. DS. 'commonjs.php';
+?>
+
+<script src="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datatables/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+<!-- page script -->
+<script>
+    $(".datepicker").datepicker({
+        language: "zh-CN"
+    });
+
+    function single_send(id,status)
+    {
+        if(!confirm("您确定发起转账？")){
+            return false;
+        }
+        $.post('<?php echo site_url('/iwidepay/settlement/single_send')?>',{
+            'id':id,
+            'status':status,
+            '<?php echo $this->security->get_csrf_token_name(); ?>' : '<?php echo $this->security->get_csrf_hash(); ?>'
+        },function(res)
+        {
+            if(res.status == 1){
+                alert(res.msg);
+                window.location.reload();
+            }else{
+                alert(res.msg);
+            }
+
+        },'json');
+    }
+
+
+    //选择公众号 =》 酒店
+    function change_inter(inter_id)
+    {
+        if(inter_id == ''){
+            return false;
+        }
+
+
+        $.get("<?php echo site_url('/iwidepay/IwidepayApi/get_hotels')?>",{
+            'inter_id':inter_id,
+        },function(res){
+            var list = '<option value="">所有门店</option>';
+            if(res.data.length > 0)
+            {
+                var list = '';
+                for (var i=0;res.data.length > i;i++)
+                {
+                    list += '<option value="'+res.data[i].hotel_id+'">'+res.data[i].hotel_name+'</option>';
+                }
+            }
+            $('#hotel_id').html(list);
+        },'json');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<body>
+
+<?php 
+    $bg  = get_cdn_url('public/soma/images/exchange/bg.jpg');
+    $bg2 = get_cdn_url('public/soma/images/exchange/bg2.jpg');
+
+    if($theme 
+        && $theme->m_get('bg_img') != null 
+        && $theme->m_get('bg_img') != '') {
+        $bg = $theme->m_get('bg_img');
+    }
+
+    if($theme 
+        && $theme->m_get('btn_img') != null 
+        && $theme->m_get('btn_img') != '') {
+        $bg2 = $theme->m_get('btn_img');
+    }
+?>
+
+<style>
+body,html,.box{width:100%;height:100%;}
+::-webkit-scrollbar  
+{  
+    width: 0px;  
+    height: 0px;   
+}
+.clearfl{display: block;clear: both;content: "";overflow: hidden;height: 0;}
+.box{background:no-repeat;background-size:cover;position:absolute;display: block!important;}
+.conter{position: relative;
+    margin: 18px 20px 20px 20px;
+    background: #fff;
+    border-radius: 1em;
+    overflow: hidden;
+    text-align: center;}
+.squareimg{ padding-bottom:50%;}
+.conter .conter-input{margin: 28px 15px 15px 15px;}
+.conter .conter-input ::-webkit-input-placeholder {  
+　　color:#bfbfbf;font-size:14px;
+　　}
+.conter .conter-input :-moz-placeholder {   
+　　color:#bfbfbf;font-size:14px;
+　　}
+.conter .conter-input ::-moz-placeholder {   
+　　color:#bfbfbf;font-size:14px;
+　　}
+.conter .conter-input :-ms-input-placeholder { 
+　　color:#bfbfbf;font-size:14px;
+}
+.conter input{border:1px solid #e4e4e4;width:100%;height:35px;border:1px solid #dbdbdb;padding:12px;border-radius:4px;margin-bottom: 8px;display: block;text-align: center;}
+.exchange-btn{ display: block; border-radius:4px; height: 37px;margin: 15px 15px 28px 15px;background-color: #ff9900;line-height: 37px;font-size: 15px;color: #fff;}
+.exchange-btn.disable{    
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+    opacity: 0.8;}
+.box{background-image:url("<?php echo $bg; ?>") }  /* 页面背景图 */
+._histroy{ position: relative;margin-top: 10%;width: 100%;z-index: 9;}
+._histroy > *{display:inline-block; border-radius:50%; background:rgba(3,152,255,0.8); color:#fff;width:60px; height:60px;}
+._histroy span{ padding-top:12px; display:block}
+.descript{text-align: left;color: #333;width: 90%;margin: 0 auto;font-size: 12px;border-top: 1px dashed #dbdbdb;padding-bottom: 15px;}
+.descript h4{color: #808080;padding-top: 16px;padding-bottom: 12px;}
+.descript-content{overflow-y:scroll;max-height: 65px;height: auto;}
+.descript li{line-height: 18px;}
+.bottom-float{position: fixed;bottom: 0;left: 0;width: 100%;height: 45px;background-color: #fff;}
+.bottom-float li{width: 33.3333%;text-align: center;float: left;}
+.bottom-float li a{color: #333;font-size: 10px;display: block;}
+.bottom-float li a i{display: block;margin: 0 auto;width: 18px;height: 18px;background-image: url(<?php echo get_cdn_url('public/soma/images/bottom-icons.png');?>);background-size: 60px 20px;margin-top: 5px;}
+.bottom-float li:nth-child(1) a i{
+    background-position:  0 0;
+}
+.bottom-float li:nth-child(2) a i{
+    background-position:  -18px -0px;
+}
+.bottom-float li:nth-child(3) a i{
+    background-position:  -36px 0px; 
+}
+
+</style>
+<div class="box">
+	<div class="conter">
+    	<div class="squareimg overflow"><img src="<?php echo $bg2; ?>"></div> <!-- 输入框内Banner 图 -->
+       <!--  <p class="pad3 h30"><?php echo ($theme && $theme->m_get('page_content') && $theme->m_get('page_content') != '') ? $theme->m_get('page_content') : '请输入您的验证码'; ?></p> -->
+        <div class="conter-input"><input class="h34 center" type="text" id="in_code" placeholder="请输入兑换券码" /></div>
+        <div class="exchange-btn martop disable" id="btn">确定</div>
+        <?php if(!empty($theme->m_get('redeem_content'))): ?>
+            <div class="descript" id="descript">
+                <h4>兑换说明</h4>
+                <ul class="descript-content">
+                    <li><?php echo $theme->m_get('redeem_content') ?></li>
+                </ul>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+<ul class="bottom-float clearfl">
+    <li><a href="<?php echo (!empty($theme->m_get('recommended_links')) ? $theme->m_get('recommended_links') : $soma_index_url) ?>"><i></i><span>更多推荐</span></a></li>
+    <li><a href="<?php echo $record_url ?>"><i></i><span>我的订单</span></a></li>
+    <li><a href="<?php echo $member_center_url ?>"><i></i><span>个人中心</span></a></li>
+</ul>
+<script>
+$(function(){
+	var url = "<?php echo Soma_const_url::inst()->get_url('*/package'); ?>";
+	$('#in_code').bind('input propertychange',function(){
+        if($(this).val()==''){
+          $('#btn').addClass('disable');  
+          $('#descript').show();
+      } 
+        
+    else{
+      $('#btn').removeClass('disable');
+      $('#descript').hide();
+    } 
+	});
+
+	function gourl(){ window.location.href=url;	}
+	function Reload(){window.location.reload();}
+	$('#btn').click(function(){
+        if($('#btn').hasClass('disable')) return;
+		var code = $('#in_code').val();
+		pageloading();
+		$.ajax({
+            url:"<?php echo Soma_const_url::inst()->get_url('*/*/scaner_exchange',array('id'=>$inter_id));?>",
+			async:true,
+            type:"post",
+            dataType:"json",
+            data:{ code:code },
+            error:function(data){
+				$.MsgBox.Confirm('服务器开小差，请刷新后重试',Reload,Reload,'取消','好的');
+            },
+            success:function(data){
+                if(data.status == <?php echo Soma_base::STATUS_TRUE;?>) {
+                	url = data.data.url;
+					$.MsgBox.Confirm('恭喜您已通过验证',gourl,Reload,'立即使用','稍后再说');
+                } else {
+					url = "<?php echo Soma_const_url::inst()->get_url('*/package'); ?>";
+                	$.MsgBox.Confirm(data.message,gourl,'','进入商城','重新输入');
+                }
+            },
+			complete:function(){
+				removeload();
+			}
+        });
+	})
+})
+</script>
+</body>
+</html>

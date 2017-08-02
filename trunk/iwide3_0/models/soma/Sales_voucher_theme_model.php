@@ -36,6 +36,8 @@ class Sales_voucher_theme_model extends MY_Model_Soma {
             'bg_img'=> '页面背景图 <span style="color: red;font-size: 8px;">(640x1008px, jpg)</span>',
             'btn_img'=> '兑换提示图 <span style="color: red;font-size: 8px;">(560x280px, jpg)</span>',
             'page_content'=> '页面文字内容',
+            'redeem_content'=> '兑换说明',
+            'recommended_links'=> '更多推荐',
 		);
 	}
 
@@ -52,6 +54,8 @@ class Sales_voucher_theme_model extends MY_Model_Soma {
             'bg_img',
             'btn_img',
             'page_content',
+            'redeem_content',
+            'recommended_links',
 	    );
 	}
 
@@ -153,6 +157,30 @@ class Sales_voucher_theme_model extends MY_Model_Soma {
                 //'form_ui'=> ' disabled ',
                 //'form_default'=> '0',
                 //'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'text',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'redeem_content' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                //'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+//                'form_tips'=> '注意事项',
+                //'form_hide'=> TRUE,
+                //'form_type'=> TRUE,
+                //'input_unit'=> '单位',
+                //'grid_function'=> 'show_price_prefix|￥',
+                'type'=>'textarea',	//textarea|text|date|datetime|combobox|number|logo|email|url|price
+            ),
+            'recommended_links' => array(
+                'grid_ui'=> '',
+                'grid_width'=> '10%',
+                //'form_ui'=> ' disabled ',
+                //'form_default'=> '0',
+//                'form_tips'=> '注意事项',
                 //'form_hide'=> TRUE,
                 //'form_type'=> TRUE,
                 //'input_unit'=> '单位',

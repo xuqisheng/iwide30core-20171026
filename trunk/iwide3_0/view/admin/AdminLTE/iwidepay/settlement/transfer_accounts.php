@@ -196,7 +196,7 @@
                                             }
                                             ?>
                                             &nbsp;
-                                            <a class="blue" href="<?php echo site_url('/iwidepay/settlement/ext_financial?inter_id='.$value['inter_id'].'&hotel_id='.$value['hotel_id'].'&time='.$value['add_time']);?>">对账单</a>
+                                            <a class="blue" href="<?php echo site_url('/iwidepay/settlement/ext_financial?record_id='.$value['id']);?>">对账单</a>
                                         </td>
                                     </tr>
                                     <?php
@@ -261,7 +261,7 @@ require_once VIEWPATH. $tpl .DS .'privilege'. DS. 'commonjs.php';
         {
             if(res.status == 1){
                 alert(res.msg);
-                //window.location.reload();
+                window.location.reload();
             }else{
                 alert(res.msg);
             }

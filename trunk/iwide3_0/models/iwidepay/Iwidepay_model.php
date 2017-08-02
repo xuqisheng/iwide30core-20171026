@@ -279,7 +279,7 @@ class Iwidepay_model extends MY_Model{
 
 	//退款组装数据独立开来
 	public function handle_refund_request($iwidepay_order,$refund_data,$type){
-
+		$this->load->library('IwidePay/IwidePayApi',null,'IwidePayApi');
 		$jfk_cost = empty($iwidepay_order['regular_jfk_cost'])?0:$iwidepay_order['regular_jfk_cost'];//记录分账时使用的费率
 		$this->load->model('iwidepay/iwidepay_transfer_model');
 		$rules = $this->iwidepay_transfer_model->get_rules_by_filter(array('inter_id'=>$iwidepay_order['inter_id'],'module'=>$iwidepay_order['module'],'status'=>1));

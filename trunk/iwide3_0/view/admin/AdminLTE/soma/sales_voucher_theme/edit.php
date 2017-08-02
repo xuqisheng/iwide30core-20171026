@@ -56,6 +56,16 @@ echo $block_left;
 						<label for="el_page_content" class="col-sm-2 control-label">页面文字内容</label>
 						<div class="col-sm-8"><input type="text" class="form-control " maxlength="20" name="page_content" id="el_page_content" placeholder="输入文字不得超过20个" value="<?php echo $model->m_get('page_content'); ?>"></div>
 					</div>
+				<?php elseif($k == 'redeem_content'): ?>
+					<div class="form-group  has-feedback">
+						<label for="el_page_content" class="col-sm-2 control-label">兑换说明</label>
+						<div class="col-sm-8"><input type="text" class="form-control " maxlength="140" name="redeem_content" id="el_page_content" placeholder="输入文字不得超过140个" value="<?php echo $model->m_get('redeem_content'); ?>"></div>
+					</div>
+				<?php elseif($k == 'recommended_links'): ?>
+						<div class="form-group  has-feedback">
+							<label for="el_page_content" class="col-sm-2 control-label">更多推荐</label>
+							<div class="col-sm-8"><input type="text" class="form-control " maxlength="256" name="recommended_links" id="el_page_content" placeholder="默认为商城首页" value="<?php echo $model->m_get('recommended_links'); ?>"></div>
+						</div>
             	<?php else: ?>
 					<?php 
 	                if($check_data==FALSE) echo EA_block_admin::inst()->render_from_element($k, $v, $model); 

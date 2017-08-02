@@ -819,7 +819,7 @@ class Wxapi extends My_Controller {
 		if(!empty($openid)){
 			$obj = json_decode($redids->get($openid));
 			//会话时效15分钟
-			return intval($obj->timeout) > 0 && (time() - intval($obj->timeout) < 90);
+			return intval($obj->timeout) > 0 && (time() - intval($obj->timeout) < 900);
 		}else 
 			return false;
 	}

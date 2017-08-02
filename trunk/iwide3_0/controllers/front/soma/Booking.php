@@ -428,7 +428,9 @@ class Booking extends MY_Front_Soma {
                 'tel'=>$phone,
                 'remark'=>$remark,
                 'rtype'=>'room',//默认room
-                'allprice'=>$send_grand_total,
+                // 'allprice'=>$send_grand_total,
+                // 默认价格为0
+                'allprice' => 0,
             );
 
         //给订房发送数据

@@ -149,6 +149,16 @@ class Settlement extends MY_Admin
 
         if ($status == 'send')
         {
+            //操作日志
+            $data = array(
+                'inter_id' => $this->admin_profile['inter_id'],
+                'username' => $this->admin_profile['username'],
+                'uid' => $this->admin_profile['admin_id'],
+                'jfk_no' => $id,
+                'record_id' => $id,
+                'status' => $status,
+            );
+            add_iwidepay_admin_op_log($data, 'singleSend');
             $this->load->model('iwidepay/Iwidepay_Deliver_Model');
             $res = $this->Iwidepay_Deliver_Model->single_send($id);
             if (true == $res)
@@ -292,23 +302,8 @@ class Settlement extends MY_Admin
     public function ext_financial()
     {
         $param = request();
-        $filter['inter_id'] = !empty($param['inter_id']) ? addslashes($param['inter_id']) : '';
-        $filter['hotel_id'] = !empty($param['hotel_id']) ? addslashes($param['hotel_id']) : '';
-        $time = !empty($param['time']) ? addslashes($param['time']) : '';
+        $filter['record_id'] = !empty($param['record_id']) ? intval($param['record_id']) : '';
         //$filter['transfer_status'] = 3;//已分账
-
-        if ($filter['inter_id'] == 'jinfangka')
-        {
-            unset($filter['inter_id'],$filter['hotel_id']);
-        }
-        else if ($filter['hotel_id'] == 0)
-        {
-            unset($filter['inter_id']);
-        }
-
-        $time = date('Y-m-d',strtotime($time));
-        $filter['pay_start_time'] = $time;
-        $filter['pay_end_time'] = $time .' 23:59:59';
 
         $this->load->model('iwidepay/iwidepay_order_model' );
         $this->load->model('iwidepay/iwidepay_refund_model' );
@@ -316,11 +311,10 @@ class Settlement extends MY_Admin
         $select = 'o.id,o.inter_id,o.hotel_id,o.module,o.order_no,o.pay_no,o.order_status,o.transfer_status,o.trans_amt,o.is_dist,o.pay_time';
         $status = array(0=>'--',1=>'待定',2=>'待分',3=>'已分',4=>'异常',5=>'待定未分完',6=>'退款',7=>'已结清全额退款',8=>'部分退款',9=>'已结清部分退款');
         $module = array('hotel'=>'订房','soma'=>'商城','vip'=>'会员','okpay'=>'快乐付','dc'=>'在线点餐');
-        $list = $this->iwidepay_order_model->get_orders($select,$filter,'','');
+        $list = $this->iwidepay_order_model->get_financial_orders($select,$filter,'','');
 
         //已分账
         $sort_time = array();
-
         if ($list)
         {
             foreach ($list as $key => $value)
@@ -328,7 +322,6 @@ class Settlement extends MY_Admin
                 $order_no[] = $value['order_no'];
             }
             $transfer = $this->iwidepay_transfer_model->get_transfer('order_no,type,amount,add_time,module,name',$order_no);
-
             $transfer_data = $transfer_time = $transfer_hotel = array();
             if (!empty($transfer))
             {
@@ -353,7 +346,6 @@ class Settlement extends MY_Admin
                 }
             }
             unset($transfer);
-
 
             foreach ($list as $key => $value)
             {
@@ -392,6 +384,7 @@ class Settlement extends MY_Admin
         }
 
         //已结清全额退款
+        /*
         $where_arr = $filter;
         $where_arr['start_time'] = $filter['pay_start_time'];
         $where_arr['end_time'] = $filter['pay_end_time'];
@@ -432,6 +425,8 @@ class Settlement extends MY_Admin
         }
 
         array_multisort($sort_time, SORT_DESC, $list);
+
+         */
 
         $headArr = array('交易时间','所属公众号','所属门店','来源模块','平台订单号','支付订单号','交易类型','分账状态','分账时间','交易/退款金额(元)','核销门店','交易手续费','金房卡分成','集团分成','门店分成','分销员分成');
         $widthArr = array(20,20,20,12,20,20,12,12,12,12,12,12,12,14);

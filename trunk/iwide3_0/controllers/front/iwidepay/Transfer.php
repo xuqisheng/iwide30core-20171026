@@ -143,6 +143,7 @@ class Transfer extends MY_Controller {
             $per_soma_bill = $v['per_hotel_amt'];//每张通票应分金额
             $single_inter = 0;//是否是单体 
             $soma_bill_arr = array();
+            $ohter_amt = $hotel_amt = 0;//酒店分的 和 非酒店分的 soma用
             if($v['module'] == 'soma' ){
                 $soma_bill = $this->iwidepay_transfer_model->get_soma_bill($v['inter_id'],$v['order_no']);
                 if(!empty($soma_bill)){//不为空
@@ -173,9 +174,12 @@ class Transfer extends MY_Controller {
                         $soma_hotel_bill = $money_arr['regular_hotel'];
                         unset($money_arr['regular_hotel']);
                     }
-                }elseif($v['transfer_status'] == 5 && empty($per_soma_bill)){//重新计算剩下的
-                    $trans_sum_amt = $this->iwidepay_transfer_model->gather_transfer_amt($v['inter_id'],$v['order_no'],$v['module']);
-                    $soma_hotel_bill = $v['trans_amt'] - $trans_sum_amt;
+                }elseif($v['transfer_status'] == 5 && empty($per_soma_bill)){//重新计算除了酒店以外的
+                    //$trans_sum_amt = $this->iwidepay_transfer_model->gather_transfer_amt($v['inter_id'],$v['order_no'],$v['module']);
+                    $handle_order_amt = $this->iwidepay_transfer_model->get_handle_transfer_amt($v['order_no']);
+                    $ohter_amt = isset($handle_order_amt['o_amt'])?$handle_order_amt['o_amt']:0;//除了酒店之外的
+                    $hotel_amt = isset($handle_order_amt['hotel_amt'])?$handle_order_amt['hotel_amt']:0;//酒店已经分的
+                    $soma_hotel_bill = $v['trans_amt'] - $ohter_amt;
                 }
             }
             
@@ -242,14 +246,11 @@ class Transfer extends MY_Controller {
                     $per_soma_bill = $single_inter?$soma_hotel_bill:round($soma_hotel_bill / $v['bill_num']);
                 }
                 //改成每次去查
-                $handle_order_amt = $this->iwidepay_transfer_model->get_handle_transfer_amt($v['order_no']);
-                $ohter_amt = isset($handle_order_amt['o_amt'])?$handle_order_amt['o_amt']:0;//除了酒店之外的
-                $hotel_amt = isset($handle_order_amt['hotel_amt'])?$handle_order_amt['hotel_amt']:0;//酒店已经分的
                 $last_hotel_amt = 0;
                 foreach($soma_bill_arr as $soma_k=>$soma_v){
                     if($soma_k == count($soma_bill_arr) - 1 && !$single_inter && $soma_flag){//最后一条
-                        $per_bill = round(($v['trans_amt'] - $ohter_amt) / $v['bill_num']);
-                        $last_hotel_amt = $per_bill + ($v['trans_amt']- $ohter_amt-$per_bill * $v['bill_num']);
+                        $cut_amt = $ohter_amt==0?($v['trans_amt']-$soma_hotel_bill):$ohter_amt;
+                        $last_hotel_amt = $per_soma_bill + ($v['trans_amt']- $cut_amt-$per_soma_bill * $v['bill_num']);
                     }
                     $inser_data[] = $this->handle_soma_bill($v,$rules_data['rule_id'],$soma_v,($last_hotel_amt>0?$last_hotel_amt:$per_soma_bill),$bank_arr);
                 }

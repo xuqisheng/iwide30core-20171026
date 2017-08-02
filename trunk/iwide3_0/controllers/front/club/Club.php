@@ -33,10 +33,13 @@ class Club extends MY_Front {
         $inter_id=$this->inter_id;
         $data['inter_id'] = $inter_id;
 
-        $headImg=$this->Clubs_model->getHeadImg($openid);    //用户头像地址
+        $this->load->model('wx/Publics_model');
+        $fans_info=$this->Publics_model->get_fans_info_one($inter_id,$openid);
 
-        if(!empty($headImg)&&isset($headImg)){
-            $data['imgs']=$headImg;
+//        $headImg=$fans_info['headimgurl'];    //用户头像地址
+        $data['imgs']='';
+        if(isset($fans_info['headimgurl']) && !empty($fans_info['headimgurl'])){
+            $data['imgs']=$fans_info['headimgurl'];
         }
 
        if($staff_info){

@@ -26,10 +26,12 @@ class Voucher extends MY_Front_Soma {
 		
 		$this->load->model('soma/sales_voucher_theme_model', 't_model');
 		$theme = $this->t_model->load_by_inter_id($this->inter_id);
-		$record_url = Soma_const_url::inst()->get_url( 'soma/order/my_order_list', array('id'=>$this->inter_id) );
+		$record_url = Soma_const_url::inst()->get_url( 'soma/order/my_order_list', array('id' => $this->inter_id) );
+		$soma_index_url = Soma_const_url::inst()->get_url('soma/package/index', array('id' => $this->inter_id));
+		$member_center_url = base_url("index.php/membervip/center?id=" . $this->inter_id);
 
 		$this->_view('header', array('title'=>'兑换券兑换页面'));
-		$this->_view('index', array('theme' => $theme, 'record_url'=>$record_url));
+		$this->_view('index', array('theme' => $theme, 'record_url'=>$record_url, 'soma_index_url' => $soma_index_url, 'member_center_url' => $member_center_url));
 	}
 
 	//到店兑换方法
