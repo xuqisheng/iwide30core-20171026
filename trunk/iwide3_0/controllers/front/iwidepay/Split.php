@@ -18,7 +18,7 @@ class Split extends MY_Controller {
 	}
     private function check_arrow(){//访问限制
         //var_dump($_SERVER['REMOTE_ADDR']);die;
-        // return true;
+        return true;
         $arrow_ip = array('118.178.228.168','118.178.133.170','114.55.234.45');//只允许服务器自动访问，不能手动
         if(!in_array($_SERVER['REMOTE_ADDR'],$arrow_ip)/*&&$_SERVER['SERVER_ADDR']!=$_SERVER['REMOTE_ADDR']*/){
             exit('非法访问！');

@@ -92,6 +92,7 @@ class CardService extends MemberBaseService
         $assign_data['public'] = $this->getCI()->Publics_model->get_public_by_id($inter_id);
         $assign_data['next_id'] = isset($card_info['next_id']) ? $card_info['next_id'] : 0;
         $assign_data['inter_id'] = $inter_id;
+        $assign_data['page_title'] = '我的优惠券';
         $this->res_data['status'] = 1;
         $this->res_data['msg_lvl'] = 1;
         $this->res_data['msg'] = 'ok';
@@ -296,6 +297,7 @@ class CardService extends MemberBaseService
         $data['signpackage'] = $this->getCI()->access_token_model->getSignPackage($inter_id);
         $data['public'] = $this->getCI()->Publics_model->get_public_by_id($inter_id);
         $data['inter_id'] = $inter_id;
+        $data['page_title'] = '优惠券详情';
         $this->res_data['status'] = 1;
         $this->res_data['msg_lvl'] = 1;
         $this->res_data['msg'] = 'ok';
@@ -440,6 +442,7 @@ class CardService extends MemberBaseService
         $data['card_rule_id'] = $card_rule_id;
         $data['inter_id'] = $inter_id;
         $data['filed_name'] = $filed_names;
+        $data['page_title'] = '豪礼大放送';
         $this->res_data['status'] = 1;
         $this->res_data['msg_lvl'] = 1;
         $this->res_data['msg'] = 'ok';
@@ -765,6 +768,7 @@ class CardService extends MemberBaseService
         $this->getCI()->load->model('wx/access_token_model');
         $this->getCI()->load->model('wx/Publics_model');
         $assign_data['public'] = $this->getCI()->Publics_model->get_public_by_id($inter_id);
+        $assign_data['page_title'] = '领取优惠券';
         $this->res_data['status'] = 1;
         $this->res_data['msg_lvl'] = 1;
         $this->res_data['msg'] = 'ok';
@@ -918,6 +922,7 @@ class CardService extends MemberBaseService
         }
 
         $assign_data['auth_gift'] = $auth_gift;
+        $assign_data['page_title'] = '优惠券详情';
         $this->res_data['status'] = 1;
         $this->res_data['msg_lvl'] = 1;
         $this->res_data['msg'] = 'ok';
@@ -972,6 +977,7 @@ class CardService extends MemberBaseService
         $this->getCI()->load->model('wx/access_token_model');
         $data['signpackage'] = $this->getCI()->access_token_model->getSignPackage($inter_id);
         $data['public'] = $this->getCI()->Publics_model->get_public_by_id($inter_id);
+        $data['page_title'] = '扫码核销';
         $this->res_data['status'] = 1;
         $this->res_data['msg_lvl'] = 1;
         $this->res_data['msg'] = 'ok';

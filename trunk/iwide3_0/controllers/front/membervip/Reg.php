@@ -31,7 +31,7 @@ class Reg extends MY_Front_Member
            $this->template_show('member',$this->_template,'reg',$data);
        }
 	}
-
+    
     /**
      * 2016-07-20
      * @author knight

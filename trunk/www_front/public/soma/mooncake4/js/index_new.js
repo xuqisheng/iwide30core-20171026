@@ -76,7 +76,7 @@ function countDown () {
 	if (days <= 0) {
 		startDay = '';
 	} else {
-		var showDay = days > 9 ? minutes : '0' + days;
+		var showDay = days > 9 ? days : '0' + days;
 		startDay = '<span class="time-number">' + showDay + '</span><span class="f24 time-unit">天</span>';
 	}
 
