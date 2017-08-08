@@ -1,8 +1,0 @@
-2017-07-06 10:51:20 | 1546 | 127.0.0.1 |  | /iapi/v1/membervip/vapi/coupon_task | POST=[] | ERROR | 404 Page Not Found: iapi/admin/Membervip/vapi
-2017-07-06 11:19:01 | 2030 | 127.0.0.1 |  | /index.php/membervip/timingtask/welfaretask | POST=[] | ERROR | Session: Unable to connect to Redis with the configured settings.
-2017-07-06 11:19:11 | 2030 | 127.0.0.1 | 4ea2b3637166f76e131517328c07a2e43b4eeff6 | /index.php/membervip/timingtask/welfaretask | POST=[] | ERROR | Unable to connect to the database
-2017-07-06 11:19:26 | 2026 | 127.0.0.1 | 4ea2b3637166f76e131517328c07a2e43b4eeff6 | /index.php/membervip/timingtask/welfaretask | POST=[] | ERROR | Unable to connect to the database
-2017-07-06 11:20:15 | 1546 | 127.0.0.1 | 4ea2b3637166f76e131517328c07a2e43b4eeff6 | /index.php/membervip/timingtask/welfaretask | POST=[] | ERROR | Unable to connect to the database
-2017-07-06 11:21:11 | 2030 | 127.0.0.1 | 4ea2b3637166f76e131517328c07a2e43b4eeff6 | /index.php/membervip/timingtask/welfaretask | POST=[] | ERROR | Unable to connect to the database
-2017-07-06 11:33:11 | 1546 | 127.0.0.1 | 7e51e9a81c03f5bef29d3c31bce84706206828a3 | /index.php/membervip/timingtask/welfaretask | POST=[] | ERROR | Unable to connect to the database
-2017-07-06 11:33:11 | 1546 | 127.0.0.1 | 7e51e9a81c03f5bef29d3c31bce84706206828a3 | /index.php/membervip/timingtask/welfaretask | POST=[] | ERROR | Session: Error while trying to free lock for ci_session:4ea2b3637166f76e131517328c07a2e43b4eeff6:lock

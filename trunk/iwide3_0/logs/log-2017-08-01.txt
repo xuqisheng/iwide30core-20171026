@@ -1,1 +1,0 @@
-ERROR - 2017-08-01 16:08:03 --> Unable to connect to the database

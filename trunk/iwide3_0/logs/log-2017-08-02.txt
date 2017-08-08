@@ -1,4 +1,0 @@
-ERROR - 2017-08-02 16:13:22 --> Unable to connect to the database
-ERROR - 2017-08-02 16:13:39 --> Unable to connect to the database
-ERROR - 2017-08-02 16:14:13 --> Unable to connect to the database
-ERROR - 2017-08-02 16:14:28 --> Unable to connect to the database

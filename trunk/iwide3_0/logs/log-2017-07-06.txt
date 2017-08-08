@@ -1,8 +1,0 @@
-ERROR - 2017-07-06 10:51:20 --> 404 Page Not Found: iapi/admin/Membervip/vapi
-ERROR - 2017-07-06 11:19:01 --> Session: Unable to connect to Redis with the configured settings.
-ERROR - 2017-07-06 11:19:11 --> Unable to connect to the database
-ERROR - 2017-07-06 11:19:26 --> Unable to connect to the database
-ERROR - 2017-07-06 11:20:15 --> Unable to connect to the database
-ERROR - 2017-07-06 11:21:11 --> Unable to connect to the database
-ERROR - 2017-07-06 11:33:11 --> Unable to connect to the database
-ERROR - 2017-07-06 11:33:11 --> Session: Error while trying to free lock for ci_session:4ea2b3637166f76e131517328c07a2e43b4eeff6:lock

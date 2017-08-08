@@ -136,7 +136,7 @@
 //                    }
                     ?>
                 </font>
-                <?php echo isset($v['expire_time']) ? '有效期 ' . date('Y.m.d', $v['receive_time']) . ' - ' . date('Y.m.d', $v['expire_time']) : ''; ?>
+                <?php echo isset($v['expire_time']) ? '有效期 ' . date('Y.m.d', $v['use_time_start']) . ' - ' . date('Y.m.d', $v['expire_time']) : ''; ?>
             </div>
         </div>
             </a>
