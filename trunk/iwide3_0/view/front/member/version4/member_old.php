@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=320,initial-scale=1,user-scalable=0">
+<?php include 'wxheader.php' ?>
 <link rel="stylesheet" href="<?php echo base_url("public/member/zhouji/css/zhouji.css");?>" type="text/css">
 <title>会员登记</title>
 </head>

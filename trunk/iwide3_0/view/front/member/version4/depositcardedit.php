@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="<?php echo base_url("public/member/version4.0/weui/dist/style/weui.css");?>"/>
     <link rel="stylesheet" href="<?php echo base_url("public/member/version4.0/weui/dist/style/weui.min.css");?>"/>
     <link rel="stylesheet" href="<?php echo base_url("public/member/version4.0/weui/dist/example/example.css");?>"/>
-    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <?php include 'wxheader.php' ?>
     <link href="<?php echo base_url("public/member/phase2/styles/global.css");?>" rel="stylesheet">
     <script src="<?php echo base_url("public/member/phase2/scripts/jquery.js");?>"></script>
     <script src="<?php echo base_url("public/member/phase2/scripts/ui_control.js");?>"></script>

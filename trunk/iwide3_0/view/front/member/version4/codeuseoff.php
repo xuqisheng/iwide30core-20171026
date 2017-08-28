@@ -18,7 +18,7 @@
     <script src="<?php echo base_url('public/soma/scripts/ui_control.js');?>"></script>
     <script src="<?php echo base_url('public/soma/scripts/imgscroll.js');?>"></script>
     <script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
-    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <?php include 'wxheader.php' ?>
     <script src="<?php echo base_url('public/member/scripts/alert.js');?>"></script>
     <style>
     </style>

@@ -12,6 +12,7 @@
 
 <script src="<?php echo base_url("public/member/public/js/jquery.js");?>"></script>
 <script src="<?php echo base_url("public/member/public/js/ui_control.js");?>"></script>
+<?php include 'wxheader.php' ?>
 <link href="<?php echo base_url("public/member/public/css/global.css");?>" rel="stylesheet">
 <title>二维码</title>
 <script type="text/javascript">  

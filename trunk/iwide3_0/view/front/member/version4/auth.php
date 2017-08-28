@@ -17,7 +17,7 @@
 <script src="<?php echo base_url("public/member/phase2/scripts/jquery.js");?>"></script>
 <script src="<?php echo base_url("public/member/phase2/scripts/ui_control.js");?>"></script>
 <script src="<?php echo base_url("public/member/phase2/scripts/alert.js");?>"></script>
-<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<?php include 'wxheader.php' ?>
 <style>
 </style>
 </head>

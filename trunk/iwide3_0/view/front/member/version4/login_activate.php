@@ -14,7 +14,7 @@
     <script src="<?php echo base_url("public/member/version4.0/weui/dist/example/example.js");?>"></script>
     <script src="<?php echo base_url("public/member/version4.0/js/login.js");?>"></script>
     <script type="text/javascript" src="<?php echo base_url("public/member/version4.0/js/alert.js");?>"></script>
-    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <?php include 'wxheader.php' ?>
 </head>
 <body ontouchstart>
 <div class="vip_content" style="display:none;">

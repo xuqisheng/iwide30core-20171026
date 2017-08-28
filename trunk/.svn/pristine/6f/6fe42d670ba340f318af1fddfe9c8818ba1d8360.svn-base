@@ -1,0 +1,355 @@
+<!-- DataTables -->
+<link rel="stylesheet"
+  href="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datatables/dataTables.bootstrap.css">
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+    <script src="<?php echo base_url(FD_PUBLIC) ?>/js/html5shiv.min.js"></script>
+    <script src="<?php echo base_url(FD_PUBLIC) ?>/js/respond.min.js"></script>
+<![endif]-->
+<link rel="stylesheet" href="<?php echo base_url(FD_PUBLIC) ?>/AdminLTE/plugins/new/new.css">
+<script src="<?php echo base_url(FD_PUBLIC) ?>/AdminLTE/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="<?php echo base_url(FD_PUBLIC) ?>/AdminLTE/plugins/datatables/dataTables.bootstrap.min.js"></script>
+</head>
+<style>
+.j_head >div >span:nth-of-type(1){width: 106px;}
+</style>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="modal fade" id="setModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">显示设置</h4>
+      </div>
+      <div class="modal-body">
+        <div id='cfg_items'>
+        <?php echo form_open('distribute/distri_report/save_cofigs','id="setting_form"')?>
+          
+        </form></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="set_btn_save">保存</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div class="wrapper">
+
+<?php
+/* 顶部导航 */
+echo $block_top;
+?>
+
+<?php
+/* 左栏菜单 */
+echo $block_left;
+?>
+<style>
+.j_head >div:nth-of-type(1){width:370px;}
+.j_head >div:nth-of-type(2){width:317px;}
+.dataTables_filter{display: none;}
+</style>
+<div style="color:#92a0ae;">
+    <div class="over_x">
+        <div class="content-wrapper" style="min-width:1130px;" >
+            <div class="banner bg_fff p_0_20">
+                <?php echo $breadcrumb_html; ?>
+            </div>
+		    <div class="contents">
+		    <?php echo form_open('hotel/prices/index',array('id'=>'code_form','method'=>'get'));?>
+		        <div class="head_cont contents_list bg_fff">
+		          <div class="j_head">
+		            <div>
+					    <label>请选择酒店</label>
+					    <select id="hotel" onchange="get_rooms(this)" name="hotel">
+					    <?php foreach ($hotels as $hotel):?><option value="<?=$hotel['hotel_id']?>"<?php if($hotel_id == $hotel['hotel_id']):?> selected<?php endif;?>><?=$hotel['name']?></option><?php endforeach;?>
+					    </select>
+					    <?php if(count($hotels)>10){?>
+					     <div style='margin-top: 5px;'>
+					    	<input type="text" name="qhs" id="qhs" placeholder="快捷查询">
+					 	  	<input type="button" onclick='quick_search()' value='查询' />
+					 	  	<input type="button" onclick='go_hotel("next")' value='下一个' />
+					 	  	<input type="button" onclick='go_hotel("prev")' value='上一个' />
+					 	  	<span id='search_tip' style='color:red'></span>
+					    </div>
+					    <?php }?>
+		            </div>
+		            <div>
+		              <span>请选择房型/商品</span>
+		              <select id="room_id" name="r" class="w_200">
+		              </select>
+		            </div>
+		            <div>
+	                  <span for="type">请选择类型</span>
+	                  <select id="type" onchange="get_rooms(this)" name="t">
+	                	<?php if(!empty($enum_des['HOTEL_PRICE_CODE_TYPE'])){ foreach($enum_des['HOTEL_PRICE_CODE_TYPE'] as $code=>$des) {?>
+	              			<option value="<?php echo $code;?>" <?php if($type==$code) echo 'selected';?>><?php echo $des;}?></option>
+	              		<?php }?>
+	                  </select>
+		            </div>
+		          </div>
+		          <div  class="h_btn_list" style="">
+		            <div class="actives">筛选</div>
+		          </div>
+		        </div>
+		        <?php echo form_close();?>
+		        <div class="contents_list" style="font-size:13px;display: none;">
+		          <div class="classification display_flex bg_fff">
+		            <div value="可用">有效房价</div>
+		            <div value="未设置">无效房价</div>
+		            <div value="隐藏">隐藏房价</div>
+		            <div class="add_active">所有房价</div>
+		          </div>
+		        </div>
+		        <div class="box-body">
+		         <table id="coupons_table" class="table-striped table-condensed dataTable no-footer" style="width:100%;">
+		            <thead class="bg_f8f9fb form_thead">
+		              <tr class="bg_f8f9fb form_title">
+		                <th>房型</th>
+		                <th>价格代码</th>
+		                <th>默认房价</th>
+		                <th>默认房量</th>
+		                <th>早餐</th>
+		                <th>关联价格代码</th>
+		                <th>当前状态</th>
+		                <th>状态</th>
+		                <th>操作</th>
+		              </tr>
+		            </thead>
+		            <tbody class="containers dataTables_wrapper form-inline dt-bootstrap">
+	                    <?php if(!empty($list)){ foreach($list as $lt){ ?>
+		                    <tr  class=" form_con">
+		                    <?php foreach ($fields_config as $k=> $v):?>
+		             			<td><?php if(!empty($v['enable'])){ ?>
+				             		<input name='<?php echo $k?>' value='<?php echo $lt[$k]; ?>' />
+				             	<?php }else if(!empty($v['select'])){ ?>
+									<select  name='<?php echo $k; ?>'>
+									<?php foreach($v['select'] as $vk=>$vs) { ?>
+										<option value='<?php echo $vk; ?>' <?php if($vk==$lt[$k]){ echo 'selected';} ?>><?php echo $vs; ?></option>
+									<?php }?>
+									</select>
+							 	<?php } else { echo $lt[$k];}?></td>
+				             <?php endforeach; ?>
+				             <td><a class="bg_ff9900 color_fff template_btn" target='top' href="<?php echo site_url('hotel/prices/edit').'?r='.$lt['rid'].'&h='.$lt['hid'].'&code='.$lt['price_code'];?>">修改</a>
+				             	<a href="javascript:void(0);" onclick="quick_save(this,'<?php echo $lt['hid'];?>','<?php echo $lt['rid'];?>','<?php echo $lt['price_code'];?>');" class="bg_fe6464 color_fff template_btn">保存</a></td>
+				             </tr>
+	                    <?php }}?>
+		            </tbody>
+		          </table>
+		        </div>
+		    </div>
+        </div>
+    </div>
+
+
+
+</div>
+     
+<?php
+/* Footer Block @see footer.php */
+require_once VIEWPATH . $tpl . DS . 'privilege' . DS . 'footer.php';
+?>
+
+<?php
+/* Right Block @see right.php */
+require_once VIEWPATH . $tpl . DS . 'privilege' . DS . 'right.php';
+?>
+
+
+
+<?php
+/* Right Block @see right.php */
+require_once VIEWPATH . $tpl . DS . 'privilege' . DS . 'commonjs.php';
+?>
+
+<script>
+$(function(){
+	$('.actives').click(function(){
+		$('#code_form').submit();
+	});
+
+  $('#coupons_table').DataTable({
+      "bProcessing": true,
+      "paging": false,
+      "lengthChange": true,
+      "ordering": false,
+      "info": false,
+      "autoWidth": false,
+      "searching": true,
+      "language": {
+			"sSearch": "搜索",
+			"lengthMenu": "每页显示 _MENU_ 条记录",
+			"zeroRecords": "找不到任何记录. ",
+			"info": "",
+			"infoEmpty": "",
+			"infoFiltered": "(从 _MAX_ 条记录中过滤)",
+		}
+  });
+	var table = $('#coupons_table').DataTable();
+	$('.classification >div').click(function(){
+		$(this).addClass('add_active').siblings().removeClass('add_active');
+	    table
+	        .columns( 5 )
+	        .search( $(this).attr('value') )
+	        .draw();
+	})
+  //行全拼start
+  rowspans();
+  function rowspans(){
+  	  var arr1=[];
+	  var josn={};
+	  if($('.form_con').length>0){
+		  for(var i=0;i<$('.form_con').length;i++){
+		  	if(i==0){
+		  		josn.roomName=$('.form_con').eq(i).find('td:first-child').html();
+		  		josn.starNumber=i;
+		  	}
+			if(i==$('.form_con').length-1||josn.roomName!=$('.form_con').eq(i).find('td:first-child').html()){
+				if(i!=$('.form_con').length-1){
+					josn.endNumber=i-1;
+				}else{
+					if($('.form_con').eq(i).find('td:first-child').html()!=josn.roomName){
+						josn.endNumber=i-1;
+					}else{
+						josn.endNumber=i;
+					}
+				}
+				arr1.push(josn);
+				
+				if(i!=$('.form_con').length-1){
+					josn={};
+					josn.roomName=$('.form_con').eq(i).find('td:first-child').html();
+					josn.starNumber=i;
+				}else{
+					if($('.form_con').eq(i).find('td:first-child').html()!=josn.roomName){
+						josn={};
+						josn.roomName=$('.form_con').eq(i).find('td:first-child').html();
+			  			josn.starNumber=i;
+			  			josn.endNumber=i;
+						arr1.push(josn);
+					}
+				}
+				
+			}
+		  };
+	  }
+	  $('.form_con td:first-child').remove();
+	  for(var i=0;i<arr1.length;i++){
+	  	$('.form_con').eq(arr1[i].starNumber).prepend('<td class="moba" rowspan="'+(arr1[i].endNumber+1-arr1[i].starNumber)+'">'+arr1[i].roomName+'</td>');
+	  }
+  }
+  
+ //行全拼end
+
+})
+
+</script>
+<script>
+var room_id=0;
+<?php if(!empty($room_id)){?>
+room_id=<?php echo $room_id;?>;
+<?php }?>
+<?php if(!empty($hotel_id)){?>
+fill_rooms('<?php echo $hotel_id;?>');
+<?php }?>
+var search_index=0;
+function quick_search() {
+	var hk=$('#qhs').val();
+	if(hk){
+		$('#search_tip').html('');
+		options=$('#hotel option');
+		search_index=0;
+		$.each(options,function(i,n){
+			$(n).css('color','#555');
+			$(n).removeAttr('be_search');
+			if(n.innerHTML.indexOf(hk)>-1){
+				search_index++;
+				$(n).css('color','red');
+				$(n).attr('be_search',search_index);
+				if(search_index==1){
+					n.selected=true;
+					fill_rooms(n.value);
+				}
+			}
+		});
+		if(search_index==0){
+			$('#search_tip').html('无结果');
+		}
+	}
+}; 
+function go_hotel(direction){
+	selected_option=$('#hotel').find('option:selected');
+	selected_option=selected_option[0];
+	now_index=$(selected_option).attr('be_search');
+	if(now_index){
+		search_index=now_index;
+	}
+	if(search_index){
+		if(direction=='next'){
+			search_index++;
+		}else{
+			search_index--;
+		}
+	}
+	if(search_index){
+		option=$('#hotel>option[be_search="'+search_index+'"]');
+		if(option[0]!=undefined){
+			option=option[0];
+			option.selected=true;
+			fill_rooms(option.value);
+		}
+	}
+}
+function get_rooms(obj){
+	var hotel_id = $(obj).val();
+	if(isNaN(hotel_id)){
+		hotel_id = $('#hotel').val();
+	}
+	fill_rooms(hotel_id);
+}
+function fill_rooms(hotel_id){
+	var _html = '<option value="0">--全部房型--</option>';
+	$('#room_id').html(_html);
+	$.getJSON('<?php echo site_url('hotel/prices/room_types')?>',{'hid':hotel_id},function(datas){
+		$.each(datas,function(k,v){
+			_html += '<option value="' + v.room_id +'" ';
+			if(v.room_id==room_id)
+				_html+=' selected';
+			_html+= '>' + v.name+ '</option>';
+		});
+		$('#room_id').html(_html);
+	},'json');
+}
+function quick_save(obj,hotel,room,code){
+	$(obj).html('保存');
+	var _parent=$(obj).parent().parent();
+	var price=_parent.find("input[name='sprice']").val();
+	<?php if (empty($is_pms)){?>
+	if(isNaN(price) || price <=0){
+		$(obj).html('保存'+'<span style="color:red">价格必须大于0！</span>');
+		return;
+	}
+	<?php }?>
+	var num=_parent.find("input[name='snums']").val();
+	var bfnums = _parent.find("select[name='bfnums']").val();
+	var status=_parent.find("select[name='set_status']").val();
+	$.getJSON('<?php echo site_url('hotel/prices/quick_save_set')?>',{
+			'hid':hotel,
+			'room':room,
+			'code':code,
+			'price':price,
+			'num':num,
+			'bfnums':bfnums,
+			'status':status
+		},function(data){
+			if(data==1)
+				$(obj).html('保存'+'<span style="color:red">修改成功</span>');
+			else
+				$(obj).html('保存'+'<span style="color:red">修改失败</span>');
+		},'text');
+}
+</script>
+</body>
+</html>

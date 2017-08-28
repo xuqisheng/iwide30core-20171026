@@ -20,7 +20,7 @@
     <link href="<?php echo base_url('public/soma/styles/global.css');?>" rel="stylesheet">
     <link href="<?php echo base_url('public/soma/styles/command.css');?>" rel="stylesheet">
     <link href="<?php echo base_url('public/soma/styles/theme.css');?>" rel="stylesheet">
-    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <?php include 'wxheader.php' ?>
     <title><?php echo $title;?></title>
 </head>
     <script>

@@ -31,7 +31,7 @@
 <div class="xuanxiang">我的账户余额：<?=!empty($user_info['balance'])?$user_info['balance']:'0.00'?></div>
 <form action="<?=EA_const_url::inst()->get_url('*/*/sub_pay');?>" class="form-save" method="post">
     <input type="hidden" name="orderid" value="<?=!empty($orderid)?$orderid:0?>" />
-    <div class="kuang">
+    <div class="kuang" style="display: none;">
         <input type="password" autocomplete="off" name="password" placeholder="请输入支付密码" />
     </div>
     <div class="check">
@@ -66,7 +66,7 @@
             timeout:20000,
             beforeSubmit: function(arr, $form, options){
                 /*验证提交数据*/
-                var _null = false,
+                /*var _null = false,
                     _msg = '',
                     inputos = $(".form-save").find('input'),
                     _inputo = null;
@@ -91,7 +91,7 @@
                 if (_null === true) {
                     $.MsgBox.Alert(_msg);
                     return false;
-                }
+                }*/
                 /*end*/
                 pageloading();
             },

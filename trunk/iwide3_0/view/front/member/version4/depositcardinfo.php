@@ -13,6 +13,7 @@
     <script src="<?php echo base_url("public/member/phase2/scripts/ui_control.js");?>"></script>
     <script src="<?php echo base_url(FD_PUBLIC)?>/js/ajaxForm.js"></script>
     <script src="<?php echo base_url("public/member/phase2/scripts/alert.js");?>"></script>
+    <?php include 'wxheader.php' ?>
     <style>
         .bg_F3F4F8, body, html{background-color:#fff}
         @font-face {
