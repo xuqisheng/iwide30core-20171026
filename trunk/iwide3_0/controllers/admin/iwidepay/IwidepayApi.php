@@ -1658,7 +1658,7 @@ class IwidepayApi extends MY_Controller
                     {
                         $value['hotel_name'] = '集团';
                     }
-                    $value['amount'] = formatMoney($value['amount']/100);
+                    $value['amount'] = !empty($value['amount']) ? formatMoney($value['amount']/100) : '--';
                     $value['hotel_name'] = !empty($value['hotel_name']) ? $value['hotel_name'] : '';
                     $value['name'] = !empty($value['name']) ? $value['name'] : '';
                     $value['remark'] = !empty($value['remark']) ? $value['remark'] : '--';
@@ -1889,8 +1889,8 @@ class IwidepayApi extends MY_Controller
                 }
 
                 $value['refund_amount'] = formatMoney($value['refund_amount']/100);
+                $value['trans_amt'] = formatMoney($value['orig_amount']/100);
                 $value['orig_amount'] = formatMoney($value['orig_amount']/100);
-                $value['trans_amt'] = formatMoney($value['trans_amt']/100);
                 $value['module'] = $module[$value['module']];
                 $orders[$key] = $value;
             }
@@ -2005,7 +2005,7 @@ class IwidepayApi extends MY_Controller
             if($refund_status['status'] == 8)
             {
                 //正常部分退款
-                $up_data['trans_amt'] = 'trans_amt - '.$refund_fee;//交易金额
+                $up_data['trans_amt'] = '`trans_amt` - '.$refund_fee;//交易金额
                 $up_data['transfer_status'] = $refund_status['status'];
             }
             else if($refund_status['status'] == 6)

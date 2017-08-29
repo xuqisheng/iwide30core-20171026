@@ -89,10 +89,7 @@ class Split extends MY_Controller {
         //释放锁
         $this->redis_lock('delete');
         MYLOG::w('info:结束分账的脚本', 'iwidepay_split');
-        if($res){
-            exit('分账执行完毕');
-        }
-        exit('分账执行失败');
+        exit('分账执行完毕');
     }
 
     //处理订单
@@ -102,6 +99,7 @@ class Split extends MY_Controller {
         if($type=='online'){
             $nosplitorders = $this->Iwidepay_split_model->get_no_split_order('',$enddate);
         }elseif ($type=='offline') {
+            $enddate = date('Y-m-d 06:00:00');
             $nosplitorders = $this->Iwidepay_split_model->get_no_split_order_offline('',$enddate);
         }
         $inter_ids = array();
@@ -114,7 +112,7 @@ class Split extends MY_Controller {
             //释放锁
             MYLOG::w('err:data is empty by '.$type, 'iwidepay_split');
             $this->redis_lock('delete');
-            return 'data is empty by '.$type;
+            return 'data is empty by '.$type.'|';
         }
         //取全部分账规则 根据inter_id拿
         $splitrules = $this->Iwidepay_split_model->get_split_rule($inter_ids);
@@ -147,7 +145,7 @@ class Split extends MY_Controller {
                 }
             }
         }
-        return 'this is done by'.$type;    
+        return 'this is done by '.$type.'|';    
     }
 
     /**

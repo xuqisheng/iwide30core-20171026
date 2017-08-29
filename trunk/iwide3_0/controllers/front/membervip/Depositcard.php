@@ -130,6 +130,11 @@ class Depositcard extends MY_Front_Member
             $view = 'okpay';
         }
         $data['page_title'] = '支付结果';
+        if($this->inter_id == 'a421641095'){
+            $data['ido_show'] = false;
+        }else{
+            $data['ido_show'] = true;
+        }
         $this->load->view('member/'.$this->_template.'/'.$view,$data);
     }
     //支付失败
@@ -183,7 +188,8 @@ class Depositcard extends MY_Front_Member
 
     /*更新购买者信息*/
     public function update_order_buyer(){
-        $data = DepositcardService::getInstance()->update_order_buyer($this->inter_id,$this->openid);
+        $token = rand(1000,9999);
+        $data = DepositcardService::getInstance()->update_order_buyer($this->inter_id,$this->openid,$token);
         if(!empty($data['err'])){
             $this->_ajaxReturn($data['msg'],null,0);
         }else{

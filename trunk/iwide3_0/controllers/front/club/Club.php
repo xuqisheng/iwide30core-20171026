@@ -373,6 +373,11 @@ class Club extends MY_Front {
         $clubs_id=array();
 
         if($list){
+            foreach($list as $tmp_list){
+                $clubs_id[]=$tmp_list['club_id'];
+            }
+            $club_valid=$this->Clubs_model->check_group_club_validated($inter_id,$clubs_id);    //验证社群客的有效性
+
             foreach($list as $key=>$arr){
                 $arr_hotel_id=explode(',',$arr['hotel_id']);
                 if($arr['hotel_id']==0 || empty($arr['hotel_id'])){
@@ -386,7 +391,7 @@ class Club extends MY_Front {
                     $list[$key]['type']='part';
                 }
 
-                $valid=$this->Clubs_model->check_club_validated($arr['club_id']);    //验证社群客的有效性
+                $valid=isset($club_valid[$arr['club_id']]['valid'])?$club_valid[$arr['club_id']]['valid']:0;    //验证社群客的有效性
                 $arr_price_codes = array();
                 $arr_soma_codes = array();
 
@@ -420,7 +425,6 @@ class Club extends MY_Front {
                 $list[$key]['arr_price_codes']=$arr_price_codes;
                 $list[$key]['arr_soma_codes']=$arr_soma_codes;
 
-                $clubs_id[]=$list[$key]['club_id'];
             }
 
         //统计产生的间夜数量

@@ -246,7 +246,7 @@ total_favour+=pay_favour*1;
 var checkindateStr = '<?php echo date("Y-m-d",strtotime($startdate));?>';
 var checkoutdateStr = '<?php echo date("Y-m-d",strtotime($enddate));?>';
 var todayStr = '<?php echo date("Y-m-d");?>';
-var max_room_nums = '3';
+var max_room_nums = '<?php echo $first_state['least_num'];?>';
 var packages_price =<?php if(isset($packages_price) && !empty($packages_price))echo intval($packages_price);else echo 0; ?>;
 var dateOpt= {
     theme:'ios', //设置显示主题

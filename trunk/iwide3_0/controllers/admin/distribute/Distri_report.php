@@ -3140,6 +3140,9 @@ class Distri_report extends MY_Admin {
 		$this->load->model('distribute/report_model');
 		$admin_profile = $this->session->userdata('admin_profile');
 		
+		if(!empty($admin_profile['entity_id']))
+			$params['hotel_id'] = explode(',', $admin_profile['entity_id']);
+		
 		$this->load->library('pagination');
 		$config['per_page']          = 20;
 		$page = empty($this->uri->segment(5)) ? 0 : ($this->uri->segment(5) - 1) * $config['per_page'];

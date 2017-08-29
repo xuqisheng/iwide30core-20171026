@@ -230,13 +230,13 @@ class MY_Front_Member extends MY_Front{
             else
                 $slink = $slink . "?id=" . $this->inter_id;
             $data ['js_share_config'] ['link'] = $slink;
-            $data ['js_share_config'] ['imgUrl'] = 'http://7n.cdn.iwide.cn/public/uploads/201708/qf081454028608.jpg';
             $data ['js_share_config'] ['desc'] = $this->public ['name'] . '欢迎您使用会员服务,享受会员特权...';
             $data ['js_share_config'] ['type'] = '';
             $data ['js_share_config'] ['dataUrl'] = '';
         }
         if(empty($data ['js_share_config'] ['imgUrl'])){
-            $data ['js_share_config'] ['imgUrl'] = 'http://7n.cdn.iwide.cn/public/uploads/201708/qf081454028608.jpg';
+            $skin_config=$this->get_skin_config($this->_template);
+            $data ['js_share_config'] ['imgUrl'] = $skin_config['share_img'];
         }
         isset ( $data ['inter_id'] ) or $data ['inter_id'] = $this->inter_id;
         isset ( $data ['page_title'] ) or $data ['page_title'] = $this->public ['name'];
@@ -255,6 +255,17 @@ class MY_Front_Member extends MY_Front{
             return true;
         }
         return false;
+    }
+    protected function get_skin_config($skin_name) {
+        $config = array (
+                'allskins'=>array(
+                        'share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201708/qf281646497479.jpg'
+                ),
+                'highclass' => array (
+                        'share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201708/qf081454028608.jpg'
+                )
+        );
+        return empty ( $config [$skin_name] ) ? $config ['allskins'] : $config [$skin_name] ;
     }
     /**
      * 检查是否为已登录的会员卡

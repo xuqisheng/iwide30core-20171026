@@ -36,9 +36,9 @@ class Iwidepay_financial_model extends MY_Model
      * @param $where_arr
      * @return
      */
-    public function get_financial($select = '*',$where_arr)
+    public function get_financial($select = 'fc.*',$where_arr)
     {
-        $sql = "SELECT {$select} FROM ".self::TAB_IWIDEPAY_FINANCIAL." AS fc";
+        $sql = "SELECT {$select},H.name AS hotel_name,P.name FROM ".self::TAB_IWIDEPAY_FINANCIAL." AS fc";
         $sql .= " LEFT JOIN iwide_hotels as H ON H.inter_id = fc.inter_id AND H.hotel_id = fc.hotel_id";
         $sql .= " LEFT JOIN iwide_publics as P ON P.inter_id = fc.inter_id";
 
@@ -64,6 +64,77 @@ class Iwidepay_financial_model extends MY_Model
 
         $data = $this->db_read()->query($sql)->result_array();
         return $data;
+    }
+
+    /**
+     * 退款订单
+     * @param $start_time
+     * @param $end_time
+     * @return
+     */
+    public function refund_order($start_time,$end_time)
+    {
+        $sql = "SELECT * FROM ".self::TAB_IWIDEPAY_REFUND." WHERE refund_amt > 0 AND refund_status IN(1,2,3) AND `type` IN(1,3)";
+        $sql .= " AND (add_time >= '{$start_time}' AND add_time <= '{$end_time}')";
+        $data = $this->db_read()->query($sql)->result_array();
+        return $data;
+    }
+
+    /**
+     * 欠款订单
+     * @param $start_time
+     * @param $end_time
+     * @return
+     */
+    public function debt_order($start_time,$end_time)
+    {
+        $sql = "SELECT * FROM ".self::TAB_IWIDEPAY_DEBT_RD." WHERE status = 1 AND order_type IN('order','base_pay','refund','orderReward','extraReward')";
+        $sql .= " AND (add_time >= '{$start_time}' AND add_time <= '{$end_time}')";
+        $data = $this->db_read()->query($sql)->result_array();
+        return $data;
+    }
+
+
+    /**
+     * 分账订单
+     * @param $start_time
+     * @param $end_time
+     */
+    public function transfer_order($start_time,$end_time)
+    {
+        $sql = "SELECT t.type,t.module,t.amount,t.hotel_id as write_off_hotel_id,t.add_time AS transfer_date,o.order_no,
+                o.pay_no,o.order_no_main,o.inter_id,o.hotel_id,o.orig_amount,o.add_time
+                FROM iwide_iwidepay_transfer as t
+                LEFT JOIN iwide_iwidepay_order as o ON o.order_no = t.order_no AND o.module = t.module
+                WHERE t.status = 2 AND amount > 0
+                ";
+        $sql .= " AND (t.add_time >= '{$start_time}' AND t.add_time <= '{$end_time}')";
+        $data = $this->db_read()->query($sql)->result_array();
+        return $data;
+    }
+
+
+    /**
+     * 获取门店信息
+     * @param $inter_id
+     * @param $hotel_id
+     * @return
+     */
+    public function get_hotel_info($inter_id,$hotel_id)
+    {
+        $sql = "SELECT `name` FROM iwide_hotels  WHERE inter_id = '{$inter_id}' AND hotel_id = '{$hotel_id}'";
+        $data = $this->db_read()->query($sql)->row_array();
+        return $data;
+    }
+
+    /**
+     * 插入订单
+     * @param $data
+     */
+    public function insert_order($data)
+    {
+        $this->db_write()->insert ('iwidepay_financial', $data);
+        return $this->db_write()->insert_id();
     }
 
     /**

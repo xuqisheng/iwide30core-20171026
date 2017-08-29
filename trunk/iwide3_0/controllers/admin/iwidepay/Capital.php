@@ -84,8 +84,8 @@ class Capital extends MY_Admin
                     $value['hotel_name'] = '集团';
                 }
 
-                $value['hotel_name'] = !empty($value['hotel_name']) ? $value['hotel_name'] : '';
-                $value['name'] = !empty($value['name']) ? $value['name'] : '';
+                $item['name'] = !empty($value['name']) ? $value['name'] : '';
+                $item['hotel_name'] = !empty($value['hotel_name']) ? $value['hotel_name'] : '';
 
                 //查询统计金额
                 $value_arr = array(
@@ -103,14 +103,14 @@ class Capital extends MY_Admin
                 $distribution = $this->Iwidepay_capital_model->distribution($value_arr);
                 $arrears_amount = $this->Iwidepay_capital_model->arrears_amount($value_arr);
 
-                $value['total_amount'] = formatMoney($total_amount/100);
-                $value['pay_amount'] = formatMoney($pay_amount/100);
-                $value['refund_amount'] = formatMoney($refund_amount/100);
-                $value['withdraw_amount'] = formatMoney($withdraw_amount/100);
-                $value['commission'] = formatMoney($commission/100);
-                $value['distribution'] = formatMoney($distribution/100);
-                $value['arrears_amount'] = formatMoney($arrears_amount/100);
-                $list[$key] = $value;
+                $item['total_amount'] = formatMoney($total_amount/100);
+                $item['pay_amount'] = formatMoney($pay_amount/100);
+                $item['refund_amount'] = formatMoney($refund_amount/100);
+                $item['withdraw_amount'] = formatMoney($withdraw_amount/100);
+                $item['commission'] = formatMoney($commission/100);
+                $item['distribution'] = formatMoney($distribution/100);
+                $item['arrears_amount'] = formatMoney($arrears_amount/100);
+                $list[$key] = $item;
             }
         }
 

@@ -53,6 +53,7 @@
                                 </div>
                             </div>
                         </div>
+                        <?php if($ido_show){ ?>
                         <div class="weui_cells weui_cells_form">
                             <div class="weui_cell name">
                                 <div class="weui_cell_hd"><label for='' class="weui_label">证件号码</label></div>
@@ -64,6 +65,7 @@
                                 </div>
                             </div>
                         </div>
+                        <?php } ?>
                         <div class="weui_cells_title"></div>
                         <div class="bd spacing">
                             <a href="javascript:;" class="weui_btn weui_btn_primary">提交</a>

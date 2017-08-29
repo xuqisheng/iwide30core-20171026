@@ -8,20 +8,36 @@ use App\libraries\Support\Url;
  *
  * @property  Openid_rel_model $sc_openid_rel_model
  * @property Theme_config_model $Theme_config_model
- * @property Idistribute_model $Idistribute_model
  */
 class MY_Front_Soma extends MY_Front
 {
     /**
+     * 语言包路径
      * @var string
-     *
-     * chinese | english
+     */
+    protected $langDir = self::LANG_DIR_CN;
+
+    /**
+     * @var string
      */
     const LANG_DIR_CN = 'chinese';
+
+    /**
+     * @var string
+     */
     const LANG_DIR_EN = 'english';
 
-    public $headerDatas = array();
-    public $footerDatas = array();
+    /**
+     * 前后分离主题的header数据
+     * @var array
+     */
+    public $headerDatas = [];
+
+    /**
+     * 前后分离主题的footer数据
+     * @var array
+     */
+    public $footerDatas = [];
 
     /**
      * 这个公众号使用威富通支付
@@ -42,16 +58,21 @@ class MY_Front_Soma extends MY_Front
         'a499177502',
     ];
 
-    // 金陵公众号特殊处理
+    /**
+     * 金陵公众号特殊处理
+     * @var array
+     */
     protected $jinling_inter_ids = [
         'a450089706','a491796658'
     ];
 
-    // 旧版皮肤路径
+    /**
+     * 旧版皮肤路径
+     * @var array
+     */
     protected $oldThemePath = [
         'center',
         'default',
-        'en',
         'junting',
         'mooncake',
         'mooncake1',
@@ -80,24 +101,30 @@ class MY_Front_Soma extends MY_Front
 
     public $cache_timeout = 1;
     public $cache_redis = null;
-
     public $open_cache = false;
+    public $modelPrefix = 'soma/';
     public $open_cdn = false;
 
+    /**
+     *
+     * @var array|mixed
+     */
     public $themeConfig = array();
+
+    /**
+     * 主题路径文件名
+     * @var string
+     */
     public $theme = 'default';
     public $statis_code = '';
-    public $sign_update_code = '';
 
-    public $modelPrefix = 'soma/';
+    public $sign_update_code = '';
 
     /**
      * 例如，雅斯特酒店不叫储值，叫雅币
      * @var string
      */
     public $show_name = '储值';
-
-    protected $langDir = self::LANG_DIR_CN;
 
     /**
      *
@@ -106,49 +133,88 @@ class MY_Front_Soma extends MY_Front
      */
     public $public_info = [];
 
+    /**
+     * MY_Front_Soma constructor.
+     *
+     */
     public function __construct()
     {
         parent::__construct();
 
         MYLOG::soma_tracker($this->inter_id, $this->openid);
 
-        //加载缓存，如果没有缓存不起作用跳过
-        $params = $this->input->get();
-        $this->_load_cache_html($this->inter_id, $this->module, $this->controller, $this->action, $params);
-
-
         $this->current_inter_id = $this->inter_id;
         $this->public_info = $this->public;
         // 去掉MY_Front定义的public变量，防止后续代码出错
         unset($this->public);
 
-        $this->_load_lang();
-        $this->load->somaDatabase($this->db_soma);
-        $this->load->somaDatabaseRead($this->db_soma_read);
+        //theme
+        $this->load->model('soma/Theme_config_model');
+        $themeConfig = $this->Theme_config_model->get_using_theme($this->inter_id);
+        if ($themeConfig) {
+            $this->themeConfig = $themeConfig;
+            $this->theme = $themeConfig['theme_path'];
 
-        //例如，雅斯特酒店不叫储值，叫雅币
-        if( $this->inter_id == 'a472731996' ) {
-            $this->show_name = '雅币';
+            //把公众号配置的特殊信息放入配置
+            $this->statis_code = $this->_get_statis_code($this->inter_id, $themeConfig);
         }
 
-        if ( ENVIRONMENT === 'production') {
-            $success = Soma_base::inst()->check_cache_redis();
-            if ($success) {
-                //redis故障关闭cache
-                $this->open_cache = true;
+        if (ENVIRONMENT != 'production') {
+            if ($theme_path = $this->input->get('theme', true)) {
+                $this->theme = $theme_path;
             }
-            $this->open_cdn = true;
-
-            $this->cache_timeout = 60;
         }
 
-        //初始化数据库分片配置
-        $this->load->model('soma/shard_config_model', 'model_shard_config');
-        $this->db_shard_config = $this->model_shard_config->build_shard_config($this->inter_id);
+        //用于统计 例如：soma/package/index
+        $session_id = session_id();
+        if (!$this->session->userdata($session_id)) {
+            $this->session->set_userdata($session_id, "{$this->module}/{$this->controller}/{$this->action}");
+        }
 
-        $current_url = \App\libraries\Support\Url::current();
-        $sign_update_url = Soma_const_url::inst()->get_url('soma/api/get_sign_ajax');
-        $this->sign_update_code = <<<EOF
+        $this->_load_lang();
+
+        //新旧主题的逻辑分离
+        if ($this->isNewTheme()) {
+
+            $this->load->model('soma/shard_config_model', 'model_shard_config');
+            $this->db_shard_config = $this->model_shard_config->build_shard_config($this->inter_id);
+
+            $this->saveQueryParams();
+            $this->initViewData();
+
+        } else {
+
+            //加载缓存，如果没有缓存不起作用跳过
+            $params = $this->input->get();
+            $this->_load_cache_html($this->inter_id, $this->module, $this->controller, $this->action, $params);
+
+
+            $this->load->somaDatabase($this->db_soma);
+            $this->load->somaDatabaseRead($this->db_soma_read);
+
+            //例如，雅斯特酒店不叫储值，叫雅币
+            if( $this->inter_id == 'a472731996' ) {
+                $this->show_name = '雅币';
+            }
+
+            if ( ENVIRONMENT === 'production') {
+                $success = Soma_base::inst()->check_cache_redis();
+                if ($success) {
+                    //redis故障关闭cache
+                    $this->open_cache = true;
+                }
+                $this->open_cdn = true;
+
+                $this->cache_timeout = 60;
+            }
+
+            //初始化数据库分片配置
+            $this->load->model('soma/shard_config_model', 'model_shard_config');
+            $this->db_shard_config = $this->model_shard_config->build_shard_config($this->inter_id);
+
+            $current_url = \App\libraries\Support\Url::current();
+            $sign_update_url = Soma_const_url::inst()->get_url('soma/api/get_sign_ajax');
+            $this->sign_update_code = <<<EOF
 wx.error(function(res){
 $.ajax({
     type: 'POST',
@@ -163,64 +229,113 @@ $.ajax({
 });
 });
 EOF;
-        //theme
-        $this->load->model('soma/Theme_config_model');
-        $themeConfig = $this->Theme_config_model->get_using_theme($this->inter_id);
-        if ($themeConfig) {
-            $this->themeConfig = $themeConfig;
-            $this->theme = $themeConfig['theme_path'];
 
-            //把公众号配置的特殊信息放入配置
-            $this->statis_code = $this->_get_statis_code($this->inter_id, $themeConfig);
         }
 
-        //用于统计 例如：soma/package/index
-        $session_id = session_id();
-        if (!$this->session->userdata($session_id)) {
-            $this->session->set_userdata($session_id, "{$this->module}/{$this->controller}/{$this->action}");
-        }
-
-        //渠道来源
-        $channel = $this->input->get_post('channel', null, 0);
-        if ($channel) {
-            $this->session->set_tempdata('channel', $channel, 24 * 3600);
-        }
 
         // 不是ajax请求的时候，才能进行静默授权
         // 泛分销静默授权，不是粉丝不跳转，是粉丝的话判断链接是否存在rel_res参数，
         // 存在说明已经跳转过，不管成功失败，不要再次跳转造成死循环，rel_res参数当次访问一直存在
-        // 存在fans_act这个参数再进行静默授权
-         if(ENVIRONMENT != 'dev' && !$this->input->get('rel_res') && !$this->input->is_ajax_request()) {
-             $this->load->library('Soma/Api_idistribute', null);
-             $saler_info = $this->api_idistribute->get_saler_info($this->inter_id, $this->openid);
-             if (empty($saler_info)) {
-                 // 激活泛分销
-                 $this->load->model('distribute/openid_rel_model', 'sc_openid_rel_model');
+        // if(ENVIRONMENT != 'dev' && !$this->input->get('rel_res') && !$this->input->is_ajax_request())
+        // {
+        //     $this->load->library('Soma/Api_idistribute', null);
+        //     $saler_info = $this->api_idistribute->get_saler_info($this->inter_id, $this->openid);
+        //     if(empty($saler_info)) {
+        //         // 激活泛分销
+        //         $this->load->model('distribute/openid_rel_model', 'sc_openid_rel_model');
+        //         $deliver_infos = $this->Publics_model->get_public_by_id ( $this->sc_openid_rel_model->get_redis_key_status('__DISTRIBUTION_DELIER_ACCOUNT') );
+        //            $params = $this->input->get(null, true);
+        //            if (isset($params['fans_act'])) {
+        //                unset($params['fans_act']);
+        //            }
+        //         $url =  Soma_const_url::inst()->get_url('*/*/*', $params);
+        //         $act_url = prep_url($deliver_infos['domain']).'/distribute/dis_ext/auto_back/'.'?id='.$this->sc_openid_rel_model->get_redis_key_status('__DISTRIBUTION_DELIER_ACCOUNT').'&f='.base64_encode($this->inter_id.'***'.$this->openid.'***'.$url);
+        //         redirect($act_url);
+        //     }
+        // }
 
-                 $deliver_infos = $this->Publics_model->get_public_by_id($this->sc_openid_rel_model->get_redis_key_status('__DISTRIBUTION_DELIER_ACCOUNT'));
+        // 分销保护期处理
+        $this->_salarProtection();
 
-                 $params = $this->input->get(null, true);
-                 if (isset($params['fans_act'])) {
-                     unset($params['fans_act']);
-                 }
-                 $url = Soma_const_url::inst()->get_url('*/*/*', $params);
 
-                 $act_url = prep_url($deliver_infos['domain']) . '/distribute/dis_ext/auto_back/' . '?id=' . $this->sc_openid_rel_model->get_redis_key_status('__DISTRIBUTION_DELIER_ACCOUNT') . '&f=' . base64_encode($this->inter_id . '***' . $this->openid . '***' . $url);
-
-                 redirect($act_url);
-             }
         $this->datas['refund'] = true;
         if(in_array($this->inter_id, $this->cannotRefundInterId)){
             $this->datas['refund'] = false;
         }
 
-        if ($this->isNewTheme()) {
-            $this->initViewData();
-        }
+    }
+
+    /**
+     *
+     * @return     boolean  True if new theme, False otherwise.
+     *
+     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
+     *
+     * 新旧皮肤判断 $this->isNewTheme() , false为旧，true为新
+     */
+    public function isNewTheme()
+    {
+        return !in_array($this->theme, $this->oldThemePath);
+    }
+
+    /**
+     * 将一些重要参数写入session temp data 中,
+     * 方便前后分离中使用
+     * @author renshuai  <renshuai@jperation.cn>
+     */
+    private function saveQueryParams()
+    {
+        $ttl = 24 * 3600;
+
+        //分销员ID
+        $saler_id = $this->input->get('saler', null, 0);
+        if($saler_id) {
+            $this->session->set_tempdata('saler', $saler_id, $ttl);
         }
 
-        // 分销保护期处理
-        $this->_salarProtection();
+        //粉丝ID
+        $fans_id = $this->input->get('fans', null, 0);
+        if($fans_id) {
+            $this->session->set_tempdata('fans', $fans_id, $ttl);
+        }
+
+        //泛分销粉丝ID
+        $fans_saler_id = $this->input->get('fans_saler', null, 0);
+        if($fans_saler_id) {
+            $this->session->set_tempdata('fans_saler', $fans_saler_id, $ttl);
+        }
+
+        $ttl = 3600;
+
+        //渠道来源
+        $channel = $this->input->get('channel', null, 0);
+        if ($channel) {
+            $this->session->set_tempdata('channel', $channel, $ttl);
+        }
+
+        //直播code
+        $zbcode = $this->input->get('zbcode', null, '');
+        if($zbcode) {
+            $this->session->set_tempdata('zbcode', $zbcode, $ttl);
+        }
+
+        //直播渠道
+        $channelid = $this->input->get('channelid', null, 0);
+        if($channelid) {
+            $this->session->set_tempdata('channelid', $channelid, $ttl);
+        }
+
+        //直播地址
+        $zburl = $this->input->get('zburl', null, '');
+        if($zburl) {
+            $this->session->set_tempdata('zburl', $zburl, $ttl);
+        }
+
+        $rel_res = $this->input->get('rel_res', null, '');
+        if($rel_res) {
+            $this->session->set_tempdata('rel_res', $rel_res, $ttl);
+        }
+
     }
 
     /**
@@ -250,8 +365,8 @@ EOF;
     {
         //load lang file
         $lang_cookie_key = 'lang_' . $this->inter_id;
-        $lang_cookie = $this->input->cookie($lang_cookie_key, true);
-        $lang_input = $this->input->get('lang', true);
+        $lang_cookie = $this->input->cookie($lang_cookie_key);
+        $lang_input = $this->input->get('lang');
         $lang = $lang_input && in_array($lang_input, array('english', 'chinese')) ? $lang_input : ($lang_cookie ? $lang_cookie : 'chinese');
         if (!$lang_cookie || ($lang_cookie !== $lang)) {
             $this->load->helper('cookie');
@@ -274,7 +389,7 @@ EOF;
             $this->lang->language['stord_fail_tip']             = "{$this->show_name}使用失败";
         }
 
-        if (in_array($this->inter_id, $this->idistributInterId) && $lang === 'chinese' ) {
+        if (in_array($this->inter_id, $this->idistributInterId)  && $lang === 'chinese' ) {
             $this->lang->language['provide_by'] = "此活动内容由[0]提供";
             $this->lang->language['terms_and_conditions'] = "注意啦";
             $this->lang->language['buy_now'] = "立即申请";
@@ -285,17 +400,26 @@ EOF;
             $this->lang->language['my_puchases'] = "申请的商品";
             $this->lang->language['purchase_successful'] = "申请成功";
             $this->lang->language['purchase_tips'] = "小提示:请提前拨打电话进行预约";
+
         }
 
         $this->langDir = $lang;
     }
 
-    //从配置中获取统计代码
+    /**
+     *
+     * 从配置中获取统计代码
+     * @param $inter_id
+     * @param $themeConfig
+     * @return string
+     *
+     */
     protected function _get_statis_code($inter_id, $themeConfig)
     {
         $disable_action = array(
             'package_pay', 'groupon_pay', 'killsec_pay',
         );
+
         if (in_array($this->action, $disable_action)) {
             return '';
         }
@@ -315,7 +439,7 @@ var _hmt = _hmt || [];
             if (isset($themeConfig['statis_code'])) {
                 return $themeConfig['statis_code'];
             } else {
-                $public_info = $this->Publics_model->get_public_by_id($inter_id);
+                $public_info = $this->public_info;
                 if (!empty($public_info['statis_code'])) {
                     return $public_info['statis_code'];
                 }
@@ -417,7 +541,7 @@ var _hmt = _hmt || [];
 
         if (!isset($datas['js_share_config'])) {
             $datas['js_share_config'] = false;
-        }   //array('title','desc','link','imgUrl')
+        }
 
         $datas['uri'] = array(
             'module'     => $this->module,
@@ -426,7 +550,6 @@ var _hmt = _hmt || [];
         );
         $datas['inter_id'] = $this->inter_id;
         $datas['openid'] = $this->openid;
-
         $datas['business'] = $this->input->get_post('bsn', null, '');
         $datas['settlement'] = $this->input->get_post('stl', null, '');
         $datas['saler'] = $this->input->get_post('saler', null, '');
@@ -434,21 +557,16 @@ var _hmt = _hmt || [];
         $datas['fans'] = $this->input->get_post('fans', null, '');
         $path = 'soma' . DS;
 
-        $view_file_path = $path . $this->theme . DS . $file;
         if (!file_exists(VIEWPATH . $path . $this->theme . DS . $file . ".php")) {
             if (defined('PROJECT_AREA') && PROJECT_AREA == 'mooncake'
                 && file_exists(VIEWPATH . $path . 'mooncake' . DS . $file . ".php")
             ) {
-                $view_file_path = $path . 'mooncake' . DS . $file;
                 $html = $this->load->view($path . 'mooncake' . DS . $file, $datas, true);
             } else {
-                $view_file_path = $path . 'default' . DS . $file;
                 $html = $this->load->view($path . 'default' . DS . $file, $datas, true);
             }
         } else {
             $html = $this->load->view($path . $this->theme . DS . $file, $datas, true);
-
-
         }
 
         //CDN URL 替换。
@@ -473,24 +591,6 @@ var _hmt = _hmt || [];
                 $this->cache->file->save($key, $header . $html, $this->cache_timeout);
             }
 
-            /*
-            if( !$this->cache_redis ){
-                $cache= $this->_load_cache();
-                $this->cache_redis= $cache->redis->redis_instance();
-            }
-            $params= $this->input->get();
-            $cache_key= $this->_cache_html_key($this->inter_id, $cdn_url, $params);
-            if( substr($html, -6) =='header' ){
-                $this->cache_redis->setex($cache_key, $this->cache_timeout, $html );
-            } else {
-                $header= $this->cache_redis->get($cache_key);
-                //通过替换加入统计js
-                $html= str_replace( array('//[<sign_update_code>]', '</html>'),
-                    array("{$this->sign_update_code}\n", "{$this->statis_code}\n</html>"),
-                $html);
-                $this->cache_redis->setex($cache_key, $this->cache_timeout, $header. $html );
-            }
-            */
         } else {
             //通过替换加入统计js
             $html = str_replace('</html>', "{$this->statis_code}\n</html>", $html);
@@ -499,7 +599,7 @@ var _hmt = _hmt || [];
         /**
          * 悦榕庄皮肤
          */
-        if(in_array($this->inter_id, ['a493015889', 'a497864944', 'a498449733', ])) {
+        if(in_array($this->inter_id, ['a493015889', 'a497864944', 'a498449733'])) {
             $url = get_cdn_url('public/soma/v1/style_s.css');
             $html = str_replace('<body>', "<body>\n<link href=\"$url\" rel=\"stylesheet\">", $html);
         }
@@ -507,7 +607,16 @@ var _hmt = _hmt || [];
         echo $html;
     }
 
-    //# Redis 缓存html start #########################################
+    /**
+     *
+     * Redis 缓存html start #########################################
+     * @param $inter_id
+     * @param $module
+     * @param $controller
+     * @param $action
+     * @param $params
+     * @author renshuai  <renshuai@jperation.cn>
+     */
     protected function _load_cache_html($inter_id, $module, $controller, $action, $params)
     {
         $cdn_url = $this->_match_url($module, $controller, $action);
@@ -532,6 +641,11 @@ var _hmt = _hmt || [];
         }
     }
 
+    /**
+     * @param $html
+     * @return mixed
+     * @author renshuai  <renshuai@jperation.cn>
+     */
     protected function _replace_cdn_url($html)
     {
         if ($this->open_cdn) {
@@ -558,6 +672,13 @@ var _hmt = _hmt || [];
         }
     }
 
+    /**
+     * @param $inter_id
+     * @param $cdn_url
+     * @param $params
+     * @return string
+     * @author renshuai  <renshuai@jperation.cn>
+     */
     protected function _cache_html_key($inter_id, $cdn_url, $params)
     {
         if (isset($params['id'])) {
@@ -575,6 +696,14 @@ var _hmt = _hmt || [];
         }
     }
 
+    /**
+     * 需要缓存的页面
+     * @param $module
+     * @param $controller
+     * @param $action
+     * @return bool|string
+     * @author renshuai  <renshuai@jperation.cn>
+     */
     protected function _match_url($module, $controller, $action)
     {
         if ($this->open_cache) {
@@ -714,8 +843,8 @@ var _hmt = _hmt || [];
 
     /**
      * 对于需要跳转站外域名获取code的，根据inter_id 做区分跳转
-     * @param unknown $inter_id
-     * @param unknown $refer
+     * @param string $inter_id
+     * @param string $refer
      */
     protected function _wx_redirect($inter_id, $refer)
     {
@@ -801,8 +930,7 @@ var _hmt = _hmt || [];
      */
     protected function get_center_inter_id()
     {
-        if (isset($_SERVER['CI_ENV']) && $_SERVER['CI_ENV'] == 'production') {
-            // return 'a429262688';a476864535
+        if (ENVIRONMENT === 'production') {
             return 'a476864535';
         } else {
             // 测试环境中心平台公众号
@@ -862,10 +990,8 @@ var _hmt = _hmt || [];
      */
     public function build_openid_map_notify()
     {
-
         $result = $this->input->get('res', true);
         $extra = $this->input->get('extra', true);
-        $this->write_log(var_export($result, true) . var_export($extra, true), 'soma' . DS . 'center');
 
         $this->session->set_userdata(array('bulid_openid_map_record' => 1));
         $request_url = base64_url_decode($extra['origin_url']);
@@ -873,11 +999,15 @@ var _hmt = _hmt || [];
 
     }
 
-    //日志写入
+    /**
+     * 日志写入
+     * @param string $content
+     * @param string $dir
+     * @author renshuai  <renshuai@jperation.cn>
+     */
     public function write_log($content, $dir = 'mooncake')
     {
         $file = date('Y-m-d') . '.txt';
-        //echo $tmpfile;die;
         $path = APPPATH . 'logs' . DS . $dir . DS;
         if (!file_exists($path)) {
             @mkdir($path, 0777, true);
@@ -905,14 +1035,27 @@ var _hmt = _hmt || [];
 
         $products = array();
         if ($pids) {
-           $products = $this->Product_package_model->get_product_package_by_ids($pids, $this->inter_id);
+            $products = $this->Product_package_model->get_product_package_by_ids($pids, $this->inter_id);
         }
+
 
         // 如果没有配置推荐位产品，抽取产品销量最高的显示
         if (empty($products) || count($products) < 2) {
             $products = $this->Product_package_model->getRecommendedProducts($this->inter_id);
             $pids = array_keys($products);
         }
+
+
+        //首页不显示商品剔除
+        if(!empty($products)){
+            $productPackageModel = $this->Product_package_model;
+            foreach ($products as $key => $val){
+               if($val['is_hide'] == $productPackageModel::IS_NOT){
+                   unset($products[$key]);
+               }
+            }
+        }
+
 
         //获取酒店城市列表
         $this->load->model('hotel/Hotel_model', 'MyFrontSomaHotelModel');
@@ -946,51 +1089,6 @@ var _hmt = _hmt || [];
                 $products = $new_products;
             }
 
-//             if( $this->theme == 'default' ){
-
-//                 $html= '<div id="load_page_block" class="tp_list bgcolor_fff border martop"><div style="padding-bottom:3%;padding-left:3%; margin-bottom:3%" class="border_bottom h2">其他用户还看了</div>';
-//                 foreach ($products as $k=>$v ){
-//                     $url= Soma_const_url::inst()->get_url('soma/package/package_detail', array('id'=>$this->inter_id, 'pid'=> $v['product_id']) );
-//                     $can_gift= ($v['can_gift']== Product_package_model::CAN_T)? '<div class="fn"><span>可赠好友</span></div>': '';
-//                     $default_pic= base_url('public/soma/images/default.jpg');
-//                     $html.=
-// "<a href='{$url}' class='item'>
-//   <div class='img'><img src='{$v['face_img']}' />{$can_gift}</div>
-//   <p class='txtclip'>{$v['name']}</p>
-//   <div class='foot h2'>
-//       <p class='color_fff m_bg tp_price'>
-//         <span>惊喜价</span>
-//       <span class='y'>{$v['price_package']}</span>
-//           <span class='m_bg2'>去购买<em class='iconfont'>&#xe61b;</em></span>
-//       </p>
-//       <p class='tp_local txtclip'>{$v['city']}</p>
-//   </div>
-// </a>";
-//                 }
-//                 $html.= '</div>';
-
-//             } elseif( $this->theme == 'v1' ){
-//                 $is_odd= ( count($products) % 2 )>0;
-//                 if( $is_odd ) array_pop($products);
-
-//                 $html= '<link href="'.base_url("public/soma/v1/v1.css"). config_item("css_debug").'" rel="stylesheet">
-//                 <div id="load_page_block" class="tp_list bgcolor_fff border martop"><div style="padding-bottom:3%;padding-left:3%; margin-bottom:3%" class="border_bottom h2">其他用户还看了</div>';
-//                 foreach ($products as $k=>$v ){
-//                     $url= Soma_const_url::inst()->get_url('soma/package/package_detail', array('id'=>$this->inter_id, 'pid'=> $v['product_id']) );
-//                     $default_pic= base_url('public/soma/images/default.jpg');
-//                     $html.=
-// "<a href='{$url}' class='item bg_fff'>
-//   <div class='img'>
-//       <img src='{$v['face_img']}' />
-//   </div>
-//   <p class='h3 color_888'>{$v['name']}</p>
-//   <p class='item_foot'>惊喜价<em>|</em><span class='color_main y'>{$v['price_package']}</span></p>
-// </a>";
-//                 }
-//                 $html.= '</div>';
-//             }
-
-//         }
             if ($this->theme == 'default') {
 
                 $html = '<div class="bd h28 pad3 bg_fff">' . $this->lang->line('trending') . '</div><div class="tp_list bg_fff bd_bottom">';
@@ -1015,10 +1113,11 @@ var _hmt = _hmt || [];
                 $html .= '</div>';
 
             } elseif ($this->theme == 'v1') {
-                $is_odd = (count($products) % 2) > 0;
-                if ($is_odd) {
-                    array_pop($products);
-                }
+
+//                $is_odd = (count($products) % 2) > 0;
+//                if ($is_odd) {
+//                    array_pop($products);
+//                }
 
                 $html = '<link href="' . base_url("public/soma/v1/v1.css") . config_item("css_debug") . '" rel="stylesheet">
                 <div class="bd h28 pad3 bg_fff">' . $this->lang->line('trending') . '</div><div class="tp_list bg_fff bd_bottom">';
@@ -1033,6 +1132,7 @@ var _hmt = _hmt || [];
   <p class='h30 color_888'>{$v['name']}</p >
   <p class='item_foot'>" . $this->lang->line('surprise_offer') . "<em>|</em><span class='color_main y'>{$v['price_package']}</span></p >
 </a>";
+
                 }
                 $html .= '</div>';
             }
@@ -1122,6 +1222,9 @@ var _hmt = _hmt || [];
 
 
     /**
+     *
+     * response json
+     *
      * @param $arr
      * @author renshuai  <renshuai@mofly.cn>
      */
@@ -1134,6 +1237,7 @@ var _hmt = _hmt || [];
 
     /**
      * 处理分销号和泛分销号
+     *
      * @author luguihong  <luguihong@jperation.com>
      */
     public function handleDistribute()
@@ -1238,36 +1342,19 @@ var _hmt = _hmt || [];
     }
 
     /**
+     *
      * 获取当前openid的分销员ID
+     * @param $inter_id
+     * @param $openid
+     * @return mixed
+     * @author renshuai  <renshuai@jperation.cn>
      */
     public function _get_saler_id($inter_id, $openid)
     {
         $this->load->library('Soma/Api_idistribute');
         return $this->api_idistribute->get_saler_info($inter_id, $openid);
-        /*
-        $this->load->model('distribute/Staff_model');
-        $staff= $this->Staff_model->get_my_base_info_openid( $inter_id, $openid );
-        if( $staff && $staff['qrcode_id'] ){
-            return $staff['qrcode_id'];
-        } else {
-            return FALSE;
-        }
-        */
     }
 
-    /**
-     * Determines if new theme.
-     *
-     * @return     boolean  True if new theme, False otherwise.
-     *
-     * @author     fengzhongcheng <fengzhongcheng@mofly.cn>
-     *
-     * 新旧皮肤判断 $this->isNewTheme() , false为旧，true为新
-     */
-    public function isNewTheme()
-    {
-        return !in_array($this->theme, $this->oldThemePath);
-    }
     /**
      * @author zhangyi  <zhangyi@mofly.cn>
      * 新主题header，footer默认值
@@ -1277,35 +1364,43 @@ var _hmt = _hmt || [];
         $datas = [];
         $js_api_list = $menu_show_list = $menu_hide_list = '';
         $datas['wx_config'] = $this->_get_sign_package($this->inter_id);
+
         $datas['base_api_list'] = array('hideMenuItems', 'showMenuItems', 'onMenuShareTimeline', 'onMenuShareAppMessage');
         if (isset($datas['js_api_list'])) {
             $datas['js_api_list'] += $datas['base_api_list'];
-        } else {
+        }
+        else {
             $datas['js_api_list'] = $datas['base_api_list'];
         }
-        foreach ($datas['js_api_list'] as $v) {
-            $js_api_list .= "'{$v}',";
-        }
-        $datas['js_api_list'] = substr($js_api_list, 0, -1);
+        $datas['js_api_list'] = "'" . implode("','", $datas['js_api_list']) . "'";
+
         //主动显示某些菜单
         if (!isset($datas['js_menu_show'])) {
-            $datas['js_menu_show'] = array('menuItem:setFont', 'menuItem:share:appMessage', 'menuItem:share:timeline', 'menuItem:favorite', 'menuItem:copyUrl');
+            //$datas['js_menu_show'] = array('menuItem:setFont', 'menuItem:share:appMessage', 'menuItem:share:timeline', 'menuItem:favorite', 'menuItem:copyUrl');
+            $datas['js_menu_show'] = array(
+                'menuItem:setFont',
+                'menuItem:favorite',
+            );
         }
-        foreach ($datas['js_menu_show'] as $v) {
-            $menu_show_list .= "'{$v}',";
-        }
-        $datas['js_menu_show'] = substr($menu_show_list, 0, -1);
+        $datas['js_menu_show'] = "'" . implode("','", $datas['js_menu_show']) . "'";
+
         //主动隐藏某些菜单
         if (!isset($datas['js_menu_hide'])) {
-            $datas['js_menu_hide'] = array('menuItem:share:appMessage', 'menuItem:share:timeline', 'menuItem:copyUrl', 'menuItem:share:email', 'menuItem:originPage');
+            $datas['js_menu_hide'] = array(
+                'menuItem:share:appMessage',
+                'menuItem:share:timeline',
+                'menuItem:share:email',
+                'menuItem:copyUrl',
+                'menuItem:originPage'
+            );
         }
-        foreach ($datas['js_menu_hide'] as $v) {
-            $menu_hide_list .= "'{$v}',";
-        }
-        $datas['js_menu_hide'] = substr($menu_hide_list, 0, -1);
+        $datas['js_menu_hide'] = "'" . implode("','", $datas['js_menu_hide']) . "'";
+
+
         if (!isset($datas['js_share_config'])) {
             $datas['js_share_config'] = false;
         }
+
         $datas['inter_id'] = $this->inter_id;
         $datas['business'] = $this->input->get_post('bsn', null, '');
         $datas['settlement'] = $this->input->get_post('stl', null, '');
@@ -1316,27 +1411,59 @@ var _hmt = _hmt || [];
             'name' => $this->security->get_csrf_token_name(),
             'value' => $this->security->get_csrf_hash()
         ];
+
         $cdn_url = $this->_match_url($this->module, $this->controller, $this->action);
         if ($cdn_url) {
-            $datas['statistics_js'] = $this->statis_code;
-        }else{
-            $datas['statistics_js'] = $this->sign_update_code;
+            $datas['statistics_js'] =  $this->statis_code."\n";
         }
+
         $this->footerDatas = $datas;
-        $data = [
-            'title' => '商城'
-        ];
-        $this->headerDatas = $data;
+        $datas['title'] = isset($this->headerDatas['title']) ? $this->headerDatas['title'] : '商城';
+        $this->headerDatas = $datas;
     }
+
+    /**
+     * @param array $arr
+     * @author renshuai  <renshuai@jperation.cn>
+     */
+    protected function changeViewData(Array $arr)
+    {
+        if (!empty($arr)) {
+
+            if (isset($arr['js_share_config'])  && is_array($arr['js_share_config'])) {
+                $this->footerDatas['js_share_config'] = $arr['js_share_config'];
+            }
+
+            if (isset($arr['js_api_list'])  && is_array($arr['js_api_list'])) {
+                $js_api_list = "'" . implode("','", $arr['js_api_list']) . "'";
+                $this->footerDatas['js_api_list'] = $js_api_list;
+            }
+
+            if (isset($arr['js_menu_show'])  && is_array($arr['js_menu_show'])) {
+                $js_menu_show = "'" . implode("','", $arr['js_menu_show']) . "'";
+                $this->footerDatas['js_menu_show'] = $js_menu_show;
+            }
+
+            if(isset($arr['js_menu_hide'])  && is_array($arr['js_menu_hide'])) {
+                $js_menu_hide = "'" . implode("','", $arr['js_menu_hide']) . "'";
+                $this->footerDatas['js_menu_hide'] = $js_menu_hide;
+            }
+        }
+    }
+
     /**
      * @param $file
      * @param array $datas
      * @author zhangyi  <zhangyi@mofly.cn>
      * 前后端分离的新view方法
      */
-    protected function newThemeView($file, $datas = array()){
+    protected function newThemeView($file, $datas = [])
+    {
         $html = '';
         $path = 'soma' . DS;
+
+        $this->changeViewData($datas);
+
         $view_file_path = $path . $this->theme . DS . $file;
         $html .= $this->load->view($path . $this->theme . DS . 'header', $this->headerDatas, true);
         $html .= $this->load->view($path . $this->theme . DS . $file, $datas, true);
@@ -1344,6 +1471,7 @@ var _hmt = _hmt || [];
         if (ENVIRONMENT != 'production' && $this->isNewTheme()) {
             $html = '<!-- 视图文件路径:' . VIEWPATH . $view_file_path . '.php -->' . $html;
         }
+
         echo $html;
     }
 }

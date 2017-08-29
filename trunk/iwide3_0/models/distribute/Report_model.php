@@ -2142,6 +2142,14 @@ on im.mem_id=imd.mem_id where imd.membership_number!='' and im.inter_id='{$inter
             $sql .= " AND hs.master_dept = ?";
             $params [] = $arvg['department'];
         }
+        if(!empty($arvg['hotel_id'])){
+        	if(is_array($arvg['hotel_id'])){
+	        	$sql .= " AND s.hotel_id IN ?";
+        	}else{
+	        	$sql .= " AND s.hotel_id = ?";
+        	}
+        	$params [] = $arvg['hotel_id'];
+        }
 		$sql .= " ORDER BY s.order_time DESC";
 		if (!empty ( $limit )) {
 			$sql .= " LIMIT ?,?";
@@ -2205,6 +2213,14 @@ on im.mem_id=imd.mem_id where imd.membership_number!='' and im.inter_id='{$inter
         {
             $sql .= " AND hs.master_dept = ?";
             $params [] = $arvg['department'];
+        }
+        if(!empty($arvg['hotel_id'])){
+        	if(is_array($arvg['hotel_id'])){
+	        	$sql .= " AND s.hotel_id IN ?";
+        	}else{
+	        	$sql .= " AND s.hotel_id = ?";
+        	}
+        	$params [] = $arvg['hotel_id'];
         }
 		return $this->_db ( 'iwide_r1' )->query ( $sql, $params )->row()->nums;
 	}

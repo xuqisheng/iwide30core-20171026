@@ -1342,12 +1342,15 @@ class Package extends MY_Front_Soma_Iapi
         $sort = $this->input->get('sort', null, 1);
         $product_info = PackageService::getInstance()->getDistributeProducts($page, 10, $sort);
         $page_resource = [
+            'page' => $page,
+            'count' => $product_info['total'],
+            'size' => 10,
             'link' => [
                 'detail' => $this->link['product_link']
             ]
         ];
         $result = [
-            'product_info' => $product_info,
+            'product_info' => $product_info['products'],
             'page_resource' => $page_resource
         ];
         $this->json(BaseConst::OPER_STATUS_SUCCESS, '', $result);

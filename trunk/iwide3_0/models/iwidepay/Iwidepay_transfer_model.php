@@ -8,6 +8,9 @@ class Iwidepay_Transfer_Model extends MY_Model{
     const TAB_IWIDEPAY_SUM = 'iwide_iwidepay_sum_record';
     const TAB_IWIDEPAY_BILL = 'iwide_iwidepay_bill_record';
     const TAB_IWIDEPAY_SETTLE = 'iwide_iwidepay_settlement';
+    const TAB_IWIDEPAY_OFF_TRANSFER = 'iwide_iwidepay_offline_transfer';
+    const TAB_IWIDEPAY_OFF_SPLIT = 'iwide_iwidepay_offline_split';
+    const TAB_IWIDEPAY_UNSPLIT_ORDER = 'iwide_iwidepay_offline_order';
 	function __construct() {
 		parent::__construct ();
 	}
@@ -48,6 +51,14 @@ class Iwidepay_Transfer_Model extends MY_Model{
         return $res;
     }
 
+    //获取未分账订单（查询分账订单表）取前一天之前的 | 线下
+    public function get_offline_unsplit_orders(){
+        $end_time = date('Y-m-d 06:00:00');
+        $sql = "select id,order_sn,inter_id,hotel_id,module,openid,order_no_main,order_no,transfer_status,trans_amt,dist_amt,handled from " . self::TAB_IWIDEPAY_UNSPLIT_ORDER . " where handled=1 and ((transfer_status in (1,2,5,8) and module = 'soma') or (transfer_status in (2,8) and module != 'soma'))  and add_time <'{$end_time}'";
+        $res = $this->db_read()->query($sql)->result_array();
+        return $res;
+    }
+
     //获取规则
     public function get_rules_by_inter_id($inter_id = ''){
         $sql = "select * from " . self::TAB_IWIDEPAY_RULE . " where inter_id = '{$inter_id}' and status = 1";
@@ -75,9 +86,22 @@ class Iwidepay_Transfer_Model extends MY_Model{
         return $res['c'];
     }
 
+    //获取分账表行数|线下
+    public function get_offline_split_count($inter_id = '',$order_no = '',$module = 'hotel'){
+        $sql = "select count(*) as c from " .self::TAB_IWIDEPAY_OFF_SPLIT  . "  where inter_id = '{$inter_id}' and order_no = '{$order_no}' and module = '{$module}' and bank_card_no != '' and m_id != ''";
+        $res = $this->db->query($sql)->row_array();
+        return $res['c'];
+    }
+
     //获取转账表行数
     public function get_transfer_count($inter_id = '',$order_no = '',$module = 'hotel'){
         $sql = "select count(*) as c from " .self::TAB_IWIDEPAY_TRANSFER  . "  where inter_id = '{$inter_id}' and order_no = '{$order_no}' and module = '{$module}' and bank !='' and bank_card_no != '' and bank_user_name != ''";
+        $res = $this->db->query($sql)->row_array();
+        return $res['c'];
+    }
+    //获取转账表行数|线下
+    public function get_offline_transfer_count($inter_id = '',$order_no = '',$module = 'hotel'){
+        $sql = "select count(*) as c from " .self::TAB_IWIDEPAY_OFF_TRANSFER . "  where inter_id = '{$inter_id}' and order_no = '{$order_no}' and module = '{$module}' and bank_card_no != '' and m_id != '' ";
         $res = $this->db->query($sql)->row_array();
         return $res['c'];
     }
@@ -105,6 +129,13 @@ class Iwidepay_Transfer_Model extends MY_Model{
     //获取分账表和转账表的记录（连表）
     public function get_split_transfer_record($inter_id = '',$order_no = '',$module = 'hotel'){
         $sql = " select a.id,a.bank,a.bank_user_name,a.bank_card_no,a.amount,a.inter_id,a.hotel_id,a.type,a.order_no,a.status,a.m_id,b.m_id as s_m_id,b.bank as s_bank,b.bank_card_no as s_bank_card_no,b.bank_user_name as s_bank_user_name,b.amount as s_amount,b.type as s_type,b.hotel_id as s_hotel_id,b.order_no as s_order_no from " . self::TAB_IWIDEPAY_TRANSFER . " a left join " . self::TAB_IWIDEPAY_SPLIT . " b on a.inter_id = b.inter_id and b.order_no = a.order_no and  b.hotel_id = a.hotel_id and b.type = a.type and a.module = b.module where a.inter_id = '{$inter_id}' and a.order_no = '{$order_no}' and a.module = '{$module}' and a.bank !='' and a.bank_card_no != '' and a.bank_user_name != ''";
+        $res = $this->db->query($sql)->result_array();
+        return $res;
+    }
+
+    //获取分账表和转账表的记录（连表）|线下
+    public function get_offline_split_transfer_record($inter_id = '',$order_no = '',$module = 'hotel'){
+        $sql = " select a.id,a.bank_card_no,a.amount,a.inter_id,a.hotel_id,a.type,a.order_no,a.status,a.m_id,b.m_id as s_m_id,b.bank_card_no as s_bank_card_no,b.amount as s_amount,b.type as s_type,b.hotel_id as s_hotel_id,b.order_no as s_order_no from " . self::TAB_IWIDEPAY_OFF_TRANSFER . " a left join " . self::TAB_IWIDEPAY_OFF_SPLIT . " b on a.inter_id = b.inter_id and b.order_no = a.order_no and  b.hotel_id = a.hotel_id and b.type = a.type and a.module = b.module where a.inter_id = '{$inter_id}' and a.order_no = '{$order_no}' and a.module = '{$module}' and a.bank_card_no != ''";
         $res = $this->db->query($sql)->result_array();
         return $res;
     }
@@ -247,6 +278,36 @@ class Iwidepay_Transfer_Model extends MY_Model{
         $sql = "select id,sum(amount) as sum_amount,bank_card_no from " . self::TAB_IWIDEPAY_SETTLE . " where handle_date = '{$date}' and status = 0  group by bank_card_no";
         $res = $this->db_read()->query($sql)->result_array();
         return $res;
+    }
+
+    //分账脚本save in transfer 批量插入
+    public function batch_insert_transfer($data,$type){
+        if(empty($data)){
+            return false;
+        }
+        if($type == 'online'){
+            return $this->db->insert_batch('iwidepay_transfer',$data);
+        }else{//这里还要做处理 
+            foreach($data as $k=>$v){
+                unset($data[$k]['bank']);
+                unset($data[$k]['bank_user_name']);
+                unset($data[$k]['is_company']);
+                unset($data[$k]['pay_id']);
+                unset($data[$k]['pay_type']);
+            }
+            //var_dump($data);die;
+            return $this->db->insert_batch('iwidepay_offline_transfer',$data);
+        }
+    }
+
+    //update unsplit_order
+    public function update_offline_order_data($where,$update){
+        if(empty($where)){
+            return false;
+        }
+        $this->db->where($where);
+        $this->db->update('iwidepay_offline_order',$update);
+        return $this->db->affected_rows();
     }
 
 }

@@ -35,8 +35,7 @@ class Financial extends MY_Admin
 
         echo $this->_render_content($this->_load_view_file('index'), $return, TRUE);
     }
-
-
+    
     /**
      * 导出数据
      */
@@ -46,7 +45,7 @@ class Financial extends MY_Admin
         $filter['inter_id'] = !empty($param['inter_id']) ? addslashes($param['inter_id']) : $this->admin_profile['inter_id'];
         $filter['pay_start_time'] = !empty($param['start_time']) ? addslashes($param['start_time']) : '';
         $filter['pay_end_time'] = !empty($param['end_time']) ? addslashes($param['end_time']) : '';
-        $filter['transfer_status'] = '3,5';//已分账
+        $filter['transfer_status'] = '3,5,7,8,9';//已分账
 
         //集团账号
         $filter['hotel_id'] = $this->admin_profile['entity_id'];
@@ -186,16 +185,15 @@ class Financial extends MY_Admin
     public function ext_financial()
     {
         $param = request();
-        $filter['inter_id'] = !empty($param['inter_id']) ? addslashes($param['inter_id']) : $this->admin_profile['inter_id'];
+       // $filter['inter_id'] = !empty($param['inter_id']) ? addslashes($param['inter_id']) : $this->admin_profile['inter_id'];
         $filter['start_time'] = !empty($param['start_time']) ? addslashes($param['start_time']) : '';
         $filter['end_time'] = !empty($param['end_time']) ? addslashes($param['end_time']) : '';
-        //$filter['transfer_status'] = '3,5,7,8,9';//已分账
 
         //集团账号
-        $filter['hotel_id'] = $this->admin_profile['entity_id'];
+        //$filter['hotel_id'] = $this->admin_profile['entity_id'];
 
         $this->load->model('iwidepay/Iwidepay_financial_model');
-        $list = $this->Iwidepay_financial_model->get_financial($filter);
+        $list = $this->Iwidepay_financial_model->get_financial('fc.*',$filter);
         $module = array('hotel'=>'订房','soma'=>'商城','vip'=>'会员','okpay'=>'快乐付','dc'=>'在线点餐','ticket' => '预约核销','base_pay' => '基础月费','dist' => '分销');
         $trade_type = array(1 => '交易', 2 => '垫付退款', 3 => '原款退款', 4 => '首单奖励', 5 => '额外奖励', 6 => '月费基础', 7 => '交易');
         $transfer_status = array(1 => '部分分账', 2 => '已分账', 3 => '已结清');
@@ -205,7 +203,7 @@ class Financial extends MY_Admin
             {
                 $item['trade_time'] = $value['trade_time'];
                 $item['name'] = !empty($value['name']) ? $value['name'] : '';
-                $item['hotel_name'] = !empty($value['hotel_name']) ? $value['hotel_name'] : '';
+                $item['hotel_name'] = !empty($value['hotel_name']) ? $value['hotel_name'] : '--';
                 $item['module'] = !empty($module[$value['module']]) ? $module[$value['module']] : '--';
                 $item['order_no'] = $value['order_no'];
                 $item['pay_no'] = $value['pay_no'];
@@ -213,21 +211,241 @@ class Financial extends MY_Admin
                 $item['transfer_status'] = !empty($transfer_status[$value['transfer_status']]) ? $transfer_status[$value['transfer_status']] : '--';
                 $item['transfer_date'] = $value['transfer_date'];
                 $item['amount'] = formatMoney($value['amount']/100);
-                $item['write_off_hotel_id'] = $value['write_off_hotel_id'];
-                $item['cost_amount'] = formatMoney($value['cost_amount']/100);
-                $item['jfk_amount'] = formatMoney($value['jfk_amount']/100);
-                $item['group_amount'] = formatMoney($value['group_amount']/100);
-                $item['hotel_amount'] = formatMoney($value['hotel_amount']/100);
-                $item['dist_amount'] = formatMoney($value['dist_amount']/100);
+
+                //核销门店
+                $item['write_off_hotel_id'] = '';
+                if ($value['module'] = 'soma' && $value['hotel_id'] == '9999999' && $value['write_off_hotel_id'] != '9999999')
+                {
+                    $hotel = $this->Iwidepay_financial_model->get_hotel_info($value['inter_id'],$value['write_off_hotel_id']);
+                    $item['write_off_hotel_id'] = !empty($hotel['name']) ? $hotel['name'] : '--';
+                }
+
+                $item['cost_amount'] = !empty($value['cost_amount']) ? formatMoney($value['cost_amount']/100) : '--';
+                $item['jfk_amount'] = !empty($value['jfk_amount']) ? formatMoney($value['jfk_amount']/100) : '--';
+                $item['group_amount'] = !empty($value['group_amount']) ? formatMoney($value['group_amount']/100) : '--';
+
+                //线下支付
+                if ($value['trade_type'] == 7)
+                {
+                    $item['hotel_amount'] = '-' . formatMoney(($value['jfk_amount'] + $value['group_amount'] + $value['dist_amount'])/100);
+                }
+                else if (in_array($value['trade_type'],array(2,4,5,6)))
+                {
+                    $item['hotel_amount'] = '-' . $item['hotel_amount'];
+                }
+                else
+                {
+                    $item['hotel_amount'] = !empty($value['hotel_amount']) ? formatMoney($value['hotel_amount']/100) : '--';
+                }
+
+                $item['dist_amount'] = !empty($value['dist_amount']) ? formatMoney($value['dist_amount']/100) : '--';
                 $list[$key] = $item;
             }
         }
 
         $headArr = array('交易时间','所属公众号','所属门店','来源模块','平台订单号','支付订单号','交易类型','分账状态','分账时间','交易/退款金额(元)','核销门店','交易手续费','金房卡分成','集团分成','门店分成','分销员分成');
-        $widthArr = array(20,20,20,12,20,20,12,12,12,12,12,12,12,14);
+        $widthArr = array(20,20,20,12,25,25,12,12,20,12,12,12,12,14);
         getExcel('分账财务对账表',$headArr,$list,$widthArr);
 
     }
 
+
+    /**
+     * 计划任务生成 财务对账单 => 每天退款订单
+     */
+    public function run_refund_financial()
+    {
+        $this->load->model('iwidepay/Iwidepay_financial_model');
+
+        //退款记录
+        $stat_time = date('Y-m-d',strtotime('-1 days'));
+        $end_time = date('Y-m-d 23:59:60',strtotime('-1 days'));
+        $list_refund = $this->Iwidepay_financial_model->refund_order($stat_time,$end_time);
+        if (!empty($list_refund))
+        {
+            //插入对账单表
+            foreach ($list_refund as $value)
+            {
+                $item = array(
+                    'module'    => $value['module'],
+                    'order_no'  => $value['orig_order_no'],
+                    'pay_no'    => $value['ori_pay_no'],
+                    'trade_type' => 3, //3-原款退款
+                    'transfer_status' => 3, //3-已结清
+                    'transfer_date' => $value['add_time'],
+                    'amount' => $value['refund_amt'],
+                    'inter_id' => $value['inter_id'],
+                    'hotel_id' => $value['hotel_id'],
+                    'trade_time' => $value['add_time'],
+                    'add_time' => date('Y-m-d H:i:s'),
+                );
+                $this->Iwidepay_financial_model->insert_order($item);
+            }
+        }
+    }
+
+
+    /**
+     * 计划任务生成 财务对账单 => 每天欠款订单
+     */
+    public function run_debt_financial()
+    {
+        $this->load->model('iwidepay/Iwidepay_financial_model');
+
+        //退款记录
+        $stat_time = date('Y-m-d',strtotime('-1 days'));
+        $end_time = date('Y-m-d 23:59:60',strtotime('-1 days'));
+        $list_debt = $this->Iwidepay_financial_model->debt_order($stat_time,$end_time);
+        if (!empty($list_debt))
+        {
+            //插入对账单表
+            foreach ($list_debt as $value)
+            {
+                $item = array(
+                    'module'    => $value['module'],
+                    'order_no'  => $value['order_no'],
+                    'pay_no'    => $value['ori_pay_no'],
+                    'trade_type' => $this->get_financial_type($value['order_type']), //3-原款退款
+                    'transfer_status' => 3, //3-已结清
+                    'transfer_date' => date('Y-m-d',strtotime($value['add_time'])),
+                    'inter_id' => $value['inter_id'],
+                    'hotel_id' => $value['hotel_id'],
+                    'trade_time' => $value['add_time'],
+                    'add_time' => date('Y-m-d H:i:s'),
+                    'amount' => $value['amount'],
+                );
+
+                //线下交易
+                if ($item['trade_type'] == 7)
+                {
+                    $ext_info = json_decode($value['ext_info'],true);
+                    $item['amount'] = !empty($ext_info['orig_amount']) ? $ext_info['orig_amount'] : 0;
+                    $item['jfk_amount'] = !empty($ext_info['jfk_amount']) ? $ext_info['jfk_amount'] : 0;
+                    $item['group_amount'] = !empty($ext_info['group_amount']) ? $ext_info['group_amount'] : 0;
+                    $item['dist_amount'] = !empty($ext_info['dist_amount']) ? $ext_info['dist_amount'] : 0;
+                }
+                else if ($item['trade_type'] == 6)
+                {
+                    $item['module'] = 'base_pay';
+                }
+                else if (in_array($item['trade_type'],array(4,5)))
+                {
+                    $item['module'] = 'dist';
+                }
+
+                $this->Iwidepay_financial_model->insert_order($item);
+            }
+        }
+    }
+
+    /**
+     * 计划任务生成 财务对账单 => 每天分账订单
+     */
+    public function run_transfer_financial()
+    {
+        $this->load->model('iwidepay/Iwidepay_financial_model');
+        $this->load->model('iwidepay/Iwidepay_order_model');
+        $this->load->model('iwidepay/Iwidepay_transfer_model');
+
+        //退款记录
+        $stat_time = date('Y-m-d',strtotime('-30 days'));
+        $end_time = date('Y-m-d 23:59:60',strtotime('-1 days'));
+        $list_transfer = $this->Iwidepay_financial_model->transfer_order($stat_time,$end_time);
+
+        if (!empty($list_transfer))
+        {
+            $temp = $order_types = array();
+            //插入对账单表
+            foreach ($list_transfer as $value)
+            {
+                $add_key = $value['module'] .'_'.$value['order_no'];
+                $temp[$add_key]['module'] = $value['module'];
+                $temp[$add_key]['amount'] = $value['orig_amount'];
+                $temp[$add_key]['order_no_main'] = $value['order_no_main'];
+                $temp[$add_key]['pay_no'] = $value['pay_no'];
+                $temp[$add_key]['order_no'] = $value['order_no'];
+                $temp[$add_key]['transfer_date'] = $value['transfer_date'];
+                $temp[$add_key]['inter_id'] = $value['inter_id'];
+                $temp[$add_key]['hotel_id'] = $value['hotel_id'];
+                $temp[$add_key]['trade_time'] = $value['add_time'];
+                $temp[$add_key]['write_off_hotel_id'] = $value['write_off_hotel_id'];
+                $temp[$add_key]['add_time'] = date('Y-m-d H:i:s');
+
+                //核销订单
+                $status_key = $value['order_no'].'_'.$value['write_off_hotel_id'];
+                $order_types[$status_key] = array(
+                    'off_hotel_id' => $value['write_off_hotel_id'],
+                    'order_no' => $value['order_no'],
+                    'module' => $value['module'],
+                );
+
+                //分成金额
+                $amount_key = $status_key;
+                $tmp[$amount_key][$value['type']] = $value['amount'];
+            }
+
+            unset($list_transfer);
+            $list_transfer = null;
+
+            if (!empty($order_types))
+            {
+                foreach ($order_types as $key => $value)
+                {
+                    $add_key = $value['module'] .'_'.$value['order_no'];
+                    $item = $temp[$add_key];
+                    $item['transfer_status'] = 2;
+                    //部分分账
+                    if ($value['off_hotel_id'] == '9999999')
+                    {
+                        $item['transfer_status'] = 1;
+                    }
+
+                    $item['write_off_hotel_id'] = $value['off_hotel_id'];
+                    $item['trade_type'] = 1;
+
+                    $status_key = $value['order_no'].'_'.$value['off_hotel_id'];
+                    $item['cost_amount'] = !empty($tmp[$status_key]['cost']) ? $tmp[$status_key]['cost'] : 0;
+                    $item['jfk_amount'] = !empty($tmp[$status_key]['jfk']) ? $tmp[$status_key]['jfk'] : 0;
+                    $item['group_amount'] = !empty($tmp[$status_key]['group']) ? $tmp[$status_key]['group'] : 0;
+                    $item['hotel_amount'] = !empty($tmp[$status_key]['hotel']) ? $tmp[$status_key]['hotel'] : 0;
+                    $item['dist_amount'] = !empty($tmp[$status_key]['dist']) ? $tmp[$status_key]['dist'] : 0;
+
+                    $this->Iwidepay_financial_model->insert_order($item);
+                }
+            }
+        }
+    }
+
+    /**
+     * 或者对账单类型
+     * @param $order_type
+     * @return int
+     */
+    protected function get_financial_type($order_type)
+    {
+        switch($order_type)
+        {
+            case 'order':
+                $trade_type = 7;
+                break;
+            case 'base_pay':
+                $trade_type = 6;
+                break;
+            case 'refund':
+                $trade_type = 2;
+                break;
+            case 'orderReward':
+                $trade_type = 4;
+                break;
+            case 'extraReward':
+                $trade_type = 5;
+                break;
+            default :
+                $trade_type = 0;
+                break;
+        }
+
+        return $trade_type;
+    }
 
 }

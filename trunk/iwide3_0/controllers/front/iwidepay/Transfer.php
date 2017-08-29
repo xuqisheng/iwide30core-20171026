@@ -70,33 +70,42 @@ class Transfer extends MY_Controller {
         set_time_limit ( 0 );
         @ini_set('memory_limit','512M');
 
-        //找出未分账订单
-        $this->load->model ( 'iwidepay/iwidepay_transfer_model' );
-        $orders = $this->iwidepay_transfer_model->get_unsplit_orders();//var_dump($orders);die;
-        if(empty($orders)){
-            MYLOG::w('无可分账的数据', 'iwidepay/transfer');
-            $this->redis_lock('delete');
-            return false;
-        }
         //所有规则一起拿
+        $this->load->model ( 'iwidepay/iwidepay_transfer_model' );
         $all_rules = $this->iwidepay_transfer_model->get_all_rules();
-        if(empty($all_rules)){
-            MYLOG::w('无可分账的规则', 'iwidepay/transfer');
-            $this->redis_lock('delete');
-            return false;
-        }
         $rules = array();
         foreach($all_rules as $ak=>$av){
             $rules[$av['inter_id']][] = $av;
         }
         unset($all_rules);
-        $configedata = array('saler_inter_id'=>'jinfangka','iwide'=>'jinfangka','iwide_tips'=>'jinfangka');
-
+        //银行卡信息
         $bank_info_arr = $this->iwidepay_transfer_model->get_all_banks();
         foreach($bank_info_arr as $bk=>$bv){
             $bank_arr[$bv['inter_id'].'_'.$bv['hotel_id'] .'_' . $bv['type']] = $bv;
         }
         unset($bank_info_arr);
+        //找出未分账线上订单
+        $orders = $this->iwidepay_transfer_model->get_unsplit_orders();
+        $this->run_order($orders,$rules,$bank_arr,'online');
+        sleep(1);
+        unset($orders);
+        //找出线下订单
+        $offline_orders = $this->iwidepay_transfer_model->get_offline_unsplit_orders();
+        $this->run_order($offline_orders,$rules,$bank_arr,'offline');
+        echo 'done|执行完毕';
+        //遍历结束，解锁
+        $this->redis_lock('delete');
+        MYLOG::w('结束分账的脚本', 'iwidepay/transfer');
+    }
+    //脚本统一处理 传线上线下订单
+    protected function run_order($orders,$rules,$bank_arr,$order_type){
+        if(empty($orders)){
+            MYLOG::w('无可分账的数据', 'iwidepay/transfer');
+            $this->redis_lock('delete');
+            return false;
+        }
+        $this->load->model ( 'iwidepay/iwidepay_transfer_model' );
+        $configedata = array('saler_inter_id'=>'jinfangka','iwide'=>'jinfangka','iwide_tips'=>'jinfangka');
         //取分账规则 根据inter_id拿
         foreach($orders as $k=>$v){
             //查询对应的inter_id规则
@@ -126,7 +135,7 @@ class Transfer extends MY_Controller {
                 //所有模块分销不自动扣：a501472631、a467012702 订房模块分销不自动扣：a470896520
                 if(!in_array($v['inter_id'],array('a501472631','a467012702','a500304280','a502439398'))){
                     if(!($v['inter_id'] == 'a470896520' && $v['module']=='hotel')){
-                        if($v['is_dist'] && $v['dist_amt'] > 0){//是分销的单 做处理
+                        if((isset($v['is_dist']) || $order_type == 'offline') && $v['dist_amt'] > 0){//是分销的单 做处理
                             $money_arr['regular_dist'] = $v['dist_amt'];//分销员的
                         }
                     }
@@ -149,9 +158,9 @@ class Transfer extends MY_Controller {
             }
             //商城判断 多次分
             $soma_flag = 0;//商城的单  是否已经分完
-            $per_soma_bill = $v['per_hotel_amt'];//每张通票应分金额
+            $per_soma_bill = isset($v['per_hotel_amt'])?$v['per_hotel_amt']:0;//每张通票应分金额
             $single_inter = 0;//是否是单体 
-            $soma_bill_arr = array();
+            $soma_bill_arr = $soma_bill = array();
             $ohter_amt = $hotel_amt = 0;//酒店分的 和 非酒店分的 soma用
             if($v['module'] == 'soma' ){
                 $soma_bill = $this->iwidepay_transfer_model->get_soma_bill($v['inter_id'],$v['order_no']);
@@ -195,9 +204,9 @@ class Transfer extends MY_Controller {
             $transfer['inter_id'] = $v['inter_id'];
             $transfer['hotel_id'] = $v['hotel_id'];//后面核销的要用核销酒店的ID
             $transfer['order_no'] = $v['order_no'];
-            $transfer['pay_id'] = $v['pay_id'];//民生订单号
+            $transfer['pay_id'] = isset($v['pay_id'])?$v['pay_id']:'';//民生订单号
             $transfer['module'] = $v['module'];
-            $transfer['pay_type'] = $v['pay_type'];
+            $transfer['pay_type'] = isset($v['pay_type'])?$v['pay_type']:'';
             $transfer['rule_id'] = $rules_data['rule_id'];
             $transfer['status'] = 1;//初始状态 待转
             $transfer['add_time'] = date('Y-m-d H:i:s');
@@ -311,31 +320,49 @@ class Transfer extends MY_Controller {
             }
             //var_dump($inser_data);die;
             //insert
-            $res = $this->db->insert_batch('iwidepay_transfer',$inser_data);
-            if($res){//插入成功
-               // $data[$v['order_no']][] = $transfer;
-            }else{
+            $res = $this->iwidepay_transfer_model->batch_insert_transfer($inser_data,$order_type);
+            if(!$res){//插入失败记录
                 MYLOG::w('inter_id:'.$v['inter_id'].'--order_no:'.$v['order_no'].'-入库失败，该条order_no订单停止', 'iwidepay/transfer');
-                $this->redis_lock('delete');
                 return false;
             }
-
-            $is_success = $this->split_to_transfer($v['inter_id'],$v['order_no'],$v['module']);
-            if(!$is_success){
-                //程序锁住，记录报警日志并终止执行，上线将此日志交博士加入报警短信
-                MYLOG::w('err:'.__FUNCTION__ . ' 两个表--匹配不一致,订单号：' . $v['order_no'], 'iwidepay_transfer');
+            if($order_type == 'online'){
+                $is_success = $this->split_to_transfer($v['inter_id'],$v['order_no'],$v['module']);
+                if(!$is_success){
+                    //程序锁住，记录报警日志并终止执行，上线将此日志交博士加入报警短信
+                    MYLOG::w('err:'.__FUNCTION__ . ' 两个表--匹配不一致,订单号：' . $v['order_no'], 'iwidepay_transfer');
+                }
+                //调用结果处理方法
+                if(!$this->handle_online_order_result($v,$rules_data,$is_success,$soma_flag,$soma_bill,$per_soma_bill)){
+                    return false;
+                }
+            }else{
+               $is_success = $this->offline_split_to_transfer($v['inter_id'],$v['order_no'],$v['module']);
+                if(!$is_success){
+                    //程序锁住，记录报警日志并终止执行，上线将此日志交博士加入报警短信
+                    MYLOG::w('err:'.__FUNCTION__ . ' 两个表--匹配不一致,订单号：' . $v['order_no'], 'iwidepay_transfer');
+                }
+                //调用结果处理方法
+                if(!$this->handle_offline_order_result($v,$rules_data,$is_success)){
+                    return false;
+                } 
             }
-            if($v['module'] == 'soma'){
+        }  
+
+    } 
+
+    //结果处理
+    protected function handle_online_order_result($order,$rules_data,$is_success,$soma_flag,$soma_bill,$per_soma_bill){
+        if($order['module'] == 'soma'){
                 if($soma_flag){
                     $up_status = 0;
-                    $this->db->where(array('inter_id'=>$v['inter_id'],'order_no'=>$v['order_no']));
+                    $this->db->where(array('inter_id'=>$order['inter_id'],'order_no'=>$order['order_no']));
                     if($is_success){//匹配成功
                         $up_status = $this->db->update('iwidepay_order',array('transfer_status'=>3,'regular_jfk_cost'=>$rules_data['regular_jfk_cost'],'per_hotel_amt'=>$per_soma_bill));
                     }else{
                         $up_status = $this->db->update('iwidepay_order',array('transfer_status'=>4));
                     }
                 }else{
-                    $this->db->where(array('inter_id'=>$v['inter_id'],'order_no'=>$v['order_no']));
+                    $this->db->where(array('inter_id'=>$order['inter_id'],'order_no'=>$order['order_no']));
                     if($is_success){
                         $up_status = $this->db->update('iwidepay_order',array('transfer_status'=>5,'regular_jfk_cost'=>$rules_data['regular_jfk_cost'],'per_hotel_amt'=>$per_soma_bill));
                     }else{
@@ -343,7 +370,7 @@ class Transfer extends MY_Controller {
                     }
                 }
                 if(!$this->db->affected_rows()){//更新不成功
-                    MYLOG::w('inter_id:'.$v['inter_id'].'--order_no:'.$v['order_no'].'-update状态更新出错，该条order_no订单停止', 'iwidepay/transfer');
+                    MYLOG::w('inter_id:'.$order['inter_id'].'--order_no:'.$order['order_no'].'-update状态更新出错，该条order_no订单停止', 'iwidepay/transfer');
                     return false;
                 }
                 if($is_success && $up_status && !empty($soma_bill)){
@@ -353,26 +380,36 @@ class Transfer extends MY_Controller {
                     }
                 }
             }else{
-                $this->db->where(array('inter_id'=>$v['inter_id'],'order_no'=>$v['order_no']));
+                $this->db->where(array('inter_id'=>$order['inter_id'],'order_no'=>$order['order_no']));
                 if($is_success){
                     $up_status = $this->db->update('iwidepay_order',array('transfer_status'=>3,'regular_jfk_cost'=>$rules_data['regular_jfk_cost']));//3是已分
                 }else{
                     $up_status = $this->db->update('iwidepay_order',array('transfer_status'=>4));
                 }
                 if(!$this->db->affected_rows()){//更新不成功
-                    MYLOG::w('inter_id:'.$v['inter_id'].'--order_no:'.$v['order_no'].'-update状态更新出错，该条order_no订单停止', 'iwidepay/transfer');
+                    MYLOG::w('inter_id:'.$order['inter_id'].'--order_no:'.$order['order_no'].'-update状态更新出错，该条order_no订单停止', 'iwidepay/transfer');
                     return false;
                 }
-
             }
-            
-        }  
-        echo 'done';
-        //遍历结束，解锁
-        //释放锁
-        $this->redis_lock('delete');
-        MYLOG::w('结束分账的脚本', 'iwidepay/transfer');
-    } 
+            return true;
+    }
+
+    //线下订单结果处理 只有订房
+    protected function handle_offline_order_result($order,$rules_data,$is_success){
+        if($order['module'] == 'hotel'){
+            $where = array('inter_id'=>$order['inter_id'],'order_no'=>$order['order_no']);
+            if($is_success){
+                $up_status = $this->iwidepay_transfer_model->update_offline_order_data($where,array('transfer_status'=>3));//3是已分
+            }else{
+                $up_status = $this->iwidepay_transfer_model->update_offline_order_data($where,array('transfer_status'=>4));
+            }
+            if(!$this->db->affected_rows()){//更新不成功
+                MYLOG::w('inter_id:'.$order['inter_id'].'--order_no:'.$order['order_no'].'-update状态更新出错，该条order_no订单停止', 'iwidepay/transfer');
+                return false;
+            }
+        }
+        return true;
+    }
 
     //处理通票的那种单
     protected function handle_soma_bill($orders,$rules_id,$soma_hotel,$hotel_bill,$bank){
@@ -450,6 +487,41 @@ class Transfer extends MY_Controller {
                         $update = array('status'=>3,'check_time'=>date('Y-m-d H:i:s'));//匹配异常
                         $this->db->where(array('id'=>$values['id']));
                         $this->db->update('iwidepay_transfer',$update);
+                        $is_split = 0;//一次失败，就是失败
+                    }
+                }
+            }
+            return $is_split;
+    }
+
+     //线下的分账和转账对比
+    protected function offline_split_to_transfer($inter_id,$order_no,$module){
+        //先查询两个表记录条数是不是一致
+            $split_count = $this->iwidepay_transfer_model->get_offline_split_count($inter_id,$order_no,$module);
+            $transfer_count = $this->iwidepay_transfer_model->get_offline_transfer_count($inter_id,$order_no,$module);
+            if($split_count != $transfer_count){
+                MYLOG::w('inter_id:'.$inter_id.'--order_no:'.$order_no.'-两个表记录条数不一致', 'iwidepay/off_transfer');
+                return false;
+            }
+            //根据订单号和inter_id连表查询分账记录和转账记录 
+            $record = $this->iwidepay_transfer_model->get_offline_split_transfer_record($inter_id,$order_no,$module);
+            if(empty($record)){
+                MYLOG::w('inter_id:'.$inter_id.'--order_no:'.$order_no.'-分账转账无记录', 'iwidepay/off_transfer');
+                return false;
+            }
+            $is_split = 1;//是否成功分账
+            foreach($record as $key=>$values){
+                if($values['type']==$values['s_type'] && $values['hotel_id'] == $values['s_hotel_id'] && $values['order_no'] == $values['s_order_no']){//确定为同一条记录
+                    if($values['amount'] == $values['s_amount'] && $values['m_id'] == $values['s_m_id']){//相同的
+                        //相同，更新状态，或者转账
+                        $update = array('status'=>2,'check_time'=>date('Y-m-d H:i:s'));
+                        $this->db->where(array('id'=>$values['id']));
+                        $this->db->update('iwidepay_offline_transfer',$update);
+                    }else{//不相同
+                        MYLOG::w('inter_id:'.$inter_id.'--order_no:'.$order_no.'-匹配异常', 'iwidepay/off_transfer');
+                        $update = array('status'=>3,'check_time'=>date('Y-m-d H:i:s'));//匹配异常
+                        $this->db->where(array('id'=>$values['id']));
+                        $this->db->update('iwidepay_offline_transfer',$update);
                         $is_split = 0;//一次失败，就是失败
                     }
                 }

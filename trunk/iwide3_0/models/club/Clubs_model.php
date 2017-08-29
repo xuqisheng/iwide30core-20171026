@@ -1542,4 +1542,74 @@ class Clubs_model extends MY_Model {
 
     }
 
+
+    function check_group_club_validated($inter_id,$club_ids){   //验证社群客有效性，包括有效时间与人数上限
+
+        $club_list = $this->get_csv_clubs($inter_id,$club_ids);
+        $res = array();
+
+        if(!empty($club_list)){
+
+            $club_ids = implode(',',$club_ids);
+            $now_amount=$this->count_customer_by_ids($inter_id,$club_ids);
+            $count_customer = array();
+            if(!empty($now_amount)){
+                foreach($now_amount as $temp){
+                    $count_customer[$temp['club_id']] = $temp['total'];
+                }
+            }
+            foreach($club_list as $result){
+                $valid_time=explode('-',$result['valid_time']);
+                if(isset($valid_time[0])&&isset($valid_time[1])){
+                    $s_time=strtotime($valid_time[0]);
+                    $e_time=strtotime($valid_time[1]);
+                    $now=time();
+                    if($now>=$s_time && $now< ($e_time + 86400)){
+                        if(!isset($count_customer[$result['club_id']]) || $count_customer[$result['club_id']]<$result['limited_amount']){
+                            $res[$result['club_id']]['valid'] = 3;  //社群客有效，可以加入
+                        }else{
+                            $res[$result['club_id']]['valid'] = 2;  //超过人数
+                        }
+                    }elseif($now<$s_time){
+                        $res[$result['club_id']]['valid'] = 5;  //未到期
+                    }else{
+                        $res[$result['club_id']]['valid'] = 1;    //超过有效期
+                    }
+                }else{
+                    $res[$result['club_id']]['valid'] = 4;  //社群客有效期出错
+                }
+
+            }
+        }
+
+        return $res;
+
+    }
+
+
+    function get_csv_clubs($inter_id,$club_ids){   //根据社群客ID获取社群客
+
+        $db = $this->load->database('iwide_r1',true);
+        $db->where ( 'inter_id', $inter_id );
+        $db->where_in ( 'club_id', $club_ids );
+
+        $result = $db->get ( self::TAB_CLUB_LIST )->result_array();
+
+        return $result;
+
+
+    }
+
+
+    function count_customer_by_ids($inter_id,$csv_clubs_id) {    //统计销售员已经开通了的社群客
+
+        $db = $this->load->database('iwide_r1',true);
+
+        $sql="SELECT count('customer_id') as total,club_id FROM `iwide_club_customer` WHERE inter_id = '{$inter_id}' AND club_id in ({$csv_clubs_id}) group by club_id";
+
+        $result= $this->db->query($sql)->result_array();
+
+        return $result;
+    }
+
 }

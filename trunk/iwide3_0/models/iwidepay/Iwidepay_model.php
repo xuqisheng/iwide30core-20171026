@@ -906,4 +906,65 @@ class Iwidepay_model extends MY_Model{
 	public function get_hotel_info($hotel_id){
 		return $this->db->where('hotel_id',$hotel_id)->get(self::TAB_H)->row_array();
 	}
+
+	//查询unsplit order 记录
+	public function get_unsplit_orders($where = array(),$select = '*'){
+		$this->db->select($select);
+		if(!empty($where)){
+			$this->db->where($where);
+		}
+		return $this->db->get('iwidepay_offline_order')->result_array();
+	}
+
+	//查询前一天订房线下支付已经完结的订单
+	//time
+	public function get_offline_hotel_order(){
+		$e_time = date('Y-m-d 00:00:00');
+		$s_time = date('Y-m-d 00:00:00',strtotime('-1 days'));
+		$sql = "SELECT a.orderid,a.paytype,a.inter_id,a.hotel_id,a.openid,a.price,a.handled,b.istatus,b.iprice
+				FROM iwide_hotel_orders a LEFT JOIN iwide_hotel_order_items b 
+				ON a.inter_id = b.inter_id AND a.orderid = b.orderid 
+				WHERE a.paytype = 'daofu'  AND a.channel = 'weixin' AND b.istatus = 3 AND b.leavetime >= '{$s_time}' AND b.leavetime < '{$e_time}' ";
+		$sql .= " AND a.inter_id in (SELECT inter_id FROM iwide_publics WHERE split_status = 1) GROUP BY a.orderid";
+		return $this->db->query($sql)->result_array();
+	}
+
+	//保存线下同步的订单
+	public function save_sync_offline_order($order){
+		$res = $this->db->where('order_no',$order['order_no'])->get('iwidepay_offline_order')->row_array();
+		if($res){
+			return true;
+		}
+		$this->db->trans_begin();
+		$res = $this->db->insert('iwidepay_offline_order',$order);
+		if(!$res){
+			$this->db->trans_rollback();
+			return false;
+		}
+		$pk_id = $this->db->insert_id();
+		$sn = 150000000+$pk_id;
+		$order_sn = self::SN_PRE.$sn;
+		$res = $this->db->where('id',$pk_id)->update('iwidepay_offline_order',array('order_sn'=>$order_sn));
+		if(!$res){
+			$this->db->trans_rollback();
+			return false;
+		}
+		if ($this->db->trans_status () === FALSE) {
+			$this->db->trans_rollback();
+			return false;
+		}
+		$this->db->trans_commit();
+		return true;
+	}
+
+	//update unsplit_order 表
+	public function update_unsplit_order($where,$update){
+		if(empty($where)){
+			return false;
+		}
+		$this->db->where($where);
+		$this->db->update('iwidepay_offline_order',$update);
+		return $this->db->affected_rows();
+	}
+
 }

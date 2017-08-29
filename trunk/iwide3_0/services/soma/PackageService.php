@@ -740,7 +740,7 @@ class PackageService extends BaseService
             'product_id' => $productIds
         ];
         $select = [
-            'product_id', 'inter_id', 'goods_type', 'face_img', 'name',
+            'product_id', 'inter_id', 'goods_type', 'face_img', 'name', 'hotel_id',
             'price_market','price_package', 'stock', 'validity_date',
             'status', 'type', 'expiration_date', 'sales_cnt', 'date_type'
         ];
@@ -754,6 +754,7 @@ class PackageService extends BaseService
         //列表
         $result = [];
         if(count($productsList) && count($rewardRuleList)){
+            $hotelIds = array_column($productsList, 'hotel_id');
             foreach ($rewardRuleList as $key => $val){
                 $pid = explode(',', $val['product_ids']);
                 if($pid){
@@ -766,6 +767,8 @@ class PackageService extends BaseService
                                     $reward_money *= (double)$vale['price_package'];
                                 }
                                 $vale['sales_cnt'] = (int)$vale['sales_cnt'];
+                                $vale['reward_type'] = $val['reward_type'];
+                                $vale['reward_percent'] = $reward_money;
                                 $vale['qrcode_detail'] = WxService::getInstance()->getQrcode(WxService::QR_CODE_PRODUCT_DETAIL.$v)->getData();
                                 if(!isset($result[$v])){
                                     $vale['reward_money'] = $reward_money;
@@ -802,13 +805,30 @@ class PackageService extends BaseService
                     $temp[] = $val;
                 }
             }
+
+            $hotelId = implode(',', array_column($temp, 'hotel_id'));
+            $this->getCI()->load->model('hotel/Hotel_model', 'hotelModel');
+            $hotelList = $this->getCI()->hotelModel->get_hotel_by_ids($this->getCI()->inter_id, $hotelId);
+            if(!empty($hotelList)){
+                foreach ($temp as &$val){
+                    foreach ($hotelList as $vale){
+                        if($val['hotel_id'] == $vale['hotel_id']){
+                            $val['hotel_name'] = $vale['name'];
+                            break;
+                        }
+                    }
+                }
+            }
             $result = $temp;
+
         }
+
+        //
 
         //$redis->set($redisKey, json_encode($result));
         //$redis->expire($redisKey, 3600);
 
-        return $result;
+        return ['products' => $result, 'total' => count($productsList)];
     }
 
 

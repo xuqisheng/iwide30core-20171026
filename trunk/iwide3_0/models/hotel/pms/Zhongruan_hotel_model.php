@@ -1485,14 +1485,26 @@ class Zhongruan_hotel_model extends CI_Model {
             $s = $e;
             $run_alarm = 1;
             MYLOG::w(json_encode($s),"hotel/biguiyuan",'_exception' );
-            MYLOG::w($soap->__getLastResponseHeaders(),"hotel/biguiyuan",'_exception' );
-            MYLOG::w($soap->__getLastResponse (),"hotel/biguiyuan",'_exception' );
+            if (!empty($soap) && is_object($soap)){
+                if (method_exists($soap, '__getLastResponseHeaders')){
+                    MYLOG::w($soap->__getLastResponseHeaders(),"hotel/biguiyuan",'_exception' );
+                }
+                if (method_exists($soap, '__getLastResponse')){
+                    MYLOG::w($soap->__getLastResponse (),"hotel/biguiyuan",'_exception' );
+                }
+            }
         } catch ( Exception $e ) {
             $s = $e;
             $run_alarm = 1;
             MYLOG::w(json_encode($e),"hotel/biguiyuan",'_exception' );
-            MYLOG::w($soap->__getLastResponseHeaders(),"hotel/biguiyuan",'_exception' );
-            MYLOG::w($soap->__getLastResponse (),"hotel/biguiyuan",'_exception' );
+            if (!empty($soap) && is_object($soap)){
+                if (method_exists($soap, '__getLastResponseHeaders')){
+                    MYLOG::w($soap->__getLastResponseHeaders(),"hotel/biguiyuan",'_exception' );
+                }
+                if (method_exists($soap, '__getLastResponse')){
+                    MYLOG::w($soap->__getLastResponse (),"hotel/biguiyuan",'_exception' );
+                }
+            }
         }
         $inter_id = $pms_set ['inter_id'];
         $record_type = 'webservice';
