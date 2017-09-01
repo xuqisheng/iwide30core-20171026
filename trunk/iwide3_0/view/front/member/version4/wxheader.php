@@ -7,11 +7,7 @@
     timestamp: <?php echo $signPackage["timestamp"];?>,
     nonceStr: '<?php echo $signPackage["nonceStr"];?>',
     signature: '<?php echo $signPackage["signature"];?>',
-    jsApiList: [
-      'openLocation',
-	  'onMenuShareTimeline',
-	  'onMenuShareAppMessage'
-    ]
+    jsApiList: [<?=$js_api_list?>]
   });
 wx.ready(function(){
 <?php if( $js_menu_hide ): ?>wx.hideMenuItems({ menuList: [<?php echo $js_menu_hide; ?>] });<?php endif; ?>
