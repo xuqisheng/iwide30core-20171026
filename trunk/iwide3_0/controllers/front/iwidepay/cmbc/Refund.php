@@ -1,5 +1,5 @@
 <?php
-use App\services\soma\SeparateBillingService;
+
 //error_reporting ( 0 );
 if (! defined ( 'BASEPATH' ))
 	exit ( 'No direct script access allowed' );
@@ -46,6 +46,7 @@ class Refund extends MY_Controller {
 				"10.46.75.203",
 				"10.168.162.35",
 				"10.51.28.219",
+				"10.80.176.170",
 	        );//只允许服务器自动访问，不能手动
 	        if(!in_array($_SERVER['REMOTE_ADDR'],$arrow_ip)/*&&$_SERVER['SERVER_ADDR']!=$_SERVER['REMOTE_ADDR']*/){
 	        	MYLOG::w('非法访问！' . $_SERVER['REMOTE_ADDR'], 'iwidepay/refund');
@@ -89,27 +90,4 @@ class Refund extends MY_Controller {
          die;
     }
 
-	//退款回调 先写这里吧
-	public function refuncCallback(){
-		//通过URL传值？
-		$data = $_GET;
-		//记录log
-		//$this->db->insert('iwidepay_log',$data);
-		//验签
-		$res = $this->IwidePayApi->payreturnCallBack($data);
-		if(!$res){//验签失败
-			return false;
-		}
-		//业务逻辑代码
-		
-		//最后返回success
-		echo 'succes';
-		die;
-	}
-
-	public function get_refund_status(){
-		$sbs = SeparateBillingService::getInstance();
-		$refund_status_arr = $sbs->getOrderRefundInfo('a469428180', array('1000011758'));
-		var_dump($refund_status_arr);
-	}
 }

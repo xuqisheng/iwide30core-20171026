@@ -16,7 +16,7 @@ class Activity_killsec_model extends Activity_model {
     const ORDER_WAIT_TIME= 300;  //秒
     const PAYMENT_WAIT_TIME= 300;  //秒
 
-    const PREVIEW_TIME= 1800;  //活动提前多久生成实例，同时作为活动手动结束的时间限制
+    const PREVIEW_TIME= 600;  //活动提前多久生成实例，同时作为活动手动结束的时间限制
     const END_PREVIEW_TIME = 900;  //活动结束后多久才能重新编辑
     const PRESTART_TIME= 1800; // 提前半个小时释放token
 
@@ -510,7 +510,6 @@ class Activity_killsec_model extends Activity_model {
 		$this->_db()->where('killsec_time >', date('Y-m-d H:i:s' ) );
 		$this->_db()->where('killsec_time <', date('Y-m-d H:i:s', time()+ $preview_time ) );
 		$this->_db()->where('killsec_count >', 0 );
-	    $this->_db()->where('status', self::STATUS_TRUE );
 	    $result= $this->_db()->order_by($orderby)->get($table)->result_array();
 	    //echo $this->_db()->last_query();die;
 	    return $result;
@@ -991,7 +990,6 @@ class Activity_killsec_model extends Activity_model {
         if(empty($productId)){
             return array();
         }
-        $preview_time= self::PREVIEW_TIME;  //提前 1800秒开始
 
         $table= $this->table_name_r($inter_id);
         $result = $this->_shard_db_r('iwide_soma_r')
@@ -1539,7 +1537,7 @@ class Activity_killsec_model extends Activity_model {
 	 */
     public function create(Array $arr)
     {
-        return $this->db_conn->insert($this->table_name(), $arr);
+        return $this->soma_db_conn->insert($this->table_name(), $arr);
     }
 
 	/**
@@ -1551,8 +1549,8 @@ class Activity_killsec_model extends Activity_model {
 	 */
 	public function update($actID, Array $arr)
 	{
-		$this->db_conn->where($this->table_primary_key(), $actID);
-		return $this->db_conn->update($this->table_name(), $arr);
+		$this->soma_db_conn->where($this->table_primary_key(), $actID);
+		return $this->soma_db_conn->update($this->table_name(), $arr);
 	}
     # 秒杀监控代码开始
     

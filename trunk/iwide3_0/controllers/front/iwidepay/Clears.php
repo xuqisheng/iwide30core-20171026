@@ -86,11 +86,16 @@ class Clears extends MY_Controller {
 
     	foreach ($hotel_advances as $kh => $vh) {
     		//判断是否开启了现付结算
-    		$open_offline = $this->Iwidepay_clears_model->get_configs($inter_id,'synchro_hotel_order');
-    		MYLOG::w('info:synchro_hotel_order config_'.$inter_id.'-'.json_encode($open_offline),'iwidepay_clears');
+    		$open_offline = $this->Iwidepay_clears_model->get_configs($vh['inter_id'],'synchro_hotel_order');
+    		MYLOG::w('info:synchro_hotel_order config_'.$vh['inter_id'].'-'.json_encode($open_offline),'iwidepay_clears');
     		if(empty($open_offline)||$open_offline['value']!=1){
     			//没开启
+    			// 现付分账没开启
+    			$hotel_advances[$kh]['open_offline'] = 0;
     			continue;
+    		}else{
+    			// 现付分账开启
+    			$hotel_advances[$kh]['open_offline'] = 1;
     		}
 
     		$deductible_amount = $vh['amount'];
@@ -106,17 +111,18 @@ class Clears extends MY_Controller {
 
         	MYLOG::w('info:'.json_encode($vh).'|deductible_amount-'.$deductible_amount.'|debt_records-'.json_encode($debt_records),'iwidepay_clears');
 
-        	//没有欠款跳过该条汇总
-        	if(empty($debt_records)){
-        		continue;
-        	}
-
         	//抵扣逻辑
         	$return = $this->deductible_process($deductible_amount,$debt_records);
         	//记录结余金额和是否有未结清的欠款记录
         	$hotel_advances[$kh]['balance_amount'] = $return['amount'];
         	$hotel_advances[$kh]['is_settle'] = $return['is_settle'];
         	$hotel_advances[$kh]['debt_records'] = $debt_records;
+
+        	//没有欠款跳过该条汇总
+        	if(empty($debt_records)){
+        		continue;
+        	}
+
         	//判断结余金额
 	    	if($return['amount']>=0){
 	    		//生成结余记录
@@ -241,6 +247,10 @@ class Clears extends MY_Controller {
 		$debt_ids = array();
     	MYLOG::w('info:summary_hotel_advances-'.json_encode($hotel_advances),'iwidepay_clears');
     	foreach ($hotel_advances as $ka => $va) {
+    		if($va['open_offline']!=1){
+    			//现付分账没开启
+    			continue;
+    		}
     		$debt_ids_va = array();
     		foreach ($va['debt_records'] as $kd => $vd) {
     			$ext_info_arr = json_decode($vd['ext_info'],true);

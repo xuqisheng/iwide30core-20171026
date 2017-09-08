@@ -327,7 +327,12 @@ class Club extends MY_Admin_Cprice {
     public function club_reports(){    //社群客订单报表
 
         $data = $this->common_data;
-        $inter_id = $this->inter_id;
+
+        if(isset($_GET['id'])){
+            $inter_id = $_GET['id'];
+        }else{
+            $inter_id = $this->inter_id;
+        }
 
         $this->load->model("club/Club_model");
         $this->load->model("club/Clubs_model");

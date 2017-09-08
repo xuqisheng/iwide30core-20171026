@@ -23,7 +23,9 @@
   <title><?php echo $page_title ?></title>
 </head>
 <?php include 'wxheader.php' ?>
-<link rel="stylesheet" href="<?php echo refer_res('app.css','public/user') ?>">
-<script type="text/javascript">
-window.skin_theme='<?php echo isset($_skin_theme)?$_skin_theme:''; ?>';
-</script>
+
+<?php if($_skin_theme == 'white'){ ?>
+<link rel="stylesheet" href="<?php echo refer_res('light.css','public/user') ?>">
+<?php } else { ?>
+<link rel="stylesheet" href="<?php echo refer_res('dark.css','public/user') ?>">
+<?php } ?>

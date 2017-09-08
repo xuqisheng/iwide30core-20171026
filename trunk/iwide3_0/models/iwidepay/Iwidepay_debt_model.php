@@ -62,15 +62,13 @@ class Iwidepay_debt_model extends MY_Model{
 	 * 取垫付退款成功的数据
 	 */
 	public function get_refund_orders($startdate = '' , $enddate = ''){
-		$this->db->where(array(
-			'refund_status' => 2,
-			));
+		$this->db->where_in('refund_status',array(1,2,3));
 		$this->db->where_in('type',array(2,4));
 		if(!empty($startdate)){
-            $this->db->where('update_time>=',$startdate);
+            $this->db->where('add_time>=',$startdate);
         }
         if(!empty($enddate)){
-            $this->db->where('update_time<',$enddate);
+            $this->db->where('add_time<',$enddate);
         }
         $res = $this->db->get(self::TAB_REFUND)->result_array();
         return $res;

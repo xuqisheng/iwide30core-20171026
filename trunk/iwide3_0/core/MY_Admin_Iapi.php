@@ -3,6 +3,7 @@ use App\libraries\Iapi\CommonLib;
 
 class MY_Admin_Iapi extends MY_Controller {
     protected $_token;
+    protected $_source;
     // 初始化
     public function __construct() {
         parent::__construct ();
@@ -133,6 +134,15 @@ class MY_Admin_Iapi extends MY_Controller {
         }
         $this->out_put_msg ( 'auth_deny','','','',401 );
         // $this->_redirect ( EA_const_url::inst ()->get_deny_admin () );
+    }
+    protected function get_source($index = '', $xss_clean = TRUE) {
+        if (!$this->_source){
+            $this->_source=json_decode($this->input->raw_input_stream,true);
+        }
+        if ($index === '')
+            return $this->_source;
+        $value = isset ( $this->_source [$index] ) ? $this->_source [$index] : NULL;
+        return ($value && $xss_clean === TRUE) ? $this->security->xss_clean ( $value ) : $value;
     }
     protected function _init_router() {
         $URI = & load_class ( 'URI', 'core', NULL );

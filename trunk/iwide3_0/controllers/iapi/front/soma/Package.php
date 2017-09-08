@@ -254,7 +254,7 @@ class Package extends MY_Front_Soma_Iapi
             'link' => [
                 'home' => $this->link['home'],
                 'order' =>  $this->link['order_link'],
-                'prepay' => $this->link['prepay_link'].'?pid='.$productId.'&btype=package'
+                'prepay' => $this->link['prepay_link'].'&pid='.$productId
             ]
         ];
 
@@ -429,7 +429,7 @@ class Package extends MY_Front_Soma_Iapi
             ];
             $option = [
                 'limit' => null,
-                'orderBy' => 'sort desc',
+                'orderBy' => 'cat_sort desc',
             ];
             $page_data['categories'] = $this->categoryModel->get(array_keys($filter), array_values($filter), '*', $option);
         }
@@ -459,7 +459,7 @@ class Package extends MY_Front_Soma_Iapi
             'sort', 'status', 'type','date_type', 'expiration_date', 'sales_cnt', 'show_sales_cnt'
         ];
         $options = [
-            'limit' => $page_size, 'offset' => ($page - 1) * $page_size,
+            'limit' => $page_size, 'offset' => ($page - 1) * $page_size, 
             'orderBy' => 'sort DESC, product_id DESC', 'page' => $page
         ];
 

@@ -118,9 +118,12 @@ class MY_Front_Soma extends MY_Front
      * @var string
      */
     public $theme = 'default';
+    //白版、黑版
+    public $version = 1;
     public $statis_code = '';
-
     public $sign_update_code = '';
+    //商城读取vue目录
+    public $path = 'SOMA';
 
     /**
      * 例如，雅斯特酒店不叫储值，叫雅币
@@ -151,11 +154,18 @@ class MY_Front_Soma extends MY_Front
         unset($this->public);
 
         //theme
-        $this->load->model('soma/Theme_config_model');
-        $themeConfig = $this->Theme_config_model->get_using_theme($this->inter_id);
-        if ($themeConfig) {
-            $this->themeConfig = $themeConfig;
-            $this->theme = $themeConfig['theme_path'];
+       $this->load->model('soma/Theme_config_model');
+            $themeConfig = $this->Theme_config_model->get_using_theme($this->inter_id);
+            if ($themeConfig) {
+                $this->themeConfig = $themeConfig;
+                $this->theme = $themeConfig['theme_path'];
+                if(isset($themeConfig['theme_id'])){
+                    $themeConfigInfo = $this->Theme_config_model->get(['theme_id'], [$themeConfig['theme_id']]);
+                    if($themeConfigInfo){
+                        $this->version = $themeConfigInfo[0]['version'];
+                    }
+                }
+
 
             //把公众号配置的特殊信息放入配置
             $this->statis_code = $this->_get_statis_code($this->inter_id, $themeConfig);
@@ -177,10 +187,13 @@ class MY_Front_Soma extends MY_Front
 
         //新旧主题的逻辑分离
         if ($this->isNewTheme()) {
-
             $this->load->model('soma/shard_config_model', 'model_shard_config');
             $this->db_shard_config = $this->model_shard_config->build_shard_config($this->inter_id);
-
+            //雅高定制版本商城
+            if($this->inter_id == 'a502245149'){
+                $this->version = 2;
+                $this->path = 'SOMAACCOR';
+            }
             $this->saveQueryParams();
             $this->initViewData();
 
@@ -309,20 +322,6 @@ EOF;
             $this->session->set_tempdata('fans');
         }
 
-        /* add by chencong 20170829 分销保护期 start */
-        if(!$saler_id && !$fans_id){
-            $this->load->model('distribute/Idistribute_model');
-            $trueSaler = $this->Idistribute_model->get_protection_saler($this->openid, $this->inter_id);
-            if($trueSaler){
-                if($trueSaler >= 10000000){// 泛分销10000000起的
-                    $this->session->set_tempdata('fans', $trueSaler, $ttl);
-                }else{
-                    $this->session->set_tempdata('saler', $trueSaler, $ttl);
-                }
-            }
-        }
-        /* add by chencong 20170829 分销保护期 end */
-
         //泛分销粉丝ID
         $fans_saler_id = $this->input->get('fans_saler', null, 0);
         if($fans_saler_id) {
@@ -330,6 +329,20 @@ EOF;
         } else{
             $this->session->set_tempdata('fans_saler');
         }
+
+        /* add by chencong 20170829 分销保护期 start */
+        if(!$saler_id && !$fans_saler_id){
+            $this->load->model('distribute/Idistribute_model');
+            $trueSaler = $this->Idistribute_model->get_protection_saler($this->openid, $this->inter_id);
+            if($trueSaler){
+                if($trueSaler >= 10000000){// 泛分销10000000起的
+                    $this->session->set_tempdata('fans_saler', $trueSaler, $ttl);
+                }else{
+                    $this->session->set_tempdata('saler', $trueSaler, $ttl);
+                }
+            }
+        }
+        /* add by chencong 20170829 分销保护期 end */
 
         $ttl = 3600;
 
@@ -361,18 +374,19 @@ EOF;
         if($rel_res) {
             $this->session->set_tempdata('rel_res', $rel_res, $ttl);
         }
-	
-       //css：[默认：黑版、1：白版]
-        $style = $this->input->get('style', null, '');
-        if($style){
-            $this->session->set_tempdata('style', $style, $ttl);
+
+        //tkid
+        $tkid = $this->input->get('tkid', null, '');
+        if($tkid){
+            $this->session->set_tempdata('tkid', $tkid, $ttl);
         }
 
-        //布局：[默认、1]
-        $layout = $this->input->get('layout', null, '');
-        if($layout){
-            $this->session->set_tempdata('layout', $style, $ttl);
+        //brandname
+        $brandname = $this->input->get('brandname', null, '');
+        if($brandname){
+            $this->session->set_tempdata('brandname', $brandname, $ttl);
         }
+
 
     }
 
@@ -1286,7 +1300,7 @@ var _hmt = _hmt || [];
         $fansSalerId    = $this->input->get('fans_saler');
 
         /* add by chencong 20170826 分销保护期 start */
-        if(empty($posts['saler']) && empty($posts['fans_saler'])){
+        if(!$salerId && !$fansSalerId){
             $this->load->model('distribute/Idistribute_model');
             $trueSaler = $this->Idistribute_model->get_protection_saler($this->openid, $this->inter_id);
             if($trueSaler){
@@ -1469,11 +1483,11 @@ var _hmt = _hmt || [];
             $datas['statistics_js'] = $this->sign_update_code;
         }
 
-        $this->footerDatas = $datas;
+        $datas['version'] = $this->version;
+        $datas['path'] = $this->path;
         $datas['title'] = isset($this->headerDatas['title']) ? $this->headerDatas['title'] : '商城';
-        $datas['style'] = $this->session->tempdata('style');
-        $datas['layout'] = $this->session->tempdata('layout');
         $this->headerDatas = $datas;
+        $this->footerDatas = $datas;
     }
 
     /**

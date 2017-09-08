@@ -33,7 +33,7 @@ class Orders extends MY_Admin {
         //echo $this->_render_content ( $this->_load_view_file ( 'index' ), $view_params, TRUE );
     }
 
-    public function get_refund(){
+    public function get_refund(){echo '关闭这个接口';die;
         $order_id = $this->input->get('oid',true);
         if(empty($order_id)){
             echo 'id error';

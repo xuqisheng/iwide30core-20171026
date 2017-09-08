@@ -4,6 +4,7 @@ class MY_Front_Member extends MY_Front
 {
     protected $_token;
     protected $_template;
+    protected $_raw_template;
     protected $_skin_theme='default';
     protected $_template_filed_names;
     public $user_info;
@@ -158,6 +159,7 @@ class MY_Front_Member extends MY_Front
         );
         $result = $this->doCurlPostRequest($post_tem_url, $post_tem_data);
         $this->_template = $result['data'];
+        $this->_raw_template = $result['data'];
         if (strpos($this->_template,'#')!=FALSE){
             $theme=explode('#', $this->_template,2);
             $this->_template=$theme[0];
@@ -257,7 +259,7 @@ class MY_Front_Member extends MY_Front
         $data ['js_share_config'] ['dataUrl'] = isset($data ['js_share_config'] ['dataUrl']) ? $data ['js_share_config'] ['dataUrl'] : '';
 
         if (empty($data ['js_share_config'] ['imgUrl'])) {
-            $skin_config = $this->get_skin_config($this->_template);
+            $skin_config = $this->get_skin_config($this->_raw_template);
             $data ['js_share_config'] ['imgUrl'] = $skin_config['share_img'];
         }
         isset ($data ['inter_id']) or $data ['inter_id'] = $this->inter_id;

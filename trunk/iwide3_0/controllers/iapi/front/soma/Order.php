@@ -437,6 +437,7 @@ class Order extends MY_Front_Soma_Iapi
                 'package_review' => $this->link['package_review'], //  卷码 - 已使用（消费）
                 'del_order' => $this->link['delete_order_link'], // 订单删除
                 'refund_index' => $this->link['refund_index'], // 退款首页
+                'refund_detail' => $this->link['refund_detail'].'&oid='.$oid //退款详情
             ],
         ];
         if ($result->getStatus() !== Result::STATUS_OK) {
@@ -1241,8 +1242,8 @@ class Order extends MY_Front_Soma_Iapi
             'code' => $params['post_code'],
             'name' => $params['post_name'],
             'phone' => $params['post_phone'],
-            'start' => $params['post_start'],
-            'end' => $params['post_end'],
+            'start' => date('Y-n-j', strtotime($params['post_start'])),
+            'end' => date('Y-n-j', strtotime($params['post_end'])),
             'room_name' => $params['post_room_name'],
             'code_name' => $params['post_code_name'],
             'assetItemId' => $params['aiid'],
@@ -1978,13 +1979,13 @@ class Order extends MY_Front_Soma_Iapi
 
             //直接支付
             if (in_array($result['payChannel'], ['already_pay', 'balance_pay', 'point_pay'])) {
-                $link = $this->link['already_pay'] . '?id=' . $this->inter_id . '&bType=' . '&saler=' . $this->session->tempdata('saler') . '&order_id=' . $result['orderInfo']['order_id'] . '&settlement=' . $params['settlement'] . '&zburl=' . $this->session->tempdata('zburl');
+                $link = $this->link['already_pay'] . '&bType=' . '&saler=' . $this->session->tempdata('saler') . '&order_id=' . $result['orderInfo']['order_id'] . '&settlement=' . $params['settlement'] . '&zburl=' . $this->session->tempdata('zburl');
             } //微信支付
             elseif ($result['payChannel'] == 'wx_pay') {
-                $link = $this->link['wx_pay'] . '?id=' . $this->inter_id . '&bType=' . '&saler=' . $this->session->tempdata('saler') . '&order_id=' . $result['orderInfo']['order_id'];
+                $link = $this->link['wx_pay'].'&bType=' . '&saler=' . $this->session->tempdata('saler') . '&order_id=' . $result['orderInfo']['order_id'];
             } //威付通支付
             elseif ($result['payChannel'] == 'wft_pay') {
-                $link = $this->link['wft_pay'] . '?id=' . $this->inter_id . '&bType=' . '&saler=' . $this->session->tempdata('saler') . '&order_id=' . $result['orderInfo']['order_id'];
+                $link = $this->link['wft_pay'] . '&bType=' . '&saler=' . $this->session->tempdata('saler') . '&order_id=' . $result['orderInfo']['order_id'];
             }
             $page_resource = [
                 'link' => [

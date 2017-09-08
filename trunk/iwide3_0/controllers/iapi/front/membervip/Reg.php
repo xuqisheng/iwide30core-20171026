@@ -13,7 +13,7 @@ class Reg extends MY_Front_Member_Iapi
 {
 	//会员卡登录页面
     public function index(){
-        $data = RegService::getInstance()->index($this->inter_id);
+        $data = RegService::getInstance()->index($this->inter_id,$this->openid);
         $ext['links']['login'] = site_url('membervip/login/index')."?id=$this->inter_id";
         $ext['links']['savereg'] = site_url('iapi/membervip/reg/savereg')."?id=$this->inter_id";
 

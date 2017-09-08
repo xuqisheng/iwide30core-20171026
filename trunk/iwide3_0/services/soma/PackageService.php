@@ -175,10 +175,12 @@ class PackageService extends BaseService
                     if($val['type'] == $productModel::PRODUCT_TYPE_BALANCE) {
                         //储值标签
                         $val['tag'] = $productModel::PRODUCT_TAG_BALANCE;
+                        $val['can_refund'] = (string)$productModel::CAN_F;
                     }
                     if($val['type'] == $productModel::PRODUCT_TYPE_POINT) {
                         //积分标签
                         $val['tag'] = $productModel::PRODUCT_TAG_POINT;
+                        $val['can_refund'] = (string)$productModel::CAN_F;
                     }
                 }
                 if(!empty($val['auto_rule'])){
@@ -700,23 +702,49 @@ class PackageService extends BaseService
         //缓存
         $redis = $this->getCI()->get_redis_instance();
         $themeConfig = $redis->get('theme_config_distribute');
-        $redisKey = 'get_distribute_products_'.$this->getCI()->inter_id.'_page_'.$page.'_pagesize_'.$pageSize.'_sort_'.$sort;
-        if(!empty($redis->get($redisKey))){
-            return json_decode($redis->get($redisKey), true);
+
+        //分销员
+        $saler = $fansler = 0;
+        $salerInfo = $this->getSalerInfo();
+        if($salerInfo){
+            //soma_detail_商品id_分销id_泛分销id
+            if($salerInfo['saler_type'] == 'STAFF'){
+                $saler = $salerInfo['saler_id'];
+            }
+            if($salerInfo['saler_type'] == 'FANS'){
+                $fansler = $salerInfo['saler_id'];
+            }
         }
+
+        //二维码
+        $dir = str_replace('system', '', BASEPATH);
+        $this->getCI()->load->helper('phpqrcode');
+        $uploadUrl = $dir.'/www_front/public/soma/qrcode/';
+
+        //首页二维码
+        $qrCodeImg = WxService::QR_CODE_SOMA_INDEX.'_'.$saler.'_'.$fansler.'.png';
+        $qrCodeUrl = site_url('soma/package/index?'. http_build_query([
+                'id' => $this->getCI()->inter_id,
+                'saler' => $saler,
+                'fans_saler' => $fansler
+            ]));
+        $qrcodeIndex = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
 
         $productIds = [];
 
         //绩效商品
         $all = false;
         $nowTime = date('Y-m-d H:i:s');
+        /**
+         * @var \Reward_rule_model $rewardRuleModel
+         */
         $this->getCI()->load->model('soma/Reward_rule_model', 'rewardRuleModel');
         $rewardRuleModel = $this->getCI()->rewardRuleModel;
         $rewardRuleList = $rewardRuleModel->get(
-            ['inter_id', 'status', 'start_time <= ', 'end_time >='],
-            [$this->getCI()->inter_id, $rewardRuleModel::STATUS_ACTIVE, $nowTime, $nowTime],
+            ['inter_id', 'status', 'start_time <= ', 'end_time >=', 'reward_source'],
+            [$this->getCI()->inter_id, $rewardRuleModel::STATUS_ACTIVE, $nowTime, $nowTime, $rewardRuleModel::REWARD_SOURCE_SALER],
             ['product_ids', 'reward_rate', 'sort', 'reward_type'],
-            ['limit' => null, 'orderBy' => 'sort desc']
+            ['limit' => null, 'orderBy' => 'sort desc, rule_id desc']
         );
         if(count($rewardRuleList)){
             foreach ($rewardRuleList as $key => $val){
@@ -734,6 +762,32 @@ class PackageService extends BaseService
             }
         }
 
+
+
+        //组合商品
+        if(!empty($productIds)){
+            $this->getCI()->load->model('soma/Product_package_link_model', 'productPackageLinkModel');
+            $productPackageLinkModel = $this->getCI()->productPackageLinkModel;
+            $productPackageLinkList = $productPackageLinkModel->get(['parent_pid'], [$productIds], ['parent_pid', 'child_pid'], ['limit' => null]);
+
+            if(!empty($productPackageLinkList)){
+                foreach ($productPackageLinkList as $val){
+                    //主、子都有，取主商品
+                    if(in_array($val['parent_pid'], $productIds) && in_array($val['child_pid'], $productIds)){
+                        foreach ($productIds as $item => $vale){
+                            if($vale == $val['child_pid']){
+                                unset($productIds[$item]);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+            }
+            $productIds = array_values($productIds);
+        }
+
+
         //商品
         $this->getCI()->load->model('soma/Product_package_model', 'productPackageModel');
         $productPackageModel = $this->getCI()->productPackageModel;
@@ -744,8 +798,8 @@ class PackageService extends BaseService
             'un_validity_date >= ' => $nowTime,
             'expiration_date >= '  => $nowTime
         ];
-        if(!$all){
-            $where['product_ids'] = $productIds;
+        if(!$all && !empty($productIds)){
+            $where['product_id'] = $productIds;
         }
         $select = [
             'product_id', 'inter_id', 'goods_type', 'face_img', 'name', 'hotel_id',
@@ -872,38 +926,46 @@ class PackageService extends BaseService
 
         }
 
+
         //列表
         $result = [];
         if(count($productsList) && count($rewardRuleList)){
-            foreach ($rewardRuleList as $key => $val){
-                if($productIds){
-                    foreach ($productIds as $k => $v){
-                        if(isset($productsList[$v])){
-                            $reward_money = (double)$val['reward_rate'];
-                            $reward_sort = (int)$val['sort'];
-                            $reward_type = $val['reward_type'];
-                            if($val['reward_type'] == $rewardRuleModel::REWARD_TYPE_PERCENT){
-                                $reward_money *= (double)$productsList[$v]['price_package'];
-                            }
-                            $product_sales_cnt = (int)$productsList[$v]['sales_cnt'];
-                            $qrcode_detail = WxService::getInstance()->getQrcode(WxService::QR_CODE_PRODUCT_DETAIL.$v)->getData();
+            foreach ($productsList as $key => $val){
+                //生成二维码图片
+                $qrCodeImg = WxService::QR_CODE_PRODUCT_DETAIL.$val['product_id'].'_'.$saler.'_'.$fansler.'.png';
+                $qrCodeUrl = site_url('soma/package/package_detail?'. http_build_query([
+                        'id' => $this->getCI()->inter_id,
+                        'pid' => $val['product_id'],
+                        'saler' => $saler,
+                        'fans_saler' => $fansler
+                    ]));
+                $qrcode_detail = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
+                $productsList[$key]['qrcode_detail'] = $qrcode_detail;
+                $productsList[$key]['sales_cnt'] = (int)$val['sales_cnt'];
+                $productsList[$key]['detail'] = site_url('soma/package/package_detail').'?id='.$this->getCI()->inter_id.'&pid='.$val['product_id'].'&saler='.$saler;
 
-                            if(isset($productsList[$v]['reward_sort']) && $reward_sort > $productsList[$v]['reward_sort']){
-                                $productsList[$v]['sales_cnt'] = $product_sales_cnt;
-                                $productsList[$v]['reward_type'] = $reward_type;
-                                $productsList[$v]['reward_percent'] = $reward_money;
-                                $productsList[$v]['qrcode_detail'] = $qrcode_detail;
-                                $productsList[$v]['reward_money'] = $reward_money;
-                                $productsList[$v]['reward_sort'] = $reward_sort;
-                                continue;
+                $reward_sort = 0;
+                foreach ($rewardRuleList as $item => $vale){
+                    $pids = explode(',', $vale['product_ids']);
+                    //全部
+                    if($all){
+                        $pids = $productIds;
+                    }
+                    if($pids){
+                        foreach ($pids as $items => $value){
+                            if($value == $val['product_id']){
+                                if($reward_sort < (int)$vale['sort']){
+                                    $reward_money = (double)$vale['reward_rate'];
+                                    $reward_sort = (int)$vale['sort'];
+                                    if($vale['reward_type'] == $rewardRuleModel::REWARD_TYPE_PERCENT){
+                                        $reward_money *= (double)$productsList[$key]['price_package'];
+                                    }
+                                    $productsList[$key]['reward_type'] = $vale['reward_type'];
+                                    $productsList[$key]['reward_percent'] = $vale['reward_rate'];
+                                    $productsList[$key]['reward_money'] = number_format($reward_money, 2, '.', ',');
+                                    $productsList[$key]['reward_sort'] = $reward_sort;
+                                }
                             }
-
-                            $productsList[$v]['sales_cnt'] = $product_sales_cnt;
-                            $productsList[$v]['reward_type'] = $reward_type;
-                            $productsList[$v]['reward_percent'] = $reward_money;
-                            $productsList[$v]['qrcode_detail'] = $qrcode_detail;
-                            $productsList[$v]['reward_money'] = $reward_money;
-                            $productsList[$v]['reward_sort'] = $reward_sort;
                         }
                     }
                 }
@@ -912,12 +974,13 @@ class PackageService extends BaseService
         }
 
         //销量
+        $this->getCI()->load->helpers('soma/math');
         if($sort == 1){
-            $result = $this->array_sort($result, 'sales_cnt', 'desc');
+            $result = array_acco_sort($result, 'sales_cnt', 'desc');
         }
         //绩效金额
         if($sort == 2){
-            $result = $this->array_sort($result, 'reward_money', 'desc');
+            $result = array_acco_sort($result, 'reward_money', 'desc');
         }
 
         $offset = ($page - 1 <= 0 ? 0 : $page - 1) * $pageSize;
@@ -951,34 +1014,125 @@ class PackageService extends BaseService
             'total' => count($productsList),
             'theme' => json_decode($themeConfig, true),
             'attach' => [
-                'qrcode_index' => WxService::getInstance()->getQrcode(WxService::QR_CODE_SOMA_INDEX)->getData()
+                'qrcode_index' => $qrcodeIndex
             ]
         ];
 
-        $redis->set($redisKey, json_encode($result), 3600);
-
         return $result;
+    }
+
+
+
+
+    //获取分销员信息
+    public function getSalerInfo(){
+
+        $saler_id = $saler_name = $saler_type = null;
+
+        /* add by chencong 20170826 分销保护期 start */
+        if(empty($posts['saler']) && empty($posts['fans_saler'])){
+            $this->getCI()->load->model('distribute/Idistribute_model');
+            $trueSaler = $this->getCI()->Idistribute_model->get_protection_saler($this->getCI()->openid, $this->getCI()->openid);
+            if($trueSaler){
+                if($trueSaler >= 10000000){// 泛分销10000000起的
+                    $fansSalerId = $trueSaler;
+                }else{
+                    $salerId = $trueSaler;
+                }
+            }
+        }
+        /* add by chencong 20170826 分销保护期 end */
+
+        $this->getCI()->load->library('Soma/Api_idistribute');
+        $staff = $this->getCI()->api_idistribute->get_saler_info($this->getCI()->inter_id, $this->getCI()->openid);
+        if($staff){
+            $saler_type = isset($staff['typ']) && ! empty($staff['typ']) ? $staff['typ'] : '';
+            $saler_id = isset($staff['info']['saler']) && ! empty($staff['info']['saler']) ? $staff['info']['saler'] : 0;
+            $saler_name = isset($staff['info']['name']) && ! empty($staff['info']['name']) ? $staff['info']['name'] : '';
+        }
+
+        return [
+            'saler_id' => $saler_id,
+            'saler_name' => $saler_name,
+            'saler_type' => $saler_type
+        ];
 
     }
 
 
-    public function array_sort($arr, $keys, $type = 'asc') {
-        $keysvalue = $new_array = array();
-        foreach ($arr as $k => $v) {
-            $keysvalue[$k] = $v[$keys];
+    //生成自定义链接二维码
+    public function getQrcode($filePath, $fileName, $codeUrl){
+
+        $redis = $this->getCI()->get_redis_instance();
+        if (empty($redis)) {
+            return false;
         }
-        if ($type == 'asc') {
-            //对数组进行排序并保持索引关系
-            asort($keysvalue);
-        } else {
-            //对数组进行逆向排序并保持索引关系
-            arsort($keysvalue);
+        $url = $redis->get($fileName);
+        if (!empty($url)){
+            return $url;
         }
-        reset($keysvalue);
-        foreach ($keysvalue as $k => $v) {
-            $new_array[] = $arr[$k];
+
+        $this->getCI()->load->helper('phpqrcode');
+
+        //生成二维码图片
+        if(!is_dir($filePath)){
+            @mkdir($filePath, 0755);
         }
-        return $new_array;
+        if(!file_exists($filePath.$fileName)){
+            $qrCode = new \QRcode();
+            $qrCode::png($codeUrl, $filePath.$fileName, 'L', 6, 2);
+        }
+
+        $imgUrl = $this->uploadFileToCdn($filePath.$fileName);
+        @unlink($filePath.$fileName);
+
+        $redis->set($fileName, $imgUrl);
+        $redis->expire($fileName, 3600 * 24 * 365);
+
+        return $imgUrl;
     }
+
+
+    //cdn上传
+    public function uploadFileToCdn($furl){
+
+        //cdn
+        $file_system_path = '/public/uploads/' .date("Ym"). '/';
+        //ftp开始
+        $this->getCI()->load->library('ftp');
+        $configftp['hostname'] = config_item('ftphostname');
+        $configftp['username'] = config_item('ftpusername');
+        $configftp['password'] = config_item('ftppassword');
+        $configftp['port']     = config_item('ftpport');
+        $configftp['passive']  = config_item('ftppassive');
+        $configftp['debug']    = config_item('ftpdebug');
+
+        $this->getCI()->ftp->connect($configftp);
+
+        $toftppath = '/public_html'.$file_system_path;
+        $isdir = $this->getCI()->ftp->list_files($toftppath);
+        if (empty($isdir)) {
+            $newpath = '/';$arrpath = explode('/', $toftppath);
+            foreach ($arrpath as $v) {
+                if ($v!='') {
+                    $newpath = $newpath.$v.'/';
+                    $isdirchild = $this->getCI()->ftp->list_files($newpath);
+                    if (empty($isdirchild)) {
+                        $this->getCI()->ftp->mkdir($newpath);
+                    }
+                }
+            }
+        }
+
+        $uploadName = time().mt_rand(0, 9999).'.png';
+        $this->getCI()->ftp->upload($furl, $toftppath.$uploadName, 'binary', 0775);
+        $this->getCI()->ftp->close();
+        //ftp结束
+
+        $file_domain = empty(config_item('ftp_cdn_url'))? config_item('ftpurl') : config_item('ftp_cdn_url');
+
+        return $file_domain.$file_system_path.$uploadName;
+    }
+
 
 }

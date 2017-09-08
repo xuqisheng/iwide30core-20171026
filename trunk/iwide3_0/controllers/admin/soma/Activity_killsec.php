@@ -760,7 +760,7 @@ EOF;
                     $w ++;
                     $temp  = $w % 7;
                     $i ++;
-                    if(in_array($temp,$schedule))
+                    if(in_array($temp,$schedule) || ($temp == 0 && in_array($w,$schedule)))
                         break;
 
                 }

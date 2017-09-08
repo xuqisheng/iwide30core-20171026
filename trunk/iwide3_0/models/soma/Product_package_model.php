@@ -58,6 +58,10 @@ class Product_package_model extends MY_Model_Soma
     const LANG_CN = 1;
     const LANG_EN = 2;
 
+    //分销规则类型
+    const SALES_TYPE_NEW = 1;
+    const SALES_TYPE_OLD = 2;
+
     public function get_conn_devices()
     {
         return array(

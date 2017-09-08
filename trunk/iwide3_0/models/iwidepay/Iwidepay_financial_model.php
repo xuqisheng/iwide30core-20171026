@@ -49,7 +49,7 @@ class Iwidepay_financial_model extends MY_Model
         }
         if (!empty($where_arr['hotel_id']))
         {
-            $sql .= " AND fc.hotel_id IN ({$where_arr['hotel_id']})";
+            $sql .= " AND (fc.hotel_id IN ({$where_arr['hotel_id']}) OR fc.write_off_hotel_id IN ({$where_arr['hotel_id']}))";
         }
 
         if (!empty($where_arr['start_time']))
@@ -90,7 +90,7 @@ class Iwidepay_financial_model extends MY_Model
     public function debt_order($start_time,$end_time)
     {
         $sql = "SELECT * FROM ".self::TAB_IWIDEPAY_DEBT_RD." WHERE status = 1 AND order_type IN('order','base_pay','refund','orderReward','extraReward')";
-        $sql .= " AND (add_time >= '{$start_time}' AND add_time <= '{$end_time}')";
+        $sql .= " AND (up_time >= '{$start_time}' AND up_time <= '{$end_time}')";
         $data = $this->db_read()->query($sql)->result_array();
         return $data;
     }
@@ -137,17 +137,17 @@ class Iwidepay_financial_model extends MY_Model
     /**
      * 欠款订单
      * 2017-08-29
-     * @param $set_id 逗号分隔
+     * @param $where 条件
      * @return
      */
-    public function transfer_accounts_debt_order($set_id)
+    public function transfer_accounts_debt_order($where)
     {
         $sql = "SELECT DR.*,H.name as hotel_name,P.name FROM ".self::TAB_IWIDEPAY_DEBT_RD." AS DR
                 LEFT JOIN iwide_hotels as H ON H.inter_id = DR.inter_id AND H.hotel_id = DR.hotel_id
                 LEFT JOIN iwide_publics as P ON P.inter_id = DR.inter_id
                 WHERE DR.status = 1 AND DR.order_type IN('order','base_pay','refund','orderReward','extraReward')";
-        $sql .= " AND DR.set_id IN (?)";
-        $data = $this->db_read()->query($sql,$set_id)->result_array();
+        $sql .= " AND {$where}";
+        $data = $this->db_read()->query($sql)->result_array();
         return $data;
     }
 
@@ -158,7 +158,7 @@ class Iwidepay_financial_model extends MY_Model
      */
     public function sum_settlement($record_id)
     {
-        $sql = "SELECT id FROM ".self::TAB_IWIDEPAY_SETTLE." WHERE record_id = ? ";
+        $sql = "SELECT id,type FROM ".self::TAB_IWIDEPAY_SETTLE." WHERE record_id = ? ";
         $data = $this->db_read()->query($sql,$record_id)->result_array();
         return $data;
     }

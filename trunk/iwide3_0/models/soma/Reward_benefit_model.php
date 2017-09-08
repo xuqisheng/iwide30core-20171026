@@ -390,7 +390,7 @@ class Reward_benefit_model extends MY_Model_Soma {
         
         $rewardInfo = $this->bgySpecialHotelReward($inter_id, $order);
         if ($rewardInfo['status'] == Soma_base::STATUS_TRUE) {
-            $data = $rewardInfo['rewardInfo'];
+            $data = $rewardInfo['rewardInfo'];      //碧桂园的分销新规则
         } else {
             $data= $rule_model->calculate_reward_data($inter_id, $order, $rules, Reward_rule_model::REWARD_SOURCE_SALER);
         }
@@ -494,38 +494,27 @@ class Reward_benefit_model extends MY_Model_Soma {
 
     public function bgySpecialHotelReward($inter_id, $order)
     {
-        if(time() < strtotime("2017-09-01 10:00:00")){
-            return ['status' => Soma_base::STATUS_FALSE];
-        }
-        
+        //去除需谨慎，为碧桂园定制的分销规则
         $interIds = ['a421641095', 'a429262688'];
         if (!in_array($inter_id, $interIds)) {
             return ['status' => Soma_base::STATUS_FALSE];
         }
 
-        $file = APPPATH . '..' . DS . 'www_admin' . DS . 'public' . DS . 'import' . DS . 'bgy_reward_hotels.csv';
-        if (!file_exists($file)) {
-            return ['status' => Soma_base::STATUS_FALSE];
+        //获取订单细单的商品ID
+        $items = $order->get_order_items($order->m_get('business'), $inter_id);
+        $product_ids = [];
+        foreach ($items as $item) {
+            $product_ids[] = $item['product_id'];
         }
-        
-        $csv = fopen($file, 'r');
-        $csv_data = array(); 
-        $n = 0; 
-        while ($data = fgetcsv($csv)) { 
-            $num = count($data); 
-            for ($i = 0; $i < $num; $i++) { 
-                $csv_data[$n][$i] = mb_convert_encoding($data[$i], 'utf-8', 'gbk');//$data[$i]; 
-            } 
-            $n++; 
-        }
+        $product_ids = array_unique($product_ids);
 
-        $hotels = [];
-        foreach ($csv_data as $row) {
-            $hotels[] = $row[0];
-        }
-
-        if (!in_array($order->m_get('hotel_id'), $hotels)) {
-            return ['status' => Soma_base::STATUS_FALSE];
+        //获取商品ID对应的分销规则类型(只要其中有一个商品为旧规则，则使用旧的分销规则)
+        $this->load->model('soma/Product_package_model', 'productPackageModel');
+        foreach ($product_ids as $productId) {
+            $productDetail = $this->productPackageModel->getByID($productId, $inter_id);
+            if ($productDetail['sales_type'] == Product_package_model::SALES_TYPE_OLD) {
+                return ['status' => Soma_base::STATUS_FALSE];
+            }
         }
 
         $rewardInfo = [];

@@ -45,6 +45,7 @@ class Handle extends MY_Controller {
 				"10.46.75.203",
 				"10.168.162.35",
 				"10.51.28.219",
+				"10.80.176.170",
 	        );//只允许服务器自动访问，不能手动
 	        if(!in_array($_SERVER['REMOTE_ADDR'],$arrow_ip)/*&&$_SERVER['SERVER_ADDR']!=$_SERVER['REMOTE_ADDR']*/){
 	        	MYLOG::w('非法访问！' . $_SERVER['REMOTE_ADDR'], 'iwidepay/refund');
@@ -88,4 +89,68 @@ class Handle extends MY_Controller {
          die;
     }
 
+    //关闭订单接口
+    public function close_order(){
+    	$this->check_arrow();
+	 	$data = $this->input->post();
+	 	MYLOG::w('http关闭订单数据' . json_encode($data), 'iwidepay/close_order_handle');
+	 	$return = array('errcode'=>1,'msg'=>'fail','data'=>array());
+	 	if(empty($data)){
+		 	MYLOG::w('关闭订单数据为空', 'iwidepay/close_order_handle');
+		 	$return['msg'] = '关闭订单数据为空';
+		 	echo json_encode($return);
+		 	die;
+	 	}
+	 	$this->load->library('IwidePay/IwidePayService',null,'IwidePayApi');
+	 	$chart = IwidePayConfig::CLOSE_ORDER_SECRET;//验证key
+	 	$sign = md5($chart.$data['requestNo'].$data['transId'].$data['orderDate'].$data['orderNo'].$data['origOrderNo'].$data['origOrderDate'].$chart);
+		if($sign != $data['sign']){
+			$return['msg'] = '关闭订单签名错误';
+			MYLOG::w('关闭订单签名错误' . json_encode($data), 'iwidepay/close_order_handle');
+			echo json_encode($return);
+			die;
+		}
+		$res = $this->IwidePayApi->closeOrderRequest($data);
+		MYLOG::w('http关闭订单返回|' . json_encode($res), 'iwidepay/close_order_handle');
+		//返回也要加密
+		$res_sign = md5($chart.$res.$chart);
+		$return['errcode'] = 0;
+		$return['msg'] = 'ok';
+		$return['data'] = array('return_data'=>$res,'sign'=>$res_sign);
+		echo json_encode($return);
+		die;
+    }
+
+    //查询订单接口
+    public function query_order(){
+    	$this->check_arrow();
+	 	$data = $this->input->post();
+	 	MYLOG::w('http查询订单数据' . json_encode($data), 'iwidepay/query_order_handle');
+	 	$return = array('errcode'=>1,'msg'=>'fail','data'=>array());
+	 	if(empty($data)){
+		 	MYLOG::w('查询订单数据为空', 'iwidepay/query_order_handle');
+		 	$return['msg'] = '查询订单数据为空';
+		 	echo json_encode($return);
+		 	die;
+	 	}
+	 	$this->load->library('IwidePay/IwidePayService',null,'IwidePayApi');
+	 	$chart = IwidePayConfig::QUERY_ORDER_SECRET;//验证key
+	 	$sign = md5($chart.$data['requestNo'].$data['transId'].$data['orderNo'].$data['orderDate'].$chart);
+		if($sign != $data['sign']){
+			$return['msg'] = '查询订单签名错误';
+			MYLOG::w('查询订单签名错误' . json_encode($data), 'iwidepay/query_order_handle');
+			echo json_encode($return);
+			die;
+		}
+		$res = $this->IwidePayApi->queryOrderRequest($data);
+		MYLOG::w('http查询订单返回|' . json_encode($res), 'iwidepay/query_order_handle');
+		//返回也要加密
+		$res_sign = md5($chart.$res.$chart);
+		$return['errcode'] = 0;
+		$return['msg'] = 'ok';
+		$return['data'] = array('return_data'=>$res,'sign'=>$res_sign);
+		echo json_encode($return);
+		die;
+    }
+    
 }

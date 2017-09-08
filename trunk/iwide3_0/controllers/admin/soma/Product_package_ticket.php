@@ -159,9 +159,10 @@ class Product_package_ticket extends MY_Admin_Soma {
         //皮肤选择
         $this->load->model('soma/Theme_config_model','somaThemeConfigModel');
         $themeList = $this->somaThemeConfigModel->get_themes( $inter_id );
+
         if( $themeList )
         {
-            $themeArr = array('v1','ticket','zongzi', 'mooncake4');
+            $themeArr = array('v1','ticket','zongzi', 'mooncake4', 'idefault');
             $themeListNew = array();
             //先去掉除了v1、ticket、zongzi的皮肤
             foreach( $themeList as $k=>$v )

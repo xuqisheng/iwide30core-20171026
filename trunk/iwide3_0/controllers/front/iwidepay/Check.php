@@ -130,8 +130,6 @@ class Check extends MY_Controller {
 			//2.按子单查，先查出子订单号
 			$itemids = $this->Iwidepay_model->get_hotel_order_items($params['order_no']);
 			if(!empty($itemids)){
-				$item_num = count($itemids);
-				$inum = 0;
 				foreach ($itemids as $k => $itemid) {
 					$grade_entity_all = $this->Iwidepay_model->get_single_grade_base_all($params['inter_id'],$itemid['id']);
 					MYLOG::w('info:'.$params['inter_id'].'-'.$params['order_no'].'hotel_dist by itemid_all-'.json_encode($grade_entity_all), 'iwidepay_check');
@@ -147,15 +145,14 @@ class Check extends MY_Controller {
 							MYLOG::w('info:'.$dist_amt,'iwidepay_check');
 							return false;
 						}
-						$dist_amts += $dist_amt;
+						if(is_numeric($dist_amts)){
+							$dist_amts += $dist_amt;
+						}else{
+							$dist_amts = $dist_amt;
+						}
 					}else{
-						$inum++;
 						continue;
 					}
-				}
-				if($inum == $item_num){
-					//无分销
-					return true;
 				}
 			}else{
 				return true;
@@ -259,7 +256,7 @@ class Check extends MY_Controller {
 						if($vr['istatus']==3){
 							//记录订单最终金额
 							$s_status = 1;
-							// $f_price += $vr['iprice']*100;
+							$f_price += $vr['iprice']*100;
 						}
 					}
 				}
@@ -271,12 +268,18 @@ class Check extends MY_Controller {
 				MYLOG::w('err:'.$params['inter_id'].'-'.$params['order_no'].' transfer_status update fail','iwidepay_check');
 				return false;
 			}
-			//更新同步订单最终金额
-			// $res = $this->Iwidepay_model->edit_order_amt($params['inter_id'],$params['module'],$params['order_no'],$f_price);
-			// if(!$res){
-			// 	MYLOG::w('info:'.$params['inter_id'].'-'.$params['order_no'].':'.$f_price.' order_amt update fail','iwidepay_check');
-			// 	return false;
-			// }
+			//判断是否开启了现付结算
+			$this->load->model('iwidepay/Iwidepay_clears_model');
+    		$open_offline = $this->Iwidepay_clears_model->get_configs($params['inter_id'],'synchro_hotel_order');
+    		MYLOG::w('info:synchro_hotel_order config_'.$params['inter_id'].'-'.json_encode($open_offline),'iwidepay_check');
+    		if(!empty($open_offline['value'])&&$open_offline['value']==1){
+				//更新同步订单最终金额
+				$res = $this->Iwidepay_model->edit_order_amt($params['inter_id'],$params['module'],$params['order_no'],$f_price);
+				if(!$res){
+					MYLOG::w('info:'.$params['inter_id'].'-'.$params['order_no'].':'.$f_price.' order_amt update fail','iwidepay_check');
+					return false;
+				}
+			}
 		}
 		if($order['handled']==1){
 			//完结，更新分账状态为2待分,订单完结状态为1已完结

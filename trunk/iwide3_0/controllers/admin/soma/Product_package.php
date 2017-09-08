@@ -574,6 +574,11 @@ class Product_package extends MY_Admin_Soma {
 		$post['wx_booking_config'] = json_encode( $hotels );
 		// var_dump( $hotels, $hotelIds, $post['wx_booking_config'] );die;
 
+        //积分、储值商品不能退款（2017-09-01，建磊要求要改）
+        if(in_array($post['type'], [$model::PRODUCT_TYPE_BALANCE, $model::PRODUCT_TYPE_POINT])){
+            $post['can_refund'] = $model::STATUS_CAN_NO;
+        }
+
         //规格信息
         $spec_save_sign = FALSE;
         $specList = array(

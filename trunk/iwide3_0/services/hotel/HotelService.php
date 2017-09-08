@@ -12,7 +12,6 @@ use App\services\HotelBaseService;
 class HotelService extends HotelBaseService {
 	public $common_data;
 	public $module;
-	public $share;
 
 	/**
      * 获取服务实例方法
@@ -25,49 +24,32 @@ class HotelService extends HotelBaseService {
 
 	function __construct() {
 		parent::__construct ();
-		\MYLOG::hotel_tracker($this->getCI()->openid,  $this->getCI()->inter_id);
+		\MYLOG::hotel_tracker($this->_hotel_ci->openid,  $this->_hotel_ci->inter_id);
 		$this->module = 'hotel';
 		$this->member_no = '';
 		$this->member_lv = '';
-		if (! empty ( $this->getCI()->member_info ) && isset ( $this->getCI()->member_info->mem_id )) {
-			$this->member_no = $this->getCI()->member_info->mem_card_no;
-			$this->member_lv = $this->getCI()->member_info->level;
+		if (! empty ( $this->_hotel_ci->member_info ) && isset ( $this->_hotel_ci->member_info->mem_id )) {
+			$this->member_no = $this->_hotel_ci->member_info->mem_card_no;
+			$this->member_lv = $this->_hotel_ci->member_info->level;
 		}
-		$this->getCI()->load->model ( 'wx/Access_token_model' );
-		$this->common_data ['signPackage'] = $this->getCI()->Access_token_model->getSignPackage ( $this->getCI()->inter_id );
-		$this->common_data ['pagetitle'] = $this->getCI()->public ['name'];
-		$this->common_data ['member'] = $this->getCI()->member_info;
-		$this->common_data ['inter_id'] = $this->getCI()->inter_id;
-		$this->common_data ['csrf_token'] = $this->getCI()->security->get_csrf_token_name ();
-		$this->common_data ['csrf_value'] = $this->getCI()->security->get_csrf_hash ();
-		$this->share ['title'] = $this->getCI()->public ['name'] . '-微信订房';
-		$slink = 'http://'.$_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'];
-		if (strpos ( $slink, '?' ))
-			$slink = $slink . "&id=" . $this->getCI()->inter_id;
-		else
-			$slink = $slink . "?id=" . $this->getCI()->inter_id;
-		$this->share ['link'] = $slink;
-		$this->share ['imgUrl'] = 'http://7n.cdn.iwide.cn/public/uploads/201609/qf051934149038.jpg';
-		$this->share ['desc'] = $this->getCI()->public ['name'] . '欢迎您使用微信订房,享受快捷服务...';
-		$this->share ['type'] = '';
-		$this->share ['dataUrl'] = '';
-		$this->common_data ['share'] = $this->share;
+		
+		$this->common_data ['member'] = $this->_hotel_ci->member_info;
 
-		$this->common_data ['index_url'] = $this->getCI()->public ['is_multy'] == 1 ? \Hotel_base::inst()->get_url('INDEX') : \Hotel_base::inst()->get_url('SEARCH');
+		$this->common_data ['index_url'] = $this->_hotel_ci->public ['is_multy'] == 1 ? \Hotel_base::inst()->get_url('INDEX') : \Hotel_base::inst()->get_url('SEARCH');
 
-		$this->common_data ['my_saler_id']=$this->getCI()->my_saler_id;
-		$this->common_data ['url_param'] = $this->getCI()->url_param;
+		$this->common_data ['my_saler_id']=$this->_hotel_ci->my_saler_id;
+		$this->common_data ['url_param'] = $this->_hotel_ci->url_param;
 
-		if ($this->getCI()->input->get ( 'theme' )) {
-			$this->getCI()->session->set_userdata ( $this->getCI()->inter_id . 'skin', $this->getCI()->input->get ( 'theme' ) );
+		if ($this->_hotel_ci->input->get ( 'theme' )) {
+			$this->_hotel_ci->session->set_userdata ( $this->_hotel_ci->inter_id . 'skin', $this->_hotel_ci->input->get ( 'theme' ) );
 		}
 	}
 	function search() {
 		$data = $this->common_data;
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->model ( 'hotel/Order_model' );
-		$this->getCI()->load->model('hotel/Hotel_config_model');
-		$config_data = $this->getCI()->Hotel_config_model->get_hotel_config ( $this->getCI()->inter_id, 'HOTEL', 0, array (
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
+		$this->_hotel_ci->load->model('hotel/Hotel_config_model');
+		$config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', 0, array (
 		        'BOOK_DATE_VALIDATE',
 		        'MAX_BOOK_DAY',
 		        'LOGIN_ACTION_NAME',
@@ -82,52 +64,52 @@ class HotelService extends HotelBaseService {
 		    $data['max_book_day']=90;
 		}
 		//可预订的开始日期
-		$date_check = $this->getCI()->Order_model->date_validate ( date('Ymd'), date('Ymd',time()+86400), $this->getCI()->inter_id,0,$config_data);
+		$date_check = $this->_hotel_ci->Order_model->date_validate ( date('Ymd'), date('Ymd',time()+86400), $this->_hotel_ci->inter_id,0,$config_data);
 		$data ['startdate'] = $date_check[0];
 		$data ['enddate'] = $date_check[1];
 		$data['pre_sp_date']=$date_check[2];
 
-		$data ['pubimgs'] = $this->getCI()->Hotel_model->get_imgs ( 'pub', $this->getCI()->inter_id );
-		$cities = $this->getCI()->Hotel_model->get_hotel_citys ( $this->getCI()->inter_id );
+		$data ['pubimgs'] = $this->_hotel_ci->Hotel_model->get_imgs ( 'pub', $this->_hotel_ci->inter_id );
+		$cities = $this->_hotel_ci->Hotel_model->get_hotel_citys ( $this->_hotel_ci->inter_id );
 		$data ['citys'] = $cities['citys'];
         $data['area'] = $cities['area'];
 
 		$data ['first_city'] = $cities['first_city'];
 		$data ['hot_city'] = $cities['hot_city'];
 
-		$data ['last_orders'] = $this->getCI()->Order_model->get_last_order ( $this->getCI()->inter_id, $this->getCI()->openid, 5, true, 'h.city' );
-		$data ['hotel_collection'] = $this->getCI()->Hotel_model->get_front_marks ( array (
-			                                                                   'inter_id' => $this->getCI()->inter_id,
-			                                                                   'openid' => $this->getCI()->openid,
+		$data ['last_orders'] = $this->_hotel_ci->Order_model->get_last_order ( $this->_hotel_ci->inter_id, $this->_hotel_ci->openid, 5, true, 'h.city' );
+		$data ['hotel_collection'] = $this->_hotel_ci->Hotel_model->get_front_marks ( array (
+			                                                                   'inter_id' => $this->_hotel_ci->inter_id,
+			                                                                   'openid' => $this->_hotel_ci->openid,
 			                                                                   'mark_type' => 'hotel_collection',
 			                                                                   'status' => 1
 		                                                                   ), 'mark_nums desc', 5, 0 );
-		$data ['hotel_visited'] = $this->getCI()->Hotel_model->get_front_marks ( array (
-			                                                                'inter_id' => $this->getCI()->inter_id,
-			                                                                'openid' => $this->getCI()->openid,
+		$data ['hotel_visited'] = $this->_hotel_ci->Hotel_model->get_front_marks ( array (
+			                                                                'inter_id' => $this->_hotel_ci->inter_id,
+			                                                                'openid' => $this->_hotel_ci->openid,
 			                                                                'mark_type' => 'hotel_visited',
 			                                                                'status' => 1
 		                                                                ), 'mark_time desc', 5, 0 );
 
 
-		$this->getCI()->load->model ( 'plugins/Advert_model' );
-		$data ['foot_ads'] = $this->getCI()->Advert_model->get_hotel_ads ( $this->getCI()->inter_id, 0, 'search_foot', 1, 1 );
+		$this->_hotel_ci->load->model ( 'plugins/Advert_model' );
+		$data ['foot_ads'] = $this->_hotel_ci->Advert_model->get_hotel_ads ( $this->_hotel_ci->inter_id, 0, 'search_foot', 1, 1 );
 
-		$type = $this->getCI()->input->get ( 'type', TRUE );
+		$type = $this->_hotel_ci->input->get ( 'type', TRUE );
 		$data ['type'] = $type;
 		//首页配置
-		$this->getCI()->load->model ( 'hotel/Views_model' );
-		$data['homepage_set'] = $this->getCI()->Views_model->get_homepage_config ($this->getCI()->inter_id,1);
+		$this->_hotel_ci->load->model ( 'hotel/Views_model' );
+		$data['homepage_set'] = $this->_hotel_ci->Views_model->get_homepage_config ($this->_hotel_ci->inter_id,1);
 
 		//获取皮肤配置
-		$module_view=$this->getCI()->get_display_view('hotel/search');
-		$skin_config=$this->getCI()->get_skin_config($module_view['skin_name'], 'hotel/search');
+		$module_view=$this->_hotel_ci->get_display_view('hotel/search');
+		$skin_config=$this->_hotel_ci->get_skin_config($module_view['skin_name'], 'hotel/search');
 		$module_view=array(
 				'module_view'=>$module_view
 		);
 		if (!empty($skin_config['fans_info'])){
-			$this->getCI()->load->model('wx/Publics_model');
-			$data['fans_info']=$this->getCI()->Publics_model->get_fans_info_one($this->getCI()->inter_id,$this->getCI()->openid);
+			$this->_hotel_ci->load->model('wx/Publics_model');
+			$data['fans_info']=$this->_hotel_ci->Publics_model->get_fans_info_one($this->_hotel_ci->inter_id,$this->_hotel_ci->openid);
 		}
 
         if (!empty($skin_config['show_area'])){
@@ -147,19 +129,19 @@ class HotelService extends HotelBaseService {
 	function sresult() {
 		$data = $this->common_data;
 
-        $is_near = $this->getCI()->input->get ( 'nearby', TRUE );
+        $is_near = $this->_hotel_ci->input->get ( 'nearby', TRUE );
         if(!empty($is_near) && $is_near==1)$data['nearby']=1;else $data['nearby']=0;
-        $this->getCI()->load->model ( 'hotel/Hotel_config_model' );
-        $config_data = $this->getCI()->Hotel_config_model->get_hotel_config ( $this->getCI()->inter_id, 'HOTEL', 0, array (
+        $this->_hotel_ci->load->model ( 'hotel/Hotel_config_model' );
+        $config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', 0, array (
                 'HOTEL_RESULT_ICON',
                 'BOOK_DATE_VALIDATE',
                 'MAX_BOOK_DAY',
                 'MIN_START_DATE'
         ) );
 
-		$city = $this->getCI()->input->post ( 'city', TRUE );
+		$city = $this->_hotel_ci->input->post ( 'city', TRUE );
 		if (empty($city)){
-			$city = $this->getCI()->input->get ( 'city', TRUE );
+			$city = $this->_hotel_ci->input->get ( 'city', TRUE );
 			if (!empty($city)){
 				$city=json_decode('["'.str_replace('%',"\\",$city).'"]');
 				if (!empty($city[0]))
@@ -168,9 +150,9 @@ class HotelService extends HotelBaseService {
 		}
 		$city=addslashes($city);
 
-        $area = $this->getCI()->input->post ( 'area', TRUE );
+        $area = $this->_hotel_ci->input->post ( 'area', TRUE );
         if (empty($area)){
-            $area = $this->getCI()->input->get ( 'area', TRUE );
+            $area = $this->_hotel_ci->input->get ( 'area', TRUE );
             if (!empty($area)){
                 $area=json_decode('["'.str_replace('%',"\\",$area).'"]');
                 if (!empty($area[0]))
@@ -178,34 +160,34 @@ class HotelService extends HotelBaseService {
             }
         }
         $area=addslashes($area);
-		$startdate = $this->getCI()->input->post ( 'startdate', TRUE );
-		$enddate = $this->getCI()->input->post ( 'enddate', TRUE );
-		$extra_condition = $this->getCI()->input->post ( 'ec', TRUE );
+		$startdate = $this->_hotel_ci->input->post ( 'startdate', TRUE );
+		$enddate = $this->_hotel_ci->input->post ( 'enddate', TRUE );
+		$extra_condition = $this->_hotel_ci->input->post ( 'ec', TRUE );
 
-		$type = $this->getCI()->input->get ( 'type', TRUE );
+		$type = $this->_hotel_ci->input->get ( 'type', TRUE );
 		$data ['type'] = $type;
 
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->model ( 'hotel/Order_model' );
-		$date_check = $this->getCI()->Order_model->date_validate ( $startdate, $enddate, $this->getCI()->inter_id,0,$config_data);
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
+		$date_check = $this->_hotel_ci->Order_model->date_validate ( $startdate, $enddate, $this->_hotel_ci->inter_id,0,$config_data);
 		$data ['startdate'] = $date_check [0];
 		$data ['enddate'] = $date_check [1];
 		$data ['pre_sp_date']=$date_check [2];
 
-		$keyword = $this->getCI()->input->post ( 'keyword', TRUE );
+		$keyword = $this->_hotel_ci->input->post ( 'keyword', TRUE );
 		$keyword=addslashes($keyword);
 		$result=array();
 
 		//获取皮肤配置
-		$module_view=$this->getCI()->get_display_view('hotel/sresult');
-		$skin_config=$this->getCI()->get_skin_config($module_view['skin_name'], 'hotel/sresult');
+		$module_view=$this->_hotel_ci->get_display_view('hotel/sresult');
+		$skin_config=$this->_hotel_ci->get_skin_config($module_view['skin_name'], 'hotel/sresult');
 		$module_view=array(
 				'module_view'=>$module_view
 		);
 
 		if(empty($skin_config['no_hotel_list']) && ($type != 'athour' || date('Hi')<2300)){
-			$this->getCI()->load->model('hotel/Hotel_check_model');
-			$result = $this->getCI()->Hotel_model->search_hotel_front ( $this->getCI()->inter_id, array (
+			$this->_hotel_ci->load->model('hotel/Hotel_check_model');
+			$result = $this->_hotel_ci->Hotel_model->search_hotel_front ( $this->_hotel_ci->inter_id, array (
 				'keyword' => $keyword,
 				'city' => $city,
 				'startdate' => $data ['startdate'],
@@ -222,11 +204,11 @@ class HotelService extends HotelBaseService {
 		$data ['hotel_ids'] = '';
 		if (! empty ( $result )) {
 			// foreach ( $result as $rt ) {
-			// $rt->service = $this->getCI()->Hotel_model->get_imgs ( 'hotel_service', $this->getCI()->inter_id, $rt->hotel_id );
+			// $rt->service = $this->_hotel_ci->Hotel_model->get_imgs ( 'hotel_service', $this->_hotel_ci->inter_id, $rt->hotel_id );
 			// $data ['hotel_ids'] .= ',' . $rt->hotel_id;
 			// }
 			// $data ['hotel_ids'] = substr ( $data ['hotel_ids'], 1 );
-			// $lowests = $this->getCI()->Order_model->get_lowest_price ( $this->getCI()->inter_id, array (
+			// $lowests = $this->_hotel_ci->Order_model->get_lowest_price ( $this->_hotel_ci->inter_id, array (
 			// 'startdate' => $data ['startdate'],
 			// 'enddate' => $data ['enddate'],
 			// 'hotel_ids' => $data ['hotel_ids']
@@ -238,8 +220,8 @@ class HotelService extends HotelBaseService {
 				$data ['hotel_ids'] .= ',' . $rt->hotel_id;
 			}
 			$data ['hotel_ids'] = substr ( $data ['hotel_ids'], 1 );
-			$this->getCI()->load->model ( 'hotel/Hotel_check_model' );
-			$result = $this->getCI()->Hotel_check_model->get_extra_info ( $this->getCI()->inter_id, $result, array (
+			$this->_hotel_ci->load->model ( 'hotel/Hotel_check_model' );
+			$result = $this->_hotel_ci->Hotel_check_model->get_extra_info ( $this->_hotel_ci->inter_id, $result, array (
 				'hotel_service',
 				'lowest_price',
 				'search_icons',
@@ -255,10 +237,10 @@ class HotelService extends HotelBaseService {
 				$data ['icons_set'] = json_decode ( $config_data ['HOTEL_RESULT_ICON'], TRUE );
 			}
 		}
-		$this->getCI()->load->model ( 'common/Record_model' );
-		$this->getCI()->Record_model->visit_log ( array (
-			                                 'openid' => $this->getCI()->openid,
-			                                 'inter_id' => $this->getCI()->inter_id,
+		$this->_hotel_ci->load->model ( 'common/Record_model' );
+		$this->_hotel_ci->Record_model->visit_log ( array (
+			                                 'openid' => $this->_hotel_ci->openid,
+			                                 'inter_id' => $this->_hotel_ci->inter_id,
 			                                 'title' => '搜索结果',
 			                                 'url' => $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'],
 			                                 'des' => "城市：$city,关键字：$keyword"
@@ -274,11 +256,11 @@ class HotelService extends HotelBaseService {
 
 	}
 	function return_lowest_price() {
-		$this->getCI()->load->model ( 'hotel/Order_model' );
-		$hotel_ids = $this->getCI()->input->get ( 'hs' );
-		$startdate = $this->getCI()->input->get ( 's' );
-		$enddate = $this->getCI()->input->get ( 'e' );
-		$lowests = $this->getCI()->Order_model->get_lowest_price ( $this->getCI()->inter_id, array (
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
+		$hotel_ids = $this->_hotel_ci->input->get ( 'hs' );
+		$startdate = $this->_hotel_ci->input->get ( 's' );
+		$enddate = $this->_hotel_ci->input->get ( 'e' );
+		$lowests = $this->_hotel_ci->Order_model->get_lowest_price ( $this->_hotel_ci->inter_id, array (
 			'startdate' => $startdate,
 			'enddate' => $enddate,
 			'hotel_ids' => $hotel_ids,
@@ -288,11 +270,11 @@ class HotelService extends HotelBaseService {
 	}
 	function index() {
 		$data = $this->common_data;
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-        $this->getCI()->load->model ( 'hotel/Coupon_model' );
-		$this->getCI()->load->model ( 'hotel/Gallery_model' );
-		$hotel_id = $this->getCI()->Hotel_model->get_a_hotel_id ( $this->getCI()->inter_id, $this->getCI()->input->get ( 'h' ), true );
-		$data ['hotel'] = $this->getCI()->Hotel_model->get_hotel_detail ( $this->getCI()->inter_id, $hotel_id, array (
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+        $this->_hotel_ci->load->model ( 'hotel/Coupon_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Gallery_model' );
+		$hotel_id = $this->_hotel_ci->Hotel_model->get_a_hotel_id ( $this->_hotel_ci->inter_id, $this->_hotel_ci->input->get ( 'h' ), true );
+		$data ['hotel'] = $this->_hotel_ci->Hotel_model->get_hotel_detail ( $this->_hotel_ci->inter_id, $hotel_id, array (
 			'img_type' => array (
 				'hotel_service',
 				'hotel_lightbox'
@@ -301,8 +283,8 @@ class HotelService extends HotelBaseService {
 				'ICONS_IMG_SERACH_RESULT'
 			)
 		) );
-		$this->getCI()->load->model ( 'hotel/Hotel_config_model' );
-		$config_data = $this->getCI()->Hotel_config_model->get_hotel_config ( $this->getCI()->inter_id, 'HOTEL', $hotel_id, array (
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_config_model' );
+		$config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', $hotel_id, array (
 		        'HOTEL_RESULT_ICON',
 		        'ROOM_EMPTY_ALERT',
 		        'BOOK_DATE_VALIDATE',
@@ -310,21 +292,21 @@ class HotelService extends HotelBaseService {
 		        'NONE_COMMENT',//取消评论
 		        'MIN_START_DATE'
 		));
-		$gallery_count = $this->getCI()->Gallery_model->get_gallery_count ( $this->getCI()->inter_id, $data ['hotel'] ['hotel_id'] );
+		$gallery_count = $this->_hotel_ci->Gallery_model->get_gallery_count ( $this->_hotel_ci->inter_id, $data ['hotel'] ['hotel_id'] );
 		$data ['gallery_count'] = 0;
 		foreach ( $gallery_count as $gc ) {
 			$data ['gallery_count'] += $gc ['g_nums'];
 		}
-		$collect_check = $this->getCI()->Hotel_model->get_type_mark ( array (
-			                                                     'inter_id' => $this->getCI()->inter_id,
+		$collect_check = $this->_hotel_ci->Hotel_model->get_type_mark ( array (
+			                                                     'inter_id' => $this->_hotel_ci->inter_id,
 			                                                     'mark_name' => $hotel_id,
-			                                                     'openid' => $this->getCI()->openid,
+			                                                     'openid' => $this->_hotel_ci->openid,
 			                                                     'mark_type' => 'hotel_collection'
 		                                                     ) );
 		$data ['collect_id'] = empty ( $collect_check ) ? 0 : $collect_check ['mark_id'];
-		$startdate = $this->getCI()->input->get ( 'start' );
-		$enddate = $this->getCI()->input->get ( 'end' );
-		$type = $this->getCI()->input->get ( 'type', TRUE );
+		$startdate = $this->_hotel_ci->input->get ( 'start' );
+		$enddate = $this->_hotel_ci->input->get ( 'end' );
+		$type = $this->_hotel_ci->input->get ( 'type', TRUE );
 		$data ['type'] = $type;
 		if($type == 'ticket'){
 			$room_type = 'ticket';
@@ -333,14 +315,14 @@ class HotelService extends HotelBaseService {
 		}
 		
 		
-		$this->getCI()->load->model ( 'hotel/Order_model' );
-		$date_check = $this->getCI()->Order_model->date_validate ( $startdate, $enddate,$this->getCI()->inter_id,$hotel_id,$config_data);
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
+		$date_check = $this->_hotel_ci->Order_model->date_validate ( $startdate, $enddate,$this->_hotel_ci->inter_id,$hotel_id,$config_data);
 		$data ['startdate'] = $date_check [0];
 		$data ['enddate'] = $date_check [1];
 		$data['pre_sp_date'] = $date_check [2];
-		$rooms = $this->getCI()->Hotel_model->get_hotel_rooms ( $this->getCI()->inter_id, $hotel_id, 1 ,null ,null ,$room_type);
+		$rooms = $this->_hotel_ci->Hotel_model->get_hotel_rooms ( $this->_hotel_ci->inter_id, $hotel_id, 1 ,null ,null ,$room_type);
 
-		$rooms = $this->getCI()->Hotel_model->get_rooms_detail ( $this->getCI()->inter_id, $hotel_id, $rooms, array (
+		$rooms = $this->_hotel_ci->Hotel_model->get_rooms_detail ( $this->_hotel_ci->inter_id, $hotel_id, $rooms, array (
 			'data' => 'value',
 			'img_type' => 'hotel_room_service'
 		) );
@@ -348,7 +330,7 @@ class HotelService extends HotelBaseService {
 		$condit = array (
 			'startdate' => $data ['startdate'],
 			'enddate' => $data ['enddate'],
-			'openid' => $this->getCI()->openid,
+			'openid' => $this->_hotel_ci->openid,
 			'member_level' => $this->member_lv,
 			'member_bonus'=>isset($this->common_data ['member']->bonus)?$this->common_data ['member']->bonus:0,
 			'check_pointpay'=>1,
@@ -356,8 +338,8 @@ class HotelService extends HotelBaseService {
 		    'check_package'=>1
 		);
 		// if ( $this->member_lv !='') {
-		$this->getCI()->load->model ( 'hotel/Member_model' );
-		$member_privilege = $this->getCI()->Member_model->level_privilege ( $this->getCI()->inter_id );
+		$this->_hotel_ci->load->model ( 'hotel/Member_model' );
+		$member_privilege = $this->_hotel_ci->Member_model->level_privilege ( $this->_hotel_ci->inter_id );
 		if (! empty ( $member_privilege )) {
 			$condit ['member_privilege'] = $member_privilege;
 		}
@@ -365,8 +347,8 @@ class HotelService extends HotelBaseService {
 		// }
 
 		$data ['countday'] = get_room_night($data ['startdate'],$data ['enddate'],'ceil',$data);//至少有一个间夜
-		$this->getCI()->load->library ( 'PMS_Adapter', array (
-			'inter_id' => $this->getCI()->inter_id,
+		$this->_hotel_ci->load->library ( 'PMS_Adapter', array (
+			'inter_id' => $this->_hotel_ci->inter_id,
 			'hotel_id' => $hotel_id
 		), 'pmsa' );
 
@@ -374,31 +356,31 @@ class HotelService extends HotelBaseService {
 		if($type){
 			$condit ['only_type'] = $type;
 		}
-		// $this->getCI()->load->model('hotel/Order_model');
-		// $data ['rooms'] = $this->getCI()->Order_model->get_rooms_change ( $rooms, array (
+		// $this->_hotel_ci->load->model('hotel/Order_model');
+		// $data ['rooms'] = $this->_hotel_ci->Order_model->get_rooms_change ( $rooms, array (
 		//专题活动处理 add by ping
-		$tc_id = $this->getCI()->input->get ( 'tc_id', TRUE );
+		$tc_id = $this->_hotel_ci->input->get ( 'tc_id', TRUE );
 		if($tc_id>0){
 			$data ['tc_id'] = $tc_id;
-			$this->getCI()->load->model ( 'hotel/Hotel_thematic_model' );
-			$tc_row = $this->getCI()->Hotel_thematic_model->get_row($this->getCI()->inter_id,$tc_id,array('nowtime'=>date('Y-m-d H:i:s'),'status'=>1));
+			$this->_hotel_ci->load->model ( 'hotel/Hotel_thematic_model' );
+			$tc_row = $this->_hotel_ci->Hotel_thematic_model->get_row($this->_hotel_ci->inter_id,$tc_id,array('nowtime'=>date('Y-m-d H:i:s'),'status'=>1));
 			if(!empty($tc_row)){
 				$tc_price_codes = json_decode($tc_row['price_codes'],TRUE);
 				$condit['price_codes'] = implode(',',$tc_price_codes);
 			}
 		}
-		$data ['rooms'] = $this->getCI()->pmsa->get_rooms_change ( $rooms, array (
-			'inter_id' => $this->getCI()->inter_id,
+		$data ['rooms'] = $this->_hotel_ci->pmsa->get_rooms_change ( $rooms, array (
+			'inter_id' => $this->_hotel_ci->inter_id,
 			'hotel_id' => $hotel_id
 		), $condit, true );
 		$data['packages']=empty($data ['rooms']['packages'])?array():$data ['rooms']['packages'];
 		$data['rooms']=$data ['rooms']['rooms'];
-		$this->getCI()->load->helper('string');
+		$this->_hotel_ci->load->helper('string');
 
         $pay_days = get_day_range ( $data ['startdate'], $data ['enddate'], 'array' );
         array_pop ( $pay_days );
-        $pay_ways = $this->getCI()->Pay_model->get_pay_way ( array (
-            'inter_id' => $this->getCI()->inter_id,
+        $pay_ways = $this->_hotel_ci->Pay_model->get_pay_way ( array (
+            'inter_id' => $this->_hotel_ci->inter_id,
             'module' => $this->module,
             'status' => 1,
             'exclude_type' => array(),
@@ -445,11 +427,12 @@ class HotelService extends HotelBaseService {
 
                     );
 
-                    $cardlist = $this->getCI()->Coupon_model->select_coupon($params,$mycards);
+                    $cardlist = $this->_hotel_ci->Coupon_model->select_coupon($params,$mycards);
                     $coupons = isset($cardlist['cards'])?$cardlist['cards']:'';
                     $mycards = isset($cardlist['mycards'])?$cardlist['mycards']:'';
 
                     if(isset($coupons['selected']) && !empty($coupons['selected'])){
+                        $data ['rooms'][$room_key]['state_info'][$state_key]['coupon_type'] = isset($coupons['selected'][0]['coupon_type'])?$coupons['selected'][0]['coupon_type']:'no_discount';
                         $data ['rooms'][$room_key]['state_info'][$state_key]['useable_coupon_favour'] = $coupons['select_coupon_favour'];
                     }
                     }
@@ -458,8 +441,8 @@ class HotelService extends HotelBaseService {
 		}
 		
 		if(empty($config_data['NONE_COMMENT'])){
-			$this->getCI()->load->model('hotel/Comment_model');
-			$data ['t_t'] = $this->getCI()->Comment_model->get_hotel_comment_counts($this->getCI()->inter_id, $hotel_id, 1, $this->getCI()->openid);
+			$this->_hotel_ci->load->model('hotel/Comment_model');
+			$data ['t_t'] = $this->_hotel_ci->Comment_model->get_hotel_comment_counts($this->_hotel_ci->inter_id, $hotel_id, 1, $this->_hotel_ci->openid);
 		}
 		$data ['icons_set'] = array ();
 		if (! empty ( $config_data ['HOTEL_RESULT_ICON'] )) {
@@ -476,26 +459,26 @@ class HotelService extends HotelBaseService {
 		}
 
 		// Visit log
-		$this->getCI()->load->model ( 'common/Record_model' );
-		$this->getCI()->Record_model->visit_log ( array (
-			                                 'openid' => $this->getCI()->openid,
-			                                 'inter_id' => $this->getCI()->session->userdata ( 'inter_id' ),
+		$this->_hotel_ci->load->model ( 'common/Record_model' );
+		$this->_hotel_ci->Record_model->visit_log ( array (
+			                                 'openid' => $this->_hotel_ci->openid,
+			                                 'inter_id' => $this->_hotel_ci->session->userdata ( 'inter_id' ),
 			                                 'title' => $data ['hotel'] ['name'],
 			                                 'url' => $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'],
 			                                 'visit_time' => date ( 'Y-m-d H:i:s' ),
 			                                 'des' => ''
 		                                 ) );
-		$this->getCI()->Hotel_model->add_front_mark ( array (
-			                                     'inter_id' => $this->getCI()->inter_id,
-			                                     'openid' => $this->getCI()->openid,
+		$this->_hotel_ci->Hotel_model->add_front_mark ( array (
+			                                     'inter_id' => $this->_hotel_ci->inter_id,
+			                                     'openid' => $this->_hotel_ci->openid,
 			                                     'mark_name' => $hotel_id,
 			                                     'mark_type' => 'hotel_visited',
 			                                     'mark_title' => $data ['hotel'] ['name'],
-			                                     'mark_link' => site_url ( 'hotel/hotel/index?id=' . $this->getCI()->inter_id . '&h=' . $hotel_id )
+			                                     'mark_link' => site_url ( 'hotel/hotel/index?id=' . $this->_hotel_ci->inter_id . '&h=' . $hotel_id )
 		                                     ) );
-		$this->getCI()->load->model ( 'plugins/Advert_model' );
-		$data ['foot_ads'] = $this->getCI()->Advert_model->get_hotel_ads ( $this->getCI()->inter_id, $hotel_id, 'index_foot', 1, 1 );
-		$data ['middle_ads'] = $this->getCI()->Advert_model->get_hotel_ads ( $this->getCI()->inter_id, $hotel_id, 'index_middle', 1, 1 );
+		$this->_hotel_ci->load->model ( 'plugins/Advert_model' );
+		$data ['foot_ads'] = $this->_hotel_ci->Advert_model->get_hotel_ads ( $this->_hotel_ci->inter_id, $hotel_id, 'index_foot', 1, 1 );
+		$data ['middle_ads'] = $this->_hotel_ci->Advert_model->get_hotel_ads ( $this->_hotel_ci->inter_id, $hotel_id, 'index_middle', 1, 1 );
 		if (isset($config_data['MAX_BOOK_DAY'])&&$config_data['MAX_BOOK_DAY']>0){
 		    $data['max_book_day']=$config_data['MAX_BOOK_DAY'];
 		}else{
@@ -514,31 +497,31 @@ class HotelService extends HotelBaseService {
 
 	}
 	function return_more_room() {
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->model ( 'hotel/Order_model' );
-        $this->getCI()->load->model ( 'hotel/Coupon_model' );
-		$hotel_id = $this->getCI()->input->post ( 'h' );
-		$startdate = $this->getCI()->input->post ( 'start' );
-		$enddate = $this->getCI()->input->post ( 'end' );
-		$protrol_code = $this->getCI()->input->post ( 'protrol_code' );
-        $member_level =$this->getCI()->input->post ( 'mem_level' );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
+        $this->_hotel_ci->load->model ( 'hotel/Coupon_model' );
+		$hotel_id = $this->_hotel_ci->input->post ( 'h' );
+		$startdate = $this->_hotel_ci->input->post ( 'start' );
+		$enddate = $this->_hotel_ci->input->post ( 'end' );
+		$protrol_code = $this->_hotel_ci->input->post ( 'protrol_code' );
+        // $member_level =$this->_hotel_ci->input->post ( 'mem_level' );
 		if (! empty ( $protrol_code )) {
-			$protrol_price_code = $this->getCI()->Order_model->get_protrol_price_code ( $this->getCI()->inter_id, $hotel_id, $protrol_code );
+			$protrol_price_code = $this->_hotel_ci->Order_model->get_protrol_price_code ( $this->_hotel_ci->inter_id, $hotel_id, $protrol_code );
 		}
-		$type = $this->getCI()->input->get ( 'type', TRUE );
+		$type = $this->_hotel_ci->input->get ( 'type', TRUE );
 		$data ['type'] = $type;
 		if($type == 'ticket'){
 			$room_type = 'ticket';
 		}else{
 			$room_type = 'room';
 		}
-		$rooms = $this->getCI()->Hotel_model->get_hotel_rooms ( $this->getCI()->inter_id, $hotel_id, 1 ,null ,null ,$room_type);
-		$rooms = $this->getCI()->Hotel_model->get_rooms_detail ( $this->getCI()->inter_id, $hotel_id, $rooms, array (
+		$rooms = $this->_hotel_ci->Hotel_model->get_hotel_rooms ( $this->_hotel_ci->inter_id, $hotel_id, 1 ,null ,null ,$room_type);
+		$rooms = $this->_hotel_ci->Hotel_model->get_rooms_detail ( $this->_hotel_ci->inter_id, $hotel_id, $rooms, array (
 			'data' => 'value',
 			'img_type' => 'hotel_room_service'
 		) );
-		$this->getCI()->load->model ( 'hotel/Order_model' );
-		$date_check = $this->getCI()->Order_model->date_validate ( $startdate, $enddate,$this->getCI()->inter_id,$hotel_id);
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
+		$date_check = $this->_hotel_ci->Order_model->date_validate ( $startdate, $enddate,$this->_hotel_ci->inter_id,$hotel_id);
 		$startdate = $date_check [0];
 		$enddate = $date_check [1];
 		$errmsg = '';
@@ -546,7 +529,7 @@ class HotelService extends HotelBaseService {
 			'startdate' => $startdate,
 			'enddate' => $enddate,
 			'is_ajax' => 1,
-			'openid' => $this->getCI()->openid,
+			'openid' => $this->_hotel_ci->openid,
 			'member_level' => $this->member_lv,
 			'member_bonus'=>isset($this->common_data ['member']->bonus)?$this->common_data ['member']->bonus:0,
 			'check_pointpay'=>1,
@@ -554,8 +537,8 @@ class HotelService extends HotelBaseService {
 		    'check_package'=>1
 		);
 		// if ( $this->member_lv !='') {
-		$this->getCI()->load->model ( 'hotel/Member_model' );
-		$member_privilege = $this->getCI()->Member_model->level_privilege ( $this->getCI()->inter_id );
+		$this->_hotel_ci->load->model ( 'hotel/Member_model' );
+		$member_privilege = $this->_hotel_ci->Member_model->level_privilege ( $this->_hotel_ci->inter_id );
 		if (! empty ( $member_privilege )) {
 			$condit ['member_privilege'] = $member_privilege;
 		}
@@ -568,26 +551,26 @@ class HotelService extends HotelBaseService {
 		} else if (! empty ( $protrol_code )) {
 			$errmsg = '木有这个协议代码哦';
 		}
-		$this->getCI()->load->library ( 'PMS_Adapter', array (
-			'inter_id' => $this->getCI()->inter_id,
+		$this->_hotel_ci->load->library ( 'PMS_Adapter', array (
+			'inter_id' => $this->_hotel_ci->inter_id,
 			'hotel_id' => $hotel_id
 		), 'pmsa' );
 		if($type){
 			$condit ['only_type'] = $type;
 		}
 		//专题活动处理 add by ping
-		$tc_id = $this->getCI()->input->post ( 'tc_id', TRUE );
+		$tc_id = $this->_hotel_ci->input->post ( 'tc_id', TRUE );
 		if($tc_id>0){
 			$data ['tc_id'] = $tc_id;
-			$this->getCI()->load->model ( 'hotel/Hotel_thematic_model' );
-			$tc_row = $this->getCI()->Hotel_thematic_model->get_row($this->getCI()->inter_id,$tc_id,array('nowtime'=>date('Y-m-d H:i:s'),'status'=>1));
+			$this->_hotel_ci->load->model ( 'hotel/Hotel_thematic_model' );
+			$tc_row = $this->_hotel_ci->Hotel_thematic_model->get_row($this->_hotel_ci->inter_id,$tc_id,array('nowtime'=>date('Y-m-d H:i:s'),'status'=>1));
 			if(!empty($tc_row)){
 				$tc_price_codes = json_decode($tc_row['price_codes'],TRUE);
 				$condit['price_codes'] = implode(',',$tc_price_codes);
 						}
 					}
-		$rooms = $this->getCI()->pmsa->get_rooms_change ( $rooms, array (
-			'inter_id' => $this->getCI()->inter_id,
+		$rooms = $this->_hotel_ci->pmsa->get_rooms_change ( $rooms, array (
+			'inter_id' => $this->_hotel_ci->inter_id,
 			'hotel_id' => $hotel_id
 		), $condit, true );
 		$packages=empty($rooms['packages'])?array():$rooms['packages'];
@@ -600,8 +583,8 @@ class HotelService extends HotelBaseService {
 
         $pay_days = get_day_range ( $startdate, $enddate, 'array' );
         array_pop ( $pay_days );
-        $pay_ways = $this->getCI()->Pay_model->get_pay_way ( array (
-            'inter_id' => $this->getCI()->inter_id,
+        $pay_ways = $this->_hotel_ci->Pay_model->get_pay_way ( array (
+            'inter_id' => $this->_hotel_ci->inter_id,
             'module' => $this->module,
             'status' => 1,
             'exclude_type' => array(),
@@ -657,17 +640,18 @@ class HotelService extends HotelBaseService {
                         'rooms'=>1,
                         'product_num'=>1,
                         'extra_para'=>array(),
-                        'level'=>$member_level,
+                        'level'=>$this->member_lv,
                         'amount'=>$v['state_info'][$state_key]['total_price'],
                         'paytype'=>$coupon_paytype
 
                     );
 
-                    $cardlist = $this->getCI()->Coupon_model->select_coupon($params,$mycards);
+                    $cardlist = $this->_hotel_ci->Coupon_model->select_coupon($params,$mycards);
                     $coupons = isset($cardlist['cards'])?$cardlist['cards']:'';
                     $mycards = isset($cardlist['mycards'])?$cardlist['mycards']:'';
 
                     if(isset($coupons['selected']) && !empty($coupons['selected'])){
+                        $v['state_info'][$state_key]['coupon_type'] = isset($coupons['selected'][0]['coupon_type'])?$coupons['selected'][0]['coupon_type']:'no_discount';
                         $v['state_info'][$state_key]['useable_coupon_favour'] = $coupons['select_coupon_favour'];
                     }
                     }
@@ -687,23 +671,23 @@ class HotelService extends HotelBaseService {
 	}
 	function hotel_detail() {
 		$data = $this->common_data;
-		if ($this->getCI()->input->get ( 'h' ))
-			$this->getCI()->session->set_userdata ( array (
-				                               $this->getCI()->inter_id . '_room_hotel_id' => $this->getCI()->input->get ( 'h' )
+		if ($this->_hotel_ci->input->get ( 'h' ))
+			$this->_hotel_ci->session->set_userdata ( array (
+				                               $this->_hotel_ci->inter_id . '_room_hotel_id' => $this->_hotel_ci->input->get ( 'h' )
 			                               ) );
-		$this->hotel_id = $this->getCI()->session->userdata ( $this->getCI()->inter_id . '_room_hotel_id' );
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$data ['hotel'] = $this->getCI()->Hotel_model->get_hotel_detail ( $this->getCI()->inter_id, $this->hotel_id, array (
+		$this->hotel_id = $this->_hotel_ci->session->userdata ( $this->_hotel_ci->inter_id . '_room_hotel_id' );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$data ['hotel'] = $this->_hotel_ci->Hotel_model->get_hotel_detail ( $this->_hotel_ci->inter_id, $this->hotel_id, array (
 			'img_type' => array (
 				'hotel_service',
 				'hotel_lightbox'
 			)
 		) );
 		// Visit log
-		$this->getCI()->load->model ( 'common/Record_model' );
-		$this->getCI()->Record_model->visit_log ( array (
-			                                 'openid' => $this->getCI()->openid,
-			                                 'inter_id' => $this->getCI()->session->userdata ( 'inter_id' ),
+		$this->_hotel_ci->load->model ( 'common/Record_model' );
+		$this->_hotel_ci->Record_model->visit_log ( array (
+			                                 'openid' => $this->_hotel_ci->openid,
+			                                 'inter_id' => $this->_hotel_ci->session->userdata ( 'inter_id' ),
 			                                 'title' => $data ['hotel'] ['name'],
 			                                 'url' => $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'],
 			                                 'visit_time' => date ( 'Y-m-d H:i:s' ),
@@ -713,19 +697,19 @@ class HotelService extends HotelBaseService {
 	}
 	function arounds() {
 		$data = $this->common_data;
-		if ($this->getCI()->input->get ( 'h' ))
-			$this->getCI()->session->set_userdata ( array (
-				                               $this->getCI()->inter_id . '_room_hotel_id' => $this->getCI()->input->get ( 'h' )
+		if ($this->_hotel_ci->input->get ( 'h' ))
+			$this->_hotel_ci->session->set_userdata ( array (
+				                               $this->_hotel_ci->inter_id . '_room_hotel_id' => $this->_hotel_ci->input->get ( 'h' )
 			                               ) );
-		$this->hotel_id = $this->getCI()->session->userdata ( $this->getCI()->inter_id . '_room_hotel_id' );
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$data ['hotel'] = $this->getCI()->Hotel_model->get_hotel_detail ( $this->getCI()->inter_id, $this->hotel_id);
+		$this->hotel_id = $this->_hotel_ci->session->userdata ( $this->_hotel_ci->inter_id . '_room_hotel_id' );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$data ['hotel'] = $this->_hotel_ci->Hotel_model->get_hotel_detail ( $this->_hotel_ci->inter_id, $this->hotel_id);
 		$data['pagetitle']=$data ['hotel']['name'];
 		// Visit log
-		$this->getCI()->load->model ( 'common/Record_model' );
-		$this->getCI()->Record_model->visit_log ( array (
-			                                 'openid' => $this->getCI()->openid,
-			                                 'inter_id' => $this->getCI()->session->userdata ( 'inter_id' ),
+		$this->_hotel_ci->load->model ( 'common/Record_model' );
+		$this->_hotel_ci->Record_model->visit_log ( array (
+			                                 'openid' => $this->_hotel_ci->openid,
+			                                 'inter_id' => $this->_hotel_ci->session->userdata ( 'inter_id' ),
 			                                 'title' => $data ['hotel'] ['name'],
 			                                 'url' => $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'],
 			                                 'visit_time' => date ( 'Y-m-d H:i:s' ),
@@ -735,38 +719,38 @@ class HotelService extends HotelBaseService {
 	}
 	function bookroom() {
 		$data = $this->common_data;
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->model ( 'hotel/Order_model' );
-        $this->getCI()->load->model ( 'hotel/Coupon_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
+        $this->_hotel_ci->load->model ( 'hotel/Coupon_model' );
 
 
 
-		$hotel_id = intval ( $this->getCI()->input->post ( 'hotel_id' ) );
-		$room_id = intval ( $this->getCI()->input->post ( 'room_id' ) );
-		$data ['price_codes'] = $this->getCI()->input->post ( 'price_codes' );
-		$data ['price_type'] = $this->getCI()->input->post ( 'price_type' );
+		$hotel_id = intval ( $this->_hotel_ci->input->post ( 'hotel_id' ) );
+		$room_id = intval ( $this->_hotel_ci->input->post ( 'room_id' ) );
+		$data ['price_codes'] = $this->_hotel_ci->input->post ( 'price_codes' );
+		$data ['price_type'] = $this->_hotel_ci->input->post ( 'price_type' );
 
-		$startdate = $this->getCI()->input->post ( 'startdate' );
-		$enddate = $this->getCI()->input->post ( 'enddate' );
+		$startdate = $this->_hotel_ci->input->post ( 'startdate' );
+		$enddate = $this->_hotel_ci->input->post ( 'enddate' );
 
 
 
-		$date_check = $this->getCI()->Order_model->date_validate ( $startdate, $enddate,$this->getCI()->inter_id,$hotel_id);
+		$date_check = $this->_hotel_ci->Order_model->date_validate ( $startdate, $enddate,$this->_hotel_ci->inter_id,$hotel_id);
 		$data ['startdate'] = $date_check [0];
 		$data ['enddate'] = $date_check [1];
 		$data ['hotel_id'] = $hotel_id;
-		$datas = $this->getCI()->input->post ( 'datas', TRUE );
+		$datas = $this->_hotel_ci->input->post ( 'datas', TRUE );
 		$price_codes = json_decode ( $data ['price_codes'], TRUE );
 		$price_type = json_decode ( $data ['price_type'], TRUE );
-		$type = $this->getCI()->input->post ( 'type', TRUE );
-		$package_info = json_decode ( $this->getCI()->input->post ( 'package_info' ), TRUE );
+		$type = $this->_hotel_ci->input->post ( 'type', TRUE );
+		$package_info = json_decode ( $this->_hotel_ci->input->post ( 'package_info' ), TRUE );
 		$countday = get_room_night($data ['startdate'],$data ['enddate'],'ceil',$data);//至少有一个间夜
 
 
 		if (empty ( $datas ) || empty ( $price_codes )) {
 			return array('redirect'=>\Hotel_base::inst()->get_url('INDEX',array('h'=>$hotel_id,'type'=>$type)));
 		}
-		$data ['hotel'] = $this->getCI()->Hotel_model->get_hotel_detail ( $this->getCI()->inter_id, $hotel_id, array (
+		$data ['hotel'] = $this->_hotel_ci->Hotel_model->get_hotel_detail ( $this->_hotel_ci->inter_id, $hotel_id, array (
 			'img_type' => array (
 				'hotel_service',
 				'hotel_lightbox'
@@ -780,7 +764,7 @@ class HotelService extends HotelBaseService {
 				unset ( $data_arr [$key] );
 			}
 		}
-		$data ['room_list'] = $this->getCI()->Hotel_model->get_rooms_detail ( $this->getCI()->inter_id, $hotel_id, array_keys ( $data_arr ), array (
+		$data ['room_list'] = $this->_hotel_ci->Hotel_model->get_rooms_detail ( $this->_hotel_ci->inter_id, $hotel_id, array_keys ( $data_arr ), array (
 			'number_realtime' => array (
 				's' => $data ['startdate'],
 				'e' => $data ['enddate']
@@ -794,21 +778,21 @@ class HotelService extends HotelBaseService {
 			'startdate' => $data ['startdate'],
 			'enddate' => $data ['enddate'],
 			'nums' => $data_arr,
-			'openid' => $this->getCI()->openid,
+			'openid' => $this->_hotel_ci->openid,
 			'member_level' => $this->member_lv,
 			'hotel_id'=> $hotel_id
 		);
 		// if ( $this->member_lv !='') {
-		$this->getCI()->load->model ( 'hotel/Member_model' );
-		$member_privilege = $this->getCI()->Member_model->level_privilege ( $this->getCI()->inter_id );
+		$this->_hotel_ci->load->model ( 'hotel/Member_model' );
+		$member_privilege = $this->_hotel_ci->Member_model->level_privilege ( $this->_hotel_ci->inter_id );
 		if (! empty ( $member_privilege )) {
 			$condit ['member_privilege'] = $member_privilege;
 		}
 
 		// }
-		$protrol_code = $this->getCI()->input->post ( 'protrol_code' );
+		$protrol_code = $this->_hotel_ci->input->post ( 'protrol_code' );
 		if (! empty ( $protrol_code ) && array_key_exists ( 'protrol', $price_type )) {
-			$protrol_price_code = $this->getCI()->Order_model->get_protrol_price_code ( $this->getCI()->inter_id, $hotel_id, $protrol_code );
+			$protrol_price_code = $this->_hotel_ci->Order_model->get_protrol_price_code ( $this->_hotel_ci->inter_id, $hotel_id, $protrol_code );
 		}
 		if (! empty ( $protrol_price_code )) {
 			$price_codes [] = $protrol_price_code;
@@ -817,15 +801,15 @@ class HotelService extends HotelBaseService {
 			);
 		}
 		$condit ['price_codes'] = implode ( ',', $price_codes );
-		$this->getCI()->load->library ( 'PMS_Adapter', array (
-			'inter_id' => $this->getCI()->inter_id,
+		$this->_hotel_ci->load->library ( 'PMS_Adapter', array (
+			'inter_id' => $this->_hotel_ci->inter_id,
 			'hotel_id' => $hotel_id
 		), 'pmsa' );
 		if($type){
 			$condit ['only_type'] = $type;
 		}
-		$data ['rooms'] = $this->getCI()->pmsa->get_rooms_change ( $data ['room_list'], array (
-			'inter_id' => $this->getCI()->inter_id,
+		$data ['rooms'] = $this->_hotel_ci->pmsa->get_rooms_change ( $data ['room_list'], array (
+			'inter_id' => $this->_hotel_ci->inter_id,
 			'hotel_id' => $hotel_id
 		), $condit, true );
 		reset($data ['rooms']);
@@ -861,8 +845,8 @@ class HotelService extends HotelBaseService {
 		        return array('redirect'=>\Hotel_base::inst()->get_url('INDEX',array('h'=>$hotel_id,'type'=>$type)));
 		    }else if (!empty($package_info)){
         		$goods_ids=array_column($data ['first_state']['goods_info']['items'], 'gs_id');
-    		    $this->getCI()->load->model('hotel/goods/Goods_order_model');
-                $package_check = $this->getCI()->Goods_order_model->check_order_package($this->getCI()->inter_id,$data ['first_state']['goods_info'],$package_info,array('startdate'=>$data ['startdate'],'enddate'=>$data ['enddate'],'roomnums'=>1));
+    		    $this->_hotel_ci->load->model('hotel/goods/Goods_order_model');
+                $package_check = $this->_hotel_ci->Goods_order_model->check_order_package($this->_hotel_ci->inter_id,$data ['first_state']['goods_info'],$package_info,array('startdate'=>$data ['startdate'],'enddate'=>$data ['enddate'],'roomnums'=>1));
     		    if ($package_check['s']==0){
     		        return array('redirect'=>\Hotel_base::inst()->get_url('INDEX',array('h'=>$hotel_id,'type'=>$type)));
     		    }else{
@@ -896,8 +880,8 @@ class HotelService extends HotelBaseService {
 			$no_pay_ways = empty ( $code_price ['condition'] ['no_pay_way'] ) ? $no_pay_ways : array_merge ( $no_pay_ways, $code_price ['condition'] ['no_pay_way'] );
 		}
 
-		$this->getCI()->load->model ( 'hotel/Hotel_config_model' );
-		$config_data = $this->getCI()->Hotel_config_model->get_hotel_config ( $this->getCI()->inter_id, 'HOTEL', $hotel_id, array (
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_config_model' );
+		$config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', $hotel_id, array (
 			'PRICE_EXCHANGE_POINT',
 			'BANCLANCE_COMSUME_CODE_NEED',
 			'POINT_EXCHANGE_ROOM',
@@ -906,12 +890,18 @@ class HotelService extends HotelBaseService {
             'POINT_PAY_CODE_NEED',
 			'POINT_NAME',
 			'HOTEL_PREPAY_FAVOUR',
-		    'BOOK_ADDIT_SERVICE'
-		) );
-		$this->getCI()->load->model ( 'hotel/Service_model' );
+            'BOOK_ADDIT_SERVICE',
+            'MORE_ROOM_NO_FAVOUR'
+        ) );
+        if(!empty($config_data['MORE_ROOM_NO_FAVOUR'])){
+            $data['no_favour']=$config_data['MORE_ROOM_NO_FAVOUR'];
+        }else{
+            $data['no_favour'] = 0;
+        }
+		$this->_hotel_ci->load->model ( 'hotel/Service_model' );
 		$data['addit_service']=array();
 		if (!empty($config_data['BOOK_ADDIT_SERVICE'])){
-    	    $data['addit_service']=$this->getCI()->Service_model->format_book_service(json_decode($config_data['BOOK_ADDIT_SERVICE'],TRUE));
+    	    $data['addit_service']=$this->_hotel_ci->Service_model->format_book_service(json_decode($config_data['BOOK_ADDIT_SERVICE'],TRUE));
 		}
 		//优惠券温馨提示
 		if(!empty($config_data['COUPON_TIPS'])){
@@ -926,10 +916,10 @@ class HotelService extends HotelBaseService {
 		if ($data ['first_state'] ['price_type'] == 'athour') {
 			$data ['athour'] = 1;
 		}
-		$this->getCI()->load->model ( 'hotel/Service_model' );
-		$this->getCI()->load->model ( 'hotel/Price_code_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Service_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Price_code_model' );
 		if (! empty ( $data ['first_state'] ['add_service_set'] )) {
-			$data ['services'] = $this->getCI()->Service_model->replace_service ( $this->getCI()->inter_id, array (
+			$data ['services'] = $this->_hotel_ci->Service_model->replace_service ( $this->_hotel_ci->inter_id, array (
 				'service_type' => 'hotel_order',
 				'status' => 1,
 				'add_occasion' => array (
@@ -937,18 +927,18 @@ class HotelService extends HotelBaseService {
 					'hotel_order_both'
 				)
 			), $data ['first_state'] ['add_service_set'] );
-			$data ['services'] = $this->getCI()->Service_model->classify_service ( $data ['services'] );
+			$data ['services'] = $this->_hotel_ci->Service_model->classify_service ( $data ['services'] );
 		}
 
 		if (! empty ( $data ['first_state'] ['time_condition'] ['book_time'] )) {
 			$min_hour = empty ( $data ['first_state'] ['time_condition'] ['min_hour'] ) ? 0 : $data ['first_state'] ['time_condition'] ['min_hour'] *3600;
-			$order_times = $this->getCI()->Price_code_model->get_book_time ( $data ['first_state'] ['time_condition'] ['book_time'], $min_hour );
+			$order_times = $this->_hotel_ci->Price_code_model->get_book_time ( $data ['first_state'] ['time_condition'] ['book_time'], $min_hour );
 			$data ['first_state'] ['time_condition'] ['book_times'] = $order_times ['book_times'];
 			$data ['first_state'] ['time_condition'] ['last_time'] = $order_times ['last_time'];
 		}
 		if (! empty ( $data ['first_state'] ['time_condition'] ['book_time_range'] )) {
 			$min_hour = empty ( $data ['first_state'] ['time_condition'] ['min_hour'] ) ? 0 : $data ['first_state'] ['time_condition'] ['min_hour'] *3600;
-			$order_times = $this->getCI()->Price_code_model->get_book_time ( $data ['first_state'] ['time_condition'] ['book_time'], $min_hour );
+			$order_times = $this->_hotel_ci->Price_code_model->get_book_time ( $data ['first_state'] ['time_condition'] ['book_time'], $min_hour );
 			$data ['first_state'] ['time_condition'] ['book_times'] = $order_times ['book_times'];
 			$data ['first_state'] ['time_condition'] ['last_time'] = $order_times ['last_time'];
 		}
@@ -957,7 +947,7 @@ class HotelService extends HotelBaseService {
 				$data ['add_time_service'] = current ( $data ['services'] ['add_time'] );
 				$begin_time = empty ( $data ['first_state'] ['condition'] ['last_time'] ) ? date ( 'YmdH00', strtotime ( '+ 1 hour', time () ) ) : $data ['first_state'] ['condition'] ['last_time'];
 				$max_time = empty ( $data ['first_state'] ['condition'] ['book_time'] ['e'] ) ? 0 : $data ['first_state'] ['condition'] ['book_time'] ['e'];
-				$data ['add_time_service'] ['add_times'] = $this->getCI()->Service_model->check_service_rule ( 'add_time', array (
+				$data ['add_time_service'] ['add_times'] = $this->_hotel_ci->Service_model->check_service_rule ( 'add_time', array (
 					'begin_time' => $begin_time,
 					'max_time' => $max_time,
 					'max_num' => $data ['add_time_service'] ['max_num']
@@ -966,12 +956,12 @@ class HotelService extends HotelBaseService {
 		}
 
 		$data ['room_count'] = array_sum ( $data_arr );
-		$this->getCI()->load->model ( 'pay/Pay_model' );
-		$this->getCI()->load->helper ( 'date' );
+		$this->_hotel_ci->load->model ( 'pay/Pay_model' );
+		$this->_hotel_ci->load->helper ( 'date' );
 		$pay_days = get_day_range ( $data ['startdate'], $data ['enddate'], 'array' );
 		array_pop ( $pay_days );
-		$data ['pay_ways'] = $this->getCI()->Pay_model->get_pay_way ( array (
-			                                                     'inter_id' => $this->getCI()->inter_id,
+		$data ['pay_ways'] = $this->_hotel_ci->Pay_model->get_pay_way ( array (
+			                                                     'inter_id' => $this->_hotel_ci->inter_id,
 			                                                     'module' => $this->module,
 			                                                     'status' => 1,
 			                                                     'exclude_type' => $no_pay_ways,
@@ -1004,7 +994,7 @@ class HotelService extends HotelBaseService {
 						'countday'     => $countday,
 						'startdate'    => $startdate,
 						'enddate'      => $enddate,
-						'openid'       => $this->getCI()->openid,
+						'openid'       => $this->_hotel_ci->openid,
 						'total_price'  => $data ['total_price'],
 						'roomnums'     => $data ['room_count'],
 						'hotel_id'     => $data ['hotel_id'],
@@ -1021,7 +1011,7 @@ class HotelService extends HotelBaseService {
 					    $point_params['extra_para']['pms_total_point']=$data ['first_state']['pms_total_point'];
 					    $data['extra_pointpay_para']=$point_params['extra_para'];
 					}
-					$point_pay_set = $this->getCI()->Member_model->point_pay_check($this->getCI()->inter_id, $point_params);
+					$point_pay_set = $this->_hotel_ci->Member_model->point_pay_check($this->_hotel_ci->inter_id, $point_params);
 					//End PMS point
 
 					$data['point_pay_set'] = $point_pay_set['pay_set'];
@@ -1095,12 +1085,12 @@ class HotelService extends HotelBaseService {
         }
 
 		$data ['source_data'] = json_encode ( $data_arr );
-		$last_orders = $this->getCI()->Order_model->get_last_order ( $this->getCI()->inter_id, $this->getCI()->openid, 1, false );
-// 		$data ['member'] = $this->pub_pmsa->check_openid_member ( $this->getCI()->inter_id, $this->getCI()->openid, array (
+		$last_orders = $this->_hotel_ci->Order_model->get_last_order ( $this->_hotel_ci->inter_id, $this->_hotel_ci->openid, 1, false );
+// 		$data ['member'] = $this->pub_pmsa->check_openid_member ( $this->_hotel_ci->inter_id, $this->_hotel_ci->openid, array (
 // 			'create' => TRUE,
 // 			'update' => TRUE
 // 		) );
-		$data ['member'] = $this->getCI()->member_info;
+		$data ['member'] = $this->_hotel_ci->member_info;
 		isset($data['member']->bonus) or $data['member']->bonus=0;
 		empty ( $last_orders ) ?  : $data ['last_order'] = $last_orders [0];
 
@@ -1109,7 +1099,7 @@ class HotelService extends HotelBaseService {
 			'startdate' => $data ['startdate'],
 			'enddate' => $data ['enddate'],
 			'nums' => current($data_arr),
-			'openid' => $this->getCI()->openid,
+			'openid' => $this->_hotel_ci->openid,
 			'member_level' => $this->member_lv,
 			'room_id'=>key($data_arr),
 			'price_code'=>current($price_codes),
@@ -1122,7 +1112,7 @@ class HotelService extends HotelBaseService {
 			'check_point_name'=>1
 		);
 
-		$point_consum_set = $this->getCI()->Member_model->get_point_consum_rate ( $this->getCI()->inter_id, $this->member_lv,'room',$member_privilege,$point_condit );
+		$point_consum_set = $this->_hotel_ci->Member_model->get_point_consum_rate ( $this->_hotel_ci->inter_id, $this->member_lv,'room',$member_privilege,$point_condit );
 
 		//@Editor lGh 2016-7-29 11:59:33 积分兑换比例配置
 		$data ['point_consum_set']=$point_consum_set ['part_set'];
@@ -1132,8 +1122,8 @@ class HotelService extends HotelBaseService {
 		$avg_price = floatval ( $data ['total_price'] / $countday );
 
 		if (! empty ( $config_data ['PRICE_EXCHANGE_POINT'] )) {
-			$this->getCI()->load->model ( 'hotel/Member_model' );
-			$data ['point_exchange'] = $this->getCI()->Member_model->room_point_exchange ( $this->getCI()->inter_id, $data ['member'], array (
+			$this->_hotel_ci->load->model ( 'hotel/Member_model' );
+			$data ['point_exchange'] = $this->_hotel_ci->Member_model->room_point_exchange ( $this->_hotel_ci->inter_id, $data ['member'], array (
 				'countday' => $countday,
 				'price' => $avg_price,
 				'config' => $config_data ['PRICE_EXCHANGE_POINT'],
@@ -1190,7 +1180,7 @@ class HotelService extends HotelBaseService {
         );
 
 
-        $cardlist = $this->getCI()->Coupon_model->select_coupon($coupon_condition);   //自动选择优惠券
+        $cardlist = $this->_hotel_ci->Coupon_model->select_coupon($coupon_condition);   //自动选择优惠券
         $select_coupon = isset($cardlist['cards'])?$cardlist['cards']:'';
 
         if(isset($select_coupon['selected']) && !empty($select_coupon['select_coupon_favour'])){
@@ -1231,12 +1221,12 @@ class HotelService extends HotelBaseService {
 
         $data['exchange_max_point'] = floor($data['exchange_max_point']);
 
-        $data['paytype_icon'] =  $this->getCI()->Hotel_model->bigger_payways_icon();
+        $data['paytype_icon'] =  $this->_hotel_ci->Hotel_model->bigger_payways_icon();
 
-        $invoice_id = $this->getCI()->input->get('eid');
+        $invoice_id = $this->_hotel_ci->input->get('eid');
         if(isset($invoice_id)){
-            $this->getCI()->load->model ( 'invoice/Invoice_model' );
-            $data['invoice'] =  $this->getCI()->Invoice_model->getInvoiceById($this->getCI()->openid,$invoice_id);
+            $this->_hotel_ci->load->model ( 'invoice/Invoice_model' );
+            $data['invoice'] =  $this->_hotel_ci->Invoice_model->getInvoiceById($this->_hotel_ci->openid,$invoice_id);
         }
 
 		$data ['type'] = $type;
@@ -1283,38 +1273,38 @@ class HotelService extends HotelBaseService {
 		// Visit log
 		$now=date ( 'Y-m-d H:i:s' );
 
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->model ( 'hotel/Order_model' );
-		$this->getCI()->load->model ( 'hotel/Hotel_config_model' );
-		$startdate = date ( 'Ymd', strtotime ( $this->getCI()->input->post ( 'startdate' ) ) );
-		$enddate = date ( 'Ymd', strtotime ( $this->getCI()->input->post ( 'enddate' ) ) );
-		$hotel_id = intval ( $this->getCI()->input->post ( 'hotel_id' ) );
-		$price_codes = json_decode ( $this->getCI()->input->post ( 'price_codes' ), TRUE );
-		$datas = $this->getCI()->input->post ( 'datas' );
-		$price_type = json_decode ( $this->getCI()->input->post ( 'price_type' ), TRUE );
-		$coupons = json_decode ( $this->getCI()->input->post ( 'coupons' ), TRUE );
-		$roomnos = json_decode ( $this->getCI()->input->post ( 'roomnos' ), TRUE );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_config_model' );
+		$startdate = date ( 'Ymd', strtotime ( $this->_hotel_ci->input->post ( 'startdate' ) ) );
+		$enddate = date ( 'Ymd', strtotime ( $this->_hotel_ci->input->post ( 'enddate' ) ) );
+		$hotel_id = intval ( $this->_hotel_ci->input->post ( 'hotel_id' ) );
+		$price_codes = json_decode ( $this->_hotel_ci->input->post ( 'price_codes' ), TRUE );
+		$datas = $this->_hotel_ci->input->post ( 'datas' );
+		$price_type = json_decode ( $this->_hotel_ci->input->post ( 'price_type' ), TRUE );
+		$coupons = json_decode ( $this->_hotel_ci->input->post ( 'coupons' ), TRUE );
+		$roomnos = json_decode ( $this->_hotel_ci->input->post ( 'roomnos' ), TRUE );
 		// @author lGh 加服务配置
-		$add_service = json_decode ( $this->getCI()->input->post ( 'add_service' ), TRUE );
-		$extra_formdata = json_decode($this->getCI()->input->post ( 'extra_formdata' ),TRUE);
-		$custom_remark = $this->getCI()->input->post ( 'custom_remark',TRUE );
-		$consume_code = $this->getCI()->input->post ( 'consume_code' );
-        $bonus_consume_code = $this->getCI()->input->post ( 'consume_code' );
-        $point_pay_code = $this->getCI()->input->post ( 'consume_code' );
-        $package_info = json_decode ( $this->getCI()->input->post ( 'package_info' ), TRUE );
+		$add_service = json_decode ( $this->_hotel_ci->input->post ( 'add_service' ), TRUE );
+		$extra_formdata = json_decode($this->_hotel_ci->input->post ( 'extra_formdata' ),TRUE);
+		$custom_remark = $this->_hotel_ci->input->post ( 'custom_remark',TRUE );
+		$consume_code = $this->_hotel_ci->input->post ( 'consume_code' );
+        $bonus_consume_code = $this->_hotel_ci->input->post ( 'consume_code' );
+        $point_pay_code = $this->_hotel_ci->input->post ( 'consume_code' );
+        $package_info = json_decode ( $this->_hotel_ci->input->post ( 'package_info' ), TRUE );
     
-		$name = htmlspecialchars ( $this->getCI()->input->post ( 'name' ) );
-		$tel = htmlspecialchars ( $this->getCI()->input->post ( 'tel' ) );
-		$this->getCI()->load->helper('validate');
+		$name = htmlspecialchars ( $this->_hotel_ci->input->post ( 'name' ) );
+		$tel = htmlspecialchars ( $this->_hotel_ci->input->post ( 'tel' ) );
+		$this->_hotel_ci->load->helper('validate');
 		if(!check_phone($tel)){
 			$info ['s'] = 0;
 			$info ['errmsg'] = '请输入正确的手机号码';
 			return $info;
 		}
-		$email = $this->getCI()->input->post ( 'email' ) ;
-		$paytype = htmlspecialchars ( $this->getCI()->input->post ( 'paytype' ) );
-		$bonus = intval ( $this->getCI()->input->post ( 'bonus' ) );
-		$config_data = $this->getCI()->Hotel_config_model->get_hotel_config ( $this->getCI()->inter_id, 'HOTEL', $hotel_id, array (
+		$email = $this->_hotel_ci->input->post ( 'email' ) ;
+		$paytype = htmlspecialchars ( $this->_hotel_ci->input->post ( 'paytype' ) );
+		$bonus = intval ( $this->_hotel_ci->input->post ( 'bonus' ) );
+		$config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', $hotel_id, array (
 			'HOTEL_ORDER_ENSURE_WAY',
 			// 'HOTEL_IS_PMS',
 			'PMS_AFT_SUBMIT',
@@ -1332,19 +1322,20 @@ class HotelService extends HotelBaseService {
 		    'BOOK_ADDIT_SERVICE',
 		    'BOOK_DATE_VALIDATE',
 		    'PAID_ORDER_NOT_AUTO_ENSURE',
-		    'MIN_START_DATE'
+		    'MIN_START_DATE',
+            'MORE_ROOM_NO_FAVOUR'
 		) );
 		//检查是否二次提交订单
 		if(!empty($config_data['ORDER_DBL_SUBMIT_CHECK'])){
-			$this->getCI()->load->helper('common');
-			$this->getCI()->load->library('Cache/Redis_proxy', array(
+			$this->_hotel_ci->load->helper('common');
+			$this->_hotel_ci->load->library('Cache/Redis_proxy', array(
 				'not_init'    => FALSE,
 				'module'      => 'common',
 				'refresh'     => FALSE,
 				'environment' => ENVIRONMENT
 			), 'redis_proxy');
-			$redis = $this->getCI()->redis_proxy;
-			$dbl_chk_key=$this->getCI()->inter_id.':order_dbl_check:'.$this->getCI()->openid;
+			$redis = $this->_hotel_ci->redis_proxy;
+			$dbl_chk_key=$this->_hotel_ci->inter_id.':order_dbl_check:'.$this->_hotel_ci->openid;
 			//判断是否存在KEY
 			if($redis->exists($dbl_chk_key)){
 				//直接退出
@@ -1378,17 +1369,17 @@ class HotelService extends HotelBaseService {
     		$order_data['customer_remark']='';
 		}
 		
-		$this->getCI()->load->helper('string');
+		$this->_hotel_ci->load->helper('string');
 		$name=trim_space($name);
 		
-		$this->getCI()->load->model ( 'hotel/Service_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Service_model' );
 		$book_formdata=isset($extra_formdata['addit_service'])?$extra_formdata['addit_service']:array();
 		if (!empty($config_data['BOOK_ADDIT_SERVICE'])){
-		    $check_service=$this->getCI()->Service_model->check_book_formdata($book_formdata,json_decode($config_data['BOOK_ADDIT_SERVICE'],TRUE),'addit_service',array(
+		    $check_service=$this->_hotel_ci->Service_model->check_book_formdata($book_formdata,json_decode($config_data['BOOK_ADDIT_SERVICE'],TRUE),'addit_service',array(
 		            'startdate'=>$startdate,
 		            'enddate'=>$enddate,
-		            'openid'=>$this->getCI()->openid,
-		            'inter_id'=>$this->getCI()->inter_id
+		            'openid'=>$this->_hotel_ci->openid,
+		            'inter_id'=>$this->_hotel_ci->inter_id
 		    ));
 		    if ($check_service['s']==0){
 		        unset($check_service['data']);
@@ -1400,7 +1391,7 @@ class HotelService extends HotelBaseService {
 		}
 		
 		//可预订的开始日期
-		$date_check = $this->getCI()->Order_model->date_validate ( $startdate, $enddate, $this->getCI()->inter_id,0,$config_data);
+		$date_check = $this->_hotel_ci->Order_model->date_validate ( $startdate, $enddate, $this->_hotel_ci->inter_id,0,$config_data);
 		$enable_start = $date_check[0];
 
 		if (empty($paytype)){
@@ -1409,7 +1400,7 @@ class HotelService extends HotelBaseService {
 			return $info;
 		}
 
-		if (! $datas || ! $name || ! $tel || ! strtotime ( $this->getCI()->input->post ( 'startdate' ) ) || ! strtotime ( $this->getCI()->input->post ( 'enddate' ) ) || $startdate < $enable_start || $enddate <= $startdate) {
+		if (! $datas || ! $name || ! $tel || ! strtotime ( $this->_hotel_ci->input->post ( 'startdate' ) ) || ! strtotime ( $this->_hotel_ci->input->post ( 'enddate' ) ) || $startdate < $enable_start || $enddate <= $startdate) {
 			$info ['s'] = 0;
 			$info ['errmsg'] = '请填写有效信息';
 			return $info;
@@ -1423,12 +1414,12 @@ class HotelService extends HotelBaseService {
 		}
 		$email=htmlspecialchars($email);
 		
-		$hotel_row=$this->getCI()->Hotel_model->get_hotel_detail($this->getCI()->inter_id,$hotel_id);
+		$hotel_row=$this->_hotel_ci->Hotel_model->get_hotel_detail($this->_hotel_ci->inter_id,$hotel_id);
 		if(!empty($hotel_row['multiple_inner'])){
 			$customer = [];
 			
-			if($this->getCI()->input->post('customer') !== null && is_array($this->getCI()->input->post('customer'))){
-				$customer = array_map('trim_space', $this->getCI()->input->post('customer'));
+			if($this->_hotel_ci->input->post('customer') !== null && is_array($this->_hotel_ci->input->post('customer'))){
+				$customer = array_map('trim_space', $this->_hotel_ci->input->post('customer'));
 				foreach($customer as $v){
 					if(!$v){
 						$info ['s'] = 0;
@@ -1485,7 +1476,7 @@ class HotelService extends HotelBaseService {
 				unset ( $data_arr [$key] );
 			}
 		}
-		$room_list = $this->getCI()->Hotel_model->get_rooms_detail ( $this->getCI()->inter_id, $hotel_id, array_keys ( $data_arr ), array (
+		$room_list = $this->_hotel_ci->Hotel_model->get_rooms_detail ( $this->_hotel_ci->inter_id, $hotel_id, array_keys ( $data_arr ), array (
 			'number_realtime' => array (
 				's' => $startdate,
 				'e' => $enddate
@@ -1497,12 +1488,12 @@ class HotelService extends HotelBaseService {
 			'enddate' => $enddate,
 			'price_codes' => implode ( ',', $price_codes ),
 			'nums' => $data_arr,
-			'openid' => $this->getCI()->openid,
+			'openid' => $this->_hotel_ci->openid,
 			'member_level' => $this->member_lv
 		);
 		// if ( $this->member_lv !='') {
-		$this->getCI()->load->model ( 'hotel/Member_model' );
-		$member_privilege = $this->getCI()->Member_model->level_privilege ( $this->getCI()->inter_id );
+		$this->_hotel_ci->load->model ( 'hotel/Member_model' );
+		$member_privilege = $this->_hotel_ci->Member_model->level_privilege ( $this->_hotel_ci->inter_id );
 		if (! empty ( $member_privilege )) {
 			$condit ['member_privilege'] = $member_privilege;
 		}
@@ -1510,12 +1501,12 @@ class HotelService extends HotelBaseService {
 		if (! empty ( $price_type )) {
 			$condit ['price_type'] = array_keys ( $price_type );
 		}
-		$this->getCI()->load->library ( 'PMS_Adapter', array (
-			'inter_id' => $this->getCI()->inter_id,
+		$this->_hotel_ci->load->library ( 'PMS_Adapter', array (
+			'inter_id' => $this->_hotel_ci->inter_id,
 			'hotel_id' => $hotel_id
 		), 'pmsa' );
-		$rooms = $this->getCI()->pmsa->get_rooms_change ( $room_list, array (
-			'inter_id' => $this->getCI()->inter_id,
+		$rooms = $this->_hotel_ci->pmsa->get_rooms_change ( $room_list, array (
+			'inter_id' => $this->_hotel_ci->inter_id,
 			'hotel_id' => $hotel_id
 		), $condit, true );
 		$order_additions ['third_favour_info'] = array ();
@@ -1606,7 +1597,7 @@ class HotelService extends HotelBaseService {
 		
 		if (!empty($first_state['customer_condition']['multi_fill'])){
     		$multi_inner=isset($extra_formdata['multi_inner'])?$extra_formdata['multi_inner']:array();
-    		$check_inner=$this->getCI()->Service_model->check_book_formdata($multi_inner,$first_state['customer_condition'],'multi_inner',array('roomnums'=>$order_data['roomnums'],'first_man'=>$name));
+    		$check_inner=$this->_hotel_ci->Service_model->check_book_formdata($multi_inner,$first_state['customer_condition'],'multi_inner',array('roomnums'=>$order_data['roomnums'],'first_man'=>$name));
     		if ($check_inner['s']==0){
     		    unset($check_inner['data']);
 				return $check_inner;
@@ -1621,8 +1612,8 @@ class HotelService extends HotelBaseService {
     		    $info['errmsg']='请选择套餐';
     		    return $info;
     		}else if (!empty($package_info)){
-    		    $this->getCI()->load->model('hotel/goods/Goods_order_model');
-    		    $package_check = $this->getCI()->Goods_order_model->check_order_package($this->getCI()->inter_id,$first_state['goods_info'],$package_info,array('startdate'=>$startdate,'enddate'=>$enddate,'roomnums'=>$order_data['roomnums']));
+    		    $this->_hotel_ci->load->model('hotel/goods/Goods_order_model');
+    		    $package_check = $this->_hotel_ci->Goods_order_model->check_order_package($this->_hotel_ci->inter_id,$first_state['goods_info'],$package_info,array('startdate'=>$startdate,'enddate'=>$enddate,'roomnums'=>$order_data['roomnums']));
     		    if ($package_check['s']==0){
     		        unset($package_check['data']);
     		        return $info;
@@ -1636,21 +1627,21 @@ class HotelService extends HotelBaseService {
 		    return $info;
 		}
 		$order_additions ['room_codes'] = json_encode ( $room_codes );
-// 		$member = $this->pub_pmsa->check_openid_member ( $this->getCI()->inter_id, $this->getCI()->openid, array (
+// 		$member = $this->pub_pmsa->check_openid_member ( $this->_hotel_ci->inter_id, $this->_hotel_ci->openid, array (
 // 			'create' => TRUE,
 // 			'update' => TRUE
 // 		) );
-		$member = $this->getCI()->member_info;
+		$member = $this->_hotel_ci->member_info;
 
 		if ($paytype == 'bonus') {
 			// @author lGh 2016-4-6 21:34:15 积分换房
 			$countday = get_room_night($startdate, $enddate ,'ceil',$order_data);//至少有1个间夜
 			$avg_price = floatval ( $order_data ['price'] / ($countday * $order_data ['roomnums']) );
-			// $this->getCI()->load->model ( 'hotel/Hotel_config_model' );
-			// $config_data = $this->getCI()->Hotel_config_model->get_hotel_config ( $this->getCI()->inter_id, 'HOTEL', $hotel_id, 'PRICE_EXCHANGE_POINT');
+			// $this->_hotel_ci->load->model ( 'hotel/Hotel_config_model' );
+			// $config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', $hotel_id, 'PRICE_EXCHANGE_POINT');
 			if (! empty ( $config_data ['PRICE_EXCHANGE_POINT'] )) {
-				$this->getCI()->load->model ( 'hotel/Member_model' );
-				$point_exchange = $this->getCI()->Member_model->room_point_exchange ( $this->getCI()->inter_id, $member, array (
+				$this->_hotel_ci->load->model ( 'hotel/Member_model' );
+				$point_exchange = $this->_hotel_ci->Member_model->room_point_exchange ( $this->_hotel_ci->inter_id, $member, array (
 					'countday' => $countday,
 					'price' => $avg_price,
 					'config' => $config_data ['PRICE_EXCHANGE_POINT'],
@@ -1673,7 +1664,7 @@ class HotelService extends HotelBaseService {
 		// 使用代金券
 		$coupon_rel=array();
 		if ((!empty($related_coupons)||! empty ( $coupons )) && empty ( $bonus_paid )) {
-			$this->getCI()->load->model ( 'hotel/Coupon_model' );
+			$this->_hotel_ci->load->model ( 'hotel/Coupon_model' );
 			$params = array ();
 			$params ['days'] = get_room_night($startdate,$enddate,'round',$order_data);//至少有1个间夜
 			$params ['amount'] = $order_data ['price'];
@@ -1699,7 +1690,7 @@ class HotelService extends HotelBaseService {
 					$params['extra_para']['pms_code']=$room_codes [$first_room ['room_id']] ['code'] ['extra_info']['pms_code'];
 				}
 			}
-			$coupon_check = $this->getCI()->Coupon_model->check_coupon_using ( $this->getCI()->inter_id, $this->getCI()->openid, $params, array_keys ( $coupons ),$coupons,$related_coupons );
+			$coupon_check = $this->_hotel_ci->Coupon_model->check_coupon_using ( $this->_hotel_ci->inter_id, $this->_hotel_ci->openid, $params, array_keys ( $coupons ),$coupons,$related_coupons );
 
 			if ($coupon_check ['s'] == 0) {
 				return $coupon_check;
@@ -1742,7 +1733,7 @@ class HotelService extends HotelBaseService {
 				'startdate' => $startdate,
 				'enddate' => $enddate,
 				'nums' => $order_data ['roomnums'],
-				'openid' => $this->getCI()->openid,
+				'openid' => $this->_hotel_ci->openid,
 				'member_level' => $this->member_lv,
 				'room_id'=>key($data_arr),
 				'price_code'=>current($price_codes),
@@ -1756,8 +1747,8 @@ class HotelService extends HotelBaseService {
 				'check_point_name'=>1
 			);
 
-			$this->getCI()->load->model ( 'hotel/Member_model' );
-			$point_consum_rate = $this->getCI()->Member_model->get_point_consum_rate ( $this->getCI()->inter_id, $this->member_lv,'room',$member_privilege,$point_condit );
+			$this->_hotel_ci->load->model ( 'hotel/Member_model' );
+			$point_consum_rate = $this->_hotel_ci->Member_model->get_point_consum_rate ( $this->_hotel_ci->inter_id, $this->member_lv,'room',$member_privilege,$point_condit );
 			if (! empty ( $point_consum_rate )) {
 				if ($point_consum_rate['s']!=0 && !empty($point_consum_rate['consum_rate'])){
 					$order_additions ['point_favour'] = $bonus * $point_consum_rate['consum_rate'];
@@ -1789,7 +1780,7 @@ class HotelService extends HotelBaseService {
 				'countday'     => $countday,
 				'startdate'    => $startdate,
 				'enddate'      => $enddate,
-				'openid'       => $this->getCI()->openid,
+				'openid'       => $this->_hotel_ci->openid,
 				'total_price'  => $order_data ['price'],
 				'roomnums'     => $order_data ['roomnums'],
 				'hotel_id'     => $hotel_id,
@@ -1813,8 +1804,8 @@ class HotelService extends HotelBaseService {
 				}
 			}
 
-			$this->getCI()->load->model('hotel/Member_model');
-			$point_exchange = $this->getCI()->Member_model->point_pay_check($this->getCI()->inter_id, $point_params);
+			$this->_hotel_ci->load->model('hotel/Member_model');
+			$point_exchange = $this->_hotel_ci->Member_model->point_pay_check($this->_hotel_ci->inter_id, $point_params);
 
 			if (empty ( $point_exchange ) || $point_exchange ['can_exchange'] == 0) {
 				$info ['s'] = 0;
@@ -1847,6 +1838,13 @@ class HotelService extends HotelBaseService {
 			}
 		}
 
+        //检查是否多房间不能使用优惠
+        if(isset($config_data['MORE_ROOM_NO_FAVOUR']) && $config_data['MORE_ROOM_NO_FAVOUR']==1 && array_sum ( $data_arr )>1 && (!empty($coupons) || $bonus!=0 || (isset($order_additions ['wxpay_favour']) && $order_additions ['wxpay_favour']>0))){
+            $info ['s'] = 0;
+            $info ['errmsg'] = '多间房不能使用优惠';
+            return $info;
+        }
+
 		if ($order_data ['price'] <= 0 && empty ( $bonus_paid )) {
 			$info ['s'] = 0;
 			$info ['errmsg'] = '价格错误！';
@@ -1855,8 +1853,8 @@ class HotelService extends HotelBaseService {
 
 		// 保存订单
 		$order_data ['hotel_id'] = $hotel_id;
-		$order_data ['inter_id'] = $this->getCI()->inter_id;
-		$order_data ['openid'] = $this->getCI()->openid;
+		$order_data ['inter_id'] = $this->_hotel_ci->inter_id;
+		$order_data ['openid'] = $this->_hotel_ci->openid;
 		$order_data ['name'] = $name;
 		$order_data ['tel'] = $tel;
 		$order_data ['email'] = $email;
@@ -1877,7 +1875,7 @@ class HotelService extends HotelBaseService {
 				$saletime_start = date('Ymd').$first_state['time_condition']['book_time']['s'].'00';
 				$saletime_end = date('Ymd').$first_state['time_condition']['book_time']['e'].'00';
 			}
-			$intime = date('Y-m-d ').$this->getCI()->input->post ( 'intime' ).':00';
+			$intime = date('Y-m-d ').$this->_hotel_ci->input->post ( 'intime' ).':00';
 			if(strtotime($intime)<time() || strtotime($intime)<strtotime($saletime_start) || strtotime($intime)>strtotime($saletime_end)){
 				$info ['s'] = 0;
 				$info ['errmsg'] = '所选入住时间已过！';
@@ -1888,26 +1886,26 @@ class HotelService extends HotelBaseService {
 
 		$order_data ['paytype'] = $paytype; // 支付类型
 
-		$order_data ['own_saler']=$this->getCI()->my_saler_id;
-		if (empty($this->getCI()->my_saler_id)){
-			$order_data ['link_saler']=$this->getCI()->link_saler_id;
+		$order_data ['own_saler']=$this->_hotel_ci->my_saler_id;
+		if (empty($this->_hotel_ci->my_saler_id)){
+			$order_data ['link_saler']=$this->_hotel_ci->link_saler_id;
 		}else{
-			if (!empty($this->getCI()->ori_saler_id)){
-				$order_data ['link_saler']=$this->getCI()->ori_saler_id;
+			if (!empty($this->_hotel_ci->ori_saler_id)){
+				$order_data ['link_saler']=$this->_hotel_ci->ori_saler_id;
 			}else {
-				$order_data ['link_saler']=$this->getCI()->link_saler_id;
+				$order_data ['link_saler']=$this->_hotel_ci->link_saler_id;
 			}
 		}
 		if(empty($order_data ['link_saler'])){
-			$this->getCI()->load->model('distribute/Idistribute_model');
-			$true_saler = $this->getCI()->Idistribute_model->get_protection_saler($this->getCI()->openid,$this->getCI()->inter_id);
+			$this->_hotel_ci->load->model('distribute/Idistribute_model');
+			$true_saler = $this->_hotel_ci->Idistribute_model->get_protection_saler($this->_hotel_ci->openid,$this->_hotel_ci->inter_id);
 			if(!empty($true_saler)){
 				$order_data ['link_saler'] = $true_saler;
 			}
 		}
 
-		$this->getCI()->load->model ( 'pay/Pay_model' );
-		$pre_pay = $this->getCI()->Pay_model->is_online_pay ( $order_data ['paytype'] );
+		$this->_hotel_ci->load->model ( 'pay/Pay_model' );
+		$pre_pay = $this->_hotel_ci->Pay_model->is_online_pay ( $order_data ['paytype'] );
 		if ($pre_pay == 1) {
 			$order_data ['status'] = 9;
 		} else if (! empty ( $config_data ['HOTEL_ORDER_ENSURE_WAY'] ) && $config_data ['HOTEL_ORDER_ENSURE_WAY'] == 'instant') {
@@ -1918,7 +1916,7 @@ class HotelService extends HotelBaseService {
 			$order_data ['member_no'] = $member->mem_card_no;
 			$order_data ['jfk_member_no'] = $member->jfk_member_no;
 		}
-		$info = $this->getCI()->Order_model->create_order ( $this->getCI()->inter_id, array (
+		$info = $this->_hotel_ci->Order_model->create_order ( $this->_hotel_ci->inter_id, array (
 			'main_order' => $order_data,
 			'order_additions' => $order_additions,
 			'coupon_rel'=>$coupon_rel,
@@ -1931,49 +1929,49 @@ class HotelService extends HotelBaseService {
 			// if (! empty ( $config_data ['HOTEL_IS_PMS'] ) && $config_data ['HOTEL_IS_PMS'] == 1) {
 			// if ((! empty ( $config_data ['PMS_PRE_SUBMIT'] ) && $config_data ['PMS_PRE_SUBMIT'] == 1) || $pre_pay != 1) {
 			if ($pre_pay != 1) {
-				$msg = $this->getCI()->pmsa->order_submit ( $this->getCI()->inter_id, $info ['orderid'], array (
+				$msg = $this->_hotel_ci->pmsa->order_submit ( $this->_hotel_ci->inter_id, $info ['orderid'], array (
 					'room_codes' => $room_codes
 				) );
 				if ($msg ['s'] == 0) {
-					$this->getCI()->Order_model->handle_order ( $this->getCI()->inter_id, $info ['orderid'], 10, $this->getCI()->openid ,array('main_db'=>1)); // pms下单失败，退回
+					$this->_hotel_ci->Order_model->handle_order ( $this->_hotel_ci->inter_id, $info ['orderid'], 10, $this->_hotel_ci->openid ,array('main_db'=>1)); // pms下单失败，退回
 					$info = $msg;
 				} else {
-					$this->getCI()->Order_model->handle_order ( $this->getCI()->inter_id, $info ['orderid'], 'ss','',array('main_db'=>1) );
+					$this->_hotel_ci->Order_model->handle_order ( $this->_hotel_ci->inter_id, $info ['orderid'], 'ss','',array('main_db'=>1) );
 					if (!empty($info['has_paid'])||!empty($msg['has_paid'])){
 					    $status = empty($config_data['PAID_ORDER_NOT_AUTO_ENSURE']) ? 1 :0 ;
-						$this->getCI()->Order_model->update_order_status ( $this->getCI()->inter_id, $info ['orderid'], $status, $this->getCI()->openid, true );
+						$this->_hotel_ci->Order_model->update_order_status ( $this->_hotel_ci->inter_id, $info ['orderid'], $status, $this->_hotel_ci->openid, true );
 					}else if ($order_data ['status'] == 1) {
-						$this->getCI()->Order_model->handle_order ( $this->getCI()->inter_id, $info ['orderid'], $order_data ['status'], $this->getCI()->openid ,array('main_db'=>1));
+						$this->_hotel_ci->Order_model->handle_order ( $this->_hotel_ci->inter_id, $info ['orderid'], $order_data ['status'], $this->_hotel_ci->openid ,array('main_db'=>1));
 					}else if(isset($msg['upstatus']) && $msg['upstatus'] == 1){
-						$this->getCI()->Order_model->update_order_status ( $this->getCI()->inter_id, $info ['orderid'], 1, $this->getCI()->openid, FALSE );
+						$this->_hotel_ci->Order_model->update_order_status ( $this->_hotel_ci->inter_id, $info ['orderid'], 1, $this->_hotel_ci->openid, FALSE );
 					}
 				}
 			} else {
 				if ((empty ( $config_data ['PMS_AFT_SUBMIT'] ) || $config_data ['PMS_AFT_SUBMIT'] == 0)||(!empty($config_data ['PMS_POINT_REDUCE_WAY'])&&$config_data ['PMS_POINT_REDUCE_WAY']=='after'&&$paytype=='point')) {
-					$msg = $this->getCI()->pmsa->order_submit ( $this->getCI()->inter_id, $info ['orderid'], array (
+					$msg = $this->_hotel_ci->pmsa->order_submit ( $this->_hotel_ci->inter_id, $info ['orderid'], array (
 						'room_codes' => $room_codes
 					) );
 					if ($msg ['s'] == 0) {
-						$this->getCI()->Order_model->handle_order ( $this->getCI()->inter_id, $info ['orderid'], 10, $this->getCI()->openid,array('main_db'=>1) ); // pms下单失败，退回
+						$this->_hotel_ci->Order_model->handle_order ( $this->_hotel_ci->inter_id, $info ['orderid'], 10, $this->_hotel_ci->openid,array('main_db'=>1) ); // pms下单失败，退回
 						$info = $msg;
 					}else{
-						$this->getCI()->Order_model->handle_order ( $this->getCI()->inter_id, $info ['orderid'], 'ss','',array('main_db'=>1) );
+						$this->_hotel_ci->Order_model->handle_order ( $this->_hotel_ci->inter_id, $info ['orderid'], 'ss','',array('main_db'=>1) );
 						if (!empty($info['has_paid'])||!empty($msg['has_paid'])){
 						    $status = empty($config_data['PAID_ORDER_NOT_AUTO_ENSURE']) ? 1 :0 ;
-							$this->getCI()->Order_model->update_order_status ( $this->getCI()->inter_id, $info ['orderid'], $status, $this->getCI()->openid, true );
+							$this->_hotel_ci->Order_model->update_order_status ( $this->_hotel_ci->inter_id, $info ['orderid'], $status, $this->_hotel_ci->openid, true );
 						}
 					}
 				}
 			}
 
 
-            $invoice_id = $this->getCI()->input->post('invoice');
+            $invoice_id = $this->_hotel_ci->input->post('invoice');
 
             if($invoice_id !=0){
-                $this->getCI()->load->model ( 'invoice/Invoice_model' );
+                $this->_hotel_ci->load->model ( 'invoice/Invoice_model' );
                 $invoice_post = array(
-                    'openid'=>$this->getCI()->openid,
-                    'inter_id'=>$this->getCI()->inter_id,
+                    'openid'=>$this->_hotel_ci->openid,
+                    'inter_id'=>$this->_hotel_ci->inter_id,
                     'orderid'=>$info ['orderid'],
                     'invoice_id'=>$invoice_id,
                     'hotel_id'=>$hotel_id,
@@ -1981,7 +1979,7 @@ class HotelService extends HotelBaseService {
                     'createtime'=>date('Y-m-d H:i:s',time())
                 );
 
-                $invoice_info = $this->getCI()->Invoice_model->getInvoiceById($this->getCI()->openid,$invoice_id);
+                $invoice_info = $this->_hotel_ci->Invoice_model->getInvoiceById($this->_hotel_ci->openid,$invoice_id);
 
                 $invoice_content = array(
                     'type'=>$invoice_info['type'],
@@ -2000,10 +1998,10 @@ class HotelService extends HotelBaseService {
                 $invoice_post['invoice_content'] = json_encode($invoice_content);
 
 
-                $get_invoice = $this->getCI()->Invoice_model->book_invoice($invoice_post);
+                $get_invoice = $this->_hotel_ci->Invoice_model->book_invoice($invoice_post);
 
                 if($get_invoice != 0 ){
-                    $this->getCI()->Invoice_model->update_order_invoice($this->getCI()->openid,$this->getCI()->inter_id,$info ['orderid']);
+                    $this->_hotel_ci->Invoice_model->update_order_invoice($this->_hotel_ci->openid,$this->_hotel_ci->inter_id,$info ['orderid']);
                 }
 
             }
@@ -2015,10 +2013,10 @@ class HotelService extends HotelBaseService {
 
 
 		// Visit log
-		$this->getCI()->load->model ( 'common/Record_model' );
-		$this->getCI()->Record_model->visit_log ( array (
-			                                 'openid' => $this->getCI()->openid,
-			                                 'inter_id' => $this->getCI()->session->userdata ( 'inter_id' ),
+		$this->_hotel_ci->load->model ( 'common/Record_model' );
+		$this->_hotel_ci->Record_model->visit_log ( array (
+			                                 'openid' => $this->_hotel_ci->openid,
+			                                 'inter_id' => $this->_hotel_ci->session->userdata ( 'inter_id' ),
 			                                 'title' => '提交订单',
 			                                 'url' => $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'],
 			                                 'visit_time' => date ( 'Y-m-d H:i:s' ),
@@ -2027,74 +2025,74 @@ class HotelService extends HotelBaseService {
 		return $info;
 	}
 	function add_hotel_collection() {
-		$hotel_id = $this->getCI()->input->get ( 'hid' );
-		$mark_title = $this->getCI()->input->get ( 'hname' );
+		$hotel_id = $this->_hotel_ci->input->get ( 'hid' );
+		$mark_title = $this->_hotel_ci->input->get ( 'hname' );
 		$data = array (
 			'mark_name' => $hotel_id,
-			'inter_id' => $this->getCI()->inter_id,
-			'openid' => $this->getCI()->openid,
+			'inter_id' => $this->_hotel_ci->inter_id,
+			'openid' => $this->_hotel_ci->openid,
 			'mark_type' => 'hotel_collection',
 			'mark_title' => $mark_title,
-			'mark_link' => site_url ( 'hotel/hotel/index' ) . '?id=' . $this->getCI()->inter_id . '&h=' . $hotel_id
+			'mark_link' => site_url ( 'hotel/hotel/index' ) . '?id=' . $this->_hotel_ci->inter_id . '&h=' . $hotel_id
 		);
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		return $this->getCI()->Hotel_model->add_front_mark ( $data );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		return $this->_hotel_ci->Hotel_model->add_front_mark ( $data );
 	}
 	function clear_visited_hotel() {
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->Hotel_model->update_mark_status ( $this->getCI()->inter_id, $this->getCI()->openid, 2, 'hotel_visited', 'mark_type' );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->Hotel_model->update_mark_status ( $this->_hotel_ci->inter_id, $this->_hotel_ci->openid, 2, 'hotel_visited', 'mark_type' );
 		return 1;
 	}
 	function cancel_one_mark() {
-		$mark_id = $this->getCI()->input->get ( 'mid' );
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->Hotel_model->update_mark_status ( $this->getCI()->inter_id, $this->getCI()->openid, 2, $mark_id, 'mark_id' );
+		$mark_id = $this->_hotel_ci->input->get ( 'mid' );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->Hotel_model->update_mark_status ( $this->_hotel_ci->inter_id, $this->_hotel_ci->openid, 2, $mark_id, 'mark_id' );
 		return 1;
 	}
 	function orderdetail() {
 		$data = $this->common_data;
 		$order_condition=array (
-			'openid' => $this->getCI()->openid,
+			'openid' => $this->_hotel_ci->openid,
 			'member_no' => $this->member_no,
 			'idetail' => array (
 				'i'
 			)
 		);
-		$orderid = $this->getCI()->input->get ( 'orderid' );
+		$orderid = $this->_hotel_ci->input->get ( 'orderid' );
 		if (!empty($orderid)){
 		    $order_condition['orderid']=$orderid;
 		    $oid=$order_condition['orderid'];
 		}else{
-		    $order_condition['oid'] = intval ( $this->getCI()->input->get ( 'oid' ) );
+		    $order_condition['oid'] = intval ( $this->_hotel_ci->input->get ( 'oid' ) );
     		$oid=$order_condition['oid'];
 		}
-		$this->getCI()->load->model ( 'hotel/Order_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
 		$order_condition ['package_condition'] = array('get_goods_info'=>2,'syn_status'=>1);
-		$list = $this->getCI()->Order_model->get_main_order ( $this->getCI()->inter_id, $order_condition );
+		$list = $this->_hotel_ci->Order_model->get_main_order ( $this->_hotel_ci->inter_id, $order_condition );
 		if ($list) {
 			$list = $list [0];
 			$flag = 1;
 			$comment = 0;
-			$this->getCI()->load->model ( 'common/Enum_model' );
-			$this->getCI()->load->model ( 'pay/Pay_model' );
-			$data ['status_des'] = $this->getCI()->Enum_model->get_enum_des ( array (
+			$this->_hotel_ci->load->model ( 'common/Enum_model' );
+			$this->_hotel_ci->load->model ( 'pay/Pay_model' );
+			$data ['status_des'] = $this->_hotel_ci->Enum_model->get_enum_des ( array (
 				                                                         'HOTEL_ORDER_STATUS',
 				                                                         'PAY_WAY',
 				                                                         'HOTEL_ORDER_PAY_STATUS'
 			                                                         ), array (
 				                                                         1,
 				                                                         2
-			                                                         ) ,$this->getCI()->inter_id);
-			$data ['pay_ways'] = $this->getCI()->Pay_model->get_pay_way ( array (
-					'inter_id' => $this->getCI()->inter_id,
+			                                                         ) ,$this->_hotel_ci->inter_id);
+			$data ['pay_ways'] = $this->_hotel_ci->Pay_model->get_pay_way ( array (
+					'inter_id' => $this->_hotel_ci->inter_id,
 					'module' => 'hotel',
 					'pay_type'=>array($list['paytype']),
 					'key'=>'value'
 			) );
 
 			// 显示订单状态，判断评论和可否取消
-			$this->getCI()->load->model ( 'hotel/Order_check_model' );
-			$state = $this->getCI()->Order_check_model->check_order_state ( $list, $data ['status_des'] ['HOTEL_ORDER_STATUS'] );
+			$this->_hotel_ci->load->model ( 'hotel/Order_check_model' );
+			$state = $this->_hotel_ci->Order_check_model->check_order_state ( $list, $data ['status_des'] ['HOTEL_ORDER_STATUS'] );
 			$list ['status_des'] = $state ['des'];
 			$list ['show_orderid'] = empty ( $list ['web_orderid'] ) ? $list ['orderid'] : $list ['web_orderid'];
 			$data ['not_same'] = $state ['not_same'];
@@ -2103,53 +2101,52 @@ class HotelService extends HotelBaseService {
 			$data ['re_pay'] = $state ['re_pay'];
 			$data['states']=$state;
 			if ($state ['not_same'] == 0) {
-				$data ['order_sequence'] = $this->getCI()->Order_model->get_order_sequence ( $list ['status'] );
+				$data ['order_sequence'] = $this->_hotel_ci->Order_model->get_order_sequence ( $list ['status'] );
 			}
 			$week_arr=array("星期日","星期一","星期二","星期三","星期四","星期五","星期六");
 			$data['startdate_weekday']=$week_arr[date('w',strtotime($list['startdate']))];
 			$data['enddate_weekday']=$week_arr[date('w',strtotime($list['enddate']))];
 			if ($state ['pms_check'] == 1) {
-				$this->getCI()->load->library ( 'PMS_Adapter', array (
-					'inter_id' => $this->getCI()->inter_id,
+				$this->_hotel_ci->load->library ( 'PMS_Adapter', array (
+					'inter_id' => $this->_hotel_ci->inter_id,
 					'hotel_id' => $list ['hotel_id']
 				), 'pmsa' );
-				$this->getCI()->pmsa->update_web_order ( $this->getCI()->inter_id, $list );
+				$this->_hotel_ci->pmsa->update_web_order ( $this->_hotel_ci->inter_id, $list );
 			}
 
 			$data ['order'] = $list;
-			$data ['pagetitle'] = '订单详情';
 			//additions room_codes数据
 			$room_codes = json_decode($list['room_codes'], true);
 			$room_codes = $room_codes [$list['first_detail']['room_id']]; //$room_codes 结构：array('本地room_id'=>array('room'=>array('webser_id'=>房型代码),'code'=>array($extra_info(就是取房态时的 extra_info),'price_type'=>'价格类型')))
 			$extra_info=$room_codes['code']['extra_info'];
 			$data['extra_info']=$extra_info;
 
-			$this->getCI()->load->model ( 'hotel/Hotel_model' );
-			$data ['first_room'] = $this->getCI()->Hotel_model->get_room_detail ( $this->getCI()->inter_id, $list ['hotel_id'], $data ['order'] ['first_detail'] ['room_id'], array (
+			$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+			$data ['first_room'] = $this->_hotel_ci->Hotel_model->get_room_detail ( $this->_hotel_ci->inter_id, $list ['hotel_id'], $data ['order'] ['first_detail'] ['room_id'], array (
 				'img_type' => 'hotel_room_service'
 			) );
 
-			$data ['hotel'] = $this->getCI()->Hotel_model->get_hotel_detail ( $this->getCI()->inter_id, $list['hotel_id']);
+			$data ['hotel'] = $this->_hotel_ci->Hotel_model->get_hotel_detail ( $this->_hotel_ci->inter_id, $list['hotel_id']);
 			if($list['status'] == 9 && ($list['paytype'] == 'weixin' || $list['paytype'] == 'weifutong' || $list['paytype'] == 'lakala' || $list['paytype'] == 'lakala_y' || $list['paytype'] == 'unionpay')){//微信未支付
-				$this->getCI()->load->model ( 'hotel/Order_queues_model' );
-				$data['timeout'] = $this->getCI()->Order_queues_model->get_over_time($list['orderid']);
+				$this->_hotel_ci->load->model ( 'hotel/Order_queues_model' );
+				$data['timeout'] = $this->_hotel_ci->Order_queues_model->get_over_time($list['orderid']);
 			}else{
 				$data['timeout'] = 0;
 			}
 
             if(isset($data['order']['orderid'])){
-                $this->getCI()->load->model ( 'invoice/Invoice_model' );
-                $data['invoice_info'] = $this->getCI()->Invoice_model->check_order_invoice($data['order']['orderid']);
+                $this->_hotel_ci->load->model ( 'invoice/Invoice_model' );
+                $data['invoice_info'] = $this->_hotel_ci->Invoice_model->check_order_invoice($data['order']['orderid']);
             }
 
 		} else {
 			return array('redirect'=>\Hotel_base::inst()->get_url('MYORDER'));
 		}
 		// Visit log
-		$this->getCI()->load->model ( 'common/Record_model' );
-		$this->getCI()->Record_model->visit_log ( array (
-			                                 'openid' => $this->getCI()->openid,
-			                                 'inter_id' => $this->getCI()->inter_id,
+		$this->_hotel_ci->load->model ( 'common/Record_model' );
+		$this->_hotel_ci->Record_model->visit_log ( array (
+			                                 'openid' => $this->_hotel_ci->openid,
+			                                 'inter_id' => $this->_hotel_ci->inter_id,
 			                                 'title' => '订单详情',
 			                                 'url' => $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'],
 			                                 'des' => "订单id：" . $oid
@@ -2158,14 +2155,14 @@ class HotelService extends HotelBaseService {
 	}
 	function myorder() {
 		$data = $this->common_data;
-		$this->getCI()->load->model ( 'hotel/Order_model' );
-		$hl = $this->getCI()->input->get ( 'hl' );
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
+		$hl = $this->_hotel_ci->input->get ( 'hl' );
 		$handled = isset ( $hl ) ? intval ( $hl ) : null;
 		/*统一定时任务去取消
-		$from_order = $this->getCI()->input->get ( 'fro' );
+		$from_order = $this->_hotel_ci->input->get ( 'fro' );
 		if (! empty ( $from_order )) {
-			$info = $this->getCI()->Order_model->cancel_order ( $this->getCI()->inter_id, array (
-				'openid' => $this->getCI()->openid,
+			$info = $this->_hotel_ci->Order_model->cancel_order ( $this->_hotel_ci->inter_id, array (
+				'openid' => $this->_hotel_ci->openid,
 				'member_no' => $this->member_no,
 				'orderid' => $from_order,
 				'cancel_status' => 5,
@@ -2176,8 +2173,8 @@ class HotelService extends HotelBaseService {
 				)
 			) );
 		}*/
-		$orders = $this->getCI()->Order_model->get_main_order ( $this->getCI()->inter_id, array (
-			'openid' => $this->getCI()->openid,
+		$orders = $this->_hotel_ci->Order_model->get_main_order ( $this->_hotel_ci->inter_id, array (
+			'openid' => $this->_hotel_ci->openid,
 			'member_no' => $this->member_no,
 			'handled' => $handled,
 			'idetail' => array (
@@ -2185,11 +2182,11 @@ class HotelService extends HotelBaseService {
 			),
 		    'no_goods_order'=>1
 		) );
-		$this->getCI()->load->model ( 'common/Enum_model' );
-		$status_des = $this->getCI()->Enum_model->get_enum_des ( 'HOTEL_ORDER_STATUS' );
-		$this->getCI()->load->model ( 'hotel/Order_check_model' );
+		$this->_hotel_ci->load->model ( 'common/Enum_model' );
+		$status_des = $this->_hotel_ci->Enum_model->get_enum_des ( 'HOTEL_ORDER_STATUS' );
+		$this->_hotel_ci->load->model ( 'hotel/Order_check_model' );
 		foreach ( $orders as $ok => $o ) {
-			$state = $this->getCI()->Order_check_model->check_order_state ( $o, $status_des );
+			$state = $this->_hotel_ci->Order_check_model->check_order_state ( $o, $status_des );
 			$orders [$ok] ['status_des'] = $state ['des'];
 			$orders[$ok]['can_comment']=$state['can_comment'];
 			$orders[$ok]['can_cancel']=$state['can_cancel'];
@@ -2200,30 +2197,29 @@ class HotelService extends HotelBaseService {
 		}
 		$data ['orders'] = $orders;
 		$data ['handled'] = $handled;
-		$this->getCI()->load->model ( 'pay/Pay_model' );
+		$this->_hotel_ci->load->model ( 'pay/Pay_model' );
 
-		$data ['online_pay'] = $this->getCI()->Pay_model->is_online_pay ();
+		$data ['online_pay'] = $this->_hotel_ci->Pay_model->is_online_pay ();
 
-		$data ['pagetitle'] = '我的订单';
 		return $data;
 
 	}
 	function hotel_photo() {
 		$data = $this->common_data;
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->model ( 'hotel/Gallery_model' );
-		$data ['hotel_id'] = $hotel_id = $this->getCI()->Hotel_model->get_a_hotel_id ( $this->getCI()->inter_id, $this->getCI()->input->get ( 'h' ), false );
-		$data ['gallery_count'] = $this->getCI()->Gallery_model->get_gallery_count ( $this->getCI()->inter_id, $data ['hotel_id'] );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Gallery_model' );
+		$data ['hotel_id'] = $hotel_id = $this->_hotel_ci->Hotel_model->get_a_hotel_id ( $this->_hotel_ci->inter_id, $this->_hotel_ci->input->get ( 'h' ), false );
+		$data ['gallery_count'] = $this->_hotel_ci->Gallery_model->get_gallery_count ( $this->_hotel_ci->inter_id, $data ['hotel_id'] );
 		$data ['first_gallery'] = $data ['gallery_count'] [0];
 
         //获取皮肤配置
-        $module_view=$this->getCI()->get_display_view('hotel/hotel_photo');
-        $skin_config=$this->getCI()->get_skin_config($module_view['skin_name'], 'hotel/hotel_photo');
+        $module_view=$this->_hotel_ci->get_display_view('hotel/hotel_photo');
+        $skin_config=$this->_hotel_ci->get_skin_config($module_view['skin_name'], 'hotel/hotel_photo');
         $module_view=array(
             'module_view'=>$module_view
         );
         if (!empty($skin_config['all_photo'])){
-            $data ['cur_gallery'] = $this->getCI()->Gallery_model->get_gallery ( $this->getCI()->inter_id, array (
+            $data ['cur_gallery'] = $this->_hotel_ci->Gallery_model->get_gallery ( $this->_hotel_ci->inter_id, array (
                 'hotel_id' => $data ['hotel_id']
             ), true );
 
@@ -2242,7 +2238,7 @@ class HotelService extends HotelBaseService {
             }
 
         }else{
-            $data ['cur_gallery'] = $this->getCI()->Gallery_model->get_gallery ( $this->getCI()->inter_id, array (
+            $data ['cur_gallery'] = $this->_hotel_ci->Gallery_model->get_gallery ( $this->_hotel_ci->inter_id, array (
                 'hotel_id' => $data ['hotel_id'],
                 'gallery_id' => $data ['first_gallery'] ['gid']
             ), true, 3, 0 );
@@ -2250,17 +2246,17 @@ class HotelService extends HotelBaseService {
         return $data;
 	}
 	function get_new_gallery() {
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->model ( 'hotel/Gallery_model' );
-		$hotel_id = $hotel_id = $this->getCI()->Hotel_model->get_a_hotel_id ( $this->getCI()->inter_id, $this->getCI()->input->get ( 'h' ), false );
-		$gid = $this->getCI()->input->get ( 'gid' );
-		$nums = $this->getCI()->input->get ( 'nums' );
-		$offset = $this->getCI()->input->get ( 'offset' );
-		$new_gallery = $this->getCI()->Gallery_model->get_gallery ( $this->getCI()->inter_id, array (
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Gallery_model' );
+		$hotel_id = $hotel_id = $this->_hotel_ci->Hotel_model->get_a_hotel_id ( $this->_hotel_ci->inter_id, $this->_hotel_ci->input->get ( 'h' ), false );
+		$gid = $this->_hotel_ci->input->get ( 'gid' );
+		$nums = $this->_hotel_ci->input->get ( 'nums' );
+		$offset = $this->_hotel_ci->input->get ( 'offset' );
+		$new_gallery = $this->_hotel_ci->Gallery_model->get_gallery ( $this->_hotel_ci->inter_id, array (
 			'hotel_id' => $hotel_id,
 			'gallery_id' => $gid
 		), true, $nums, $offset );
-		$this->getCI()->load->helper ( 'ajaxdata' );
+		$this->_hotel_ci->load->helper ( 'ajaxdata' );
 		$new_gallery = data_dehydrate ( $new_gallery, array (
 			'gid',
 			'gallery_name',
@@ -2271,15 +2267,14 @@ class HotelService extends HotelBaseService {
 	}
 	function my_marks() {
 		$data = $this->common_data;
-		$data ['pagetitle'] = '我的收藏';
-		$data ['mark_type'] = intval ( $this->getCI()->input->get ( 'mt' ) );
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$condit = $this->getCI()->Hotel_model->return_mark_condi ( $data ['mark_type'] );
+		$data ['mark_type'] = intval ( $this->_hotel_ci->input->get ( 'mt' ) );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$condit = $this->_hotel_ci->Hotel_model->return_mark_condi ( $data ['mark_type'] );
 		$data ['marks'] = array ();
 		if (! empty ( $condit )) {
-			$data ['marks'] = $this->getCI()->Hotel_model->get_front_marks ( array (
-				                                                        'inter_id' => $this->getCI()->inter_id,
-				                                                        'openid' => $this->getCI()->openid,
+			$data ['marks'] = $this->_hotel_ci->Hotel_model->get_front_marks ( array (
+				                                                        'inter_id' => $this->_hotel_ci->inter_id,
+				                                                        'openid' => $this->_hotel_ci->openid,
 				                                                        'mark_type' => $condit ['type'],
 				                                                        'status' => 1
 			                                                        ), $condit ['sort'] );
@@ -2287,17 +2282,17 @@ class HotelService extends HotelBaseService {
 		return $data;
 	}
 	function get_near_hotel() {
-		$latitude = $this->getCI()->input->get ( 'lat', true );
-		$longitude = $this->getCI()->input->get ( 'lnt', true );
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->helper ( 'calculate' );
-		$hotels = $this->getCI()->Hotel_model->get_all_hotels ( $this->getCI()->inter_id, 1 );
+		$latitude = $this->_hotel_ci->input->get ( 'lat', true );
+		$longitude = $this->_hotel_ci->input->get ( 'lnt', true );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->helper ( 'calculate' );
+		$hotels = $this->_hotel_ci->Hotel_model->get_all_hotels ( $this->_hotel_ci->inter_id, 1 );
 		$count = count ( $hotels );
 		for($i = 0; $i < $count; $i ++) {
 			$hotels [$i] ['distance'] = get_distance ( $hotels [$i] ['longitude'], $hotels [$i] ['latitude'], $longitude, $latitude );
 		}
-		$hotels = $this->getCI()->Hotel_model->sort_dyd_array ( $hotels, 'distance', 'gt', 5 );
-		$this->getCI()->load->helper ( 'ajaxdata' );
+		$hotels = $this->_hotel_ci->Hotel_model->sort_dyd_array ( $hotels, 'distance', 'gt', 5 );
+		$this->_hotel_ci->load->helper ( 'ajaxdata' );
 		return data_dehydrate ( $hotels, array (
 			'name',
 			'hotel_id'
@@ -2305,51 +2300,50 @@ class HotelService extends HotelBaseService {
 	}
 	function hotel_comment() {
 		$data = $this->common_data;
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->model ( 'hotel/Comment_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Comment_model' );
 
-        $hotel_id = $this->getCI()->Hotel_model->get_a_hotel_id ( $this->getCI()->inter_id, $this->getCI()->input->get ( 'h' ), false );
-        $data ['t_t'] = $this->getCI()->Comment_model->get_hotel_comment_counts ( $this->getCI()->inter_id, $hotel_id, 1 ,$this->getCI()->openid);
+        $hotel_id = $this->_hotel_ci->Hotel_model->get_a_hotel_id ( $this->_hotel_ci->inter_id, $this->_hotel_ci->input->get ( 'h' ), false );
+        $data ['t_t'] = $this->_hotel_ci->Comment_model->get_hotel_comment_counts ( $this->_hotel_ci->inter_id, $hotel_id, 1 ,$this->_hotel_ci->openid);
 
-        $module_view=$this->getCI()->get_display_view('hotel/hotel_comment');
-        $skin_config=$this->getCI()->get_skin_config($module_view['skin_name'], 'hotel/hotel_comment');
+        $module_view=$this->_hotel_ci->get_display_view('hotel/hotel_comment');
+        $skin_config=$this->_hotel_ci->get_skin_config($module_view['skin_name'], 'hotel/hotel_comment');
 
         if (isset($skin_config['comment_pages']) && $skin_config['comment_pages']==1){
             $offset = 0;
             $nums = 20;
             $data['nums'] = $nums;
-            $data ['comments'] = $this->getCI()->Comment_model->get_hotel_comments ( $this->getCI()->inter_id, $hotel_id, 1,'',$nums,$offset);
+            $data ['comments'] = $this->_hotel_ci->Comment_model->get_hotel_comments ( $this->_hotel_ci->inter_id, $hotel_id, 1,'',$nums,$offset);
         }else{
-            $data ['comments'] = $this->getCI()->Comment_model->get_hotel_comments ( $this->getCI()->inter_id, $hotel_id, 1);
+            $data ['comments'] = $this->_hotel_ci->Comment_model->get_hotel_comments ( $this->_hotel_ci->inter_id, $hotel_id, 1);
         }
-		$data ['pagetitle'] = '酒店评论';
 		$data ['hotel_id'] = $hotel_id;
 
-        $this->getCI()->load->model ( 'hotel/Comment_model' );
-        $data ['comment_config'] = $this->getCI()->Comment_model->get_comment_show_type ( $this->getCI()->inter_id);
+        $this->_hotel_ci->load->model ( 'hotel/Comment_model' );
+        $data ['comment_config'] = $this->_hotel_ci->Comment_model->get_comment_show_type ( $this->_hotel_ci->inter_id);
 
 		return $data;
 	}
 	function ajax_hotel_comments(){
 		$data = $this->common_data;
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->model ( 'hotel/Comment_model' );
-		$hotel_id = $this->getCI()->Hotel_model->get_a_hotel_id ( $this->getCI()->inter_id, $this->getCI()->input->get ( 'h' ), false );
-		$offset = $this->getCI()->input->get ( 'off', TRUE );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Comment_model' );
+		$hotel_id = $this->_hotel_ci->Hotel_model->get_a_hotel_id ( $this->_hotel_ci->inter_id, $this->_hotel_ci->input->get ( 'h' ), false );
+		$offset = $this->_hotel_ci->input->get ( 'off', TRUE );
 		$offset = empty ( intval ( $offset ) ) ? 0 : intval ( $offset );
-		$nums = $this->getCI()->input->get ( 'num', TRUE );
+		$nums = $this->_hotel_ci->input->get ( 'num', TRUE );
 		$nums = empty ( intval ( $nums ) ) ? 20 : intval ( $nums );
 		$nums = $nums > 20 ? 20 : $nums;
-		$data ['comments'] = $this->getCI()->Comment_model->get_hotel_comments ( $this->getCI()->inter_id, $hotel_id, 1 ,'',$nums,$offset);
+		$data ['comments'] = $this->_hotel_ci->Comment_model->get_hotel_comments ( $this->_hotel_ci->inter_id, $hotel_id, 1 ,'',$nums,$offset);
 		if (!empty($data ['comments'])){
-            $new_comment = $this->getCI()->Comment_model->get_comment_show_type($this->getCI()->inter_id);
+            $new_comment = $this->_hotel_ci->Comment_model->get_comment_show_type($this->_hotel_ci->inter_id);
             if(!empty($new_comment)){        //新版评论
                 return array (
                     's' => 1,
                     'data' => $data ['comments']
                 );
             }else{
-                $html=$this->getCI()->display ( 'hotel/ajax_hotel_comments/ajax_comment_list', $data , '', array (), TRUE );
+                $html=$this->_hotel_ci->display ( 'hotel/ajax_hotel_comments/ajax_comment_list', $data , '', array (), TRUE );
                 return  array (
                     's' => 1,
                     'data' => $html
@@ -2363,26 +2357,26 @@ class HotelService extends HotelBaseService {
 	}
 	function to_comment() {
 		$data = $this->common_data;
-		$this->getCI()->load->model ( 'hotel/Order_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
 		$order_condition=array (
-			'openid' => $this->getCI()->openid,
+			'openid' => $this->_hotel_ci->openid,
 			'member_no' => $this->member_no,
 			'idetail' => array (
 				'i'
 			)
 		);
-		$orderid = $this->getCI()->input->get ( 'orderid' );
+		$orderid = $this->_hotel_ci->input->get ( 'orderid' );
 		if (!empty($orderid)){
 		    $order_condition['orderid']=$orderid;
 		    $oid=$order_condition['orderid'];
 		}else{
-		    $order_condition['oid'] = intval ( $this->getCI()->input->get ( 'oid' ) );
+		    $order_condition['oid'] = intval ( $this->_hotel_ci->input->get ( 'oid' ) );
 		    $oid=$order_condition['oid'];
 		}
-		$list = $this->getCI()->Order_model->get_main_order ( $this->getCI()->inter_id, $order_condition );
+		$list = $this->_hotel_ci->Order_model->get_main_order ( $this->_hotel_ci->inter_id, $order_condition );
 		if ($list) {
-			$this->getCI()->load->model ( 'common/Enum_model' );
-			$data ['status_des'] = $this->getCI()->Enum_model->get_enum_des ( 'HOTEL_ORDER_STATUS' );
+			$this->_hotel_ci->load->model ( 'common/Enum_model' );
+			$data ['status_des'] = $this->_hotel_ci->Enum_model->get_enum_des ( 'HOTEL_ORDER_STATUS' );
 			$list = $list [0];
 			$comment = 0;
 			$complete_status = array (
@@ -2403,27 +2397,27 @@ class HotelService extends HotelBaseService {
 				}
 			}
 
-			$this->getCI()->load->model ( 'hotel/Comment_model' );
-			$data ['comment_info'] = $this->getCI()->Comment_model->get_order_comment ( $this->getCI()->inter_id, $list ['orderid'], $this->getCI()->openid );
-            $data ['comment_config'] = $this->getCI()->Comment_model->get_comment_show_type ( $this->getCI()->inter_id);
+			$this->_hotel_ci->load->model ( 'hotel/Comment_model' );
+			$data ['comment_info'] = $this->_hotel_ci->Comment_model->get_order_comment ( $this->_hotel_ci->inter_id, $list ['orderid'], $this->_hotel_ci->openid );
+            $data ['comment_config'] = $this->_hotel_ci->Comment_model->get_comment_show_type ( $this->_hotel_ci->inter_id);
             if(!empty($data ['comment_config']) && !empty($data ['comment_config']->sign)){
                 $data ['comment_config']->sign = explode(',',$data ['comment_config']->sign);
             }
+            $list ['roomnight'] = get_room_night( $list['startdate'],$list['enddate']);
 			$data ['order'] = $list;
-			$data ['pagetitle'] = '订单评论';
 			$data ['comment'] = $comment;
-			$this->getCI()->load->model ( 'hotel/Hotel_model' );
-			$data ['first_room'] = $this->getCI()->Hotel_model->get_room_detail ( $this->getCI()->inter_id, $list ['hotel_id'], $data ['order'] ['first_detail'] ['room_id'], array (
+			$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+			$data ['first_room'] = $this->_hotel_ci->Hotel_model->get_room_detail ( $this->_hotel_ci->inter_id, $list ['hotel_id'], $data ['order'] ['first_detail'] ['room_id'], array (
 				'img_type' => 'hotel_room_service'
 			) );
 		} else {
 			return array('redirect'=>\Hotel_base::inst()->get_url('MYORDER'));
 		}
 		// Visit log
-		$this->getCI()->load->model ( 'common/Record_model' );
-		$this->getCI()->Record_model->visit_log ( array (
-			                                 'openid' => $this->getCI()->openid,
-			                                 'inter_id' => $this->getCI()->inter_id,
+		$this->_hotel_ci->load->model ( 'common/Record_model' );
+		$this->_hotel_ci->Record_model->visit_log ( array (
+			                                 'openid' => $this->_hotel_ci->openid,
+			                                 'inter_id' => $this->_hotel_ci->inter_id,
 			                                 'title' => '订单评论',
 			                                 'url' => $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'],
 			                                 'des' => "订单id：" . $oid
@@ -2431,25 +2425,25 @@ class HotelService extends HotelBaseService {
 		return $data;
 	}
 	function return_usable_coupon() {
-		$this->getCI()->load->model ( 'hotel/Coupon_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Coupon_model' );
 		$params = array ();
-		$start = $this->getCI()->input->post ( 'start' );
-		$end = $this->getCI()->input->post ( 'end' );
+		$start = $this->_hotel_ci->input->post ( 'start' );
+		$end = $this->_hotel_ci->input->post ( 'end' );
 		$params ['days']  = get_room_night($start,$end,'round');//至少有1个间夜
-		$params ['amount'] = $this->getCI()->input->post ( 'total' );
-		$params ['hotel'] = $this->getCI()->input->post ( 'h' );
-		$params ['paytype'] = $this->getCI()->input->post ( 'paytype' );
-        $pay_favour = $this->getCI()->input->post ( 'pay_favour' );
+		$params ['amount'] = $this->_hotel_ci->input->post ( 'total' );
+		$params ['hotel'] = $this->_hotel_ci->input->post ( 'h' );
+		$params ['paytype'] = $this->_hotel_ci->input->post ( 'paytype' );
+        $pay_favour = $this->_hotel_ci->input->post ( 'pay_favour' );
 
 		//增加获取券参数
 		$params ['startdate'] = $start;
 		$params ['enddate'] = $end;
-		$params ['extra_para'] = $this->getCI()->input->post ( 'extra_para' );
+		$params ['extra_para'] = $this->_hotel_ci->input->post ( 'extra_para' );
 		$params ['extra_para'] = empty($params ['extra_para'])?array():json_decode($params ['extra_para'],TRUE);
 
 		$params ['level'] = $this->member_lv;
-		$data_arr = json_decode ( $this->getCI()->input->post ( 'datas' ), TRUE );
-		$price_codes = json_decode ( $this->getCI()->input->post ( 'price_code' ), TRUE );
+		$data_arr = json_decode ( $this->_hotel_ci->input->post ( 'datas' ), TRUE );
+		$price_codes = json_decode ( $this->_hotel_ci->input->post ( 'price_code' ), TRUE );
 		if(!empty($data_arr)){
 			foreach ( $data_arr as $key => $value ) {
 				if ($value == 0) {
@@ -2462,8 +2456,8 @@ class HotelService extends HotelBaseService {
 			reset ( $data_arr );
 			$params ['category'] = key ( $data_arr );
 			//多于配置值，不能使用优惠券
-			$this->getCI()->load->model('hotel/Hotel_config_model');
-			$config_data = $this->getCI()->Hotel_config_model->get_hotel_config ( $this->getCI()->inter_id, 'HOTEL', $params['hotel'], array (
+			$this->_hotel_ci->load->model('hotel/Hotel_config_model');
+			$config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', $params['hotel'], array (
 				'MAXROOM_CAN_COUPON',
 			) );
 			if(!empty($config_data['MAXROOM_CAN_COUPON'])&&$config_data['MAXROOM_CAN_COUPON']<$params['rooms']){
@@ -2473,9 +2467,15 @@ class HotelService extends HotelBaseService {
 		if(!empty($price_codes)){
 			$params ['price_code'] = current ( $price_codes );
 		}
-		$cards = $this->getCI()->Coupon_model->get_usable_coupon ( $this->getCI()->inter_id, $this->getCI()->openid, $params, TRUE );
+		$cards = $this->_hotel_ci->Coupon_model->get_usable_coupon ( $this->_hotel_ci->inter_id, $this->_hotel_ci->openid, $params, TRUE );
 		$cards['selected'] = [];
         $cards['auto_coupons'] = [];
+
+        $this->_hotel_ci->load->model('hotel/Hotel_config_model');
+        $config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', 0, array (
+            'MORE_ROOM_NO_FAVOUR'
+        ) );
+        if(isset($config_data['MORE_ROOM_NO_FAVOUR']) && $config_data['MORE_ROOM_NO_FAVOUR']==1 && $params ['product_num'] > 1)return $cards;
 
         if($params ['paytype']=='weixin' && isset($pay_favour) && !empty($pay_favour)){
             $price_total = $params ['amount'] - $pay_favour;
@@ -2485,9 +2485,16 @@ class HotelService extends HotelBaseService {
 
 		if(!empty($cards['cards'])){ //有优惠券
 			$cards_list = json_decode(json_encode($cards['cards']),true);
-			uasort($cards_list, function ($a, $b){
-				return $a['reduce_cost'] - $b['reduce_cost'] > 0 ? -1 : 1;
-			});
+            uasort($cards_list, function ($a, $b){
+                if($a['coupon_type']=='discount' && $b['coupon_type']=='discount'){
+                    return $a['reduce_cost'] - $b['reduce_cost'] < 0 ? -1 : 1;
+                }elseif($a['coupon_type']=='voucher' && $b['coupon_type']=='voucher'){
+                    return $a['reduce_cost'] - $b['reduce_cost'] > 0 ? -1 : 1;
+                }elseif($a['coupon_type'] != $b['coupon_type']){
+                    return $a['coupon_type']=='discount'? -1 : 1;
+                }
+//				return $a['reduce_cost'] - $b['reduce_cost'] > 0 ? -1 : 1;
+            });
 			$select_amount = 0;
 			$i = 0;
 			foreach($cards_list as $v){
@@ -2498,6 +2505,7 @@ class HotelService extends HotelBaseService {
 					$select_amount += $v['reduce_cost'];
 					$i++;
 				}
+                if($v['coupon_type']=='discount')break;
 				if($i >= $cards['count']['num']){
 					break;
 				}
@@ -2509,19 +2517,19 @@ class HotelService extends HotelBaseService {
 	//@Editor lGh 返回积分配置
 	function return_point_set() {
 		$params = array ();
-		$start = $this->getCI()->input->post ( 'start' );
-		$end = $this->getCI()->input->post ( 'end' );
-		$params ['total_price'] = $this->getCI()->input->post ( 'total_price' );
-		$params ['hotel_id'] = $this->getCI()->input->post ( 'h' );
-		$params ['paytype'] = $this->getCI()->input->post ( 'paytype' );
-		$params ['openid'] = $this->getCI()->openid;
+		$start = $this->_hotel_ci->input->post ( 'start' );
+		$end = $this->_hotel_ci->input->post ( 'end' );
+		$params ['total_price'] = $this->_hotel_ci->input->post ( 'total_price' );
+		$params ['hotel_id'] = $this->_hotel_ci->input->post ( 'h' );
+		$params ['paytype'] = $this->_hotel_ci->input->post ( 'paytype' );
+		$params ['openid'] = $this->_hotel_ci->openid;
 
 		$params ['startdate'] = $start;
 		$params ['enddate'] = $end;
 		$params ['member_level'] = $this->member_lv;
 		$params ['bonus'] = isset($this->common_data ['member']->bonus)?$this->common_data ['member']->bonus:0;
-		$data_arr = json_decode ( $this->getCI()->input->post ( 'datas' ), TRUE );
-		$price_codes = json_decode ( $this->getCI()->input->post ( 'price_code' ), TRUE );
+		$data_arr = json_decode ( $this->_hotel_ci->input->post ( 'datas' ), TRUE );
+		$price_codes = json_decode ( $this->_hotel_ci->input->post ( 'price_code' ), TRUE );
 		if(!empty($data_arr)){
 			foreach ( $data_arr as $key => $value ) {
 				if ($value == 0) {
@@ -2532,8 +2540,8 @@ class HotelService extends HotelBaseService {
 			reset ( $data_arr );
 			$params ['room_id'] = key ( $data_arr );
 			//多于配置值，不能使用积分兑换
-			$this->getCI()->load->model('hotel/Hotel_config_model');
-			$config_data = $this->getCI()->Hotel_config_model->get_hotel_config ( $this->getCI()->inter_id, 'HOTEL', $params['hotel_id'], array (
+			$this->_hotel_ci->load->model('hotel/Hotel_config_model');
+			$config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', $params['hotel_id'], array (
 				'MAXROOM_CAN_BONUS',
 			) );
 			if(!empty($config_data['MAXROOM_CAN_BONUS'])&&$config_data['MAXROOM_CAN_BONUS']<$params['roomnums']){
@@ -2543,28 +2551,28 @@ class HotelService extends HotelBaseService {
 		if(!empty($price_codes)){
 			$params ['price_code'] = current ( $price_codes );
 		}
-		$params['point_name']=$this->getCI()->input->post ( 'point_name');
+		$params['point_name']=$this->_hotel_ci->input->post ( 'point_name');
 		$params['check_point_name']=1;
-		$this->getCI()->load->model ( 'hotel/Member_model' );
-		$point_consum_set = $this->getCI()->Member_model->get_point_consum_rate ( $this->getCI()->inter_id, $this->member_lv,'room',array(),$params );
+		$this->_hotel_ci->load->model ( 'hotel/Member_model' );
+		$point_consum_set = $this->_hotel_ci->Member_model->get_point_consum_rate ( $this->_hotel_ci->inter_id, $this->member_lv,'room',array(),$params );
 		ob_clean();
 		return $point_consum_set;
 	}
 	//@Editor lGh 返回积分配置
 	function return_pointpay_set() {
 		$params = array ();
-		$start = $this->getCI()->input->post ( 'start' );
-		$end = $this->getCI()->input->post ( 'end' );
-		$params ['total_price'] = $this->getCI()->input->post ( 'total_price' );
-		$params ['hotel_id'] = $this->getCI()->input->post ( 'h' );
-		$params ['openid'] = $this->getCI()->openid;
+		$start = $this->_hotel_ci->input->post ( 'start' );
+		$end = $this->_hotel_ci->input->post ( 'end' );
+		$params ['total_price'] = $this->_hotel_ci->input->post ( 'total_price' );
+		$params ['hotel_id'] = $this->_hotel_ci->input->post ( 'h' );
+		$params ['openid'] = $this->_hotel_ci->openid;
 
 		$params ['startdate'] = $start;
 		$params ['enddate'] = $end;
 		$params ['member_level'] = $this->member_lv;
 		$params ['bonus'] = isset($this->common_data ['member']->bonus)?$this->common_data ['member']->bonus:0;
-		$data_arr = json_decode ( $this->getCI()->input->post ( 'datas' ), TRUE );
-		$price_codes = json_decode ( $this->getCI()->input->post ( 'price_code' ), TRUE );
+		$data_arr = json_decode ( $this->_hotel_ci->input->post ( 'datas' ), TRUE );
+		$price_codes = json_decode ( $this->_hotel_ci->input->post ( 'price_code' ), TRUE );
 		if(!empty($data_arr)){
 			foreach ( $data_arr as $key => $value ) {
 				if ($value == 0) {
@@ -2579,21 +2587,21 @@ class HotelService extends HotelBaseService {
 			$params ['price_code'] = current ( $price_codes );
 		}
 		
-		$params['point_name']=$this->getCI()->input->post ( 'point_name');
+		$params['point_name']=$this->_hotel_ci->input->post ( 'point_name');
 		$params['check_point_name']=1;
 
-		$params ['extra_para'] = $this->getCI()->input->post ( 'extra_para' );
+		$params ['extra_para'] = $this->_hotel_ci->input->post ( 'extra_para' );
 		
-		$this->getCI()->load->model('hotel/Member_model');
-		$point_consum_set = $this->getCI()->Member_model->point_pay_check($this->getCI()->inter_id, $params);
+		$this->_hotel_ci->load->model('hotel/Member_model');
+		$point_consum_set = $this->_hotel_ci->Member_model->point_pay_check($this->_hotel_ci->inter_id, $params);
 		ob_clean();
 		return $point_consum_set;
 	}
 	function cancel_main_order() {
-		$this->getCI()->load->model ( 'hotel/Order_model' );
-		$orderid = $this->getCI()->input->get ( 'oid' );
-		$info = $this->getCI()->Order_model->cancel_order ( $this->getCI()->inter_id, array (
-			'openid' => $this->getCI()->openid,
+		$this->_hotel_ci->load->model ( 'hotel/Order_model' );
+		$orderid = $this->_hotel_ci->input->get ( 'oid' );
+		$info = $this->_hotel_ci->Order_model->cancel_order ( $this->_hotel_ci->inter_id, array (
+			'openid' => $this->_hotel_ci->openid,
 			'member_no' => $this->member_no,
 			'orderid' => $orderid,
 			'idetail' => array (
@@ -2604,22 +2612,22 @@ class HotelService extends HotelBaseService {
 		return $info;
 	}
 	function comment_sub() {
-		$data ['hotel_id'] = intval ( $this->getCI()->input->post ( 'hotel_id' ) );
-		$data ['orderid'] = $this->getCI()->input->post ( 'orderid' );
-		$data ['openid'] = $this->getCI()->openid;
-		$data ['inter_id'] = $this->getCI()->inter_id;
-		$data ['content'] = htmlspecialchars ( $this->getCI()->input->post ( 'content' ) );
-		$data ['score'] = intval ( $this->getCI()->input->post ( 'score' ) );
-		$data ['order_info'] ['hotel_name'] = $this->getCI()->input->post ( 'hotel_name' );
-		$data ['order_info'] ['room_name'] = $this->getCI()->input->post ( 'room_name' );
-		$this->getCI()->load->model ( 'hotel/Comment_model' );
-		return $this->getCI()->Comment_model->add_comment ( $data );
+		$data ['hotel_id'] = intval ( $this->_hotel_ci->input->post ( 'hotel_id' ) );
+		$data ['orderid'] = $this->_hotel_ci->input->post ( 'orderid' );
+		$data ['openid'] = $this->_hotel_ci->openid;
+		$data ['inter_id'] = $this->_hotel_ci->inter_id;
+		$data ['content'] = htmlspecialchars ( $this->_hotel_ci->input->post ( 'content' ) );
+		$data ['score'] = intval ( $this->_hotel_ci->input->post ( 'score' ) );
+		$data ['order_info'] ['hotel_name'] = $this->_hotel_ci->input->post ( 'hotel_name' );
+		$data ['order_info'] ['room_name'] = $this->_hotel_ci->input->post ( 'room_name' );
+		$this->_hotel_ci->load->model ( 'hotel/Comment_model' );
+		return $this->_hotel_ci->Comment_model->add_comment ( $data );
 	}
 	function return_room_detail() {
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$hotel_id = intval ( $this->getCI()->input->post ( 'h' ) );
-		$room_id = intval ( $this->getCI()->input->post ( 'r' ) );
-		$detail = $this->getCI()->Hotel_model->get_room_detail ( $this->getCI()->inter_id, $hotel_id, $room_id, array (
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$hotel_id = intval ( $this->_hotel_ci->input->post ( 'h' ) );
+		$room_id = intval ( $this->_hotel_ci->input->post ( 'r' ) );
+		$detail = $this->_hotel_ci->Hotel_model->get_room_detail ( $this->_hotel_ci->inter_id, $hotel_id, $room_id, array (
 			'img_type' => array (
 				'hotel_room_service',
 				'hotel_room_lightbox'
@@ -2631,7 +2639,7 @@ class HotelService extends HotelBaseService {
 		$room ['imgs'] = empty ( $detail ['imgs'] ) ? array () : $detail ['imgs'];
 		$detail ['book_policy'] = $detail ['book_policy'];
 		if (empty ( $detail ['book_policy'] )) {
-			$hotel = $this->getCI()->Hotel_model->get_hotel_detail ( $this->getCI()->inter_id, $hotel_id );
+			$hotel = $this->_hotel_ci->Hotel_model->get_hotel_detail ( $this->_hotel_ci->inter_id, $hotel_id );
 			$detail ['book_policy'] = $hotel ['book_policy'];
 		}
 		$room ['book_policy'] = nl2br ( $detail ['book_policy'] );
@@ -2644,8 +2652,8 @@ class HotelService extends HotelBaseService {
 	private function preSpDate($hotel_id=0,$config_data=array()){
 		$start_val = 0;
 		if (!$config_data){
-    		$this->getCI()->load->model('hotel/Hotel_config_model');
-    		$config_data = $this->getCI()->Hotel_config_model->get_hotel_config ( $this->getCI()->inter_id, 'HOTEL', $hotel_id, array (
+    		$this->_hotel_ci->load->model('hotel/Hotel_config_model');
+    		$config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', $hotel_id, array (
     			'BOOK_DATE_VALIDATE',
     		) );
 		}
@@ -2674,35 +2682,35 @@ class HotelService extends HotelBaseService {
 	}
 
 	function new_comment_sub() {    //提交评论
-        $this->getCI()->load->model ( 'hotel/Comment_model' );
-        $this->getCI()->load->model ( 'hotel/Member_model' );
-		$data ['images'] = $this->getCI()->input->post ( 'images' );
+        $this->_hotel_ci->load->model ( 'hotel/Comment_model' );
+        $this->_hotel_ci->load->model ( 'hotel/Member_model' );
+		$data ['images'] = $this->_hotel_ci->input->post ( 'images' );
 		if(!empty($data ['images'])){
 			$data ['images'] = implode(',',$data ['images']);
 		}
-		$data ['hotel_id'] = intval ( $this->getCI()->input->post ( 'hotel_id' ) );
-		$data ['orderid'] = $this->getCI()->input->post ( 'orderid' );
-		$data ['openid'] = $this->getCI()->openid;
-		$data ['inter_id'] = $this->getCI()->inter_id;
-		$data ['content'] = htmlspecialchars ( $this->getCI()->input->post ( 'content' ) );
-		$data ['service_score'] = intval ( $this->getCI()->input->post ( 'service_score' ) );
-		$data ['net_score'] = intval ( $this->getCI()->input->post ( 'net_score' ) );
-		$data ['facilities_score'] = intval ( $this->getCI()->input->post ( 'facilities_score' ) );
-		$data ['clean_score'] = intval ( $this->getCI()->input->post ( 'clean_score' ) );
+		$data ['hotel_id'] = intval ( $this->_hotel_ci->input->post ( 'hotel_id' ) );
+		$data ['orderid'] = $this->_hotel_ci->input->post ( 'orderid' );
+		$data ['openid'] = $this->_hotel_ci->openid;
+		$data ['inter_id'] = $this->_hotel_ci->inter_id;
+		$data ['content'] = htmlspecialchars ( $this->_hotel_ci->input->post ( 'content' ) );
+		$data ['service_score'] = intval ( $this->_hotel_ci->input->post ( 'service_score' ) );
+		$data ['net_score'] = intval ( $this->_hotel_ci->input->post ( 'net_score' ) );
+		$data ['facilities_score'] = intval ( $this->_hotel_ci->input->post ( 'facilities_score' ) );
+		$data ['clean_score'] = intval ( $this->_hotel_ci->input->post ( 'clean_score' ) );
 		$data ['score'] = number_format(($data ['service_score'] + $data ['net_score'] + $data ['facilities_score'] + $data ['clean_score']) / 4,2);
-		$data ['order_info'] ['hotel_name'] = $this->getCI()->input->post ( 'hotel_name' );
-		$data ['order_info'] ['room_name'] = $this->getCI()->input->post ( 'room_name' );
+		$data ['order_info'] ['hotel_name'] = $this->_hotel_ci->input->post ( 'hotel_name' );
+		$data ['order_info'] ['room_name'] = $this->_hotel_ci->input->post ( 'room_name' );
         $data['order_info']['sign']='';
-		$mediaid = $this->getCI()->input->post ( 'img_url' );
-        $sign = $this->getCI()->input->post ( 'sign' );
+		$mediaid = $this->_hotel_ci->input->post ( 'img_url' );
+        $sign = $this->_hotel_ci->input->post ( 'sign' );
         if(!empty($sign)){
             $data['order_info']['sign'] = implode(',',$sign);
         }
 
         if($mediaid){
             $images_url = '';
-            $this->getCI()->load->model('wx/access_token_model');
-            $access_token= $this->getCI()->Access_token_model->get_access_token( $this->getCI()->inter_id );
+            $this->_hotel_ci->load->model('wx/access_token_model');
+            $access_token= $this->_hotel_ci->Access_token_model->get_access_token( $this->_hotel_ci->inter_id );
 
             foreach($mediaid as $arr){
                 $url = $this->ftp_images($access_token,$arr);
@@ -2711,21 +2719,21 @@ class HotelService extends HotelBaseService {
             $data['images'] = substr($images_url,1);
         }
 
-        $res = $this->getCI()->Comment_model->add_comment($data);
+        $res = $this->_hotel_ci->Comment_model->add_comment($data);
 
         if($res && isset($res['comment_id'])){       //评论成功执行送积分
-            $comment_info = $this->getCI()->Comment_model->get_comment_by_id($this->getCI()->inter_id,$res['comment_id']);
+            $comment_info = $this->_hotel_ci->Comment_model->get_comment_by_id($this->_hotel_ci->inter_id,$res['comment_id']);
             if(!empty($comment_info) && $comment_info['point_give']==0){
-                $this->getCI()->Comment_model->comment_give_bonus($this->getCI()->inter_id,$comment_info);
+                $this->_hotel_ci->Comment_model->comment_give_bonus($this->_hotel_ci->inter_id,$comment_info);
             }
         }
 
         if($res && isset($res['status']) && $res['status']==1){
-            $this->getCI()->Comment_model->update_hotel_score_from_redis($this->getCI()->inter_id,$data ['hotel_id'],$data);
-            $keywords = $this->getCI()->Comment_model->get_keyword($this->getCI()->inter_id);
+            $this->_hotel_ci->Comment_model->update_hotel_score_from_redis($this->_hotel_ci->inter_id,$data ['hotel_id'],$data);
+            $keywords = $this->_hotel_ci->Comment_model->get_keyword($this->_hotel_ci->inter_id);
             if($keywords){
                 foreach($keywords as $key=>$arr){
-                    $count = $this->getCI()->Comment_model->match_keyword($arr['keyword'],array($data));
+                    $count = $this->_hotel_ci->Comment_model->match_keyword($arr['keyword'],array($data));
                     if($count){
                         $keyword_count = json_decode($arr['count']);
                         if(!$keyword_count){
@@ -2739,7 +2747,7 @@ class HotelService extends HotelBaseService {
                             $count = json_encode($keyword_count);
                         }
 
-                        $this->getCI()->Comment_model->update_keyword_count($arr['keyword_id'],$count);
+                        $this->_hotel_ci->Comment_model->update_keyword_count($arr['keyword_id'],$count);
                     }
                 }
             }
@@ -2751,12 +2759,12 @@ class HotelService extends HotelBaseService {
     function comment_no_order(){
 
         $data = $this->common_data;
-        $openid = $this->getCI()->openid;
+        $openid = $this->_hotel_ci->openid;
 //$openid = 'oz1AKv5xDYeeTBfwImfWZHP8QfyU';
-        $hotel_id = $this->getCI()->input->get('h');
+        $hotel_id = $this->_hotel_ci->input->get('h');
 
-        $this->getCI()->load->model ( 'hotel/Hotel_config_model' );
-        $config_data = $this->getCI()->Hotel_config_model->get_hotel_config ( $this->getCI()->inter_id, 'HOTEL', 0, array (
+        $this->_hotel_ci->load->model ( 'hotel/Hotel_config_model' );
+        $config_data = $this->_hotel_ci->Hotel_config_model->get_hotel_config ( $this->_hotel_ci->inter_id, 'HOTEL', 0, array (
             'COMMENT_NO_ORDER'
         ) );
 
@@ -2769,16 +2777,15 @@ class HotelService extends HotelBaseService {
 
             if (! empty ( $config_data ['COMMENT_NO_ORDER']) && $config_data ['COMMENT_NO_ORDER']==1) {
 
-                $this->getCI()->load->model ( 'hotel/Comment_model' );
+                $this->_hotel_ci->load->model ( 'hotel/Comment_model' );
                 $data['comment'] = 1;
-                $check = $this->getCI()->Comment_model->check_no_order_comment($this->getCI()->inter_id,$openid,$hotel_id);
+                $check = $this->_hotel_ci->Comment_model->check_no_order_comment($this->_hotel_ci->inter_id,$openid,$hotel_id);
 
                 if($check){
                     $data['comment'] = 0;
                 }
 
-                $data ['pagetitle'] = '酒店点评';
-                $this->getCI()->load->model ( 'hotel/Hotel_model' );
+                $this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
                 $data['order']['hotel_id'] = $hotel_id;
 
             }else{
@@ -2798,7 +2805,7 @@ class HotelService extends HotelBaseService {
 //                file_put_contents('./'.$file_name,base64_decode($data));
             $this->curl_file_get_contents($data,$file_name);
 
-            $this->ftp= $this->getCI()->_ftp_server('prod');
+            $this->ftp= $this->_hotel_ci->_ftp_server('prod');
             $base_path= 'media/club/';
 
             $to_file = $this->ftp->floder. FD_PUBLIC. '/'. $base_path;
@@ -2838,14 +2845,14 @@ class HotelService extends HotelBaseService {
     //专题页面
     function thematic_index(){
 		$data = $this->common_data;
-		$this->getCI()->load->model ( 'hotel/Hotel_model' );
-		$this->getCI()->load->model ( 'hotel/Hotel_thematic_model' );
-		$tc_id = intval($this->getCI()->input->get ( 'tc_id', TRUE ));
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_model' );
+		$this->_hotel_ci->load->model ( 'hotel/Hotel_thematic_model' );
+		$tc_id = intval($this->_hotel_ci->input->get ( 'tc_id', TRUE ));
 		$data ['hot_city'] = array();
 		$data ['first_city'] = '全部';
-		$data['list'] = $this->getCI()->Hotel_thematic_model->get_list(array('inter_id'=>$this->getCI()->inter_id,'nowtime'=>date('Y-m-d H:i:s')));
+		$data['list'] = $this->_hotel_ci->Hotel_thematic_model->get_list(array('inter_id'=>$this->_hotel_ci->inter_id,'nowtime'=>date('Y-m-d H:i:s')));
 		if(!empty($tc_id)){
-			$data['row'] = $this->getCI()->Hotel_thematic_model->get_row($this->getCI()->inter_id,$tc_id);
+			$data['row'] = $this->_hotel_ci->Hotel_thematic_model->get_row($this->_hotel_ci->inter_id,$tc_id);
 		}elseif(!empty($data['list'])){
 			$data['row'] = $data['list'][0];
 		}
@@ -2883,7 +2890,7 @@ class HotelService extends HotelBaseService {
 			if(!empty($tc_hotelids)){
 				$hotel_ids = implode(',',$tc_hotelids);
 				//获取推荐城市
-				$cities = $this->getCI()->Hotel_model->get_hotel_citys_by_hid ( $this->getCI()->inter_id ,array('hotel_id'=>$hotel_ids));
+				$cities = $this->_hotel_ci->Hotel_model->get_hotel_citys_by_hid ( $this->_hotel_ci->inter_id ,array('hotel_id'=>$hotel_ids));
 				$data ['hot_city'] = $cities;
 				if(isset($cities[0])){
 					$data ['first_city'] = $cities[0]['city'];
@@ -2904,10 +2911,10 @@ class HotelService extends HotelBaseService {
     }
 
     public function check_self_continue() {
-        $orderid = $this->getCI()->input->post ( 'orderid' );
-        $item_id = intval ( $this->getCI()->input->post ( 'item_id' ) );
-        $this->getCI()->load->model ( 'hotel/Order_check_model' );
-        $result = $this->getCI()->Order_check_model->check_self_continue ( $this->getCI()->inter_id, $orderid, $this->getCI()->openid, $item_id, array (
+        $orderid = $this->_hotel_ci->input->post ( 'orderid' );
+        $item_id = intval ( $this->_hotel_ci->input->post ( 'item_id' ) );
+        $this->_hotel_ci->load->model ( 'hotel/Order_check_model' );
+        $result = $this->_hotel_ci->Order_check_model->check_self_continue ( $this->_hotel_ci->inter_id, $orderid, $this->_hotel_ci->openid, $item_id, array (
                 'member_level' => $this->member_lv 
         ) );
         $info = array (
@@ -2922,92 +2929,92 @@ class HotelService extends HotelBaseService {
     // 酒店相册
     public function photo_list(){
         $data = $this->common_data;
-        $data['inter_id'] = $this->getCI()->inter_id;
-        $hotel_id = $this->getCI()->input->get('h');
-        $this->getCI()->load->model ( 'hotel/Gallery_model' );
-        $data['gallery'] = $this->getCI()->Gallery_model->get_gallery ( $this->getCI()->inter_id, array('hotel_id'=>$hotel_id) );
+        $data['inter_id'] = $this->_hotel_ci->inter_id;
+        $hotel_id = $this->_hotel_ci->input->get('h');
+        $this->_hotel_ci->load->model ( 'hotel/Gallery_model' );
+        $data['gallery'] = $this->_hotel_ci->Gallery_model->get_gallery ( $this->_hotel_ci->inter_id, array('hotel_id'=>$hotel_id) );
         return $data;
     }
 
 
     // 房型列表
 	public function room_list(){
-        $data['inter_id'] = $this->getCI()->inter_id;
+        $data['inter_id'] = $this->_hotel_ci->inter_id;
 
         return $data;
 	}
     // 套餐列表
 	public function package_list(){
-        $data['inter_id'] = $this->getCI()->inter_id;
+        $data['inter_id'] = $this->_hotel_ci->inter_id;
 
         return $data;
 	}
 
     // 提交订单
 	public function submit_order(){
-        $data['inter_id'] = $this->getCI()->inter_id;
+        $data['inter_id'] = $this->_hotel_ci->inter_id;
 
         return $data;
 	}
     // 我的订单
     public function my_order(){
-        $data['inter_id'] = $this->getCI()->inter_id;
+        $data['inter_id'] = $this->_hotel_ci->inter_id;
 
         return $data;
     }
 
     // 订单详情
     public function order_details(){
-        //$data['inter_id'] = $this->getCI()->inter_id;
+        //$data['inter_id'] = $this->_hotel_ci->inter_id;
         $data['state'] = $_GET['state'];
         return $data;
     }
 
     // 订单详情
     public function packages_use(){
-        $data['inter_id'] = $this->getCI()->inter_id;
+        $data['inter_id'] = $this->_hotel_ci->inter_id;
         return $data;
     }
     // 房型+套餐详情
     public function package_details(){
-        $data['inter_id'] = $this->getCI()->inter_id;       
+        $data['inter_id'] = $this->_hotel_ci->inter_id;       
         return $data;
     }
 	
     // 选择套餐
     public function package_select(){
-        $data['inter_id'] = $this->getCI()->inter_id;       
+        $data['inter_id'] = $this->_hotel_ci->inter_id;       
         return $data;
     }
 
     //城市列表
     public function city_list(){
-        $data['inter_id'] = $this->getCI()->inter_id;       
+        $data['inter_id'] = $this->_hotel_ci->inter_id;       
         return $data;
     }
 
     // 评价页面
     public function comment_list(){
-        $data['inter_id'] = $this->getCI()->inter_id;       
+        $data['inter_id'] = $this->_hotel_ci->inter_id;       
         return $data;
     }
 
     // 发表评价
     public function comment(){
-        $data['inter_id'] = $this->getCI()->inter_id;       
+        $data['inter_id'] = $this->_hotel_ci->inter_id;       
         return $data;
     }
 
     // 酒店介绍
     public function hotel_details(){
-        $data['inter_id'] = $this->getCI()->inter_id;       
+        $data['inter_id'] = $this->_hotel_ci->inter_id;       
         return $data;
     }
 
 
     // 地图
     public function map(){
-        $data['inter_id'] = $this->getCI()->inter_id;       
+        $data['inter_id'] = $this->_hotel_ci->inter_id;       
         return $data;
     }
 

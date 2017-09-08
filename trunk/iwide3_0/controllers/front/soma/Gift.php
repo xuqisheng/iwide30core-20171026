@@ -174,14 +174,14 @@ class Gift extends MY_Front_Soma {
         } else {
           $share_img = base_url('public/soma/images/gift_box.png');
         }
+        // $share_config = array(
         $share_config = array(
             'title'=> isset( $share_config_detail['share_title'] ) && !empty( $share_config_detail['share_title'] ) ? $share_config_detail['share_title'] : "亲，{$nickname}送您一份小礼物",
             'desc'=> isset( $share_config_detail['share_desc'] ) && !empty( $share_config_detail['share_desc'] ) ? $share_config_detail['share_desc'] : '小声告诉你，嘘！已经付过钱了，快快领取吧',
             'link'=> $send_link,
             'imgUrl'=> isset( $share_config_detail['share_img'] ) && !empty( $share_config_detail['share_img'] ) ? $share_config_detail['share_img'] : $share_img,
         );
-        
-        // $share_config = array(
+
         //     'title'=> "亲，{$nickname}送您一份小礼物",
         //     'desc'=> '小声告诉你，嘘！已经付过钱了，快快领取吧',
         //     'link'=> $send_link,
@@ -210,11 +210,12 @@ class Gift extends MY_Front_Soma {
             }
 
         }else{     //新皮肤
-            $this->headerDatas['js_menu_show']= implode(",",$js_menu_show);
-            $this->headerDatas['js_share_config']= $share_config;
-            $redirect= urlencode( Soma_const_url::inst()->get_url('*/*/package_list_send', array('id'=> $this->inter_id) ) );
-            $redirectUrl = Soma_const_url::inst()->get_url('*/*/package_sending', array('id'=> $this->inter_id, 'redirect'=> $redirect ) );
-            $this->headerDatas['js_share_success_function'] = $this->headerDatas['js_share_app_success_function'] = "location.href = '".$redirectUrl." '&gid=".$gift_id."&sign='".$gift_sign."';";
+            $js_menu_show = array( "'menuItem:share:appMessage'", "'menuItem:share:timeline'" );
+            $this->footerDatas['js_menu_show']= implode(",",$js_menu_show);
+            $this->footerDatas['js_share_config']= $share_config;
+//            $redirect= urlencode( Soma_const_url::inst()->get_url('*/*/package_list_send', array('id'=> $this->inter_id) ) );
+//            $redirectUrl = Soma_const_url::inst()->get_url('*/*/package_sending', array('id'=> $this->inter_id, 'redirect'=> $redirect ) );
+//            $this->footerDatas['js_share_success_function'] = $this->headerDatas['js_share_app_success_function'] = "location.href = '".$redirectUrl."&gid=".$gift_id."&sign=".$gift_sign."';";
 
 
         }
@@ -393,6 +394,36 @@ class Gift extends MY_Front_Soma {
             }
             $this->_view("header", $header);
         }
+
+        if($this->isNewTheme()){
+            $gift_id = $this->input->get('gid');
+            $gift_sign= Soma_base::inst()->str_encrypt($gift_id, TRUE); //对链接进行签名？
+            $params= array(
+                'id'=> $this->inter_id,
+                'gid'=> $gift_id,
+                'bsn'=> $business,
+                'sign'=> $gift_sign,
+            );
+            //获取微信用户的信息
+            $fans= $this->_get_wx_userinfo();
+            $nickname= empty($fans['nickname'])? '': $fans['nickname'];
+            $send_link= Soma_const_url::inst()->get_url( '*/*/package_received', $params );
+            //点击分享之后开启这些按钮
+            $js_menu_show = array( "'menuItem:share:appMessage'", "'menuItem:share:timeline'" );
+            $share_img = base_url('public/soma/images/gift_box.png');
+            $share_config = array(
+                'title'=> isset( $share_config_detail['share_title'] ) && !empty( $share_config_detail['share_title'] ) ? $share_config_detail['share_title'] : "亲，{$nickname}送您一份小礼物",
+                'desc'=> isset( $share_config_detail['share_desc'] ) && !empty( $share_config_detail['share_desc'] ) ? $share_config_detail['share_desc'] : '小声告诉你，嘘！已经付过钱了，快快领取吧',
+                'link'=> $send_link,
+                'imgUrl'=> isset( $share_config_detail['share_img'] ) && !empty( $share_config_detail['share_img'] ) ? $share_config_detail['share_img'] : $share_img,
+            );
+
+            $this->footerDatas['js_menu_show']= implode(",",$js_menu_show);
+            $this->footerDatas['js_share_config']= $share_config;
+            $pageTitle = $this->lang->line('send_gift');
+            $this->headerDatas['titile'] = $pageTitle;
+        }
+
         $this->_view("my_send_list", $this->datas);
         
     }
@@ -554,7 +585,10 @@ class Gift extends MY_Front_Soma {
 
             $this->_view("header", $header);
         }
-
+        if($this->isNewTheme()){
+            $pageTitle = $this->lang->line('received_gift');
+            $this->headerDatas['titile'] = $pageTitle;
+        }
         $this->_view("my_receive_list", $this->datas);
         
     }
@@ -964,6 +998,10 @@ class Gift extends MY_Front_Soma {
                 }
             }
             $this->_view("header",$header);
+        }
+        if($this->isNewTheme()){
+            $pageTitle = $this->lang->line('gift_to_friend');
+            $this->headerDatas['titile'] = $pageTitle;
         }
         $this->_view("package_send",$this->datas);
     }
@@ -2058,6 +2096,7 @@ class Gift extends MY_Front_Soma {
                 //$url= Soma_const_url::inst()->get_url('*/*/received_gift_detail', array('id'=> $this->inter_id,'gid'=>$gift_id,'bsn'=>$business ) );
                 //redirect( $url );exit();
                 $this->datas = array();
+                $this->headerDatas['title'] = $this->lang->line('received_gift');
                 $this->_view("package_received", $this->datas);
                 return TRUE;
             }
@@ -2069,6 +2108,7 @@ class Gift extends MY_Front_Soma {
                 //$url= Soma_const_url::inst()->get_url('*/*/received_gift_detail', array('id'=> $this->inter_id,'gid'=>$gift_id,'bsn'=>$business ) );
 //                redirect( $url );exit();
                 $this->datas = array();
+                $this->headerDatas['title'] = $this->lang->line('received_gift');
                 $this->_view("package_received", $this->datas);
                 return TRUE;
             }
@@ -2090,6 +2130,7 @@ class Gift extends MY_Front_Soma {
             redirect( $url );exit();
         }else{
             $this->datas = array();
+            $this->headerDatas['title'] = $this->lang->line('open_gift');
             $this->_view("received", $this->datas);
             return TRUE;
         }

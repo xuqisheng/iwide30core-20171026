@@ -924,7 +924,7 @@ class Roomservice_Orders_Model extends MY_Model{
                 //扣除用户余额
                 $this->load->model('hotel/Member_model');
 
-                if($this->Member_model->reduce_balance($order['inter_id'], $order['openid'], $order['sub_total'], $order['order_sn'], '点餐支付',array('module'=>'dc'))){
+                if($this->Member_model->reduce_balance($order['inter_id'], $order['openid'], $order['sub_total'], $order['order_sn'], '点餐支付',array('module'=>'dc'),array('hotel_id'=>$order['hotel_id']))){
                     //支付成功 更新状态
                     $this->db->where ( array (
                         'order_sn' => $order['order_sn'],

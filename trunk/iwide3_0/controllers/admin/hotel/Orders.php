@@ -24,6 +24,13 @@ class Orders extends MY_Admin {
 		$data['t_checkin_num'] = $model->get_today_checkin_num($this->inter_id,$entity_id);
 		$data['order_confirm_two'] = $this->getNumRoom(2);	
 		$data['order_comfirm_num'] = $model->get_order_confirm_num($this->inter_id,$entity_id);
+
+        /* 新增公告 */
+        /** @var Priv_notice $notice_model */
+        $this->load->model('core/priv_notice', 'notice_model');
+        $notice_model = $this->notice_model;
+        $data['notice_model'] = $notice_model->getLast();
+
 		$this->_render_content ( $this->_load_view_file ( 'index_one' ), $data, false );
 	}
 	//获取指定数量的未确认订单数据
@@ -1046,14 +1053,21 @@ class Orders extends MY_Admin {
 	public function item_edit_post() {
 		$orderid = $this->input->post ( 'orderid' );
 		$item_id = $this->input->post ( 'item_id' );
-		$data ['startdate'] = $this->input->post ( 'startdate' );
-		$data ['startdate'] = date('Ymd',strtotime($data ['startdate']));
-		$data ['enddate'] = $this->input->post ( 'enddate' );
-		$data ['enddate'] = date('Ymd',strtotime($data ['enddate']));
+		$startdate = $this->input->post ( 'startdate' );
+		if ($startdate){
+    		$data ['startdate'] = date('Ymd',strtotime($startdate));
+		}
+		$enddate = $this->input->post ( 'enddate' );
+		if ($enddate){
+    		$data ['enddate'] = date('Ymd',strtotime($enddate));
+		}
 		if (isset($_POST['new_price'])) {
 			$data ['new_price'] = floatval ( $this->input->post ( 'new_price' ) );
 		}
-		$data ['istatus'] = intval ( $this->input->post ( 'istatus' ) );
+		$istatus=$this->input->post ( 'istatus' );
+		if ($istatus){
+    		$data ['istatus'] = intval ( $this->input->post ( 'istatus' ) );
+		}
         $data ['mt_room_id'] = $this->input->post ( 'mt_room_id' );
 		$model = $this->_load_model ( $this->main_model_name () );
 		if (! empty ( $item_id ) && ! empty ( $orderid )) {

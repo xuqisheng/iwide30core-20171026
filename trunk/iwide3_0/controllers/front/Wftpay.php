@@ -562,5 +562,65 @@ class Wftpay extends MY_Front {
             exit('参数错误');
         }
     }
-	
+	function hkwxpay() {
+		$order_id= $this->input->get('order_id');
+		$this->RequestHandler->setParameter('service','pay.weixin.jspay');//接口类型：pay.weixin.jspay
+        //必填项，商户号，由威富通分配
+
+		$this->RequestHandler->setParameter ( "mch_id", '157550000054' );
+
+  
+		$this->RequestHandler->setKey('a7b5a9d15025bf17b7aac6471eb1f682');
+
+
+        $this->RequestHandler->setParameter('version','2.0');
+        $this->RequestHandler->setParameter('out_trade_no',$order_id);
+        $this->RequestHandler->setParameter('sub_openid',$this->session->userdata ( $this->session->userdata ( 'inter_id' ) . 'openid' ));
+        $this->RequestHandler->setParameter('body','test');
+        $this->RequestHandler->setParameter('total_fee',1);
+
+        $this->RequestHandler->setParameter('mch_create_ip',GetHostByName($_SERVER['SERVER_NAME']));
+        //通知地址，必填项
+		$this->RequestHandler->setParameter('notify_url',site_url ( 'Wftpayreturn/hotel_payreturn/'.$this->inter_id ));//通知回调地址，目前默认是空格，商户在测试支付和上线时必须改为自己的，且保证外网能访问到
+		$this->RequestHandler->setParameter('callback_url',site_url ( 'hotel/hotel/myorder' ) . '?id=' . $this->inter_id );
+        $this->RequestHandler->setParameter('nonce_str',mt_rand(time(),time()+rand()));//随机字符串，必填项，不长于 32 位
+        
+        //添加订单超时时间 add by ping
+		// $timeStamp =time();
+		// if(isset($pay_paras['outtime']) && $pay_paras['outtime']>=5 && $pay_paras['outtime']<=30){
+		// 	$out_time = $pay_paras['outtime'] * 60 + $timeStamp;
+		// }else{
+		// 	$out_time = 900 + $timeStamp;//默认15分钟超时
+		// }
+		// $this->RequestHandler->setParameter ( "time_expire", date('YmdHis',$out_time) ); // 超时时间
+
+
+        $this->RequestHandler->createSign();//创建签名
+        
+        $data = Utils::toXml($this->RequestHandler->getAllParameters());
+        $this->PayHttpClient->setReqContent($this->RequestHandler->getGateURL(),$data);
+		$this->load->library('MYLOG');
+        MYLOG::w(json_encode($data),'hkwftpay_q');
+
+        if($this->PayHttpClient->call()){
+            $this->ClientResponseHandler->setContent($this->PayHttpClient->getResContent());
+            $this->ClientResponseHandler->setKey($this->RequestHandler->getKey());
+            if($this->ClientResponseHandler->isTenpaySign()){
+                //当返回状态与业务结果都为0时才返回支付二维码，其它结果请查看接口文档
+                if($this->ClientResponseHandler->getParameter('status') == 0 && $this->ClientResponseHandler->getParameter('result_code') == 0){
+                    redirect('https://pay.swiftpass.cn/pay/jspayIntl?token_id='.$this->ClientResponseHandler->getParameter('token_id').'&showwxtitle=1');
+                    exit();
+                }else{
+                    // echo json_encode(array('status'=>500,'msg'=>'Error Code:'.$this->ClientResponseHandler->getParameter('err_code').' Error Message:'.$this->ClientResponseHandler->getParameter('err_msg')));
+                    echo $this->ClientResponseHandler->getParameter('err_msg');
+                    exit();
+                }
+            }
+            // echo json_encode(array('status'=>500,'msg'=>'Error Code:'.$this->ClientResponseHandler->getParameter('status').' Error Message:'.$this->ClientResponseHandler->getParameter('message')));
+            echo $this->ClientResponseHandler->getParameter('message');
+        }else{
+            // echo json_encode(array('status'=>500,'msg'=>'Response Code:'.$this->pay->getResponseCode().' Error Info:'.$this->pay->getErrInfo()));
+            echo $this->PayHttpClient->getErrInfo();
+        }
+	}
 }

@@ -83,6 +83,9 @@ echo $block_left;
 		                    		<th class="sorting" tabindex="0" aria-controls="data-grid" rowspan="1" colspan="1" aria-label="发放单号: activate to sort column ascending">发放单号</th>
 		                    		<th class="sorting" tabindex="0" aria-controls="data-grid" rowspan="1" colspan="1" aria-label="发放方式: activate to sort column ascending">发放方式</th>
 		                    		<th class="sorting" tabindex="0" aria-controls="data-grid" rowspan="1" colspan="1" aria-label="返佣金额: activate to sort column ascending">备注</th>
+		                    		<?php if(isset($this->session->admin_profile['role']) && $this->session->admin_profile['role']['role_name'] == 'admin'):?>
+		                    		<th class="sorting" tabindex="0" aria-controls="data-grid" rowspan="1" colspan="1" aria-label="操作: activate to sort column ascending">操作</th>
+		                    		<?php endif;?>
 		                    		</thead>
 		                    
 		                    <tfoot></tfoot>
@@ -117,7 +120,10 @@ echo $block_left;
 		                    		<td><?=$msg->grade_total?></td>
 		                    		<td><?=$msg->partner_trade_no?></td>
 		                    		<td><?=$msg->send_by == 2 ? '金房卡' : '酒店'?></td>
-		                    		<td><?php echo $msg->status == 1 ? '--' : $msg->remark?></td>
+		                    		<td style="text-align: center"><?php echo $msg->status == 1 ? '--' : $msg->remark?></td>
+		                    		<?php if(isset($this->session->admin_profile['role']) && $this->session->admin_profile['role']['role_name'] == 'admin'):?>
+		                    		<td style="text-align: center"><?php echo $msg->status == 3 ? '<a href="javascript:sfaild(' . $msg->gid . ');" class="btn btn-danger">设为失败</a>&nbsp;<a href="javascript:ssuccess(' . $msg->gid . ');" class="btn btn-danger">设为成功</a>' : '--'?></td>
+		                    		<?php endif;?>
 		                    	</tr><?php endforeach;?>
 		                    </tbody>
 		                  </table>
@@ -156,7 +162,24 @@ require_once VIEWPATH. $tpl .DS .'privilege'. DS. 'commonjs.php';
 <script src="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <!-- page script -->
 <script>
-
+<?php if(isset($this->session->admin_profile['role']) && $this->session->admin_profile['role']['role_name'] == 'admin'):?>
+function sfaild(id){
+	if(confirm('确定后将无法修改，确定要把该发放单的所有项目设为发放失败状态吗？请谨慎操作！！！')){
+		$.get('<?php echo site_url('distribute/send_records/sstatus/f')?>/' + id,function(data){
+			alert(data);
+			if(data == '重置成功') location.reload();
+		});
+	}
+}
+function ssuccess(id){
+	if(confirm('确定后将无法修改，确定要把该发放单的所有项目设为发放成功状态吗？请谨慎操作！！！')){
+		$.get('<?php echo site_url('distribute/send_records/sstatus/s')?>/' + id,function(data){
+			alert(data);
+			if(data == '重置成功') location.reload();
+		});
+	}
+}
+<?php endif;?>
 $(document).ready(function() {
 });
 </script>

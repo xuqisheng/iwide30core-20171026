@@ -23,6 +23,7 @@ class HotelBaseService extends BaseService
                 }
             }
         }
+        $this->_hotel_ci = $this->getCI();
     }
 
     public function __get($key)

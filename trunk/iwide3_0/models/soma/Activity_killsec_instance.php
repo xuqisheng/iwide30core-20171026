@@ -83,7 +83,7 @@ class Activity_killsec_instance extends \MY_Model_Soma
         $data['schedule_type'] = $activity['schedule_type'];
         $data['schedule'] = $activity['schedule'];
         $data['killsec_price'] = $activity['killsec_price'];
-        $data['killsec_count'] = $activity['killsec_count'] > 10000 ? 10000 : $activity['killsec_count'];
+        $data['killsec_count'] = (int)$activity['killsec_count'];
         $data['killsec_permax'] = $activity['killsec_permax'];
         $data['join_count'] = 0;
         $data['create_time'] = date('Y-m-d H:i:s');

@@ -12,6 +12,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class MY_Front_Member_Iapi extends MY_Front_Iapi{
 	protected $_token = '';
 	protected $_template;
+	protected $_raw_template;
     protected $_template_filed_names;
     protected $user_info = array();
 
@@ -238,7 +239,13 @@ class MY_Front_Member_Iapi extends MY_Front_Iapi{
 			'openid'=>$this->openid,
 			);
 		$result = $this->doCurlPostRequest( $post_tem_url , $post_tem_data );
+		$this->_raw_template = $result['data'];
 		$this->_template = $result['data'];
+		if (strpos($this->_template,'#')!=FALSE){
+		    $theme=explode('#', $this->_template,2);
+		    $this->_template=$theme[0];
+		    $this->_skin_theme=$theme[1];
+		}
     }
 
     protected function template_filed_name_set($inter_id =''){

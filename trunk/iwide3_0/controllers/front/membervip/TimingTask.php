@@ -81,7 +81,8 @@ class TimingTask extends MY_Controller {
         $where = array(
             'inter_id' => 'a492669988',
             'member_mode' => 2,
-            'createtime >' => 1502812800
+            'createtime >=' => 1501516800  ,
+            'createtime <=' => 1504108800
         );
         $info = $this->public_model->get_list($where,'member_info','member_info_id,open_id',5000);
         if(!empty($info)){

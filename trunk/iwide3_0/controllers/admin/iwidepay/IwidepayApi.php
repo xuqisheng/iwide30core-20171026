@@ -367,6 +367,10 @@ class IwidepayApi extends MY_Controller
         {
             ajax_return(403,'数据禁止编辑');
         }
+        else if ($info['type'] == 'group')
+        {
+            $update['hotel_id'] = '0';
+        }
 
         $update['jfk_no'] = $info['jfk_no'];
         if (empty($update['jfk_no']))
@@ -1002,10 +1006,16 @@ class IwidepayApi extends MY_Controller
 
         $arr_page = get_page($total, $cur_page, $per_page);
 
+        //界面地址
+        $url = array(
+            'ext_data' => site_url('/iwidepay/splitRule/ext_rule?'.http_build_query($param)),
+        );
+
         //返回数据
         $ajax_data = array(
             'list' => $rule_bank,
             'page' => $arr_page,
+            'url' => $url,
         );
 
         $ajax_data = array_merge($ajax_data,$this->common_data);
@@ -1773,7 +1783,7 @@ class IwidepayApi extends MY_Controller
             //发起转账校验
             $this->load->model('iwidepay/Iwidepay_Deliver_Model');
             $checkData = array(
-                'iscompay' => $bank['is_company'],
+                'isCompay' => $bank['is_company'],
                 'bank_user_name' => trim($bank['bank_user_name']),
                 'bank_card_no' => trim($bank['bank_card_no']),
                 'accBankNo' => trim($bank['accBankNo']),
@@ -1783,6 +1793,7 @@ class IwidepayApi extends MY_Controller
                 'handle_date' => date('Ymd'),
             );
 
+            MYLOG::w('账户审核转账信息-info：'.json_encode($checkData),'iwidepay/admin_api');
             try
             {
                 $res = $this->Iwidepay_Deliver_Model->check_account($checkData);
@@ -1792,6 +1803,7 @@ class IwidepayApi extends MY_Controller
                 ajax_return(self::FAIL_AUTO,$e->getMessage());
             }
 
+            MYLOG::w('账户审核转账信息-info：'.json_encode($res),'iwidepay/admin_api');
             if ($res['errmsg'] == 'ok')//成功
             {
                 $status = 1;
@@ -1842,7 +1854,7 @@ class IwidepayApi extends MY_Controller
             {
                 $ajax_data = array(
                     'status_name' => '验证成功',
-                    'remark' => '',
+                    'remark' => '交易成功',
                     'add_time' => $check['add_time'],
                     'amount' => formatMoney($amount/100),
                     'status' => $status,
@@ -1981,7 +1993,7 @@ class IwidepayApi extends MY_Controller
         }
         else if ($order['refund_status'] == 10)
         {
-            ajax_return(self::PARAM_ERROR,'退款异常，请稍后重试');
+            ajax_return(self::PARAM_ERROR,'上一笔退款正在处理中，请稍后重试');
         }
 
 
@@ -1996,6 +2008,7 @@ class IwidepayApi extends MY_Controller
         }
 
         $refund_fee = $refund_fee * 100;//单位：分
+        $refund_fee = intval($refund_fee);
         if ($refund_fee > $refund_amount)
         {
             ajax_return(self::PARAM_ERROR,'您退款的金额已超过可退金额');
@@ -2062,7 +2075,7 @@ class IwidepayApi extends MY_Controller
 
             if($arr_query['respCode'] === '0000')
             {
-                //$up_data['refund_status'] = 8;
+                $up_data['refund_status'] = 8;
                 //先更新iwidepay_orders的订单状态 ，再改变refund表的退款状态
                 $this->iwidepay_order_model->update_data($up_data,array('order_no' => $order_no,'module' => $order['module']));
                 $this->db->where(array('id'=>$refund_id));
@@ -2072,7 +2085,7 @@ class IwidepayApi extends MY_Controller
             }
             else if($arr_query['respCode'] == 'P000' || $arr_query['respCode'] == '9999'|| $arr_query['respCode'] == '9997'|| $arr_query['respCode'] == '0028')
             {
-               // $up_data['refund_status'] = 10;
+                $up_data['refund_status'] = 10;
                 $this->iwidepay_order_model->update_data($up_data,array('order_no' => $order_no,'module' => $order['module']));//异常
                 $this->db->where(array('id'=>$refund_id));
                 $this->db->update('iwidepay_refund',array('refund_status'=>3));//异常
@@ -2081,7 +2094,7 @@ class IwidepayApi extends MY_Controller
             }
             else if($arr_query['respCode'] == '0042' || $arr_query['respCode'] == '0066')
             {
-                //$up_data['refund_status'] = 9;
+                $up_data['refund_status'] = 9;
                 $up_data['transfer_status'] = 6;
                 $this->iwidepay_order_model->update_data($up_data,array('order_no' => $order_no,'module' => $order['module']));
                 $this->db->where(array('id'=>$refund_id));
@@ -2161,8 +2174,8 @@ class IwidepayApi extends MY_Controller
         $filter['inter_id'] = !empty($param['inter_id']) ? addslashes($param['inter_id']) : '';
         $filter['hotel_id'] = !empty($param['hotel_id']) ? intval($param['hotel_id']) : '';
         $filter['start_time'] = !empty($param['start_time']) ? addslashes($param['start_time']) : '';
-        $filter['end_time'] = !empty($param['end_time']) ? addslashes($param['end_time']) : '';
-        $per_page = !empty($param['limit']) ? intval($param['limit']) : 5;//显示数量
+        $filter['end_time'] = !empty($param['end_time']) ? addslashes($param['end_time']) : date('Y-m-d');
+        $per_page = !empty($param['limit']) ? intval($param['limit']) : 10;//显示数量
         $cur_page = !empty($param['offset']) ? intval($param['offset']) : 1;//页码
 
         $inter_id = $this->admin_profile['inter_id'];
@@ -2362,7 +2375,7 @@ class IwidepayApi extends MY_Controller
         //判断可操作时间
         $enabled_op_time = date('H:i:s',time());
         $op_status = false;
-        if ($enabled_op_time >= '10:00:00' && $enabled_op_time < '17:00:00')
+        if ($enabled_op_time >= '16:00:00' && $enabled_op_time < '18:00:00')
         {
             $op_status = true;
         }
@@ -2405,7 +2418,7 @@ class IwidepayApi extends MY_Controller
 
         $ajax_data = array(
             'remark' => '',
-            'status_name' => '转账失败',
+            'status_name' => '失败',
             'status' => '2',
             'update_time' => date('Y-m-d H:i:s'),
         );
@@ -2415,11 +2428,11 @@ class IwidepayApi extends MY_Controller
         {
             if ($sum['status'] == 1)
             {
-                $ajax_data['status_name'] = '转账成功';
+                $ajax_data['status_name'] = '成功';
             }
             else if ($sum['status'] == 3)
             {
-                $ajax_data['status_name'] = '转账异常';
+                $ajax_data['status_name'] = '异常';
             }
 
             $ajax_data['update_time'] = $sum['update_time'];

@@ -1093,6 +1093,8 @@ class Consumer extends MY_Front_Soma
 
             $this->_view("header", $header);
         }
+
+        $this->headerDatas['title'] = '邮寄';
         $this->_view("shipping_address_info", $this->datas);
 
     }
@@ -1647,6 +1649,7 @@ class Consumer extends MY_Front_Soma
             $this->_view("header", $header);
         }
 
+        $this->headerDatas['title'] = '物流详情';
         $this->_view("shipping_detail", $this->datas);
     }
 

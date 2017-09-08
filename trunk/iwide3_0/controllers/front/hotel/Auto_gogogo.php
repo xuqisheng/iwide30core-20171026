@@ -5175,6 +5175,136 @@ class Auto_gogogo extends MY_Controller {
 		}
 	}
 	
+	public function update_web_orders_lilang(){
+	    set_time_limit(0);
+	    $db_read=$this->load->database('iwide_r1',true);
+	    $inter_id = 'a496200601';
+	    $service_type = 'shiji';
+	    $hotel_name = '丽朗';
+	    $model_f = 'hotel/pms/Shiji_hotel_model';
+	    $this->load->model('hotel/Hotel_config_model');
 	
+	    $db_read->where(array(
+	            'param_name' => 'WEB_ORDER_UPDATE_COUNT',
+	            'module'     => 'HOTEL',
+	            'hotel_id'   => 0,
+	            'inter_id'   => $inter_id
+	    ));
+	    $update_count = $db_read->get('hotel_config')->row_array();
+	    if(!$update_count){
+	        $update_count['param_value'] = 0;
+	    }
+	    $one_count = $this->input->get('oc');
+	    $one_count = empty ($one_count) ? 20 : intval($one_count);
+	    $db_read->where(array(
+	            'inter_id'   => $inter_id,
+	            'hotel_id >' => 0
+	    ));
+	    $hotel_pms_set = $db_read->get_where('hotel_additions')->result_array();
+	    $pms_sets = array();
+	    foreach($hotel_pms_set as $hps){
+	        $pms_sets [$hps ['hotel_id']] = $hps;
+	    }
+	    $where = array(
+	            'o.inter_id'            => $inter_id,
+	            'o.isdel'               => 0,
+	            'o.handled'             => 0,
+	            'oa.web_orderid is not' => null,
+	    );
+	    $orderlist = $db_read->from('hotel_orders o')->join('hotel_order_additions oa', 'oa.orderid=o.orderid', 'inner')->where($where)->where_in('o.status', array(
+	            0,
+	            1,
+	            2,
+	            4
+	    ))->order_by('o.id', 'asc')->limit($one_count, $update_count['param_value'])->get()->result_array();
+	
+	    //查询子订单优化
+	    $sub_res=[];
+	    $oid_list=[];
+	    foreach($orderlist as $v){
+	        $oid_list[]=$v['orderid'];
+	    }
+	    //一次查询相关的子订单
+	    if($oid_list){
+	        $sub_res=$db_read->from('hotel_order_items')->select('*,id as sub_id')->where(['inter_id'=>$inter_id])->where_in('orderid',$oid_list)->get()->result_array();
+	    }
+	    $sub_list=[];
+	    foreach($sub_res as $v){
+	        $sub_list[$v['orderid']][]=$v;
+	    }
+	    //匹配子订单
+	    foreach($orderlist as $k=>$v){
+	        $orderlist[$k]['order_details']=[];
+	        if(isset($sub_list[$v['orderid']])){
+	            $orderlist[$k]['order_details']=$sub_list[$v['orderid']];
+	        }
+	        $orderlist[$k]['first_detail'] = empty($orderlist[$k]['order_details']) ? [] : $orderlist[$k]['order_details'][0];
+	    }		$debug = $this->input->get('debug');
+	    if(!empty ($debug)){
+	        var_dump($orderlist);
+	    }
+	    if(count($orderlist) < $one_count){
+	        $this->db->where(array(
+	                'param_name' => 'WEB_ORDER_UPDATE_COUNT',
+	                'module'     => 'HOTEL',
+	                'hotel_id'   => 0,
+	                'inter_id'   => $inter_id
+	        ));
+	        $this->db->update('hotel_config', array(
+	                'param_value' => 0
+	        ));
+	    } else{
+	        $this->db->where(array(
+	                'param_name' => 'WEB_ORDER_UPDATE_COUNT',
+	                'module'     => 'HOTEL',
+	                'hotel_id'   => 0,
+	                'inter_id'   => $inter_id
+	        ));
+	        $this->db->update('hotel_config', array(
+	                'param_value' => $update_count ['param_value'] + $one_count
+	        ));
+	    }
+	    $handle_num = 0;
+	    $handle_orders = '(' . $hotel_name . ')oo-';
+	    $this->load->model($model_f, 'pms');
+	    $now = time();
+	    foreach($orderlist as $lt){
+	        $new_status = $this->pms->update_web_order($inter_id, $lt, $pms_sets[$lt['hotel_id']]); // 更新订单状态,返回新的状态
+	        /*
+	         * if ($new_status == 1 || $new_status == 2) {
+	         * } else
+	             */
+	         if($new_status == 3){
+	             $handle_orders .= ',' . $lt ['orderid'];
+	             $handle_num++;
+	         } else{
+	             if($new_status == 4 || $new_status == 5 || $new_status == 8){
+	                 $handle_orders .= ',' . $lt ['orderid'];
+	                 $handle_num++;
+	             }
+	         }
+	    }
+	    $mirco_time = microtime();
+	    $mirco_time = explode(' ', $mirco_time);
+	    $wait_time = $mirco_time [1] - $now + number_format($mirco_time [0], 2, '.', '');
+	    $this->db->insert('webservice_record', array(
+	            'send_content'    => '',
+	            'receive_content' => $handle_orders,
+	            'record_time'     => $now,
+	            'inter_id'        => $inter_id,
+	            'service_type'    => $service_type,
+	            'web_path'        => $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'],
+	            'record_type'     => 'order_batch_update',
+	            'openid'          => 'gang',
+	            'wait_time'       => $wait_time
+	    ));
+	    echo '(' . $hotel_name . ')本次已处理订单 ' . $handle_num . ' 条。（订单状态被更改为离店、取消、未到、删除、异常才算处理完成，确认和入住不算。）<br />';
+	    if($handle_orders){
+	        echo '订单号：' . str_replace(',', '<br/>', $handle_orders);
+	    }
+	    if(!empty ($debug)){
+	        exit ();
+	    }
+	}
 	
 }

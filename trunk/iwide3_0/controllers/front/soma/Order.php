@@ -990,19 +990,24 @@ class Order extends MY_Front_Soma {
             $SalesOrderModel->customer= $customer;
             $SalesOrderModel->scope_product_link_id = isset($posts['scope_product_link_id']) ? $posts['scope_product_link_id'] : 0;
 
+			/* edit by chencong <chencong@mofly.cn> 去掉session判断 start */
             /**
              * 20170503 luguihong 判断是否给予绩效
              */
-            $giveDistribute = $this->session->userdata( 'giveDistribute'.$this->inter_id.$this->openid );
-            if( $giveDistribute )
-            {
-                $SalesOrderModel->saler_id      = $posts['saler'];
-                $SalesOrderModel->saler_group = $posts['saler_group'];
-                $SalesOrderModel->fans_saler_id = $posts['fans_saler'];
-            } else {
-                $SalesOrderModel->saler_id      = 0;
-                $SalesOrderModel->fans_saler_id = 0;
-            }
+//            $giveDistribute = $this->session->userdata( 'giveDistribute'.$this->inter_id.$this->openid );
+//            if( $giveDistribute )
+//            {
+//                $SalesOrderModel->saler_id      = $posts['saler'];
+//                $SalesOrderModel->saler_group = $posts['saler_group'];
+//                $SalesOrderModel->fans_saler_id = $posts['fans_saler'];
+//            } else {
+//                $SalesOrderModel->saler_id      = 0;
+//                $SalesOrderModel->fans_saler_id = 0;
+//            }
+			$SalesOrderModel->saler_id      = $posts['saler'] ?: 0;
+			$SalesOrderModel->saler_group = $posts['saler_group'] ?: '';
+			$SalesOrderModel->fans_saler_id = $posts['fans_saler'] ?: 0;
+			/* edit by chencong <chencong@mofly.cn> 去掉session判断 end */
 
             $SalesOrderModel->killsec_instance = isset($posts['inid']) ? $posts['inid'] : 0;
             $SalesOrderModel->shipping= 0;

@@ -61,7 +61,7 @@ class Iwidepay_merchant_model extends MY_Model{
 
         if (isset($filter['wd']))
         {
-            $where .= " and mi.account_aliases LIKE '%{$filter['wd']}%' OR H.name LIKE '%{$filter['wd']}%' OR P.name LIKE '%{$filter['wd']}%'";
+            $where .= " and (mi.account_aliases LIKE '%{$filter['wd']}%' OR H.name LIKE '%{$filter['wd']}%' OR P.name LIKE '%{$filter['wd']}%')";
         }
 
         $sql .= " WHERE {$where}";
@@ -107,7 +107,7 @@ class Iwidepay_merchant_model extends MY_Model{
 
         if (isset($filter['wd']))
         {
-            $where .= " and mi.account_aliases LIKE '%{$filter['wd']}%' OR H.name LIKE '%{$filter['wd']}%' OR P.name LIKE '%{$filter['wd']}%'";
+            $where .= " and (mi.account_aliases LIKE '%{$filter['wd']}%' OR H.name LIKE '%{$filter['wd']}%' OR P.name LIKE '%{$filter['wd']}%')";
         }
 
 

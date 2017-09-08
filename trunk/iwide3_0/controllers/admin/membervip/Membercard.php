@@ -821,8 +821,7 @@ class Membercard extends MY_Admin_Api
 
         if( !$get_filter) $get_filter = $this->input->get('filter');
 
-        $params['cl.inter_id'] = $admin_profile['inter_id'];
-        $params['cl.log_type'] = array(0,2,3,4);
+        $params['mc.inter_id'] = $admin_profile['inter_id'];
         $params['extendedWhere'] = "(mc.is_use = 't' OR mc.is_useoff = 't' OR mc.is_active = 'f') AND mc.is_giving = 'f'";
 
         if(is_array($get_filter)) {
@@ -845,6 +844,8 @@ class Membercard extends MY_Admin_Api
 
         if(!empty($params['coupon_code'])){
             $params['extendedWhere'] .= " AND mc.coupon_code = '{$params['coupon_code']}'";
+        }else{
+            unset($params['coupon_code']);
         }
 
         if(!empty($params['status'])){
@@ -865,20 +866,19 @@ class Membercard extends MY_Admin_Api
 
         $this->load->model('membervip/admin/Public_model','mempublics_model');
 
-        $params['table_name'] = 'card_log';
-        $params['alias'] = "cl";
+        $params['table_name'] = 'member_card';
+        $params['alias'] = "mc";
         $params['join'] = array(
-            array('table'=>'member_card as mc','on'=>"mc.member_card_id = cl.member_card_id",'type'=>'left'),
-            array('table'=>'member_info as m','on'=>"m.member_info_id = cl.member_info_id",'type'=>'left'),
-            array('table'=>'card as c','on'=>"c.card_id = cl.card_id",'type'=>'left')
+            array('table'=>'member_info as m','on'=>"m.member_info_id = mc.member_info_id",'type'=>'left'),
+            array('table'=>'card as c','on'=>"c.card_id = mc.card_id",'type'=>'left')
         );
         $params['group_by'] = 'mc.member_card_id';
-        $select = array('cl.*','mc.member_card_id','mc.coupon_code','mc.use_time','mc.card_id','mc.is_online','c.title','m.member_info_id','m.membership_number','m.name','m.nickname','m.telephone','m.cellphone','mc.use_time','mc.useoff_time','mc.is_use','mc.is_useoff','mc.is_active','mc.is_giving','mc.expire_time');
+        $select = array('mc.member_card_id','mc.card_id','mc.coupon_code','mc.use_time','mc.card_id','mc.is_online','c.title','m.member_info_id','m.membership_number','m.name','m.nickname','m.telephone','m.cellphone','mc.use_time','mc.useoff_time','mc.is_use','mc.is_useoff','mc.is_active','mc.is_giving','mc.expire_time');
         $params['sort_field'] = 'mc.use_time';
         $params['sort_direct'] = 'desc';
 
         //排序字段
-        $order_columns = array('mc.coupon_code','mc.use_time','mc.card_id','c.title','m.membership_number','m.name','m.telephone','cl.remark');
+        $order_columns = array('mc.coupon_code','mc.use_time','mc.card_id','c.title','m.membership_number','m.name','m.telephone','mc.coupon_code');
         if(isset($params['order']) && !empty($params['order'])){
             $params['sort_field'] = $order_columns[$params['order'][0]['column']];
             $params['sort_direct'] = $params['order'][0]['dir'];
@@ -890,7 +890,7 @@ class Membercard extends MY_Admin_Api
         $params['opt'] = 15;
         $params['ui_type'] = 15;
         $params['f_type'] = 15;
-        $params['sort_field'] .= ",cl.card_log_id";
+        $params['sort_field'] .= ",mc.member_card_id";
         if(is_ajax_request()){
             //处理ajax请求
             $params['page_size'] = 20;

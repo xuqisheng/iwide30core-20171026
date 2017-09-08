@@ -956,6 +956,40 @@ class CardcenterService extends MemberBaseService
         $assign_data['js_share_config']['desc'] = "送你一张【".$card_info['title']."】帮你轻松享优惠";
         /*end*/
 
+        //获取优惠券转赠授权信息
+        $auth_gift = false;
+        $this->getCI()->load->model('membervip/common/Public_model','common_model');
+        $where = array(
+            'inter_id'=>'ALL_INTER_ID',
+            'type_code'=>'member_auth_gift'
+        );
+        $member_auth_gift = $this->getCI()->common_model->get_info($where,'inter_member_config','value');
+        $auth_inter = !empty($member_auth_gift['value'])?explode(',',$member_auth_gift['value']):array();
+        if(in_array($inter_id,$auth_inter)){
+            $auth_gift = true;
+        }
+
+        $assign_data['authentication_give'] = 0;
+        if($auth_gift === true && !empty($card_info) && $card_info['is_can_give_friend'] == 't' && $card_info['is_giving'] == 'f'){
+            $assign_data['authentication_give'] = 1;
+        }else{
+            //主动显示某些菜单
+            $assign_data['js_menu_show']= array( 'menuItem:setFont');
+            $menu_show_list = '';
+            foreach ($assign_data['js_menu_show'] as $v){
+                $menu_show_list.= "'{$v}',";
+            }
+            $assign_data['js_menu_show']= substr($menu_show_list, 0, -1);
+
+            //主动隐藏某些菜单
+            $assign_data['js_menu_hide']= array('menuItem:copyUrl','menuItem:share:email','menuItem:originPage','menuItem:favorite','menuItem:share:appMessage','menuItem:share:timeline');
+            $menu_hide_list = '';
+            foreach ($assign_data['js_menu_hide'] as $v){
+                $menu_hide_list.= "'{$v}',";
+            }
+            $assign_data['js_menu_hide']= substr($menu_hide_list, 0, -1);
+        }
+
         $assign_data['card_info'] = $card_info;
         if(!$is_restful){
             $this->res_data['status'] = 1;
@@ -978,25 +1012,7 @@ class CardcenterService extends MemberBaseService
             $assign_data['card_info']['hotel_header_url']='/index.php/hotel/hotel/search?id='.$inter_id;
         }
 
-        //获取优惠券转赠授权信息
-        $auth_gift = false;
-        $this->getCI()->load->model('membervip/common/Public_model','common_model');
-        $where = array(
-            'inter_id'=>'ALL_INTER_ID',
-            'type_code'=>'member_auth_gift'
-        );
-        $member_auth_gift = $this->getCI()->common_model->get_info($where,'inter_member_config','value');
-        $auth_inter = !empty($member_auth_gift['value'])?explode(',',$member_auth_gift['value']):array();
-        if(in_array($inter_id,$auth_inter)){
-            $auth_gift = true;
-        }
-
         $assign_data['auth_gift'] = $auth_gift;
-
-        $assign_data['authentication_give'] = 0;
-        if($auth_gift === true && !empty($card_info) && $card_info['is_can_give_friend'] == 't' && $card_info['is_giving'] == 'f'){
-            $assign_data['authentication_give'] = 1;
-        }
 
         $this->res_data['status'] = 1;
         $this->res_data['msg_lvl'] = 1;

@@ -340,7 +340,7 @@ class Orders extends MY_Admin {
                             if(isset($refund_result['status']) && isset($refund_result['message']) &&$refund_result['status']==2 && $refund_result['message']=='empty'){
                             $refund_result = $this->Okpay_wxpay_model->refund($result['inter_id'],$result['trade_no'],$total_fee,$refund_fee,$out_refund_no);
                             }
-                            if(is_array($refund_result) && "SUCCESS" == $refund_result['return_code'])
+                            if(is_array($refund_result) && "SUCCESS" == $refund_result['return_code'] && "SUCCESS" == $refund_result['result_code'])
                             {
                                 $trade_no = $refund_result['transaction_id'];
                                 //$out_refund_no = $refund_result['out_refund_no'];
@@ -616,6 +616,9 @@ class Orders extends MY_Admin {
         $confs[] = 'pay_way';
         $data = "";
         foreach ($confs as $key=>$item){
+            if($item == 'nickname'){
+                continue;
+            }
             $data = $data.iconv('utf-8','gb2312',$all_keys[$item]).",";
         }
         $res = $this->okpay_model->get_okpay_orders_list($filter);
@@ -639,9 +642,9 @@ class Orders extends MY_Admin {
                             $data = $data.iconv('utf-8','gb2312',$pay_st).",";
                         }
                     }elseif($val == "nickname"){
-                        $data = $data.iconv('utf-8','gb2312',str_replace("\n",' ',str_replace("\r",' ',$item[$val]))).",";
+                        //不处理
                     }elseif($val == "remark"){
-                        $data = $data.iconv('utf-8','gb2312',str_replace("\n",' ',str_replace("\r",' ',$item[$val]))).",";
+                        $data = $data.iconv('utf-8','gb2312',str_replace("\n",' ',str_replace("\r",' ',addslashes($item[$val])))).",";
                     }elseif($val == "pay_way"){
                         $pay_way = $item[$val]==1?'微信':'余额';
                         $data = $data.iconv('utf-8','gb2312',$pay_way).",";

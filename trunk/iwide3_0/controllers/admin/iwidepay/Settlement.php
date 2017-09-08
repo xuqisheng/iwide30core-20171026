@@ -57,8 +57,6 @@ class Settlement extends MY_Admin
         $filter['hotel_id'] = !empty($param['hotel_id']) ? intval($param['hotel_id']) : '';
         $filter['start_time'] = !empty($param['start_time']) ? addslashes($param['start_time']) : '';
         $filter['end_time'] = !empty($param['end_time']) ? addslashes($param['end_time']) : '';
-        $per_page = !empty($param['limit']) ? intval($param['limit']) : '';//显示数量
-        $cur_page = !empty($param['offset']) ? intval($param['offset']) : '';//页码
 
         if (empty($filter['inter_id']))
         {
@@ -74,7 +72,7 @@ class Settlement extends MY_Admin
         $select = 'sr.id,sr.amount,sr.status,sr.is_company,sr.bank,sr.bank_card_no,sr.add_time,sr.update_time,sr.type';
 
         $status = array(0=>'待转账',1=>'成功',2=>'失败',3=>'处理中',10=>'放弃转账');
-        $list = $this->iwidepay_sum_record_model->get_settlement($select,$filter,$cur_page,$per_page);
+        $list = $this->iwidepay_sum_record_model->get_settlement($select,$filter,'','');
         if ($list)
         {
             foreach ($list as $key => $value)
@@ -217,7 +215,7 @@ class Settlement extends MY_Admin
         $filter['inter_id'] = $this->admin_profile['inter_id'];
 
         //集团账号
-        $filter['hotel_id'] = $this->hotel_id;
+        $filter['hotel_id'] = $this->admin_profile['entity_id'];
 
         if ($filter['status'] === '' || $filter['status'] < 0)
         {
@@ -259,8 +257,9 @@ class Settlement extends MY_Admin
             }
         }
 
+
         $headArr = array('转账时间','账户名','账号','转账金额','返回状态时间','转账状态','备注');
-        $widthArr = array(20,20,20,12,20,12,12);
+        $widthArr = array(20,30,25,15,20,12,25);
         getExcel('转账审核',$headArr,$list,$widthArr);
     }
 
@@ -318,7 +317,14 @@ class Settlement extends MY_Admin
 
                 //分成金额
                 $amount_key = $status_key;
-                $tmp[$amount_key][$value['type']] = $value['amount'];
+                if ($value['module'] == 'soma' && $value['type'] == 'hotel')
+                {
+                    isset($tmp[$amount_key][$value['type']]) ? $tmp[$amount_key][$value['type']] += $value['amount'] : $tmp[$amount_key][$value['type']] = $value['amount'];
+                }
+                else
+                {
+                    $tmp[$amount_key][$value['type']] = $value['amount'];
+                }
             }
 
             unset($list_transfer);
@@ -332,7 +338,7 @@ class Settlement extends MY_Admin
                     $add_key = $value['module'] .'_'.$value['order_no'];
                     $item['trade_time'] = $temp[$add_key]['trade_time'];
                     $item['name'] = $temp[$add_key]['name'];
-                    $item['hotel_name'] = $temp[$add_key]['hotel_name'];
+                    $item['hotel_name'] = !empty($temp[$add_key]['hotel_name']) ? $temp[$add_key]['hotel_name'] : '--';
                     $item['module'] = !empty($module[$temp[$add_key]['module']]) ? $module[$temp[$add_key]['module']] : '--';
                     $item['order_no'] = $temp[$add_key]['order_no'];
                     $item['pay_no'] = $temp[$add_key]['pay_no'];
@@ -350,9 +356,9 @@ class Settlement extends MY_Admin
 
                     //核销门店
                     $item['write_off_hotel_id'] = '';
-                    if ($value['module'] = 'soma' && $temp[$add_key]['hotel_id'] == '9999999' && $value['write_off_hotel_id'] != '9999999')
+                    if ($value['module'] == 'soma' && $temp[$add_key]['hotel_id'] == '9999999' && $value['off_hotel_id'] != '9999999')
                     {
-                        $hotel = $this->Iwidepay_financial_model->get_hotel_info($temp[$add_key]['inter_id'],$value['write_off_hotel_id']);
+                        $hotel = $this->Iwidepay_financial_model->get_hotel_info($temp[$add_key]['inter_id'],$value['off_hotel_id']);
                         $item['write_off_hotel_id'] = !empty($hotel['name']) ? $hotel['name'] : '--';
                     }
 
@@ -376,85 +382,94 @@ class Settlement extends MY_Admin
         $settlement = $this->Iwidepay_financial_model->sum_settlement($record_id);
         if (!empty($settlement))
         {
-            $set_id = array();
             foreach ($settlement as $item)
             {
-                $set_id[] = $item['id'];
-            }
+                # 2、通过 set_id 查询订单
 
-            $set_id = implode(',',$set_id);
-
-            # 2、通过 set_id 查询订单
-            $list_debt = $this->Iwidepay_financial_model->transfer_accounts_debt_order($set_id);
-            if (!empty($list_debt))
-            {
-                foreach ($list_debt as $value)
+                if ($item['type'] == 'hotel')
                 {
-                    $item = array();
-                    $item['trade_time'] = $value['add_time'];
-                    $item['name'] = !empty($value['name']) ? $value['name'] : '--';
-                    $item['hotel_name'] = !empty($value['hotel_name']) ? $value['hotel_name'] : '--';
+                    $where_sql = ' DR.set_id = '.$item['id'];
+                }
+                else if ($item['type'] == 'jfk')
+                {
+                    $where_sql = ' DR.jfk_id = '.$item['id'];
+                }
+                else if ($item['type'] == 'group')
+                {
+                    $where_sql = ' DR.group_id = '.$item['id'];
+                }
 
-                    $item['module'] = !empty($module[$value['module']]) ? $module[$value['module']] : '--';
-                    //来源模块
-                    $order_type = '交易';
-                    $jfk_amount = 0;
-                    $group_amount = 0;
-                    $dist_amount = 0;
-                    $hotel_amount = $value['amount'];
-                    if ($value['order_type'] == 'base_pay')
+                $list_debt = $this->Iwidepay_financial_model->transfer_accounts_debt_order($where_sql);
+                if (!empty($list_debt))
+                {
+                    foreach ($list_debt as $value)
                     {
-                        $item['module'] = '月费';
-                        $order_type = '基础月费';
-                        $jfk_amount = $hotel_amount;
+                        $item = array();
+                        $item['trade_time'] = $value['add_time'];
+                        $item['name'] = !empty($value['name']) ? $value['name'] : '--';
+                        $item['hotel_name'] = !empty($value['hotel_name']) ? $value['hotel_name'] : '--';
+
+                        $item['module'] = !empty($module[$value['module']]) ? $module[$value['module']] : '--';
+                        //来源模块
+                        $order_type = '交易';
+                        $jfk_amount = 0;
+                        $group_amount = 0;
+                        $dist_amount = 0;
+                        $hotel_amount = $value['amount'];
+                        if ($value['order_type'] == 'base_pay')
+                        {
+                            $item['module'] = '月费';
+                            $order_type = '基础月费';
+                            $jfk_amount = $hotel_amount;
+                        }
+                        else if ($value['order_type'] == 'orderReward')
+                        {
+                            $item['module'] = '分销';
+                            $order_type = '首单奖励';
+                            $dist_amount = $hotel_amount;
+                        }
+                        else if ($value['order_type'] == 'extraReward')
+                        {
+                            $item['module'] = '分销';
+                            $order_type = '额外奖励';
+                            $dist_amount = $hotel_amount;
+                        }
+                        else if ($value['order_type'] == 'refund')
+                        {
+                            $order_type = '垫付退款';
+                            //$jfk_amount = $hotel_amount;
+                        }
+                        else if ($value['order_type'] == 'order')
+                        {
+                            $ext_info = json_decode($value['ext_info'],true);
+                            $value['amount'] = !empty($ext_info['orig_amount']) ? $ext_info['orig_amount'] : 0;
+                            $jfk_amount = !empty($ext_info['jfk_amount']) ? $ext_info['jfk_amount'] : 0;
+                            $group_amount = !empty($ext_info['group_amount']) ? $ext_info['group_amount'] : 0;
+                            $dist_amount = !empty($ext_info['dist_amount']) ? $ext_info['dist_amount'] : 0;
+
+                            $hotel_amount = $jfk_amount + $group_amount + $dist_amount;
+                        }
+
+                        $item['order_no'] = !empty($value['order_no']) ? $value['order_no'] : '--';
+                        $item['pay_no'] = !empty($value['ori_pay_no']) ? $value['ori_pay_no'] : '--';
+
+                        $item['order_status'] = $order_type;
+                        $item['transfer_status'] = '已结清';
+                        $item['transfer_date'] = date('Y-m-d',strtotime($value['up_time']));
+
+                        $item['amount'] = formatMoney($value['amount']/100);
+                        $item['write_off_hotel_id'] = '';//核销门店
+
+                        $item['cost_amount'] = '--';
+                        $item['jfk_amount'] = !empty($jfk_amount) ? formatMoney($jfk_amount/100) : '--';
+                        $item['group_amount'] = !empty($group_amount) ? formatMoney($group_amount/100) : '--';
+
+                        $item['hotel_amount'] = '-'.formatMoney($hotel_amount/100);
+
+                        $item['dist_amount'] = !empty($dist_amount) ? formatMoney($dist_amount/100) : '--';
+
+                        $list[] = $item;
                     }
-                    else if ($value['order_type'] == 'orderReward')
-                    {
-                        $item['module'] = '分销';
-                        $order_type = '首单奖励';
-                        $dist_amount = $hotel_amount;
-                    }
-                    else if ($value['order_type'] == 'extraReward')
-                    {
-                        $item['module'] = '分销';
-                        $order_type = '额外奖励';
-                        $dist_amount = $hotel_amount;
-                    }
-                    else if ($value['order_type'] == 'refund')
-                    {
-                        $order_type = '垫付退款';
-                        $jfk_amount = $hotel_amount;
-                    }
-                    else if ($value['order_type'] == 'order')
-                    {
-                        $ext_info = json_decode($value['ext_info'],true);
-                        $value['amount'] = !empty($ext_info['orig_amount']) ? $ext_info['orig_amount'] : 0;
-                        $jfk_amount = !empty($ext_info['jfk_amount']) ? $ext_info['jfk_amount'] : 0;
-                        $group_amount = !empty($ext_info['group_amount']) ? $ext_info['group_amount'] : 0;
-                        $dist_amount = !empty($ext_info['dist_amount']) ? $ext_info['dist_amount'] : 0;
-
-                        $hotel_amount = $jfk_amount + $group_amount + $dist_amount;
-                    }
-
-                    $item['order_no'] = !empty($value['order_no']) ? ' '.$value['order_no'] : '--';
-                    $item['pay_no'] = !empty($value['ori_pay_no']) ? ' '.$value['ori_pay_no'] : '--';
-
-                    $item['order_status'] = $order_type;
-                    $item['transfer_status'] = '已结清';
-                    $item['transfer_date'] = date('Y-m-d',strtotime($value['up_time']));
-
-                    $item['amount'] = formatMoney($value['amount']/100);
-                    $item['write_off_hotel_id'] = '';//核销门店
-
-                    $item['cost_amount'] = '--';
-                    $item['jfk_amount'] = !empty($jfk_amount) ? formatMoney($jfk_amount/100) : '--';
-                    $item['group_amount'] = !empty($group_amount) ? formatMoney($group_amount/100) : '--';
-
-                    $item['hotel_amount'] = '-'.formatMoney($hotel_amount/100);
-
-                    $item['dist_amount'] = !empty($dist_amount) ? formatMoney($dist_amount/100) : '--';
-
-                    $list[] = $item;
                 }
             }
         }

@@ -268,4 +268,11 @@ class Iwidepay_sum_record_model extends MY_Model{
         $page_size = intval($page_size);
         return $page_size > 0 ? (' limit ' . max(0, ($page-1)*$page_size) . ', ' . max(1, $page_size)) : '';
     }
+
+    //update AMOUNT sum_amount 数据
+    public function update_sum_record_amount($where = array() , $update = array()){
+        $sql = "UPDATE iwide_iwidepay_sum_record SET amount = {$update['amount']},sum_amount = sum_amount + {$update['sum_amount']} WHERE bank_card_no = '{$where['bank_card_no']}' AND handle_date = '{$where['handle_date']}' AND status = {$where['status']}";
+        $this->db->query($sql);
+        return $this->db->affected_rows();
+    }
 }

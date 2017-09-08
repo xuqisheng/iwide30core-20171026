@@ -132,7 +132,7 @@ class Depositcard extends MY_Admin_Api
 
         $data['pay_type'] = $pay_type;
 		foreach ($data as $key => $value) {
-			if(!$value) unset($data[$key]);
+			if(!$value && $key!='logo_url') unset($data[$key]);
 		}
 
         $data['inter_id'] = $inter_id;

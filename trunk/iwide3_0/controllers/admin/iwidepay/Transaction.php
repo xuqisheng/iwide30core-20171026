@@ -50,8 +50,6 @@ class Transaction extends MY_Admin
         $filter['order_status'] = !empty($param['order_status']) ? addslashes($param['order_status']) : '';
         $filter['transfer_status'] = !empty($param['transfer_status']) ? addslashes($param['transfer_status']) : '';
         $filter['order_no'] = !empty($param['order_no']) ? addslashes($param['order_no']) : '';
-        $per_page = !empty($param['limit']) ? intval($param['limit']) : '';//显示数量
-        $cur_page = !empty($param['offset']) ? intval($param['offset']) : '';//页码
 
         if (empty($filter['inter_id']))
         {
@@ -68,7 +66,7 @@ class Transaction extends MY_Admin
         $status = array(0=>'--',1=>'待定',2=>'待分',3=>'已分',4=>'异常',5=>'待定未分完',6=>'退款',7=>'已结清全额退款',8=>'部分退款',9=>'已结清部分退款',10=>'退款异常');
         $module = array('hotel'=>'订房','soma'=>'商城','vip'=>'会员','okpay'=>'快乐付','dc'=>'在线点餐','ticket' => '预约核销','base_pay' => '基础月费');
         $is_dist = array('0'=>'否','1'=>'是','2'=>'是','3'=>'是');
-        $list = $this->iwidepay_order_model->get_orders($select,$filter,$cur_page,$per_page);
+        $list = $this->iwidepay_order_model->get_orders($select,$filter,'','');
 
         if ($list)
         {
@@ -137,7 +135,7 @@ class Transaction extends MY_Admin
         }
 
         $headArr = array('交易时间','所属公众号','所属门店','来源模块','平台订单号','支付订单号','交易状态','分账状态','交易金额(元)','核销门店','交易手续费','金房卡分成','集团分成','门店分成','分销员分成');
-        $widthArr = array(20,20,20,12,20,20,12,12,12,12,12,12,12,14);
+        $widthArr = array(20,20,20,12,24,24,20,20,12,12,12,12,12,14);
         getExcel('交易流水',$headArr,$list,$widthArr);
     }
 }

@@ -170,7 +170,7 @@ class Theme_config_model extends MY_Model_Soma {
         if( $inter_id == FULL_ACCESS ){
 
         }else{
-            $db->where( "(inter_id = '".$inter_id."' or inter_id is NULL)" );
+            $db->where( "(inter_id = '".$inter_id."' or inter_id is null or inter_id = '')" );
         }
 
         $filter = array();

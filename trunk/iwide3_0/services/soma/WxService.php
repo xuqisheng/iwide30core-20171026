@@ -34,8 +34,8 @@ class WxService extends BaseService
      */
     const QR_CODE_SOMA_PUBLIC = '1236321';
 
-    const QR_CODE_SOMA_INDEX = '43';
-    const QR_CODE_PRODUCT_DETAIL = '44';
+    const QR_CODE_SOMA_INDEX = 'soma_index_';
+    const QR_CODE_PRODUCT_DETAIL = 'soma_detail_';
 
     /**
      * 获取服务实例方法
@@ -110,8 +110,8 @@ class WxService extends BaseService
 
         $interID = $this->getCI()->inter_id;
         $key = "QRCODE_FOREVE_{$interID}_{$id}";
-        //$url = $redis->get($key);
-        $url = null;
+        $url = $redis->get($key);
+        //$url = null;
 
         if (empty($url)){
             $app = WxService::getInstance()->getApp();

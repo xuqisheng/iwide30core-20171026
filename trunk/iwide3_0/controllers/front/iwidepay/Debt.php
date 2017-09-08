@@ -142,7 +142,7 @@ class Debt extends MY_Controller {
     			'inter_id' => $v['inter_id'],
     			'hotel_id' => $v['hotel_id'],
     			'module' => $v['module'],
-    			'order_no' => $v['order_no'],
+    			'order_no' => $v['orig_order_no'],
     			'amount' => $v['amount'],
     			'order_type' => 'refund',
     			'ori_pay_no' => $v['ori_pay_no'],
@@ -162,6 +162,14 @@ class Debt extends MY_Controller {
     	//查出启用分账的公众号
     	$open_splits = $this->Iwidepay_debt_model->get_split_status();
     	foreach ($open_splits as $ko => $vo) {
+    		//判断是否开启了现付结算
+			$this->load->model('iwidepay/Iwidepay_clears_model');
+    		$open_offline = $this->Iwidepay_clears_model->get_configs($vo['inter_id'],'synchro_hotel_order');
+    		MYLOG::w('info:synchro_hotel_order config_'.$vo['inter_id'].'-'.json_encode($open_offline),'iwidepay_clears');
+    		if(empty($open_offline['value'])||$open_offline['value']!=1){
+    			continue;
+    		}
+
     		//取所有添加有效账户的酒店
     		$merchant_hotels = $this->Iwidepay_debt_model->get_merchant_hotels($vo['inter_id']);
     		if(empty($merchant_hotels)){

@@ -62,3 +62,26 @@ if ( ! function_exists('float_precision_match'))
     }
 }
 
+
+//排序
+if(!function_exists('array_acco_sort')){
+    function array_acco_sort($arr, $keys, $type = 'asc') {
+        $keysvalue = $new_array = array();
+        foreach ($arr as $k => $v) {
+            $keysvalue[$k] = $v[$keys];
+        }
+        if ($type == 'asc') {
+            //对数组进行排序并保持索引关系
+            asort($keysvalue);
+        } else {
+            //对数组进行逆向排序并保持索引关系
+            arsort($keysvalue);
+        }
+        reset($keysvalue);
+        foreach ($keysvalue as $k => $v) {
+            $new_array[] = $arr[$k];
+        }
+        return $new_array;
+    }
+}
+

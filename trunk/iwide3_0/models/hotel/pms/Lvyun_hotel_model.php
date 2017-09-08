@@ -149,7 +149,6 @@ class Lvyun_hotel_model extends CI_Model {
 		$this->load->model ( 'hotel/Order_model' );
 		$data = $this->Order_model->get_rooms_change ( $local_rooms, $params ['idents'], $params ['condit'] );
 		$pms_state = $pms_data ['pms_state'];
-	
 		$this->load->model ( 'hotel/Order_model' );
 		$members_price_code = empty ( $params ['field_config'] ['members_price_code'] ['all'] ) ? array () : explode ( ',', $params ['field_config'] ['members_price_code'] ['all'] );
 		$basic_price_code=!empty($params['field_config']['basic_price_code'])?$params['field_config']['basic_price_code']:[];
@@ -210,7 +209,6 @@ class Lvyun_hotel_model extends CI_Model {
 							$allprice .= ',' . $tmp ['date_detail'] [$dk] ['price'];
 							$amount += $tmp ['date_detail'] [$dk] ['price'];
 						}
-						
 						$data [$room_key] ['state_info'] [$sik] ['date_detail'] = $tmp ['date_detail'];
 						$data [$room_key] ['state_info'] [$sik] ['extra_info'] = $tmp ['extra_info'];
 						empty ( $tmp ['des'] ) ?  : $data [$room_key] ['state_info'] [$sik] ['des'] = $tmp ['des'];
@@ -283,7 +281,6 @@ class Lvyun_hotel_model extends CI_Model {
 		}
 		return $data;
 	}
-	
 	function get_web_roomtype($pms_set, $startdate, $days, $params) {
 		$pms_auth = json_decode ( $pms_set ['pms_auth'], TRUE );
 		$url = $pms_auth ['url'] . '/queryHotelList';
@@ -1054,7 +1051,7 @@ class Lvyun_hotel_model extends CI_Model {
 					if(!empty($room_codes['room']['consume_code'])){
 						$balance_param['password']=$room_codes ['room'] ['consume_code'];
 					}
-					if ($this->Member_model->reduce_balance ( $inter_id, $order ['openid'], $order ['price'], $order ['orderid'] . ',' . $web_orderid . ',' . $room_codes ['room'] ['consume_code'], '订房订单余额支付',$balance_param,$order ['hotel_id'] )) {
+					if ($this->Member_model->reduce_balance ( $inter_id, $order ['openid'], $order ['price'], $order ['orderid'] . ',' . $web_orderid . ',' . $room_codes ['room'] ['consume_code'], '订房订单余额支付',$balance_param,$order )) {
 						//云盟储值支付需要入账
 						if($inter_id=='a445223616'){
 							$this->add_web_bill($web_orderid,$order,$pms_auth,$orderid,true);
@@ -1840,7 +1837,15 @@ class Lvyun_hotel_model extends CI_Model {
 			$data['hotelGroupCode']=$pms_auth['hotelGroupCode'];
 			$data['appKey']=$pms_auth['key'];
 			
-			$session_id= $this->session->userdata('sess:'.$inter_id);
+			$this->load->library ( 'Cache/Redis_proxy', array (
+			        'not_init' => FALSE,
+			        'module' => 'hotel',
+			        'refresh' => FALSE,
+			        'environment' => ENVIRONMENT
+			), 'redis_proxy' );
+			
+// 			$session_id= $this->session->userdata('sess:'.$inter_id);
+			$session_id= $this->redis_proxy->get('lvyunsess:'.$inter_id);
 			if(empty($session_id)){
 				$session_id=$this->api_login($pms_auth,$inter_id);
 			}
@@ -1918,7 +1923,15 @@ class Lvyun_hotel_model extends CI_Model {
 		$session_id='';
 		if(isset($rs['resultCode'])&&$rs['resultCode']==0){
 			$session_id=$rs['resultInfo'];
-			$this->session->set_userdata('sess:'.$inter_id,$session_id);
+			$this->load->library ( 'Cache/Redis_proxy', array (
+			        'not_init' => FALSE,
+			        'module' => 'hotel',
+			        'refresh' => FALSE,
+			        'environment' => ENVIRONMENT
+			), 'redis_proxy' );
+				
+// 			$this->session->set_userdata('sess:'.$inter_id,$session_id);
+			$this->redis_proxy->set('lvyunsess:'.$inter_id,$session_id,300);
 		}
 		return $session_id;
 	}
@@ -1930,7 +1943,16 @@ class Lvyun_hotel_model extends CI_Model {
 			$data['hotelGroupCode']=$pms_auth['hotelGroupCode'];
 			$data['appKey']=$pms_auth['key'];
 			
-			$session_id= $this->session->userdata('sess:'.$inter_id);
+			$this->load->library ( 'Cache/Redis_proxy', array (
+			        'not_init' => FALSE,
+			        'module' => 'hotel',
+			        'refresh' => FALSE,
+			        'environment' => ENVIRONMENT
+			), 'redis_proxy' );
+				
+			// 			$session_id= $this->session->userdata('sess:'.$inter_id);
+			$session_id= $this->redis_proxy->get('lvyunsess:'.$inter_id);
+			
 			if(empty($session_id)){
 				$session_id=$this->api_login($pms_auth,$inter_id);
 			}

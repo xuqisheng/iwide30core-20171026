@@ -1,5 +1,5 @@
 <?php
-class Qrcode_model extends CI_Model{
+class Qrcode_model extends MY_Model{
 	function __construct()
 	{
 		parent::__construct();
@@ -8,6 +8,154 @@ class Qrcode_model extends CI_Model{
 	{
 		return parent::model($className);
 	}
+	
+	/**
+	 * @return string the associated database table name
+	 */
+	public function table_name()
+	{
+		return 'qrcode';
+	}
+	
+	public function table_primary_key()
+	{
+		return 'id';
+	}
+	
+	public function attribute_labels()
+	{
+		return array('id'=>'ID',
+				'inter_id'     => '公众号ID',
+				'keyword'      => '关键字',
+				'intro'        => '简介',
+				'create_date'  => '创建时间',
+				'edit_date'    => '更新时间',
+				'url'          => '二维码',
+				'type'         => '',
+				'name'         => '酒店');
+	}
+	
+	/**
+	 * 后台管理的表格中要显示哪些字段
+	 */
+	public function grid_fields()
+	{
+		return array(
+				'id',
+				'url',
+				'keyword',
+				'intro',
+				'name',
+				'create_date',
+				'type',
+		);
+	}
+	
+	/**
+	 * 在EasyUI grid中的 date-option 定义，包括宽度，是否排序等等
+	 *   type: grid中的表头类型定义
+	 *   form_type: form中的元素类型定义
+	 *   form_ui: form中的属性补充定义，如加disabled 在< input “disabled” / > 使元素禁用
+	 *   form_tips: form中的label信息提示
+	 *   form_hide: form中自动化输出中剔除
+	 *   form_default: form中的默认值，请用字符类型，不要用数字
+	 *   select: form中的类型为 combobox时，定义其下来列表
+	 */
+	public function attribute_ui()
+	{
+		/* text,textbox,numberbox,numberspinner, combobox,combotree,combogrid,datebox,datetimebox, timespinner,datetimespinner, textarea,checkbox,validatebox. */
+		//type: numberbox数字框|combobox下拉框|text不写时默认|datebox
+		$base_util= EA_base::inst();
+		$modules= config_item('admin_panels')? config_item('admin_panels'): array();
+		//$parents= $this->get_cat_tree_option();
+	
+		/** 获取本管理员的酒店权限  */
+		$this->_init_admin_hotels();
+		$publics = $hotels= array();
+		$filter= $filterH= NULL;
+	
+		if( $this->_admin_inter_id== FULL_ACCESS ) $filter= array();
+		else if( $this->_admin_inter_id ) $filter= array('inter_id'=> $this->_admin_inter_id);
+		if(is_array($filter)){
+			$this->load->model('wx/publics_model');
+			$publics= $this->publics_model->get_public_hash($filter);
+			$publics= $this->publics_model->array_to_hash($publics, 'name', 'inter_id');
+			//$publics= $publics+ array(FULL_ACCESS=>'-所有公众号-');
+		}
+		 
+		if( $this->_admin_hotels== FULL_ACCESS ) $filterH= array();
+		else if( $this->_admin_hotels ) $filterH= array('hotel_id'=> $this->_admin_hotels);
+		else $filterH= array();
+	
+		if( $publics && is_array($filterH)){
+			$this->load->model('hotel/hotel_model');
+			$hotels= $this->hotel_model->get_hotel_hash($filterH);
+			$hotels= $this->hotel_model->array_to_hash($hotels, 'name', 'hotel_id');
+			$hotels= $hotels+ array('0'=>'-不限定-');
+		}
+		/** 获取本管理员的酒店权限  */
+		 
+		return array(
+				'inter_id' => array(
+						'grid_ui'=> '',
+						'grid_width'=> '4%',
+						'type'=>'text',	//textarea|text|combobox
+				),
+				'id' => array(
+						'grid_ui'=> '',
+						'grid_width'=> '4%',
+						'type'=>'text',	//textarea|text|combobox
+				),
+				'keyword' => array(
+						'grid_ui'=> '',
+						'grid_width'=> '6%',
+						'type'=>'text',	//textarea|text|combobox
+				),
+				'intro' => array(
+						'grid_ui'=> '',
+						'grid_width'=> '10%',
+						'type'=>'text',	//textarea|text|combobox
+				),
+				'url' => array(
+						'grid_ui'=> '',
+						'grid_width'=> '8%',
+						'grid_function'=> 'img',
+						'type'=>'text',	//textarea|text|combobox
+				),
+				'name' => array(
+						'grid_ui'=> '',
+						'grid_width'=> '10%',
+						'type'=>'text',	//textarea|text|combobox
+				),
+				'create_date' => array(
+						'grid_ui'=> '',
+						'grid_width'=> '6%',
+						'type'=>'datebox',	//textarea|text|combobox
+				),
+				'edit_date' => array(
+						'grid_ui'=> '',
+						'grid_width'=> '4%',
+						'type'=>'datebox',	//textarea|text|combobox
+				),
+				'type' => array(
+						'grid_ui'=> '',
+						'grid_width'=> '2%',
+						'type'=>'text',	//textarea|text|combobox
+				)
+		);
+	}
+	
+	protected function get_img_html($url){
+		return '<img src="{$url}" style="width: 6em;"/>';
+	}
+	/**
+	 * grid表格中默认哪个字段排序，排序方向
+	 */
+	public static function default_sort_field()
+	{
+		return array('field'=>'id', 'sort'=>'desc');
+	}
+	
 	function create($array){
 		$array['create_date']=date("Y-m-d H:i:s");
 		return $this->db->insert('qrcode',$array);
@@ -62,6 +210,12 @@ class Qrcode_model extends CI_Model{
 				return TRUE;
 			}
 		}else{
+			$this->db->where(['inter_id'=>$inter_id,'qrcode_id'=>$key]);
+			$staff_param['name']           = $param['intro'];
+			$staff_param['hotel_name']     = $param['name'];
+			$staff_param['hotel_id']       = $hotel[0];
+			$staff_param['inter_id']       = $inter_id;
+			$this->db->update('hotel_staff',$staff_param);
 			$this->db->where(array('inter_id'=>$inter_id,'id'=>$key));
 			$this->db->update('qrcode',$param);
 			if ($this->db->trans_status () === FALSE) {
@@ -138,10 +292,16 @@ class Qrcode_model extends CI_Model{
 			);
 			$this->db->insert ( 'fans_sub_log', $param );
 		}
+		
 		//--
 		$sql = "INSERT INTO " . $this->db->dbprefix ( "qrcode_log" ) . " (qrcode_id,scan_time,keyword";
-		if (! is_null ( $openid ))
+		if (! is_null ( $openid )){
+			if($inter_id == 'a421641095'){
+				$this->load->model('distribute/Idistribute_model');
+				$this->Idistribute_model->save_saler_protection_info($inter_id, $openid, 'wxapi/qrcode_scan', intval($qrcode_id),null,'wxapi');
+			}
 			$sql .= ",openid";
+		}
 		if (! is_null ( $nickname ))
 			$sql .= ",nickname";
 		if (is_numeric ( $qrcode_id )) {

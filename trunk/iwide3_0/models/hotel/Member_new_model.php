@@ -457,7 +457,7 @@ class Member_new_model extends CI_Model {
             if (isset($result->mem_card_no)){
             	$result->mem_card_no_old=$result->mem_card_no;//原mem_card_no
             }
-            $result->mem_card_no=$result->membership_number;
+            $result->mem_card_no=isset($result->membership_number) ? $result->membership_number : '';
 
             isset($result->jfk_member_no) or $result->jfk_member_no='';
             

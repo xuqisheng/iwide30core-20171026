@@ -204,10 +204,10 @@ class Iwidepay_model extends MY_Model{
         $t_status = 0;//记录退款后的订单状态
         $leave_amount = 0;//记录正常部分退款后，剩下的订单金额
         if($iwidepay_order['transfer_status'] == 3 || $iwidepay_order['transfer_status']==5||$iwidepay_order['transfer_status']==9){
-        	MYLOG::w('已分账先不能退，inter_id:'.$iwidepay_order['inter_id'].'|order_no：'.$iwidepay_order['order_no'], 'iwidepay/refund');
+        	/*MYLOG::w('已分账先不能退，inter_id:'.$iwidepay_order['inter_id'].'|order_no：'.$iwidepay_order['order_no'], 'iwidepay/refund');
             	$return['status'] = 2;
             	$return['message'] = '已分账不能退';//这里是这个单不能再退了
-            	return $return;
+            	return $return;*/
             if($refund_data['transAmt'] == $iwidepay_order['trans_amt'] ){//全部退
             	$type = 2;//垫付全部退款
             	$t_status = 7;
@@ -412,10 +412,55 @@ class Iwidepay_model extends MY_Model{
 		}
 	}
 
+	private function get_close_order_url(){
+		if(ENVIRONMENT === 'production'){
+			return 'http://pull.jinfangka.com/index.php/iwidepay/cmbc/handle/close_order';
+		}else{
+			return 'http://cmbcpaytest.jinfangka.com/index.php/iwidepay/cmbc/handle/close_order';
+		}
+	}
+
+	private function get_query_order_url(){
+		if(ENVIRONMENT === 'production'){
+			return 'http://pull.jinfangka.com/index.php/iwidepay/cmbc/handle/query_order';
+		}else{
+			return 'http://cmbcpaytest.jinfangka.com/index.php/iwidepay/cmbc/handle/query_order';
+		}
+	}
+
 	 //加个处理的方法
     private function handle_encrypt($data,$secret,$encode = true){
         if($encode){//加密
             return md5($secret.$data['orderNo'].$data['orderDate'].$data['transAmt'].$data['transId'].$data['origOrderNo'].$data['origOrderDate'].$secret);
+        }else{//解密
+            if(empty($data)){
+                MYLOG::w('处理http返回数据为空','iwidepay/send');
+                return false;
+            }
+            $data = json_decode($data,true);
+            if($data['errcode'] == 0){
+                $sign = md5($secret. $data['data']['return_data'] .$secret);
+                if(isset($data['data']['sign'])&& $data['data']['sign']== $sign){
+                    return $data['data']['return_data'];
+                }else{
+                    MYLOG::w('处理http返回数据签名不对|' . json_encode($data),'iwidepay/send');
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }
+    }
+
+    //加个处理的方法
+    private function handle_encrypt_order($data,$secret,$encode = true){
+        if($encode){//加密
+        	$md5 = $secret;
+        	foreach ($data as $key => $value) {
+        		$md5 .= $value;
+        	}
+        	$md5 .= $secret;
+            return md5($md5);
         }else{//解密
             if(empty($data)){
                 MYLOG::w('处理http返回数据为空','iwidepay/send');
@@ -595,13 +640,21 @@ class Iwidepay_model extends MY_Model{
 				'origOrderDate' => $order['order_date'],//原订单日期
 				);
 			$this->load->helpers('common');
-			MYLOG::w('关闭订单发送数据：'.json_encode($data),'iwidepay_model');
+			MYLOG::w('关闭订单发送数据：'.json_encode($data),'iwidepay/send');
 			$this->load->library('IwidePay/IwidePayService',null,'IwidePayApi');
-			$res = $this->IwidePayApi->closeOrderRequest($data);
-			MYLOG::w('关闭订单响应数据：'.$res,'iwidepay_model');
+			// $res = $this->IwidePayApi->closeOrderRequest($data);
+			//改为调接口
+			$chart = IwidePayConfig::CLOSE_ORDER_SECRET;//验证key
+			$data['sign'] = $this->handle_encrypt_order($data,$chart);
+			$return_data = doCurlPostRequest ( $this->get_close_order_url(), http_build_query($data),array(),30);
+			MYLOG::w('关闭订单响应数据：'.$return_data,'iwidepay/send');
+			$return = $this->handle_encrypt_order($return_data,$chart,false);//这里记日志了
+			if(!$return){       
+	            return false;
+	        }
 			//转数组
-        	$res = parseQString($res);
-			if(!empty($res)&&$res['respCode']!=='0000'){
+        	$result = parseQString($return,true);
+			if(!empty($result)&&$result['errcode']!=0){
 				return false;
 			}
 			return true;
@@ -618,24 +671,35 @@ class Iwidepay_model extends MY_Model{
 				'order_no' => $order_no,
 			))->get(self::TAB_IIP_O)->row_array();
 		}
-		$data = array(
-			'requestNo' => md5($order_no . time().rand(10000,99999)),
-			'transId' => '04',
-			'orderNo' => $type==1?$order['pay_no']:$order_no,
-			'orderDate' => $type==1?$order['order_date']:$order_date,//原订单日期
-			);
-		$this->load->helpers('common');
-		MYLOG::w('查询订单发送数据：'.json_encode($data),'iwidepay_model/query');
-		$this->load->library('IwidePay/IwidePayService',null,'IwidePayApi');
-		$res = $this->IwidePayApi->queryOrderRequest($data);
-		MYLOG::w('查询订单响应数据：'.$res,'iwidepay_model/query');
-		//转数组
-    	$res = parseQString($res);
-    	//return $res;
-		if(!empty($res)&&$res['respCode']!=='0000'){//查询成功
-			return false;
+		if(!empty($order)){
+			$data = array(
+				'requestNo' => md5($order_no . time().rand(10000,99999)),
+				'transId' => '04',
+				'orderNo' => $type==1?$order['pay_no']:$order_no,
+				'orderDate' => $type==1?$order['order_date']:$order_date,//原订单日期
+				);
+			$this->load->helpers('common');
+			MYLOG::w('查询订单发送数据：'.json_encode($data),'iwidepay/send');
+			$this->load->library('IwidePay/IwidePayService',null,'IwidePayApi');
+			// $res = $this->IwidePayApi->queryOrderRequest($data);
+			//改为调接口
+			$chart = IwidePayConfig::QUERY_ORDER_SECRET;//验证key
+			$data['sign'] = $this->handle_encrypt_order($data,$chart);
+			$return_data = doCurlPostRequest ( $this->get_query_order_url(), http_build_query($data),array(),30);
+			MYLOG::w('查询订单响应数据：'.$return_data,'iwidepay/send');
+			$return = $this->handle_encrypt_order($return_data,$chart,false);//这里记日志了
+			if(!$return){       
+	            return false;
+	        }
+			//转数组
+	    	$result = parseQString($return,true);
+	    	//return $res;
+			if(!empty($result)&&$result['errcode']!=0){
+				return false;
+			}
+			return $result;
 		}
-		return $res;
+		return false;
 	}
 
 	/**
@@ -710,7 +774,7 @@ class Iwidepay_model extends MY_Model{
 	 * 查出需同步的状态的全部订单
 	 */
 	function get_sync_orders($startdate = '' , $enddate = ''){
-		$where = ' WHERE handled=0 AND ((transfer_status IN (2,8) AND dist_amt=0) OR (transfer_status IN (1,5))) ';
+		$where = ' WHERE ((handled=0 AND ((transfer_status IN (2,8) AND dist_amt=0) OR (transfer_status IN (1,5)))) OR (handled=1 AND is_dist=1)) ';
 		if(!empty($startdate)){
             $where .= ' AND add_time>="'.$startdate.'"';
         }
@@ -719,6 +783,7 @@ class Iwidepay_model extends MY_Model{
         }
 		$sql = 'SELECT * FROM '.$this->db->dbprefix(self::TAB_IIP_O).$where;
 		$res = $this->db->query($sql)->result_array();
+		// echo $this->db->last_query();
 		return $res;
 	}
 

@@ -165,6 +165,12 @@ class Refund extends MY_Front_Soma_Iapi
         //退款类型
         $data['rtype'] = isset($param['rtype'])?$param['rtype']:'';
 
+        $page_resource = [
+            'link' => [
+                'refund_detail' => $this->link['refund_detail'].'&oid='.$order_id,
+            ]
+        ];
+
         $this->json(BaseConst::OPER_STATUS_SUCCESS, '', $data);
     }
 
@@ -246,7 +252,7 @@ class Refund extends MY_Front_Soma_Iapi
 
         $order_detail = $sales_order_model->get_order_detail($business, $this->inter_id);
         if (!$order_detail) {
-            show_404();
+            $this->json(BaseConst::OPER_STATUS_FAIL_TOAST, '没有找到该订单');
         }
 
         //不是自己的订单，返回到订单列表
@@ -408,7 +414,7 @@ class Refund extends MY_Front_Soma_Iapi
 
         //查找退款主单信息
         $refund_info = $sales_refund_model->get_refund_order_detail_byOrderId($order_id, $this->inter_id);
-        if (!$refund_info) {
+        if (empty($refund_info)) {
             $this->json(BaseConst::OPER_STATUS_FAIL_TOAST, '没有退款主单');
         }
 

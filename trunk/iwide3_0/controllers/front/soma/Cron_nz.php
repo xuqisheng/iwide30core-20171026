@@ -1711,4 +1711,78 @@ class Cron_nz extends MY_Controller
         }
         echo 'success';
     }
+    
+    public function testcsv(){
+        $file = APPPATH . '..' . DS . 'www_admin' . DS . 'public' . DS . 'import' . DS . 'bgy_reward_hotels.csv';
+        $csv = fopen($file, 'r');
+        $csv_data = array(); 
+        $n = 0; 
+        while ($data = fgetcsv($csv)) { 
+            $num = count($data); 
+            for ($i = 0; $i < $num; $i++) { 
+                $csv_data[$n][$i] = mb_convert_encoding($data[$i], 'utf-8', 'gbk');//$data[$i]; 
+            } 
+            $n++; 
+        }
+
+        $hotels = [];
+        foreach ($csv_data as $row) {
+            $hotels[] = $row[0];
+        }
+        var_dump($hotels);
+    }
+
+
+    /**
+     * Wuqd 2017-09-08
+     * 手动发送微信模板消息
+     * 南昌力高皇冠假日酒店
+     */
+    public function lghgjr_0908()
+    {
+        // 1000331591//
+        $inter_id = 'a501733480';
+        $template_id = 'swxh6IRg24ET70J-un2k0o74MU6yMPX2zhg-ZICZ958';
+        $file = $this->_basic_path . 'lghgjr_0908.csv';
+
+        $data['template_id'] = $template_id;
+        $data['url'] = 'http://assist.iwide.cn/index.php/soma/order/my_order_list?id=a501733480';
+        $data['topcolor'] = '#000000';
+        $subdata['first'] = array(
+            'value' => '您的券即将到期',
+            'color' => '#000000'
+        );
+        $subdata['keyword1'] = array(
+            'value' => '',
+            'color' => '#000000'
+        );
+        $subdata['keyword2'] = array(
+            'value' => '',
+            'color' => '#000000'
+        );
+        $subdata['remark'] = array(
+            'value' => '点击立即使用',
+            'color' => '#000000'
+        );
+        $data['data'] = $subdata;
+
+        $openids = $this->get_target_openids_from_csv($inter_id, $file);
+
+        $this->load->model('soma/Message_wxtemp_template_model', 't_model');
+        $base_key = 'Soma_cron_nz:' . date('Y-m-d') . ':' . __FUNCTION__ . ':';
+        foreach ($openids as $openid) {
+            $redis_key = $base_key . $openid;
+            if($this->_redis->exists($redis_key))
+            {
+                continue;
+            }
+            $data['touser'] = $openid;
+            $res = $this->t_model->send_template(json_encode($data), $inter_id);
+            $this->_redis->set($redis_key, json_encode($res));
+        }
+        echo 'success';
+    }
+
+
+
 }

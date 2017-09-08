@@ -598,7 +598,14 @@ function getExcel($fileName,$headArr,$data,$widthArr = array())
         $span = ord("A");
         foreach($rows as $keyName=>$value){// 列写入
             $j = chr($span);
-            $objActSheet->setCellValue($j.$column, $value);
+            if (in_array($keyName,array('orig_order_no','order_no','pay_no','bank_card_no')))
+            {
+                $objActSheet->setCellValueExplicit($j.$column, $value);//设置未字符串类型
+            }
+            else
+            {
+                $objActSheet->setCellValue($j.$column, $value);
+            }
             $span++;
         }
         $column++;

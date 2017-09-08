@@ -197,7 +197,7 @@ class Iwidepay_clears_model extends MY_Model{
 	public function get_configs($inter_id,$type,$module='hotel'){
 		$this->db->where(array(
 			'inter_id' => $inter_id,
-			'hotel' => $module,
+			'module' => $module,
 			'type' => $type,
 			));
 		return $this->db->get(self::TAB_CONFIGS)->row_array();

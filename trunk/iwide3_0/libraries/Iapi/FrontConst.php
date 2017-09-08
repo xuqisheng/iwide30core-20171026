@@ -79,17 +79,7 @@ class FrontConst extends BaseConst
                     'name',
                     'is_login',
                     'logined',
-                ),
-            ),
-            'signPackage' => array(
-                'type' => 'arr',
-                'keys' => array(
-                    'appId',
-                    'nonceStr',
-                    'timestamp',
-                    'url',
-                    'signature',
-                    'rawString',
+                    'bonus',
                 ),
             ),
             'pagetitle'   => array(
@@ -175,8 +165,6 @@ class FrontConst extends BaseConst
         'hotel/hotel/search'               => array(
             'common'  => array(
                 'member',
-                'signPackage',
-                'pagetitle',
             ),
             'keys'    => array(
                 'pre_sp_date',
@@ -210,8 +198,6 @@ class FrontConst extends BaseConst
         'hotel/hotel/sresult'              => array(
             'common' => array(
                 'member',
-                'signPackage',
-                'pagetitle',
             ),
             'keys'   => array(
                 'inter_id',
@@ -227,8 +213,6 @@ class FrontConst extends BaseConst
         'hotel/hotel/return_lowest_price'  => array(
             'common' => array(
                 'member',
-                'signPackage',
-                'pagetitle',
             ),
             'keys'   => array(
                 'return_lowest_price',
@@ -237,8 +221,6 @@ class FrontConst extends BaseConst
         'hotel/hotel/index'                => array(
             'common'  => array(
                 'member',
-                'signPackage',
-                'pagetitle',
             ),
             'keys'    => array(
                 'inter_id',
@@ -276,8 +258,6 @@ class FrontConst extends BaseConst
         'hotel/hotel/return_more_room'     => array(
             'common'  => array(
                 'member',
-                'signPackage',
-                'pagetitle',
             ),
             'mul_arr' => array(
                 'rooms' => array(
@@ -317,8 +297,6 @@ class FrontConst extends BaseConst
         'hotel/hotel/orderdetail'          => array(
             'common' => array(
                 'member',
-                'signPackage',
-                'pagetitle',
             ),
             'keys'   => array(
                 'inter_id',
@@ -377,6 +355,72 @@ class FrontConst extends BaseConst
                         'landmark',
                         'address',
                         'lowest',
+                        'link',
+                    ),
+                ),
+            ),
+        ),
+        'hotel/hotel/bookroom'                => array(
+            'common'  => array(
+                'member',
+            ),
+            'keys'    => array(
+                'inter_id',
+                'csrf_token',
+                'csrf_value',
+                'my_saler_id',
+                'url_param',
+                'price_codes',
+                'price_type',
+                'startdate',
+                'enddate',
+                'hotel_id',
+                'hotel',
+                'room_list',
+                'first_room',
+                'first_state',
+                'bookpolicy_condition',
+                'customer_condition',
+                'extra_info',
+                'packages',
+                'post_packages',
+                'packages_price',
+                'total_price',
+                'total_oprice',
+                'addit_service',
+                'point_name',
+                'athour',
+                'room_count',
+                'point_pay_set',
+                'has_point_pay',
+                'extra_pointpay_para',
+                'pay_ways',
+                'source_data',
+                'last_order',
+                'point_consum_set',
+                'point_consum_rate',
+                'banlance_code',
+                'point_pay_code',
+                'extra_para',
+                'select_coupon_favour',
+                'use_coupon_code',
+                'select_coupons',
+                'bonus_setting',
+                'exchange_max_point',
+                'paytype_icon',
+                'type',
+                'days',
+            ),
+            'mul_arr' => array(
+                'rooms' => array(
+                    'keys' => array(
+                        'room_info',
+                        'state_info',
+                        'show_info',
+                        'lowest',
+                        'highest',
+                        'all_full',
+                        'top_price',
                     ),
                 ),
             ),

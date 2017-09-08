@@ -208,8 +208,8 @@ class Financial extends MY_Admin
                 $item['name'] = !empty($value['name']) ? $value['name'] : '';
                 $item['hotel_name'] = !empty($value['hotel_name']) ? $value['hotel_name'] : '--';
                 $item['module'] = !empty($module[$value['module']]) ? $module[$value['module']] : '--';
-                $item['order_no'] = ' '.$value['order_no'];
-                $item['pay_no'] = ' '.$value['pay_no'];
+                $item['order_no'] = $value['order_no'];
+                $item['pay_no'] = $value['pay_no'];
                 $item['trade_type'] = !empty($trade_type[$value['trade_type']]) ? $trade_type[$value['trade_type']] : '--';
                 $item['transfer_status'] = !empty($transfer_status[$value['transfer_status']]) ? $transfer_status[$value['transfer_status']] : '--';
                 $item['transfer_date'] = date('Y-m-d',strtotime($value['transfer_date']));
@@ -217,7 +217,7 @@ class Financial extends MY_Admin
 
                 //核销门店
                 $item['write_off_hotel_id'] = '';
-                if ($value['module'] = 'soma' && $value['hotel_id'] == '9999999' && $value['write_off_hotel_id'] != '9999999')
+                if ($value['module'] == 'soma' && $value['hotel_id'] == '9999999' && $value['write_off_hotel_id'] != '9999999')
                 {
                     $hotel = $this->Iwidepay_financial_model->get_hotel_info($value['inter_id'],$value['write_off_hotel_id']);
                     $item['write_off_hotel_id'] = !empty($hotel['name']) ? $hotel['name'] : '--';
@@ -235,21 +235,6 @@ class Financial extends MY_Admin
                 else if (in_array($value['trade_type'],array(2,4,5,6)))
                 {
                     $item['hotel_amount'] = '-' . $item['amount'];
-                    //垫付退款
-                    if ($value['trade_type'] == 2)
-                    {
-                        $item['jfk_amount'] = $item['amount'];
-                    }
-                    //分销
-                    else if ($value['trade_type'] == 4 || $value['trade_type'] == 5)
-                    {
-                        $item['dist_amount'] = $item['amount'];
-                    }
-                    //月费
-                    else if ($value['trade_type'] == 6)
-                    {
-                        $item['jfk_amount'] = $item['amount'];
-                    }
                 }
                 else
                 {
@@ -273,7 +258,7 @@ class Financial extends MY_Admin
      */
     public function run_refund_financial()
     {
-        die('no allow');
+        //die('no allow');
         $this->load->model('iwidepay/Iwidepay_financial_model');
 
         //退款记录
@@ -309,11 +294,11 @@ class Financial extends MY_Admin
      */
     public function run_debt_financial()
     {
-        die('no allow');
+        //die('no allow');
         $this->load->model('iwidepay/Iwidepay_financial_model');
 
         //退款记录
-        $stat_time = date('Y-m-d');
+        $stat_time = date('Y-m-d');//,strtotime('-50 days')
         $end_time = date('Y-m-d 23:59:60');
         $list_debt = $this->Iwidepay_financial_model->debt_order($stat_time,$end_time);
         if (!empty($list_debt))
@@ -347,10 +332,12 @@ class Financial extends MY_Admin
                 else if ($item['trade_type'] == 6)
                 {
                     $item['module'] = 'base_pay';
+                    $item['jfk_amount'] = $value['amount'];
                 }
                 else if (in_array($item['trade_type'],array(4,5)))
                 {
                     $item['module'] = 'dist';
+                    $item['dist_amount'] = $value['amount'];
                 }
 
                 $this->Iwidepay_financial_model->insert_order($item);
@@ -363,7 +350,7 @@ class Financial extends MY_Admin
      */
     public function run_transfer_financial()
     {
-        die('no allow');
+        //die('no allow');
         $this->load->model('iwidepay/Iwidepay_financial_model');
         $this->load->model('iwidepay/Iwidepay_order_model');
         $this->load->model('iwidepay/Iwidepay_transfer_model');
@@ -402,7 +389,14 @@ class Financial extends MY_Admin
 
                 //分成金额
                 $amount_key = $status_key;
-                $tmp[$amount_key][$value['type']] = $value['amount'];
+                if ($value['module'] == 'soma' && $value['type'] == 'hotel')
+                {
+                    isset($tmp[$amount_key][$value['type']]) ? $tmp[$amount_key][$value['type']] += $value['amount'] : $tmp[$amount_key][$value['type']] = $value['amount'];
+                }
+                else
+                {
+                    $tmp[$amount_key][$value['type']] = $value['amount'];
+                }
             }
 
             unset($list_transfer);

@@ -37,4 +37,8 @@ class IwidePayConfig{
 	const REFUND_SECRET = 'jfkTransferqwe1489';
 	//转账秘钥
 	const TRANSFER_PAY_SECRET = 'jfkKENUSLEIJfidk1568';
+	//关闭订单秘钥
+	const CLOSE_ORDER_SECRET = 'oM6j7nSeWVEPHhbQ3790';
+	//查询订单密钥
+	const QUERY_ORDER_SECRET = 'Zb4pDuljgnsNYhFk8457';
 }

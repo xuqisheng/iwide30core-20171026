@@ -829,7 +829,7 @@ class OrderService extends BaseService
      */
     public function create($params)
     {
-        $this->getCI()->soma_db_conn->trans_start();
+        //$this->getCI()->soma_db_conn->trans_start();
 
         //
         $beforeResult = $this->beforeCreate($params);
@@ -843,6 +843,7 @@ class OrderService extends BaseService
             return $orderResult;
         }
         $orderData = $orderResult->getData();
+
         $orderModel = $orderData['orderModel'];
 
         //
@@ -862,7 +863,7 @@ class OrderService extends BaseService
             ]
         );
 
-        $this->getCI()->soma_db_conn->trans_complete();
+        //$this->getCI()->soma_db_conn->trans_complete();
         return $result;
     }
 
@@ -884,6 +885,9 @@ class OrderService extends BaseService
         $discountInfo = $beforeData['discountInfo'];
         $memberInfo = $beforeData['memberInfo'];
 
+        /**
+         * @var \Sales_order_model $orderModel
+         */
         $this->getCI()->load->model('soma/Sales_order_model');
         $orderModel = $this->getCI()->Sales_order_model;
 
@@ -900,6 +904,7 @@ class OrderService extends BaseService
         $orderModel->member_id = $memberInfo['member_id'];
         $orderModel->member_card_id = $memberInfo['member_card_id'];
 
+
         $giveDistributeSessionKey = 'giveDistribute' . $params['inter_id'] . $params['openid'];
         $giveDistribute = $this->getCI()->session->userdata($giveDistributeSessionKey);
         if ($giveDistribute) {
@@ -908,11 +913,16 @@ class OrderService extends BaseService
             $orderModel->fans_saler_id = $params['fans_saler'];
         } else {
             $orderModel->saler_id = 0;
+            $orderModel->saler_group = 0;
             $orderModel->fans_saler_id = 0;
         }
 
+        $orderModel->shipping= 0;
         $orderModel->product = $productArr;
         $orderModel->discount = $discountInfo;
+        $orderModel->shipping = 0;
+        $orderModel->killsec_instance = $params['inid'];
+
         //预留
         //$orderModel->hotel_id = $params['hotel_id'];
         $orderModel->hotel_id = $productArr[0]['hotel_id'];
@@ -923,6 +933,7 @@ class OrderService extends BaseService
         ) {
             $orderModel->extra = ['mail' => ['address_id' => $params['address_id']]];
         }
+
 
         // todo order_save要重新改造
         $orderModel->order_save($params['business'], $params['inter_id']);
@@ -1101,9 +1112,7 @@ class OrderService extends BaseService
         }
 
         // 储值支付
-        if ($paymentInfo['payment_method'] == 'balance_pay'
-            && $orderModel->m_get('grand_total') > 0.005
-        ) {
+        if ($paymentInfo['payment_method'] == 'balance_pay') {
             $balanceResult = $this->balance_pay($orderModel, $params);
             if ($balanceResult->getStatus() != Result::STATUS_OK) {
                 return $balanceResult;
@@ -1116,9 +1125,7 @@ class OrderService extends BaseService
         }
 
         // 积分支付
-        if ($paymentInfo['payment_method'] == 'point_pay'
-            && $orderModel->m_get('grand_total') > 0.005
-        ) {
+        if ($paymentInfo['payment_method'] == 'point_pay') {
             $pointResult = $this->point_pay($orderModel, $params);
             if ($pointResult->getStatus() != Result::STATUS_OK) {
                 return $pointResult;
@@ -1480,6 +1487,8 @@ class OrderService extends BaseService
         $this->getCI()->load->model('soma/Consumer_shipping_model', 'consumer_shipping_model');
         $this->getCI()->load->model('soma/Gift_order_model', 'soma_gift_order');
         $this->getCI()->load->model('soma/Sales_order_product_record_model', 'Sales_order_product_record_model');
+        $this->getCI()->load->model('soma/Product_package_model', 'Product_package_model');
+        $this->getCI()->load->model('soma/Sales_refund_model', 'Sales_refund_model');
 
         $somaSalesOrderModel = $this->getCI()->somaSalesOrderModel;
         $salesItemPackageModel = $this->getCI()->salesItemPackageModel;
@@ -1488,6 +1497,10 @@ class OrderService extends BaseService
         $consumer_shipping_model = $this->getCI()->consumer_shipping_model;
         /** @var \Gift_order_model $soma_gift_order */
         $soma_gift_order = $this->getCI()->soma_gift_order;
+        /** @var \Product_package_model $product_package_model */
+        $product_package_model = $this->getCI()->Product_package_model;
+        /** @var \Sales_refund_model  $sales_refund_model */
+        $sales_refund_model = $this->getCI()->Sales_refund_model;
 
 
         $Sales_order_product_record_model = $this->getCI()->Sales_order_product_record_model;
@@ -1556,6 +1569,14 @@ class OrderService extends BaseService
             $item_map[$key]['name'] = isset($val['name']) && !empty($val['name']) ? strip_tags($val['name']) : '';
 //            $item_map[$key]['img_detail'] = isset($val['img_detail']) && !empty($val['img_detail']) ? htmlspecialchars($val['img_detail']) : '';
 //            $item_map[$key]['order_notice'] = isset($val['order_notice']) && !empty($val['order_notice']) ? htmlspecialchars($val['order_notice']) : '';
+            //积分、储值商品不显示退款
+            $product = $product_package_model->get(['product_id'], [$val['product_id']]);
+            if(!empty($product)){
+               if(in_array($product[0]['type'], [$product_package_model::PRODUCT_TYPE_BALANCE, $product_package_model::PRODUCT_TYPE_POINT])){
+                   $item_map[$key]['can_refund'] = (string)$product_package_model::CAN_F;
+               }
+            }
+
         }
 
         $order['package'] = $item_map;
@@ -1616,6 +1637,14 @@ class OrderService extends BaseService
         // 公众号名称
         $public_info = $this->getCI()->public_info;
         $result['public']['name'] = $public_info['name'];
+
+        //退款表
+        $refund_info_status = 0;
+        $sales_refund_info = $sales_refund_model->get(['order_id', 'inter_id'], [$oid, $inter_id]);
+        if(!empty($sales_refund_info)){
+            $refund_info_status = $sales_refund_info[0]['status'];
+        }
+        $order['refund_info_status'] = $refund_info_status;
 
         $result['code'] = $consumer_order;
         $result['product'] = $order;
@@ -1984,7 +2013,7 @@ class OrderService extends BaseService
                                     'room_cover' => $vale['room_img'],
                                     'room_price_code' => $value['price_code'],
                                     'room_price_name' => $value['price_name'],
-                                    'link' => site_url('soma/booking/select_hotel_time').'?id='.$val['inter_id'].'&bsn=package&hid='.$val['hotel_id'].'&aiid='.$aiid.'&oid='.$oid.'&rmid='.$vale['room_id'].'&cdid='.$value['price_code'].'&code_id='
+                                    'link' => site_url('soma/booking/select_hotel_time').'?id='.$val['inter_id'].'&bsn=package&hid='.$val['hotel_id'].'&aiid='.$aiid.'&oid='.$oid.'&rmid='.$vale['room_id'].'&cdid='.$value['price_code'].'&tkid='.$this->getCI()->session->tempdata('tkid').'&brandname='.$this->getCI()->session->tempdata('brandname').'&code_id='
                                 ];
                             }
                         }
@@ -2027,8 +2056,6 @@ class OrderService extends BaseService
         //$filter['status'] = $CodeModel::STATUS_SIGNED;//取出没有消费的
         //$codes = $CodeModel->get_code_by_assetItemIds(array($assetItemId), $interId, $filter, $limit);
         //$code = isset($codes[$aiidi]['code']) ? $codes[$aiidi]['code'] : ''; //
-
-        $return['code']['code'] = $codeId;
 
         // 获取联系人和电话
         $filter = array();
@@ -2121,6 +2148,8 @@ class OrderService extends BaseService
                 'post_code' => $consumer_code
             ]
         ];
+
+        $return['code']['code'] = $consumer_code;
 
         return $callback_func($return);
     }
@@ -2249,29 +2278,32 @@ class OrderService extends BaseService
         $num = $params['num']; // 选择多少间
 
 
+        //参考旧商城及进行预订操作，此处不应做校验，否则将会永远预订不了
         // 资产 and 卷码校验
         // yhdsir
-        $this->getCI()->load->model('soma/Consumer_order_model', 'Consumer_order_model');
-        $Consumer_order_model = $this->getCI()->Consumer_order_model;
-        $Consumer_order_table_name = $this->getCI()->soma_db_conn_read->dbprefix($Consumer_order_model->item_table_name($business));
-        $consumer_order_condition = [
-            'inter_id' => $interId,
-            'consumer_code' => $code,
-            'asset_item_id' => $assetItemId,
-        ];
+//        $this->getCI()->load->model('soma/Consumer_order_model', 'Consumer_order_model');
+//        $Consumer_order_model = $this->getCI()->Consumer_order_model;
+//        $Consumer_order_table_name = $this->getCI()->soma_db_conn_read->dbprefix($Consumer_order_model->item_table_name($business));
+//        $consumer_order_condition = [
+//            'inter_id' => $interId,
+//            'consumer_code' => $code,
+//            'asset_item_id' => $assetItemId,
+//        ];
+//
+//        $consumer_code_map = $Consumer_order_model->get(array_keys($consumer_order_condition), array_values($consumer_order_condition), [
+//            'status',
+//            'name'
+//        ], ['table_name' => $Consumer_order_table_name]);
+//
+//        if (empty($consumer_code_map)) {
+//            return new Result(Result::STATUS_FAIL, '券码信息不存在');
+//        }
+//        $consumer_code_map = $consumer_code_map[0];
+//        if ($consumer_code_map['status'] != 2) {
+//            return new Result(Result::STATUS_FAIL, sprintf('券码[%s]已经消费', $code));
+//        }
 
-        $consumer_code_map = $Consumer_order_model->get(array_keys($consumer_order_condition), array_values($consumer_order_condition), [
-            'status',
-            'name'
-        ], ['table_name' => $Consumer_order_table_name]);
 
-        if (empty($consumer_code_map)) {
-            return new Result(Result::STATUS_FAIL, '资产信息不存在,回跳前页面');
-        }
-        $consumer_code_map = $consumer_code_map[0];
-        if ($consumer_code_map['status'] != 2) {
-            return new Result(Result::STATUS_FAIL, sprintf('券码[%s]已经消费', $code));
-        }
 
         //组装回跳选时间的链接
 //        $select_time_params = array();
@@ -2302,7 +2334,7 @@ class OrderService extends BaseService
         $items = $ItemModel->get_order_items_byItemids(array($assetItemId), $business, $interId);
 
         if (empty($items)) {
-            return new Result(Result::STATUS_FAIL, '资产信息不存在,回跳前页面');
+            return new Result(Result::STATUS_FAIL, '资产信息不存在');
         }
 
         $item = $items[0];
@@ -2315,7 +2347,7 @@ class OrderService extends BaseService
             || (int)$item['qty'] <= 0
             || strtotime($item['expiration_date']) < strtotime($nowTime)
         ) {
-            return new Result(Result::STATUS_FAIL, '资产信息有误,回跳前页面');
+            return new Result(Result::STATUS_FAIL, '资产信息有误');
         }
 
         //组装回跳选酒店和订单详情页的参数
@@ -2332,19 +2364,19 @@ class OrderService extends BaseService
         $OrderModel = $this->getCI()->OrderModel;
         $OrderModel = $OrderModel->load($orderId);
         if (!$OrderModel) {
-            return new Result(Result::STATUS_FAIL, '酒店不存在,回跳前页面');
+            return new Result(Result::STATUS_FAIL, '酒店不存在');
         }
         $OrderModel->business = $business;
         $orderDetail = $OrderModel->get_order_detail($business, $interId);
         if (!$orderDetail) {
-            return new Result(Result::STATUS_FAIL, '订单详情不存在,回跳前页面');
+            return new Result(Result::STATUS_FAIL, '订单详情不存在');
         }
 
         // 检查下单数量和剩余数量
         $qty = $item['qty'];
         if ($num > $qty) {
             //选择数量大于剩余数量，跳回选择入住时间
-            return new Result(Result::STATUS_FAIL, '剩余数量不足,回跳前页面');
+            return new Result(Result::STATUS_FAIL, '剩余数量不足');
         }
 
         //计算要发送给订单的金额
@@ -2361,7 +2393,7 @@ class OrderService extends BaseService
             //($a-$a%$b)/$b + $a%$b;
         } else {
             //数量不足，跳回订单详情
-            return new Result(Result::STATUS_FAIL, '剩余数量不足,回跳前页面');
+            return new Result(Result::STATUS_FAIL, '剩余数量不足');
         }
 
         //给订房发送数据前，检测同一个核销码是否已经发送过，如果已经发送过，要拦截本次请求，防止多次下单
@@ -2466,6 +2498,7 @@ class OrderService extends BaseService
 
             $service = \App\services\soma\consumer\ConsumerService::getInstance();
             $result = $service->codeConsumer($interId, $code, $openid, $consumer_method, $business, $hotelId);
+
             if ($result->getStatus() == \App\services\Result::STATUS_OK) {
                 $consumer_status = TRUE;
 

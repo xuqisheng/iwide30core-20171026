@@ -57,7 +57,7 @@ echo $block_left;
                     <th>
                         <div class="tv-thumb" style="float: left;width: 130px;text-align: center;">
                             <input type="hidden" name="logo_url" id="logo_url" value="">
-                            <a class="thumb-row" href="javascript:void(0);" onclick="flashupload('thumb_images', 'LOGO上传','logo_url',thumb_images,'front,depositcard,1,1024,jpg|gif|png');return false;">
+                            <a class="thumb-row" href="javascript:void(0);" onclick="flashupload('thumb_images', 'LOGO上传','logo_url',thumb_images,'front,depositcard,1,1024,jpg|png');return false;">
                                 <?php if(isset($cardinfo['logo_url']) && $cardinfo['logo_url']):?>
                                 <img src="<?php echo $cardinfo['logo_url'];?>" id="logo_url_preview" style="width: 100%; cursor: hand;border: 2px solid #c0c0c0;"/>
                                 <?php else:?>
@@ -168,7 +168,7 @@ echo $block_left;
                         <div class="bdtime" style="">
                             <div class="controls1 m_r_75">
                                 <label class="control-checkbox wechat">
-                                    <input type="checkbox" name="pay_type[]" <?=$wechat_checked?> value="wechat" />
+                                    <input type="checkbox" name="pay_type[]" <?=$wechat_checked?> value="wechat" onclick="return false;" />
                                     <span class="m_r_20 m_l_10 width_20">微信支付</span>
                                 </label>
                                 <label class="control-checkbox balance" style="margin-left: 10px;">

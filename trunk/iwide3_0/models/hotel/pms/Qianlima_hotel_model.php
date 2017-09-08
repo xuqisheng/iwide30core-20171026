@@ -364,6 +364,8 @@ class Qianlima_hotel_model extends MY_Model{
 			$result = $this->order_reserve($order, $pms_set, $params);//提交订单
 			
 			if($result['result']){
+			    $upstatus=null;
+			    $has_paid=null;
 				$web_orderid = $result['web_orderid'];            //取得返回的pms订单id
 				$this->db->where([
 					'orderid'  => $order ['orderid'],
@@ -384,8 +386,9 @@ class Qianlima_hotel_model extends MY_Model{
 				}*/
 				
 				if($order['status'] != 9){
-					$this->change_order_status($inter_id, $orderid, 1);
-					$this->Order_model->handle_order($inter_id, $orderid, 1); // 若pms的订单是即时确认的，执行确认操作，否则省略这一步
+// 					$this->change_order_status($inter_id, $orderid, 1);
+// 					$this->Order_model->handle_order($inter_id, $orderid, 1); // 若pms的订单是即时确认的，执行确认操作，否则省略这一步
+				    $upstatus=1;
 				}
 				
 				if($order['paytype'] == 'balance'){
@@ -402,8 +405,8 @@ class Qianlima_hotel_model extends MY_Model{
 						if($this->Member_model->reduce_balance($inter_id, $order['openid'], $order['price'], $order['orderid'], '订房订单余额支付', $balance_param,$order)){
 							//调用入账接口
 							$pay_res = $this->add_web_bill($web_orderid, $order, $pms_set, $order['orderid'], 'ZC');
-							
-							$this->Order_model->update_order_status($inter_id, $order ['orderid'], 1, $order ['openid'], true);
+							$has_paid=1;
+// 							$this->Order_model->update_order_status($inter_id, $order ['orderid'], 1, $order ['openid'], true);
 						} else{
 							$info = $this->Order_model->cancel_order($inter_id, array(
 								'only_openid'   => $order ['openid'],
@@ -423,13 +426,50 @@ class Qianlima_hotel_model extends MY_Model{
 							];
 						}
 					}
+				}else if($order['paytype'] == 'point'){
+					$this->load->model('hotel/Hotel_config_model');
+					$config_data = $this->Hotel_config_model->get_hotel_config($inter_id, 'HOTEL', $order ['hotel_id'], array(
+						'PMS_POINT_REDUCE_WAY'
+					));
+					if(!empty ($config_data ['PMS_POINT_REDUCE_WAY']) && $config_data ['PMS_POINT_REDUCE_WAY'] == 'after'){
+						$point_param = [
+							'extra' => [
+								'pms_hotel_id' => $pms_set['hotel_web_id'],
+							]
+						];
+						
+						$this->load->model('hotel/Member_model');
+						if(!$this->Member_model->consum_point($order ['inter_id'], $order ['orderid'], $order ['openid'], $order ['point_used_amount'], $point_param)){
+							$this->Order_model->update_point_reduce($inter_id, $order['orderid'], 3);
+							$info = $this->Order_model->cancel_order($inter_id, [
+								'only_openid'   => $order ['openid'],
+								'member_no'     => '',
+								'orderid'       => $order ['orderid'],
+								'cancel_status' => 5,
+								'no_tmpmsg'     => 1,
+								'delete'        => 2,
+								'idetail'       => [
+									'i'
+								]
+							]);
+							return [
+								's'      => 0,
+								'errmsg' => '积分支付失败'
+							];
+						} else{
+							$has_paid=1;
+//							$this->Order_model->update_order_status($order['inter_id'], $order['orderid'], 1, $order['openid'], true, true);
+						}
+					}
 				}
 				
 				if(!empty ($params ['third_no'])){ // 提交账务,如果传入了 trans_no,代表已经支付，调用pms的入账接口
 					$this->add_web_bill($web_orderid, $order, $pms_set, $params ['third_no']);
 				}
 				return [ // 返回成功
-				         's' => 1
+				         's' => 1,
+				         'has_paid'=>$has_paid,
+				         'upstatus'=>$upstatus
 				];
 			} else{
 				$this->change_order_status($inter_id, $orderid, 10);

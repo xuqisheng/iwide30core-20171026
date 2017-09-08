@@ -222,7 +222,7 @@ class CI_Security {
 				}
 			}
 		}
-		//����input�ύ��ʽ
+		//¼æÈÝinputÌá½»·½Ê½
 		$input_arr = json_decode(file_get_contents('php://input'),true);
 		if(isset($input_arr[$this->_csrf_token_name]) && !isset($_POST[$this->_csrf_token_name])){
 			$_POST[$this->_csrf_token_name] = $input_arr[$this->_csrf_token_name];

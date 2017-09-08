@@ -20,8 +20,8 @@ class Public_model extends MY_Model_Member {
     protected function get_list_fields($table){
         $result = $this->_shard_db()->query("SHOW FULL COLUMNS FROM iwide_$table")->result_array();
         $fields = array();
-        foreach ($result as $k=>$vo){
-            if($vo['Key']=='PRI') $this->_pk = $vo['Field'];
+        foreach ($result as $k=>$vo) {
+            if ($vo['Key'] == 'PRI') $this->_pk = $vo['Field'];
             $fields[] = $vo['Field'];
         }
         return $fields;
@@ -661,7 +661,9 @@ class Public_model extends MY_Model_Member {
                     break;
                 case '15':
                     if(!empty($result)){
+                        $member_card_ids = array();
                         foreach ($result as &$val){
+                            $member_card_ids[] = $val['member_card_id'];
                             $val['status'] = '未使用';
                             if($val['is_active'] == 'f'){
                                 $val['status'] = '无效';
@@ -694,33 +696,51 @@ class Public_model extends MY_Model_Member {
                                     break;
                             }
 
-                            switch ($val['use_type']){
-                                case 1:
-                                    $val['use_type'] = '券码核销';
-                                    break;
-                                case 2:
-                                    $val['use_type'] = '密码核销';
-                                    break;
-                                case 3:
-                                    $val['use_type'] = '扫码核销';
-                                    break;
-                                case 4:
-                                    $val['use_type'] = '订房使用';
-                                    break;
-                                case 5:
-                                    $val['use_type'] = '商城使用';
-                                    break;
-                                default:
-                                    $val['use_type'] = '无';
-                                    break;
-                            }
-
                             if(!empty($val['operator'])){
                                 $operators = explode('_@@@_',$val['operator']);
                                 if(empty($operators[0])){
                                     $val['operator'] = '无';
                                 }else{
                                     $val['operator'] = $operators[0];
+                                }
+                            }
+                        }
+
+                        if(!empty($member_card_ids)){
+                            $member_card_ids = array_unique($member_card_ids);
+                            $card_log = $this->_shard_db()->select('member_card_id,remark,use_type')->where('inter_id',$params[$alias . '.inter_id'])->where_in('member_card_id', $member_card_ids)->order_by('createtime desc')->get('card_log')->result_array();
+                            if(!empty($card_log)){
+                                $_card_log = array();
+                                foreach ($card_log as $item){
+                                    if(empty($_card_log[$item['member_card_id']]['remark'])) $_card_log[$item['member_card_id']] = $item;
+                                }
+
+                                foreach ($result as &$vo){
+                                    if(isset($_card_log[$vo['member_card_id']]['remark'])) $vo['remark'] = $_card_log[$vo['member_card_id']]['remark'];
+
+                                    $vo['use_type'] = '无';
+                                    if(isset($_card_log[$vo['member_card_id']]['use_type'])){
+                                        switch ($_card_log[$vo['member_card_id']]['use_type']){
+                                            case 1:
+                                                $vo['use_type'] = '券码核销';
+                                                break;
+                                            case 2:
+                                                $vo['use_type'] = '密码核销';
+                                                break;
+                                            case 3:
+                                                $vo['use_type'] = '扫码核销';
+                                                break;
+                                            case 4:
+                                                $vo['use_type'] = '订房使用';
+                                                break;
+                                            case 5:
+                                                $vo['use_type'] = '商城使用';
+                                                break;
+                                            default:
+                                                $vo['use_type'] = '无';
+                                                break;
+                                        }
+                                    }
                                 }
                             }
                         }

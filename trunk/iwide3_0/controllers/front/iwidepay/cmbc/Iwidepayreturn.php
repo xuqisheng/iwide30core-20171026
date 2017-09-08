@@ -170,6 +170,7 @@ class Iwidepayreturn extends MY_Controller {
      */
     private function transfer_callback($parse_arr){
         //先查询iwidepay_identify 表 查询转账来源
+        MYLOG::w('分账转账回调数据：'.json_encode($parse_arr),'iwidepayreturn/send_callback');
         $this->load->model ( 'iwidepay/Iwidepay_deliver_model' );
         $array = array();
         $array['partner_trade_no']=$parse_arr ['orderNo'];
@@ -195,16 +196,27 @@ class Iwidepayreturn extends MY_Controller {
                     $this->load->model ( 'iwidepay/iwidepay_transfer_model' );
                     $sum_order = $this->Iwidepay_sum_record_model->get_one('*',array('partner_trade_no'=>$parse_arr['orderNo'],'status'=>3));
                     if(empty($sum_order)){
+                        MYLOG::w('分账转账回调更新失败：sum_record表没有记录：'.json_encode($sum_order),'iwidepayreturn/send_callback');
                         return false;
                     }
                     //更新sum_record表 这里用事务保持一致性
-                    //$this->db->trans_begin ();
+                    $this->db->trans_begin ();
                     $upres = $this->Iwidepay_deliver_model->update_data(array('id'=>$sum_order['id'],'status'=>3),array('status'=>1,'remark'=>$sum_order['remark'].'|回调：成功'));
                     if(!$upres){
-                        //$this->db->trans_rollback ();
+                        MYLOG::w('分账转账回调更新失败：sum_record表：'.json_encode($sum_order),'iwidepayreturn/send_callback');
+                        $this->db->trans_rollback ();
                         return false;
                     }
-                    /*$up_param['send_status'] = 1;//转账成功
+                    //start更新settlement表
+                    $this->db->where(array('bank_card_no'=>$sum_order['bank_card_no'],'handle_date'=>$sum_order['handle_date'],'status'=>3));
+                    $settle_res = $this->db->update('iwidepay_settlement',array('status'=>1));
+                    if(!$this->db->affected_rows()){
+                        MYLOG::w('分账转账回调更新失败：iwidepay_settlement表：'.json_encode($sum_order),'iwidepayreturn/send_callback');
+                        $this->db->trans_rollback ();
+                        return false;
+                    }
+                    //end
+                    $up_param['send_status'] = 1;//转账成功
                     $up_param['send_time'] = date('Y-m-d H:i:s');
                     $tran_where = array('record_id'=>$sum_order['id'],'status'=>2,'send_status'=>3);
                     //更新transfer表
@@ -214,7 +226,7 @@ class Iwidepayreturn extends MY_Controller {
                         return false;
                     }else{
                         $this->db->trans_commit ();
-                    }*///end 事务
+                    }//end 事务
                 }elseif($order['type'] == 2){//查询check_accout表
                     $this->load->model ( 'iwidepay/Iwidepay_merchant_model' );
                     $check_order = $this->Iwidepay_merchant_model->get_check_account('*',array('partner_trade_no'=>$parse_arr['orderNo'],'status'=>3));

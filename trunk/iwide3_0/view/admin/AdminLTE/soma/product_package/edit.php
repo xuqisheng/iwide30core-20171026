@@ -539,7 +539,7 @@ div[required]>div:first-child:before{content:'*'; color:#f00}
                 	   <div class="input" id="el_can_split_use" <?php $can_split_use=$model->m_get('can_split_use'); if( !$can_split_use || $can_split_use==$model::STATUS_CAN_NO)echo 'style="display:none"';?> ><input name="use_cnt" placeholder="请输入可拆分数量" value="<?php $use_cnt = $model->m_get('use_cnt'); if( $use_cnt ) {echo $use_cnt;} ?>"></div>
                     </div>
                 </div>
-                <div required class="combination_change_item coupon_item">
+                <div required class="combination_change_item coupon_item product-refund">
                     <div>商品退款</div>
                     <div class="flex flexcenter">
                         <label class="check"><input name="can_refund" type="radio" value="<?php echo $model::CAN_REFUND_STATUS_FAIL;?>" checked /><span class="diyradio"><tt></tt></span>不支持</label>
@@ -2537,5 +2537,29 @@ $(".add_hotel_content").scroll(function() {
         initHtml(_page)
       }
  });
+
+
+ //不能退款
+destroyRefund();
+ function destroyRefund() {
+
+     <?php
+       if(in_array($model->m_get('type'), [$model::PRODUCT_TYPE_BALANCE, $model::PRODUCT_TYPE_POINT])){
+           echo "$('.product-refund').css({'display':'none'});";
+       }
+     ?>
+
+     $('input[name="type"]').off().on('change', function(){
+         if($(this).val() == <?= $model::PRODUCT_TYPE_BALANCE ?> || $(this).val() == <?= $model::PRODUCT_TYPE_POINT ?>){
+             $('.product-refund').css({'display':'none'});
+         }
+         else{
+             $('.product-refund').css({'display':'-webkit-flex'});
+         }
+     })
+
+ }
+
+
 </script>
 </html>

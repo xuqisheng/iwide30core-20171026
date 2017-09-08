@@ -63,7 +63,8 @@ function refer_res($name, $path = 'ADMIN', $filename = 'manifest.json') {
     $paths = array (
             'ADMIN' => 'public/admin/',
 			'SOMA' => 'public/soma/vue/',
-            'SOMAOLD' => 'public/soma/vueold/'
+            'SOMAOLD' => 'public/soma/vueold/',
+            'SOMAACCOR' => 'public/soma/vue_accor/'
     );
 
     $config = & get_config ();

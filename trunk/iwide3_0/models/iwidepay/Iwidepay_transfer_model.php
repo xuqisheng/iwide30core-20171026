@@ -43,6 +43,15 @@ class Iwidepay_Transfer_Model extends MY_Model{
         return $this->db->update('iwidepay_transfer',$update);
     }
 
+    //update settle 数据
+    public function update_settlement_data($where = array() , $update = array()){
+        if(empty($where)){
+            return false;
+        }
+        $this->db->where($where);
+        return $this->db->update('iwidepay_settlement',$update);
+    }
+
     //获取未分账订单（查询分账订单表）取前一天之前的
     public function get_unsplit_orders(){
         $end_time = date('Y-m-d');
@@ -128,7 +137,7 @@ class Iwidepay_Transfer_Model extends MY_Model{
 
     //获取分账表和转账表的记录（连表）
     public function get_split_transfer_record($inter_id = '',$order_no = '',$module = 'hotel'){
-        $sql = " select a.id,a.bank,a.bank_user_name,a.bank_card_no,a.amount,a.inter_id,a.hotel_id,a.type,a.order_no,a.status,a.m_id,b.m_id as s_m_id,b.bank as s_bank,b.bank_card_no as s_bank_card_no,b.bank_user_name as s_bank_user_name,b.amount as s_amount,b.type as s_type,b.hotel_id as s_hotel_id,b.order_no as s_order_no from " . self::TAB_IWIDEPAY_TRANSFER . " a left join " . self::TAB_IWIDEPAY_SPLIT . " b on a.inter_id = b.inter_id and b.order_no = a.order_no and  b.hotel_id = a.hotel_id and b.type = a.type and a.module = b.module where a.inter_id = '{$inter_id}' and a.order_no = '{$order_no}' and a.module = '{$module}' and a.bank !='' and a.bank_card_no != '' and a.bank_user_name != ''";
+        $sql = " select a.id,a.bank,a.bank_user_name,a.bank_card_no,a.amount,a.inter_id,a.hotel_id,a.type,a.order_no,a.status,a.m_id,b.m_id as s_m_id,b.bank as s_bank,b.bank_card_no as s_bank_card_no,b.bank_user_name as s_bank_user_name,b.amount as s_amount,b.type as s_type,b.hotel_id as s_hotel_id,b.order_no as s_order_no from " . self::TAB_IWIDEPAY_TRANSFER . " a left join " . self::TAB_IWIDEPAY_SPLIT . " b on a.inter_id = b.inter_id and b.order_no = a.order_no and  b.hotel_id = a.hotel_id and b.type = a.type and a.module = b.module and a.bill_id = b.bill_id where a.inter_id = '{$inter_id}' and a.order_no = '{$order_no}'  and a.module = '{$module}' and a.bank !='' and a.bank_card_no != '' and a.bank_user_name != ''";
         $res = $this->db->query($sql)->result_array();
         return $res;
     }
@@ -142,23 +151,24 @@ class Iwidepay_Transfer_Model extends MY_Model{
 
     //获取导出记录 transfer表连merchant表
     public function get_transfer_data(){
-        $end_date = date('Y-m-d 06:00:00');
+        $end_date = date('Y-m-d H:i:s');
         //先取出异常的订单号 然后拿记录的时候去掉那些订单号
         $not_in_sql = "SELECT order_no FROM ". self::TAB_IWIDEPAY_TRANSFER . " WHERE add_time <= '{$end_date}' and status != 2 group by order_no";
-        $sql = "SELECT a.id,a.inter_id,a.hotel_id,a.bank,a.bank_user_name,a.bank_card_no,a.amount,a.m_id,b.bank_code,b.bank_city,b.clearBankNo,b.accBankNo,b.is_company FROM " . self::TAB_IWIDEPAY_TRANSFER . " a LEFT JOIN " . self::TAB_IWIDEPAY_BANK . " b on a.m_id = b.id where  a.add_time <= '{$end_date}' and amount >0 and a.status = 2 and a.send_status = 0 and a.order_no not in (".$not_in_sql.")";
+        $sql = "SELECT a.id,a.inter_id,a.hotel_id,a.bank,a.bank_user_name,a.bank_card_no,a.amount,a.m_id,b.bank_code,b.bank_city,b.clearBankNo,b.accBankNo,b.is_company FROM " . self::TAB_IWIDEPAY_TRANSFER . " a LEFT JOIN " . self::TAB_IWIDEPAY_BANK . " b on a.m_id = b.id where  a.add_time <= '{$end_date}' and amount >0 and a.status = 2 and a.send_status in(0,4) and a.order_no not in (".$not_in_sql.")";//改成去0：新增  4：已汇总
         $res = $this->db_read()->query($sql)->result_array();
         return $res;
     }
 
     //查询汇总表
-    public function get_sum_record($start_date = '',$end_date = ''){
+    public function get_sum_record($start_date = '',$end_date = '',$status=0){
         if(empty($start_date)){
             $start_date = date('Y-m-d');
         }
         if(empty($end_date)){
             $end_date = date('Y-m-d 23:59:59');
         }
-        $sql = "select amount,status,m_id,merchant_name,merchant_no,bank,bank_card_no,bank_user_name,bank_code,bank_city,add_time,handle_date from " . self::TAB_IWIDEPAY_SUM . " where add_time >= '{$start_date}' and add_time <= '{$end_date}'";
+        $sql = "select * from " . self::TAB_IWIDEPAY_SUM . " where add_time >= '{$start_date}' and add_time <= '{$end_date}' ";
+        $sql .= " and status in (0,2)";
         $res = $this->db_read()->query($sql)->result_array();
         return $res;
     }
@@ -245,7 +255,7 @@ class Iwidepay_Transfer_Model extends MY_Model{
      */
     public function get_settlement_transfer()
     {
-        $end_date = date('Y-m-d 06:00:00');
+        $end_date = date('Y-m-d H:i:s');
         //先取出异常的订单号 然后拿记录的时候去掉那些订单号
         $sql = "select order_no from ". self::TAB_IWIDEPAY_TRANSFER . " where add_time <= '{$end_date}' and status != 2 group by order_no";
         $orders = $this->db_read()->query($sql)->result_array();
@@ -273,7 +283,7 @@ class Iwidepay_Transfer_Model extends MY_Model{
     public function last_day_settlement($start_time,$end_time)
     {
         $sql = "SELECT * FROM ".self::TAB_IWIDEPAY_SETTLE."
-                WHERE status = 0 AND add_time >= '{$start_time}' AND add_time < '{$end_time}'";
+                WHERE status IN(0,2) AND add_time >= '{$start_time}' AND add_time < '{$end_time}'";
         $res = $this->db_read()->query($sql)->result_array();
         return $res;
     }
@@ -341,6 +351,7 @@ class Iwidepay_Transfer_Model extends MY_Model{
                 unset($data[$k]['is_company']);
                 unset($data[$k]['pay_id']);
                 unset($data[$k]['pay_type']);
+                unset($data[$k]['bill_id']);
             }
             //var_dump($data);die;
             return $this->db->insert_batch('iwidepay_offline_transfer',$data);

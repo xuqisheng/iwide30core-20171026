@@ -2188,7 +2188,7 @@ class Distri_report extends MY_Admin {
 		$confs = $this->report_model->get_dist_field_conf($admin_profile['inter_id'],'FANS_UNFOLLOW_LIST',$admin_profile['admin_id']);
 	
 		$avgs['inter_id'] = $admin_profile['inter_id'];
-		$res = $this->report_model->get_unfollow_fans_list($avgs);
+		$res = $this->report_model->get_unfollow_fans_list($avgs)->result_array();
 	
 		$data = "";
 		foreach ($confs as $key=>$item){

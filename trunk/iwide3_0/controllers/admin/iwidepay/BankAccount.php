@@ -130,8 +130,6 @@ class BankAccount extends MY_Admin
         $param = request();
         $type = !empty($param['type']) ? intval($param['type']) : 0;
         $keyword = !empty($param['keyword']) ? addslashes(trim($param['keyword'])) : '';
-        $per_page = !empty($param['limit']) ? intval($param['limit']) : '';//显示数量
-        $cur_page = !empty($param['offset']) ? intval($param['offset']) : '';//页码
 
         $inter_id = $this->admin_profile['inter_id'];
 
@@ -148,7 +146,7 @@ class BankAccount extends MY_Admin
 
         $this->load->model('iwidepay/iwidepay_merchant_model' );
         $select = 'mi.jfk_no,mi.type,mi.account_aliases,mi.is_company,mi.status,mi.type';
-        $list = $this->iwidepay_merchant_model->get_band_accounts($select,$filter,$cur_page,$per_page);
+        $list = $this->iwidepay_merchant_model->get_band_accounts($select,$filter,'','');
 
         if ($list)
         {
@@ -178,5 +176,145 @@ class BankAccount extends MY_Admin
         $headArr = array('账户ID','所属公众号','酒店名称','账户别名','账户类型','账户状态');
         $widthArr = array(20,20,20,20,12,12);
         getExcel('分账银行账户',$headArr,$list,$widthArr);
+    }
+
+    /**
+     * 导出账户信息
+     */
+    public function insert_account()
+    {
+        $param = request();
+        $return = array(
+            'param' => $param,
+        );
+
+        if (!empty($param['submit']))
+        {
+            $file = $this->img_upload_url();
+            $excelData = $this->importExcel($file);
+            if (!empty($excelData))
+            {
+                $this->load->model('iwidepay/iwidepay_bankcode_model');
+                $this->load->model('iwidepay/iwidepay_merchant_model');
+                $count = $fail_count = 0;
+                foreach ($excelData as $value)
+                {
+                    //完善安全添加数据判断...
+                    $bank = $this->iwidepay_bankcode_model->get_one('branch_id,branch,bank_code,clearBankNo,accBankNo', array('status'=>1,'branch' => trim($value['bank'])));
+                    if (!empty($bank))
+                    {
+                        $value['inter_id'] = trim($value['inter_id']);
+                        $value['type'] = trim($value['type']);
+                        $value['hotel_id'] = trim($value['hotel_id']);
+                        $value['bank_user_name'] = trim($value['bank_user_name']);
+                        $value['account_aliases'] = trim($value['account_aliases']);
+                        $value['bank'] = trim($value['bank']);
+                        $value['bank_city'] = trim($value['bank_city']);
+                        $value['bank_card_no'] = trim($value['bank_card_no']);
+                        $value['is_company'] = trim($value['is_company']);
+
+                        $value['branch_id'] = $bank['branch_id'];//支行
+                        $value['bank'] = $bank['branch'];//支行
+                        $value['clearBankNo'] = $bank['clearBankNo'];//清算行号
+                        $value['accBankNo'] = $bank['accBankNo'];//受理行号
+                        $value['bank_code'] = $bank['bank_code'];//行别代码
+
+                        $value['registered_address'] = '';
+                        $value['telephone'] = '';
+                        $value['taxpayer_identity_number'] = '';//纳税人识别号
+                        $value['status'] = 1;//状态
+                        $value['updated_by'] = $this->admin_profile['username'];//修改人
+                        $value['updated_at'] = date('Y-m-d H:i:s');//修改时间
+                        $value['created_by'] = $this->admin_profile['username'];//状态
+                        $value['created_at'] = date('Y-m-d H:i:s');//状态
+
+                        $insert_id = $this->iwidepay_merchant_model->insert_account($value);
+                        if ($insert_id > 0)
+                        {
+                            //更改 生成金房卡内部ID
+                            $where = array(
+                                'id' => $insert_id,
+                            );
+                            $update = array(
+                                'jfk_no' => create_merchant_no(1200000 + $insert_id,'FZZH'),
+                            );
+                            $this->iwidepay_merchant_model->update_account($where,$update);
+
+                            //添加日志
+                            $inert['jfk_no'] = $update['jfk_no'];
+                            add_iwidepay_admin_op_log($inert,'add');
+                        }
+
+                        $count++;
+                    }
+                    else
+                    {
+                        $fail_count++;
+                    }
+                }
+            }
+
+            echo '成功：' .$count."<br/>";
+            echo '失败：' .$fail_count."<br/>";
+            exit;
+        }
+
+        echo $this->_render_content($this->_load_view_file('insert_account'), $return, TRUE);
+    }
+
+    protected function img_upload_url()
+    {
+        $config ['upload_path'] = '../www_admin';
+        $config ['allowed_types'] = '*';
+        $config ['file_name'] = date ( 'YmdHis' ) . rand ( 10, 99 );
+        // $config['allowed_types'] ='png|jpg|jpeg|bmp|gif';
+        $config ['max_size'] = '20000';
+        $this->load->library ( 'upload', $config );
+        $this->upload->initialize ( $config );
+
+        if ($this->upload->do_upload ( 'Filedata' )) {
+            $a = $this->upload->data ();
+
+//上传服务器后要更改地址
+            return $config ['upload_path'] . '/' . $a ['file_name'];
+
+//            return 'iwide30dev/www_admin' . '/' . $a ['file_name'];     //本地测试
+        } else {
+// 			$this->upload->display_errors('<p>', '</p>');
+            echo  $this->upload->display_errors('<p>', '</p>');exit;
+        }
+    }
+
+
+    /**
+     * @desc PHPEXCEL导入
+     * return array();
+     */
+    protected function importExcel($file)
+    {
+        $this->load->model('plugins/Excel_model','excel_model');
+        $data = $this->excel_model->load_exl($file);
+        $sheet = $data->getSheet(0);
+        $highestRow = $sheet->getHighestRow(); // 取得总行数
+        //$highestColumm = $sheet->getHighestColumn(); // 取得总列数
+
+        $new_data =  array ();
+        for ($row = 2; $row <= $highestRow; $row++)
+        {
+            $item['inter_id'] = $sheet->getCell('A'.$row)->getValue();
+            $item['type'] = $sheet->getCell('B'.$row)->getValue();
+            $item['hotel_id'] = $sheet->getCell('C'.$row)->getValue();
+            $item['bank_user_name'] = $sheet->getCell('D'.$row)->getValue();
+            $item['account_aliases'] = $sheet->getCell('E'.$row)->getValue();
+            $item['bank'] = $sheet->getCell('F'.$row)->getValue();
+            $item['bank_city'] = $sheet->getCell('G'.$row)->getValue();
+            $item['bank_card_no'] = $sheet->getCell('H'.$row)->getValue();
+            $item['is_company'] = $sheet->getCell('I'.$row)->getValue();
+
+            $new_data[] = $item;
+        }
+        unlink ( $file );
+
+        return $new_data;
     }
 }

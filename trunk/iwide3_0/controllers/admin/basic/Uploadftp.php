@@ -72,7 +72,7 @@ class Uploadftp extends MY_Admin {
 		$file_system_path = '/public/uploads/' .date("Ym"). '/';
 		
 		$config['upload_path']      = './public/base/tmp/';
-        $config['allowed_types']    = 'gif|jpg|jpeg|png|bmp|swf|flv|swf|flv|mp3|wav|wma|wmv|mid|avi|mpg|asf|rm|rmvb|doc|docx|xls|xlsx|ppt|htm|html|txt|zip|rar|gz|bz2';
+        $config['allowed_types']    = 'pdf|gif|jpg|jpeg|png|bmp|swf|flv|swf|flv|mp3|wav|wma|wmv|mid|avi|mpg|asf|rm|rmvb|doc|docx|xls|xlsx|ppt|htm|html|txt|zip|rar|gz|bz2';
         $config['max_size']     = 20480;
         $config['max_width']        = 10240;
         $config['max_height']       = 7680;

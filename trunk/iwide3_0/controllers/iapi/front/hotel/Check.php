@@ -33,6 +33,9 @@ class Check extends MY_Front_Hotel_Iapi {
 		$data = CheckService::getInstance()->ajax_hotel_list();
 		if($data['s']==1){
 			unset($data['s']);
+			foreach ($data['data']['result'] as $k => $r) {
+				$data['data']['result'][$k]->link = Hotel_base::inst()->get_url("INDEX",array('h'=>$r->hotel_id)).$data['data']['exe_param'];
+			}
         	$this->out_put_msg(1,'',$data['data'],'hotel/check/ajax_hotel_list');
 		}else{
         	$this->out_put_msg(2,'','','hotel/check/ajax_hotel_list');

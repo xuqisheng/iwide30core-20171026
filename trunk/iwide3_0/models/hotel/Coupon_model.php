@@ -58,6 +58,7 @@ class Coupon_model extends CI_Model {
         $all_cards = array();
 		$this->load->model('hotel/Price_code_model');
 		$list=array();
+        $all_cards=array();
 		$coupon_condition=array();
 		if (is_numeric($params ['price_code']))
 			$list = $this->Price_code_model->get_room_price_set ( $inter_id, $params ['hotel'], $params ['category'], $params ['price_code'] );
@@ -983,7 +984,14 @@ class Coupon_model extends CI_Model {
         if(!empty($cards['cards'])){ //有优惠券
             $cards_list = json_decode(json_encode($cards['cards']),true);
             uasort($cards_list, function ($a, $b){
-                return $a['reduce_cost'] - $b['reduce_cost'] > 0 ? -1 : 1;
+                if($a['coupon_type']=='discount' && $b['coupon_type']=='discount'){
+                    return $a['reduce_cost'] - $b['reduce_cost'] < 0 ? -1 : 1;
+                }elseif($a['coupon_type']=='voucher' && $b['coupon_type']=='voucher'){
+                    return $a['reduce_cost'] - $b['reduce_cost'] > 0 ? -1 : 1;
+                }elseif($a['coupon_type'] != $b['coupon_type']){
+                    return $a['coupon_type']=='discount'? -1 : 1;
+                }
+//                return $a['reduce_cost'] - $b['reduce_cost'] > 0 ? -1 : 1;
             });
             $select_amount = 0;
             $i = 0;
@@ -995,6 +1003,7 @@ class Coupon_model extends CI_Model {
                     $select_amount += $v['reduce_cost'];
                     $i++;
                 }
+                if($v['coupon_type']=='discount')break;
                 if($i >= $cards['count']['num']){
                     break;
                 }

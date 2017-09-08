@@ -178,7 +178,13 @@ class DepositcardService extends MemberBaseService
             'deposit_card_id' => $cardId,
         );
         $card_info = $this->doCurlPostRequest($post_info_url, $post_info_data)['data'];
-
+        if(empty($card_info['logo_url'])){
+            $this->getCI()->load->model ( 'common/Enum_model' );
+            $logo_url_info = $this->getCI()->Enum_model->get_enum_des ( array (
+                 'MEMBER_CARD_DEMO_IMG'
+             ));
+            $card_info['logo_url'] = $logo_url_info['MEMBER_CARD_DEMO_IMG']['member_card_demo_img'];
+        }
         /*检查是否满足泛分销条件*/
         if ($inter_id == 'a472731996') {  //测试环境是a469428180，正式是a472731996
             $redis_img = $this->getCI()->p_model->get_vip_redis();

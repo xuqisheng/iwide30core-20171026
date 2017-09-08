@@ -133,7 +133,7 @@ class Transfer extends MY_Controller {
             }else{
                 $regular = array('regular_jfk_cost','regular_group','regular_hotel','regular_jfk');
                 //所有模块分销不自动扣：a501472631、a467012702 订房模块分销不自动扣：a470896520
-                if(!in_array($v['inter_id'],array('a501472631','a467012702','a500304280','a502439398'))){
+                if(!in_array($v['inter_id'],array('a501472631','a467012702','a500304280','a502439398','a503075198'))){
                     if(!($v['inter_id'] == 'a470896520' && $v['module']=='hotel')){
                         if((isset($v['is_dist']) || $order_type == 'offline') && $v['dist_amt'] > 0){//是分销的单 做处理
                             $money_arr['regular_dist'] = $v['dist_amt'];//分销员的
@@ -175,7 +175,7 @@ class Transfer extends MY_Controller {
                         if($single_inter!=1 && $smv['order_qty'] == count($soma_bill) || $single_inter==1 && count($soma_bill)==1){//用完 结束分
                             $soma_flag = 1;
                         }
-                        $soma_bill_arr[] = $smv['bill_hotel'];
+                        $soma_bill_arr[] = $smv;
                     }
                 }else{// 1 5 会有
                     if($v['transfer_status'] == 5){//没有已核销的通票
@@ -209,6 +209,7 @@ class Transfer extends MY_Controller {
             $transfer['pay_type'] = isset($v['pay_type'])?$v['pay_type']:'';
             $transfer['rule_id'] = $rules_data['rule_id'];
             $transfer['status'] = 1;//初始状态 待转
+            $transfer['bill_id'] = '';//初始状态 待转
             $transfer['add_time'] = date('Y-m-d H:i:s');
             $money = 0;
             $last_arr = array();//存剩下的全部给的数据
@@ -271,8 +272,9 @@ class Transfer extends MY_Controller {
                 //改成每次去查
                 $last_hotel_amt = 0;
                 if(!empty($soma_bill_arr)){
+                    $soma_bill_count = count($soma_bill_arr);
                     foreach($soma_bill_arr as $soma_k=>$soma_v){
-                        if($soma_k == count($soma_bill_arr) - 1 && !$single_inter && $soma_flag){//最后一条
+                        if($soma_k == ($soma_bill_count - 1) && !$single_inter && $soma_flag){//最后一条
                             $cut_amt = $ohter_amt==0?($v['trans_amt']-$soma_hotel_bill):$ohter_amt;
                             $last_hotel_amt = $per_soma_bill + ($v['trans_amt']- $cut_amt-$per_soma_bill * $v['bill_num']);
                         }
@@ -415,7 +417,8 @@ class Transfer extends MY_Controller {
          //先拿出已经分掉的金额
         $transfer = array();
         $transfer['inter_id'] = $orders['inter_id'];
-        $transfer['hotel_id'] = $soma_hotel;//已经核销的
+        $transfer['hotel_id'] = $soma_hotel['bill_hotel'];//已经核销的
+        $transfer['bill_id'] = $soma_hotel['bill_id'];//商城的记录多这个东西
         $transfer['order_no'] = $orders['order_no'];
         $transfer['pay_id'] = $orders['pay_id'];//民生订单号
         $transfer['module'] = $orders['module'];
@@ -424,7 +427,7 @@ class Transfer extends MY_Controller {
         $transfer['status'] = 1;//初始状态 待转
         $transfer['add_time'] = date('Y-m-d H:i:s');
         $transfer['type'] = 'hotel';
-        $bank_info = isset($bank[$orders['inter_id'].'_'.$soma_hotel .'_hotel'])?$bank[$orders['inter_id'].'_'.$soma_hotel .'_hotel']:'';
+        $bank_info = isset($bank[$orders['inter_id'].'_'.$soma_hotel['bill_hotel'] .'_hotel'])?$bank[$orders['inter_id'].'_'.$soma_hotel['bill_hotel'] .'_hotel']:'';
         $transfer['m_id'] = !empty($bank_info['id'])?$bank_info['id']:0;
         $transfer['bank'] = !empty($bank_info['bank'])?$bank_info['bank']:'';
         $transfer['bank_card_no'] = !empty($bank_info['bank_card_no'])?$bank_info['bank_card_no']:'';
@@ -479,7 +482,7 @@ class Transfer extends MY_Controller {
                     if($values['amount'] == $values['s_amount'] && $values['m_id'] == $values['s_m_id']){//相同的
                         //相同，更新状态，或者转账
                         $update = array('status'=>2,'check_time'=>date('Y-m-d H:i:s'));
-                        $this->db->where(array('id'=>$values['id']));
+                        $this->db->where(array('id'=>$values['id'],'status'=>1));
                         $this->db->update('iwidepay_transfer',$update);
                     }else{//不相同
                         MYLOG::w('inter_id:'.$inter_id.'--order_no:'.$order_no.'-匹配异常', 'iwidepay/transfer');

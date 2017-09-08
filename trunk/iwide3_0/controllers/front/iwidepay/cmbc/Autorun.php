@@ -114,22 +114,57 @@ class Autorun extends MY_Controller {
         @ini_set('memory_limit','512M');
         MYLOG::w('-开始处理汇总脚本', 'iwidepay/transfer_auto');
         $this->load->model ( 'iwidepay/iwidepay_transfer_model' );
+        $this->load->model ( 'iwidepay/iwidepay_deliver_model');
+        $this->load->model ( 'iwidepay/iwidepay_sum_record_model' );
         $data = array();
         //先查下有咩有指定日期的数据
         $data = $this->iwidepay_transfer_model->get_sum_record();
         if(empty($data)){
-            //作废：手动转账，先将前一天还没处理转账的数据update为10：放弃转账
-            /*$this->db->where(array('status'=>0,'add_time <'=>date('Y-m-d 00:00:00')));
-            $this->db->update('iwidepay_sum_record',array('status'=>10));*/
+            
+            /*$s_time = date('Y-m-d',strtotime('-1 days'));
+            $e_time = date('Y-m-d 23:59:59',strtotime('-1 days'));
+            //先拿出旧数据
+            $tmp_old_sum = $this->iwidepay_transfer_model->get_sum_record($s_time,$e_time);
+            $sum_old_bank = array();
+            if($tmp_old_sum){//前一天没转账的 先拿出来insert进去 后面插入的时候再判断
+                foreach($tmp_old_sum as $tk=>$tv){
+                    $old_id = $tv['id'];//记录旧的id
+                    $sum_old_bank[] = $tv['bank_card_no'];//记录需要卡号
+                    unset($tv['id']);
+                    $item = $tv;
+                    $item['handle_date'] = date('Ymd');
+                    $item['add_time'] = date('Y-m-d H:i:s');
+                    $item['status'] = 0;
+                    $item['send_content'] = '';
+                    $item['receive_content'] = '';
+                    $item['update_time'] =  date('Y-m-d H:i:s');
+                    $item['send_time'] = NULL;
+                    $item['remark'] = '';
+                    $item['partner_trade_no'] = '';
+                    $this->db->insert('iwidepay_sum_record',$item);
+                    $new_id = $this->db->insert_id();
+                    $this->iwidepay_transfer_model->update_data(array('record_id'=>$old_id),array('record_id'=>$new_id));
+                    $this->iwidepay_transfer_model->update_settlement_data(array('record_id'=>$old_id),array('record_id'=>$new_id));
+                }
+                unset($tmp_old_sum);
+            }*/
+            //手动转账，先将前一天还没处理转账 或者转账失败的数据update为10：放弃转账
+            $this->db->where_in('status',array(0,2));
+            $this->db->where('add_time <',date('Y-m-d 00:00:00'));
+            $this->db->update('iwidepay_sum_record',array('status'=>10));
+           
             $res = $this->iwidepay_transfer_model->get_transfer_data();
-            if(empty($res)){
-                    echo '空数据';
-                    $this->redis_lock('delete','_CMBC_SUM_RECORD');
-                    die;
-            }
+            /*if(empty($res)){//加了代扣 不能加这个
+                echo 'transfer没有预付订单，只处理旧的sum_record记录';
+                $this->redis_lock('delete','_CMBC_SUM_RECORD');
+                die;
+            }*/
             //start这里先做一次按银行账号汇总 账号作为键值
-            $tmp_res = array();
+            $tmp_res = $sum_bank_arr =  array();
             foreach($res as $k=>$v){
+                if(!in_array($v['bank_card_no'],$sum_bank_arr)){
+                    $sum_bank_arr[] = $v['bank_card_no'];//预付bank_card_no数组
+                }
                 $tmp_res[$v['bank_card_no']]['ids'][] = $v['id']; 
                 $tmp_res[$v['bank_card_no']]['sum_trans_amt'] = isset($tmp_res[$v['bank_card_no']]['sum_trans_amt'])?$tmp_res[$v['bank_card_no']]['sum_trans_amt']+$v['amount']:$v['amount'];
                 $tmp_res[$v['bank_card_no']]['m_id'] = $v['m_id'];
@@ -145,12 +180,11 @@ class Autorun extends MY_Controller {
             unset($res);
             //end
             $settle_res = $this->iwidepay_transfer_model->get_settlement_info();
-            if(empty($settle_res)){
+            /*if(empty($settle_res)){
                 echo '查询分账结算表无数据！';
                 $this->redis_lock('delete','_CMBC_SUM_RECORD');
                 die;
-            }
-            
+            }*/
             $settle_arr =  array();
             foreach($settle_res as $sk=>$sv){
                 $settle_arr[$sv['bank_card_no']]['sum_amount'] = isset($settle_arr[$sv['bank_card_no']]['sum_amount'])?$settle_arr[$sv['bank_card_no']]['sum_amount']+$sv['orig_amount']:$sv['orig_amount'];//统计用的
@@ -158,7 +192,36 @@ class Autorun extends MY_Controller {
                 $settle_arr[$sv['bank_card_no']]['set_id'][] = $sv['id'];
             }
             $merchant_info = $this->merchant_info();
+            MYLOG::w('最终插入脚本数组tmp_res:' . json_encode($tmp_res), 'iwidepay/transfer_auto');
+            /*$settle_need = array();//没有预付订单 单独update处理
             
+            foreach($sum_old_bank as $trk=>$trv){//有旧记录的并且不在预付数组里面 单独update
+                if(!in_array($trv,$sum_bank_arr)){
+                    $settle_need[] = $trv;//存银行卡号的
+                }
+            }
+            $this->load->model ( 'iwidepay/iwidepay_sum_record_model' );
+            if(!empty($settle_need)){//没有预付订单 单独update处理amount
+                MYLOG::w('最终插入脚本数组settle_need:' . json_encode($settle_need), 'iwidepay/transfer_auto');
+                foreach($settle_need as $stk=>$stv){
+                    if(!isset($settle_arr[$stv])){
+                        continue;//settle表没有直接continue掉 
+                    }
+                    $settlement_ids = isset($settle_arr[$stv]['set_id'])?$settle_arr[$stv]['set_id']:array();
+                    $s_amount = isset($settle_arr[$stv]['trans_amount'])?$settle_arr[$stv]['trans_amount']:0;
+                    $s_sum_amount = 0;//因为没有预付，所有当天总额是0
+                    $sett_where = array('bank_card_no'=>$stv,'handle_date'=>date('Ymd'),'status'=>0);
+                    $set_sum_res = $this->iwidepay_sum_record_model->get_one('*',$sett_where);
+                    if(!$set_sum_res){
+                        $s_update_sum = array('amount'=>$s_amount,'sum_amount'=> $s_sum_amount);
+                        $this->iwidepay_sum_record_model->update_sum_record_amount($sett_where,$s_update_sum);
+                        if(!empty($settlement_ids)){
+                            $this->db->where_in('id',$settlement_ids);
+                            $settle_res = $this->db->update('iwidepay_settlement',array('record_id'=>$set_sum_res['id']));
+                        }
+                    }
+                }
+            }*/
             foreach($tmp_res as $rk=>$rv){
                 $tmp = $ids = $set_ids =  array();
                 $ids = $rv['ids'];//transfer表的id 
@@ -178,25 +241,41 @@ class Autorun extends MY_Controller {
                 $tmp['accBankNo'] = $rv['accBankNo'];
                 $tmp['clearBankNo'] = $rv['clearBankNo'];
                 $tmp['is_company'] = $rv['is_company'];
-                if(isset($settle_arr[$rv['bank_card_no']]['sum_amount']) && $settle_arr[$rv['bank_card_no']]['sum_amount'] && $settle_arr[$rv['bank_card_no']]['sum_amount']==$rv['sum_trans_amt']){
+                /*if(isset($settle_arr[$rv['bank_card_no']]['sum_amount']) && $settle_arr[$rv['bank_card_no']]['sum_amount'] && $settle_arr[$rv['bank_card_no']]['sum_amount']==$rv['sum_trans_amt']){
                     $tmp['status'] = 0;
                 }else{
                     $tmp['status'] = 9;//匹配异常
+                }*/
+                $tmp['status'] = 0;//对比先去掉
+                
+                $sum_where = array('bank_card_no'=>$tmp['bank_card_no'],'handle_date'=>$tmp['handle_date'],'status'=>0);
+                $sum_res = $this->iwidepay_sum_record_model->get_one('*',$sum_where);
+                if($sum_res){//存在 update
+                    $insert_id = $sum_res['id'];
+                    $update_sum = array('amount'=>$tmp['amount'],'sum_amount'=> $tmp['sum_amount'],'remark'=>'已存在记录,更新处理');
+                    $up_res = $this->iwidepay_deliver_model->update_data($sum_where,$update_sum);
+                    if(!$up_res){
+                        echo 'update error';//正常是不会出现这里的
+                        MYLOG::w('处理汇总脚本update出错 iwidepay_sum_record', 'iwidepay/transfer_auto');
+                        die;
+                    }
+                }else{
+                    $result = $this->db->insert('iwidepay_sum_record',$tmp);
+                    $insert_id = $this->db->insert_id();
+                    if(!$result){
+                        echo 'insert error';
+                        MYLOG::w('处理汇总脚本insert出错 iwidepay_sum_record', 'iwidepay/transfer_auto');
+                        die;
+                    }
                 }
-                $result = $this->db->insert('iwidepay_sum_record',$tmp);
-                $insert_id = $this->db->insert_id();
-                if(!$result){
-                    echo 'insert error';
-                    MYLOG::w('处理汇总脚本insert出错', 'iwidepay/transfer_auto');
-                    die;
-                }
+                
                 //批量更新 transfer 表
                 if(!empty($ids)){
                     //$ids = explode(',',$ids);
                     $this->db->where_in('id',$ids);
-                    $all_update = $this->db->update('iwidepay_transfer',array('record_id'=>$insert_id,'send_status'=>1,'send_time'=>date('Y-m-d H:i:s')));
+                    $all_update = $this->db->update('iwidepay_transfer',array('record_id'=>$insert_id,'send_status'=>4));//send_status =4 改成 已汇总 未发放
                     if(!$this->db->affected_rows()){
-                        echo 'update error';
+                        echo 'update iwidepay_transfer error';
                         MYLOG::w('处理汇总脚本update transfer表出错', 'iwidepay/transfer_auto');
                         die;
                     }
@@ -204,6 +283,9 @@ class Autorun extends MY_Controller {
                 //批量更新settlement表  
                 if(!empty($set_ids)){
                     $this->db->where_in('id',$set_ids);
+                    /*if(isset($sum_old_ids[$rv['bank_card_no']])){
+                        $this->db->or_where('record_id',$old_sum_record[$rv['bank_card_no']]);
+                    }*/
                     $settle_res = $this->db->update('iwidepay_settlement',array('record_id'=>$insert_id));
                     if(!$settle_res){
                         echo 'update error';
@@ -225,13 +307,13 @@ class Autorun extends MY_Controller {
         $this->check_arrow();
         //上锁
 
+
         $ok = $this->redis_lock('set','_CMBC_SETTLEMENT_RECORD');
         if(!$ok){
             //程序锁住，记录报警日志并终止执行，上线将此日志交博士加入报警短信
             MYLOG::w('err:'.__FUNCTION__ . ' lock fail!', 'iwidepay_transfer/settlement_info');
             die('FAILURE!');
         }
-
 
         set_time_limit ( 0 );
         @ini_set('memory_limit','512M');
@@ -253,6 +335,7 @@ class Autorun extends MY_Controller {
                 $item = $value;
                 $item['handle_date'] = date('Ymd');
                 $item['add_time'] = date('Y-m-d H:i:s');
+                $item['status'] = 0;//重置失败的状态为待转账
                 $this->db->insert('iwidepay_settlement',$item);
                 //$this->db->insert_id();
             }
@@ -260,7 +343,7 @@ class Autorun extends MY_Controller {
 
         //先update 今天之前未转账的记录
 
-        $this->db->where('status',0);
+        $this->db->where_in('status',array(0,2));
         $this->db->where('add_time <',date('Y-m-d 00:00:00'));
         $this->db->update('iwidepay_settlement',array('status' => 10));
 
@@ -268,6 +351,7 @@ class Autorun extends MY_Controller {
         if(empty($res))
         {
             echo '无记录可导出';
+            $this->redis_lock('delete','_CMBC_SETTLEMENT_RECORD');
             die;
         }
         $merchant_info = $this->merchant_info();
@@ -313,7 +397,6 @@ class Autorun extends MY_Controller {
             }
         }
 
-
         if (!empty($temp))
         {
             foreach($temp as $rk=>$rv)
@@ -344,17 +427,21 @@ class Autorun extends MY_Controller {
                     'type' => $tmp['type'],
                     'handle_date' => $tmp['handle_date'],
                 );
-                $set_id = $this->iwidepay_transfer_model->get_inter_settlement('id',$where_arr);
+                $set_id = $this->iwidepay_transfer_model->get_inter_settlement('id,handle_date',$where_arr);
                 if (!empty($set_id))
                 {
-                    $up_date = array(
-                        'amount' => '`amount` + ' .$tmp['amount'],
-                    );
-                    $res = $this->iwidepay_transfer_model->update_settlement($up_date,array('id' => $set_id['id']));
-                    if (!$res)
+                    if ($set_id['handle_date'] != date('Y-m-d'))
                     {
-                        echo 'update error';
-                        MYLOG::w('处理汇总脚本update出错', 'iwidepay/transfer_auto_settlement');
+                        $up_date = array(
+                            'amount' => '`amount` + ' .$tmp['amount'],
+                            'orig_amount' => $tmp['amount'],
+                        );
+                        $res = $this->iwidepay_transfer_model->update_settlement($up_date,array('id' => $set_id['id']));
+                        if (!$res)
+                        {
+                            echo 'update error';
+                            MYLOG::w('处理汇总脚本update出错 set_id : '.$set_id['id'], 'iwidepay/transfer_auto_settlement');
+                        }
                     }
                 }
                 else
@@ -571,10 +658,12 @@ class Autorun extends MY_Controller {
                 else if ($item['trade_type'] == 6)
                 {
                     $item['module'] = 'base_pay';
+                    $item['jfk_amount'] = $value['amount'];
                 }
                 else if (in_array($item['trade_type'],array(4,5)))
                 {
                     $item['module'] = 'dist';
+                    $item['dist_amount'] = $value['amount'];
                 }
 
                 $this->Iwidepay_financial_model->insert_order($item);
@@ -639,7 +728,14 @@ class Autorun extends MY_Controller {
 
                 //分成金额
                 $amount_key = $status_key;
-                $tmp[$amount_key][$value['type']] = $value['amount'];
+                if ($value['module'] == 'soma' && $value['type'] == 'hotel')
+                {
+                    isset($tmp[$amount_key][$value['type']]) ? $tmp[$amount_key][$value['type']] += $value['amount'] : $tmp[$amount_key][$value['type']] = $value['amount'];
+                }
+                else
+                {
+                    $tmp[$amount_key][$value['type']] = $value['amount'];
+                }
             }
 
             unset($list_transfer);

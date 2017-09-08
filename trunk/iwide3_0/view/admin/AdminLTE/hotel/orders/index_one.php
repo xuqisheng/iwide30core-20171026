@@ -87,15 +87,31 @@ echo $block_left;
 .isolatioin{margin:0 10px;}
 .none_txt{text-align:center;font-size:20px;color:#666;margin:20px 0;}
 .thim_list{width:70px;display:inline-block;margin-right:3%;}
+.notice_link {color:#3c8dbc; }
 </style>
 <div class="content-wrapper" style="background:#fff;">
-	<section class="content">
+    <section class="content">
       <div class="row">
-      	<div class="col-xs-12">
-        	<div class="box-body" style="margin-left:16px;">
-            	<div class="form-group m_width">
-                	<div class="titile">
-                    	<h2 style="margin-right:18px;" >今日概览</h2>
+        <div class="col-xs-12">
+            <div class="box-body" style="margin-left:16px;">
+                <div class="form-group m_width">
+
+                    <?php if(isset($notice_model)): ?>
+                        <div class="containers" style="padding: 0;font-size: 18px;">
+                            <div class="pull-left" style="background:#fff;padding-right: 4px;">
+                                <i class="fa fa-bullhorn" style="font-size: 26px;"></i>
+                            </div>
+                            <span style="padding-left: 10px;">
+                                <a class="notice_link" href="<?php echo EA_const_url::inst()->get_url("privilege/notice/detail?ids=" . $notice_model->id) ?>"><?php echo $notice_model->title; ?></a>
+                            </span>
+                            <div class="pull-right" style="margin-right: 5px;">
+                                <a class="notice_link" href="<?php echo EA_const_url::inst()->get_url("privilege/notice/grid") ?>">更多</a>
+                            </div>
+                        </div>
+                    <?php endif ?>
+
+                    <div class="titile">
+                        <h2 style="margin-right:18px;" >今日概览</h2>
                         <font><?php echo date('Y.m.d')?></font>
                         <font><?php $weekarray=array("日","一","二","三","四","五","六");echo "星期".$weekarray[date("w")];?></font>
                     </div>

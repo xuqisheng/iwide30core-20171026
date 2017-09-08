@@ -275,6 +275,7 @@ class Split extends MY_Controller {
                         }
                         foreach ($bill_hotels as $kb => $vb) {
                             $soma_bank_infos[$vb['id']] = $bank_infos[$order['inter_id'].'_'.$vb['bill_hotel'].'_hotel'];
+                            $soma_bank_infos[$vb['id']]['bill_id'] = $vb['bill_id'];
                         }
                         if($bill_hotels[0]['order_qty']==$bill_hotels[0]['bill_qty']){
                             //单店或者通票只有一张的情况金额不需拆分
@@ -355,6 +356,7 @@ class Split extends MY_Controller {
                                         'amount' => $nc==count($soma_bank_infos)?($last_amt>0?$last_amt:$trans_amt_p):$trans_amt_p,
                                         'create_time' => date('Y-m-d H:i:s'),
                                         'check_time' => date('Y-m-d H:i:s'),
+                                        'bill_id' => $vb['bill_id'],
                                         );
                                     $nc++;
                                 }
@@ -417,6 +419,7 @@ class Split extends MY_Controller {
                             //有核销记录才生成门店分成
                             foreach ($bill_hotels as $kb => $vb) {
                                 $soma_bank_infos[$vb['id']] = $bank_infos[$order['inter_id'].'_'.$vb['bill_hotel'].'_hotel'];
+                                $soma_bank_infos[$vb['id']]['bill_id'] = $vb['bill_id'];
                             }
                             if($bill_hotels[0]['order_qty']==$bill_hotels[0]['bill_qty']){
                                 //单店或者通票只有一张的情况金额不需拆分
@@ -469,6 +472,7 @@ class Split extends MY_Controller {
                                     'amount' => $nc==count($soma_bank_infos)?($last_amt>0?$last_amt:$trans_amt_p):$trans_amt_p,
                                     'create_time' => date('Y-m-d H:i:s'),
                                     'check_time' => date('Y-m-d H:i:s'),
+                                    'bill_id' => $vb['bill_id'],
                                     );
                                 $nc++;
                             }

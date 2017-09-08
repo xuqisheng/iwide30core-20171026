@@ -595,7 +595,7 @@ class Zhongruan_hotel_model extends CI_Model {
 				    $allprice = [];
 				    $amount = 0;
 				
-				    $least_arr = [3];
+				    $least_arr = [];
 				
 				    $date_status = true;
 				
@@ -1172,18 +1172,16 @@ class Zhongruan_hotel_model extends CI_Model {
                         $updata ['istatus'] = $istatus;
                     }
                     // 积分支付单不进行金额更新
-                    if ($order ['paytype'] != 'point' && ($day_diff != 0 || $web_start != $od ['startdate'] || $web_end != $od ['enddate'])) {
-                        $updata ['no_check_date'] = 1;
-                        $updata ['startdate'] = $web_start;
-                        $updata ['enddate'] = $web_end;
+                    if ($order ['paytype'] != 'point' ) {
+                        if (($day_diff != 0 || $web_start != $od ['startdate'] || $web_end != $od ['enddate'])){
+                            $updata ['no_check_date'] = 1;
+                            $updata ['startdate'] = $web_start;
+                            $updata ['enddate'] = $web_end;
+                        }
                         $everyday_amt = explode ( ',', $web_order [$webs_orderid]->everyday_amt );
                         $web_price = array_sum ( $everyday_amt ) - array_pop ( $everyday_amt );
                         // $web_price = 0;
-                        if (empty ( $web_price )) {
-                            if ($web_day_diff == 1) {
-                                $updata ['new_price'] = floatval ( $od ['allprice'] );
-                            }
-                        } else {
+                        if ($web_price != $od['iprice']) {
                             $updata ['new_price'] = $web_price;
                         }
                     }

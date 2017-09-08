@@ -699,7 +699,7 @@ class Okpay_model extends MY_Model{
 			// $this->db->trans_begin();//开启事务
 			//扣除用户余额
 			$this->load->model('hotel/Member_model');
-			if($this->Member_model->reduce_balance($arr['inter_id'], $arr['openid'], $arr['pay_money'], $arr['out_trade_no'], '快乐付订单余额支付',array('module'=>'okpay'))){
+			if($this->Member_model->reduce_balance($arr['inter_id'], $arr['openid'], $arr['pay_money'], $arr['out_trade_no'], '快乐付订单余额支付',array('module'=>'okpay'),array('hotel_id'=>$arr['hotel_id']))){
 				//插入订单
 				$this->db->insert(self::TAB_OKPAY_ORDERS,$arr);
 				$insert_id = $this->db->insert_id();

@@ -230,9 +230,6 @@ class Order_model extends MY_Model {
 				}
 				if (!isset($my_coupons[$pcs['coupon_condition']['couprel']])){
 					continue;
-				}else{
-					//关联房券信息，放到数据，
-					$pcs['coupon_condition']['couprel_info']=$my_coupons[$pcs['coupon_condition']['couprel']];
 				}
 			}
 
@@ -750,51 +747,17 @@ class Order_model extends MY_Model {
 			}
 
 			//@Editor lGh 2016-5-31 21:22:07 增加开始与结束日期配置
-// 			if (!empty( $pcs ['use_condition'] ['s_date_s'] )&&strtotime($pcs ['use_condition'] ['s_date_s'])&&$condit ['startdate']<$pcs ['use_condition'] ['s_date_s']) {
-// 				continue;
-// 			}
-// 			if (!empty( $pcs ['use_condition'] ['s_date_e'] )&&strtotime($pcs ['use_condition'] ['s_date_e'])&&$condit ['startdate']>$pcs ['use_condition'] ['s_date_e']) {
-// 				continue;
-// 			}
-// 			if (!empty( $pcs ['use_condition'] ['e_date_s'] )&&strtotime($pcs ['use_condition'] ['e_date_s'])&&$condit ['enddate']<$pcs ['use_condition'] ['e_date_s']) {
-// 				continue;
-// 			}
-// 			if (!empty( $pcs ['use_condition'] ['e_date_e'] )&&strtotime($pcs ['use_condition'] ['e_date_e'])&&$condit ['enddate']>$pcs ['use_condition'] ['e_date_e']) {
-// 				continue;
-// 			}
-			$check_sdate_s = 1;
-			$check_sdate_e = 1;
 			if (!empty( $pcs ['use_condition'] ['s_date_s'] )&&strtotime($pcs ['use_condition'] ['s_date_s'])&&$condit ['startdate']<$pcs ['use_condition'] ['s_date_s']) {
-			    $check_sdate_s = 0;
+				continue;
 			}
 			if (!empty( $pcs ['use_condition'] ['s_date_e'] )&&strtotime($pcs ['use_condition'] ['s_date_e'])&&$condit ['startdate']>$pcs ['use_condition'] ['s_date_e']) {
-			    $check_sdate_e = 0;
-			}
-			if(!empty( $pcs ['use_condition'] ['s_date_m'] ) && $pcs ['use_condition'] ['s_date_m'] == 2){
-			    if (!($check_sdate_s | $check_sdate_e)){
 			        continue;
-			    }
-			}else{
-			    if (!($check_sdate_s & $check_sdate_e)){
-			        continue;
-			    }
 			}
-			$check_edate_s = 1;
-			$check_edate_e = 1;
 			if (!empty( $pcs ['use_condition'] ['e_date_s'] )&&strtotime($pcs ['use_condition'] ['e_date_s'])&&$condit ['enddate']<$pcs ['use_condition'] ['e_date_s']) {
-			    $check_edate_s = 0;
+				continue;
 			}
 			if (!empty( $pcs ['use_condition'] ['e_date_e'] )&&strtotime($pcs ['use_condition'] ['e_date_e'])&&$condit ['enddate']>$pcs ['use_condition'] ['e_date_e']) {
-			    $check_edate_e = 0;
-			}
-			if(!empty( $pcs ['use_condition'] ['e_date_m'] ) && $pcs ['use_condition'] ['e_date_m'] == 2){
-			    if (!($check_edate_s | $check_edate_e)){
 			        continue;
-			    }
-			}else{
-			    if (!($check_edate_s & $check_edate_e)){
-			        continue;
-			    }
 			}
 
 			//@Editor lGh 2016-7-6 16:03:25 最大天数限制
@@ -818,9 +781,6 @@ class Order_model extends MY_Model {
 				}
 				if (!isset($my_coupons[$pcs['coupon_condition']['couprel']])){
 					continue;
-				}else{
-					//关联房券信息，放到数据，
-					$pcs['coupon_condition']['couprel_info']=$my_coupons[$pcs['coupon_condition']['couprel']];
 				}
 			}
 
@@ -1440,9 +1400,7 @@ class Order_model extends MY_Model {
 			// $this->Coupon_model->wx_card_consume ( $data ['inter_id'], $order_wxcards ['wxcards'] );
 			// }
 			// }
-$this->db->insert('weixin_text',array('content'=>'bonus_exchange+create_order'.json_encode($config_data),'edit_date'=>date('Y-m-d H:i:s')));
 			if (! empty ( $order_addition ['point_used_amount'] ) && $data ['paytype'] != 'point') {
-$this->db->insert('weixin_text',array('content'=>'bonus_exchange+point_used_amount'.$order_addition ['point_used_amount'].'+'.$data ['paytype'],'edit_date'=>date('Y-m-d H:i:s')));
                 if(empty($config_data['PMS_BONUS_COMSUME_WAY'])||$config_data['PMS_BONUS_COMSUME_WAY']=='before'){
 
 	                $room_codes = json_decode($order_addition ['room_codes'], true);
@@ -1461,7 +1419,7 @@ $this->db->insert('weixin_text',array('content'=>'bonus_exchange+point_used_amou
                     if (! $this->Member_model->consum_point ( $data ['inter_id'], $data ['orderid'], $data ['openid'], $order_addition ['point_used_amount'],$bonus_condit)) {
                         $tips=$this->session->userdata('text_msg');
                         $tips=empty($tips)?'':$tips;
-//                         $this->db->trans_rollback ();
+                        $this->db->trans_rollback ();
                         return array (
                                 's' => 0,
                                 'errmsg' => '扣减积分失败。'.$tips
@@ -1471,7 +1429,7 @@ $this->db->insert('weixin_text',array('content'=>'bonus_exchange+point_used_amou
 			}
 
 			if ($this->db->trans_status () === FALSE) {
-// 				$this->db->trans_rollback ();
+				$this->db->trans_rollback ();
 				return array (
 						's' => 0,
 						'errmsg' => '下单失败'
@@ -1486,7 +1444,7 @@ $this->db->insert('weixin_text',array('content'=>'bonus_exchange+point_used_amou
 // 							$this->update_order_status ( $data ['inter_id'], $data ['orderid'], 1, $data ['openid'], true );
 							$has_paid=1;
 						} else {
-// 							$this->db->trans_rollback ();
+							$this->db->trans_rollback ();
 							return array (
 									's' => 0,
 									'errmsg' => '支付失败'
@@ -1511,7 +1469,7 @@ $this->db->insert('weixin_text',array('content'=>'bonus_exchange+point_used_amou
 						if (! $this->Member_model->consum_point ( $data ['inter_id'], $data ['orderid'], $data ['openid'], $order_addition ['point_used_amount'],$bonus_condit)) {
 							$tips=$this->session->userdata('text_msg');
 							$tips=empty($tips)?'':$tips;
-// 							$this->db->trans_rollback ();
+							$this->db->trans_rollback ();
 							return array (
 									's' => 0,
 									'errmsg' => '积分支付失败。'.$tips
@@ -1643,19 +1601,33 @@ $this->db->insert('weixin_text',array('content'=>'bonus_exchange+point_used_amou
 			$db = $this->load->database ( 'iwide_r1', true );
 		}
 		$s = '';
+		$union_s1='';
+		$union_s2='';
 		$o = '';
 		$a = '';
-		if (! empty ( $idents ['member_no'] ))
-			$s = "( o.member_no='" . $idents ['member_no'] . "' or ( o.openid='" . $idents ['openid'] . "' and (o.member_no ='' or o.member_no is null) )) and";
-		else if (! empty ( $idents ['openid'] ))
-			$s = " o.openid='" . $idents ['openid'] . "' and (o.member_no ='' or o.member_no is null) and ";
+		$selects=' oa.*,o.*,h.name hname,h.intro_img himg,h.address haddress,h.longitude,h.latitude,h.tel htel ';
+		if (! empty ( $idents ['member_no'] )){
+			$s = "( o.member_no='" . $idents ['member_no'] . "' or ( o.openid='" . $idents ['openid'] . "' and o.member_no ='' )) and";
+			$union_s1=" o.member_no='" . $idents ['member_no']. "' and ";
+			$union_s2=" o.openid='" . $idents ['openid'] . "' and o.member_no ='' and ";
+			$selects .=',o.id as orderbyid';
+		}else if (! empty ( $idents ['openid'] ))
+			$s = " o.openid='" . $idents ['openid'] . "' and o.member_no ='' and ";
 		else if (! empty ( $idents ['only_openid'] ))
 			$s = " o.openid='" . $idents ['only_openid'] . "' and ";
+		$s_condition = '';
 		if (isset ( $idents ['status'] ) && ! is_null ( $idents ['status'] )) {
-			$s .= ' o.status in (' . $idents ['status'] . ' ) and ';
+		    $s_condition .= ' o.status in (' . $idents ['status'] . ' ) and ';
 		}
 		if (isset ( $idents ['handled'] ) && ! is_null ( $idents ['handled'] )) {
-			$s .= ' o.handled =  ' . $idents ['handled'] . ' and ';
+		    $s_condition .= ' o.handled =  ' . $idents ['handled'] . ' and ';
+		}
+		if ($s_condition){
+    		$s .= $s_condition;
+    		if ($union_s1){
+    		    $union_s1.=$s_condition;
+    		    $union_s2.=$s_condition;
+    		}
 		}
 		if (! empty ( $idents ['orderid'] )) {
 			$o .= " o.orderid ='" . $idents ['orderid'] . "' and ";
@@ -1666,13 +1638,21 @@ $this->db->insert('weixin_text',array('content'=>'bonus_exchange+point_used_amou
 		$o .= " o.inter_id='$inter_id' and o.isdel ";
 		$o .= empty ( $idents ['isdel'] ) ? ' = 0 and ' : ' in (0,' . $idents ['isdel'] . ') and ';
 		$o .= empty ( $a ) ? '' : $a;
-		$sql = "select oa.*,o.*,h.name hname,h.intro_img himg,h.address haddress,h.longitude,h.latitude,h.tel htel
+		$sql = "select $selects 
 				 from " . $db->dbprefix ( self::TAB_HO ) . " o
 		          join " . $db->dbprefix ( self::TAB_H ) . " h
 		           join " . $db->dbprefix ( self::TAB_HOA ) . " oa
 		           	on o.orderid=oa.orderid and o.inter_id=oa.inter_id and o.hotel_id=h.hotel_id and o.inter_id=h.inter_id
-		           	 where $s $o h.inter_id = '$inter_id' ";
-		$sql .= empty ( $idents ['order_by'] ) ? ' order by o.id desc' : " order by " . $idents ['order_by'];
+		           	 where ";
+		if (!$union_s1){
+		    $sql .= " $s $o h.inter_id = '$inter_id' ";
+    		$sql .= empty ( $idents ['order_by'] ) ? ' order by o.id desc' : " order by " . $idents ['order_by'];
+		}else{
+		    $union_sql1 = $sql." $union_s1 $o h.inter_id = '$inter_id' ";
+		    $union_sql2 = $sql." $union_s2 $o h.inter_id = '$inter_id' ";
+		    $sql = $union_sql1.' UNION '.$union_sql2;
+		    $sql .= ' order by orderbyid desc' ;
+		}
 		$sql .= empty ( $idents ['nums'] ) ? '' : ' limit ' . $idents ['offset'] . ',' . $idents ['nums'];
 		$result = $db->query ( $sql )->result_array ();
 		if (! empty ( $idents ['idetail'] )) {
@@ -2133,7 +2113,7 @@ $this->db->insert('weixin_text',array('content'=>'bonus_exchange+point_used_amou
 			if ($paid)
 				$updata ['paid'] = 1;
 			$this->db->update ( self::TAB_HO, $updata );
-			return $this->handle_order ( $inter_id, $orderid, $status, $openid );
+			return $this->handle_order ( $inter_id, $orderid, $status, $openid ,array('main_db'=>1));
 		}
 		return false;
 	}
@@ -2527,28 +2507,6 @@ $this->db->insert('weixin_text',array('content'=>'bonus_exchange+point_used_amou
 								}
 							}
 						}
-						// 订单完成时发放储值返现
-						if ($order ['complete_balance_given'] == 2) {
-							$balance_info = json_decode ( $order ['complete_balance_info'], TRUE );
-							if (! empty ( $balance_info ['give_amount'] )) {
-							    $this->load->model ( 'hotel/Member_new_model' );
-							    $membership_number = empty( $order['member_no'] )? $order['jfk_member_no'] : $order['member_no'];
-								$balance_reward = $this->Member_new_model->addBalanceByCard($inter_id,$order ['openid'],$membership_number,$order ['orderid'],$balance_info ['give_amount'],'离店送','离店返现',array('crsNo'=>$order['web_orderid']));//余额退款处理
-								$this->db->where ( array (
-										'orderid' => $order ['orderid'],
-										'inter_id' => $inter_id
-								) );
-								if ($balance_reward) {
-									$this->db->update ( self::TAB_HOA, array (
-											'complete_balance_given' => 3
-									) );
-								} else {
-									$this->db->update ( self::TAB_HOA, array (
-											'complete_balance_given' => 4
-									) );
-								}
-							}
-						}
 						if ($same_count == count ( $order ['order_details'] )) {
 							$this->db->where ( array (
 									'orderid' => $order ['orderid'],
@@ -2653,11 +2611,9 @@ $this->db->insert('weixin_text',array('content'=>'order_weixin_refund+订单号�
                     		$this->set_order_wxmsg($order, 'hotel_order_cancel_notice',11);
                     	}
 
-$this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>date('Y-m-d H:i:s')));
                     	//发送微信模板消息通知酒店人员 end
 				case 5 :
 					{
-$this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>date('Y-m-d H:i:s')));
 						$this->load->model ( 'hotel/Room_status_model' );
 						$this->load->model ( 'distribute/Idistribute_model' );//加载分销接口
 			            $this->load->model('distribute/Idistribution_model');
@@ -2935,6 +2891,7 @@ $this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>
 									'handled' => 1
 							) );
 							//主单完结
+							$this->load->model ( 'distribute/Idistribution_model' );
 							$this->Idistribution_model->leave_recount_by_orders($inter_id,$order['orderid'],$real_price,$orderdays,$status,$days*$order['roomnums'],array('hotel_id'=>$order['hotel_id']));
 							$this->write_log($order,$orderdays,'主单完结');//调试
 						}
@@ -3038,29 +2995,7 @@ $this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>
                         }
 
                     }
-                    //储值返现
-                    if ($order ['complete_balance_given'] == 0) {
-                    	$this->load->model ( 'hotel/Hotel_config_model' );
-                    	$config_data = $this->Hotel_config_model->get_hotel_config ( $inter_id, 'HOTEL', $order['hotel_id'], array (
-                    			'BALANCE_BACK_RATE'
-                    	) );
-                        $balance_given=$this->Member_model->check_balance_giverules( $inter_id, $order, $config_data);
 
-                        $this->db->where ( array (
-                            'orderid' => $order ['orderid'],
-                            'inter_id' => $inter_id
-                        ) );
-                        if ($balance_given ['code'] == 1) {
-                            $this->db->update ( self::TAB_HOA, array (
-                                'complete_balance_info' => json_encode ( $balance_given ['result'] ),
-                                'complete_balance_given' => 2
-                            ) );
-                        } else {
-                            $this->db->update ( self::TAB_HOA, array (
-                                'complete_balance_given' => 1
-                            ) );
-                        }
-                    }
 
                     //生成分销信息 start
 					$this->load->model ( 'distribute/Idistribution_model' );
@@ -3128,8 +3063,6 @@ $this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>
 						'saler' => isset($saler['id'])? $saler['id']:0,//分销员id
 						'link_saler' => $order['link_saler'],//链接分销员id
 						'own_saler' => $order['own_saler'],//下单分销员id
-						'link_f_saler' => $order['link_f_saler'],//链接泛分销员id
-						'own_f_saler' => $order['own_f_saler'],//下单泛分销员id
 					);
 					$this->Idistribution_model->get_best_by_order($O_params);
 					$this->write_log($order,$O_params,'主单下单');//调试
@@ -3158,13 +3091,11 @@ $this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>
 			$this->db->trans_begin ();
 			if ($item ['istatus'] == 2 || $item ['istatus'] == 1) {
 				$this->load->helper ( 'date' );
-// 				$begin_range = get_day_range ( date ( 'Ymd', strtotime ( '- 10 day', strtotime ( $item ['startdate'] ) ) ), date ( 'Ymd', strtotime ( '+ 10 day', strtotime ( $item ['startdate'] ) ) ), 'array' );
-// 				$end_range = get_day_range ( date ( 'Ymd', strtotime ( '- 10 day', strtotime ( $item ['enddate'] ) ) ), date ( 'Ymd', strtotime ( '+ 10 day', strtotime ( $item ['enddate'] ) ) ), 'array' );
 				$updata = array ();
 				$order_update = array ();
 				$main_order=$this->get_order($inter_id,array('orderid'=>$orderid));
 				$main_order=$main_order[0];
-				if(isset($data['new_price'])&&$data['new_price']>=0){
+				if(isset($data['new_price'])&&$data['new_price']>=0&&$data['new_price']!=$item['iprice']){
 				    $updata ['iprice'] = $data ['new_price'];
 				
 				    if ($main_order ['complete_point_given'] == 2) {
@@ -3191,10 +3122,20 @@ $this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>
 				        $order_update ['complete_balance_info'] = json_encode ( $balance_info );
 				    }
 				}
-				if (! empty ( $data ['startdate'] ) || ! empty ( $data ['enddate'] ) || !empty($updata ['iprice'])) {
+				if (! empty ( $data ['startdate'] ) || ! empty ( $data ['enddate'] ) || isset($updata ['iprice'])) {
+    				$min_begin_date =  date ( 'Ymd', strtotime ( '- 30 day', strtotime ( $item ['startdate'] ) )) ;
+    				$max_begin_date =  date ( 'Ymd', strtotime ( '+ 90 day', strtotime ( $item ['startdate'] ) )) ;
+    				$min_end_date =  date ( 'Ymd', strtotime ( '- 30 day', strtotime ( $item ['enddate'] ) )) ;
+    				$max_end_date =  date ( 'Ymd', strtotime ( '+ 90 day', strtotime ( $item ['enddate'] ) )) ;
 				    $data ['startdate'] = empty ( $data ['startdate'] ) ? $item ['startdate'] : date ( 'Ymd', strtotime ( $data ['startdate'] ) );
 				    $data ['enddate'] = empty ( $data ['enddate'] ) ? $item ['enddate'] : date ( 'Ymd', strtotime ( $data ['enddate'] ) );
-				    if ($data ['enddate'] >= $data ['startdate']) {
+				    if ($data ['startdate'] < $min_begin_date || $data ['startdate'] > $max_begin_date){
+				        unset($data ['startdate']);
+				    }
+				    if ($data ['enddate'] < $min_end_date || $data ['enddate'] > $max_end_date){
+				        unset($data ['enddate']);
+				    }
+				    if ((!empty($data ['startdate']) && !empty($data ['enddate']) && $data ['enddate'] >= $data ['startdate']) && ($data ['startdate']!=$item['startdate'] || $data ['enddate']!=$item['enddate']  || (isset($updata ['iprice']) && $updata ['iprice']!=$item['iprice']))) {
                         $updata ['startdate'] = $data ['startdate'];
                         $updata ['enddate'] = $data ['enddate'];
     
@@ -3403,7 +3344,7 @@ $this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>
 			$this->db->trans_begin ();
 			switch ($status) {
 				case 1 :
-					$this->handle_order ( $inter_id, $orderid, 1 );
+					$this->handle_order ( $inter_id, $orderid, 1 ,'',array('main_db'=>1));
 					break;
 				case 2 :
 					$this->load->model ( 'plugins/Template_msg_model' );
@@ -3450,7 +3391,8 @@ $this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>
 								'handled' => 1
 						) );
 						$this->handle_order ( $inter_id, $orderid, $status, '', array (
-								'no_item' => true
+								'no_item' => true,
+                                'main_db' => 1
 						) );
 					}
 					// 处理库存
@@ -3507,14 +3449,6 @@ $this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>
 							$order_update ['complete_point_info'] = json_encode ( $point_info );
 						}
 					}
-					//更新离店储值返现
-					if ($main_order ['complete_balance_given'] == 2) {
-						$balance_info = json_decode ( $main_order ['complete_balance_info'], TRUE );
-						if (! empty ( $balance_info ['give_amount'] )) {
-							$balance_info ['give_amount'] -= $this_item ['iprice'] * $balance_info ['give_rate'];
-						}
-						$order_update ['complete_balance_info'] = json_encode ( $balance_info );
-					}
 					$updata ['handled'] = 1;
 
 					// 更新优惠信息
@@ -3548,7 +3482,8 @@ $this->db->insert('weixin_text',array('content'=>'cancel_order+11','edit_date'=>
 						) );
 						if($haven_in > 0){
 							$this->handle_order ( $inter_id, $orderid, 3, '', array (
-									'no_item' => true
+									'no_item' => true,
+                                    'main_db' => 1
 							) );
 						}
 					}

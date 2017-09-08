@@ -131,11 +131,11 @@ $lang['adminrole_controller']= array(
     
 );
 $lang['adminrole_action'] = array(
-    'index' => 'index方法',
+    'index' => '列表页',
     'grid' => '查看列表',
     'add' => '新增数据',
     'edit' => '查看详情',
-    'edit_post' => '更新数据',
+    'edit_post' => '修改数据',
     'delete' => '删除数据',
     'unbinding'=>'解绑会员',
     'card_user_info'=>'优惠券详细',

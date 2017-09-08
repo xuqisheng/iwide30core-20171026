@@ -893,7 +893,7 @@ class Template_msg_model extends CI_Model {
                 $temp_str = str_replace ( '{BOOK_USER}', $order ['consignee'], $text );
                 $temp_str = str_replace('{BOOK_PHONE}', $order['phone'], $temp_str);
                 $temp_str = str_replace('{GOODS_INFO}', $order['show_name'], $temp_str);
-                $temp_str = str_replace('{BOOK_DATE}', $order['dissipate'], $temp_str);
+                $temp_str = str_replace('{BOOK_DATE}', date('Y-m-d',strtotime($order['dissipate'])), $temp_str);
                 $temp_str = str_replace ('{ORDER_SN}', $order ['order_sn'], $temp_str);
                 $temp_str = str_replace('{PAY_MONEY}', $order['sub_total'], $temp_str);
                 $temp_str = str_replace('{GOODS_INFO}', $order['show_name'], $temp_str);

@@ -54,8 +54,8 @@ if (!function_exists('check_separate_backend_frontend')) {
             'type_code' => 'SEPARATE_BACKEND_FRONTEND'
         );
         $conf = IWIDE_DB('Member', 'iwide_vip', true)->where($where)->limit(1)->get('inter_member_config')->row_array();
-        if (!empty($conf)) return false;
-        $ids = implode(',', $conf['value']);
+        if (empty($conf)) return false;
+        $ids = explode(',', $conf['value']);
         if (in_array($id, $ids)) {
             return true;
         }
@@ -175,5 +175,37 @@ if (!function_exists('IWIDE_DB')) {
             return $_model[$guid];
         }
         return false;
+    }
+}
+
+
+if (!function_exists('my_listorder')){
+    /**
+     * 自定义排序（顺序排序）
+     * @param integer $a 第一个比较值
+     * @param integer $b 第二个比较值
+     * @return int
+     */
+    function my_listorder($a,$b){
+        if(is_array($a)) $a = end($a);
+        if(is_array($b)) $b = end($b);
+        if ($a===$b) return 0;
+        return ($a<$b)?-1:1;
+    }
+}
+
+
+if (!function_exists('my_rlistorder')){
+    /**
+     * 自定义排序 (逆向排序)
+     * @param integer $a 第一个比较值
+     * @param integer $b 第二个比较值
+     * @return int
+     */
+    function my_rlistorder($a,$b){
+        if(is_array($a)) $a = end($a);
+        if(is_array($b)) $b = end($b);
+        if ($a===$b) return 0;
+        return ($a>$b)?-1:1;
     }
 }

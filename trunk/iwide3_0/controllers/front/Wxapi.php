@@ -204,47 +204,56 @@ class Wxapi extends My_Controller {
 					}
 					break;
 				case 'SCAN' :
-					$this->load->model ( 'wx/Qrcode_model' );
-					// $this->Qrcode_model->scan_log($data ['EventKey'],$this->token);
-					$this->Qrcode_model->scan_log ( $data ['EventKey'], $this->token, $data ['FromUserName'], NULL, date ( 'Y-m-d H:i:s' ) );
 
                     $inter_id = $this->token;
                     $qrcode_id = str_replace('qrscene_', '', $data['EventKey']);
 
-                    //商城：scene_id以44开头的将被拦截，跳至商品详情
-                    if(substr($qrcode_id, 0, 2) == (int)\App\services\soma\WxService::QR_CODE_PRODUCT_DETAIL){
-                        $arr = array();
-                        $type = 'news';
-                        //商品
-                        $productId = substr($qrcode_id, 2, strlen($qrcode_id));
-                        $this->load->model('soma/Product_package_model', 'productPackageModel');
-                        $productPackageModel = $this->productPackageModel->getByID($productId, $inter_id);
-                        if($productPackageModel){
-                            array_push($arr,
-                                array(
-                                    'Title' => $productPackageModel['name'],
-                                    'Description' => $productPackageModel['name'],
-                                    'PicUrl' => $productPackageModel['face_img'],
-                                    'Url' => site_url('soma/package/package_detail?id='.$inter_id.'&pid='.$productId)
-                                )
-                            );
-                            return array($arr, $type);
-                        }
-                    }
-                    //商城：scene_id以43开头的将被拦截，跳至商城首页
-                    if(substr($qrcode_id, 0, 2) == (int)\App\services\soma\WxService::QR_CODE_SOMA_INDEX){
-                        $arr = array();
-                        $type = 'news';
-                        array_push($arr,
-                            array(
-                                'Title' => '商城',
-                                'Description' => '点击进入商城',
-                                'PicUrl' => '',
-                                'Url' => site_url('soma/package/index?id='.$inter_id)
-                            )
-                        );
-                        return array($arr, $type);
-                    }
+//                    //----------------------------------商城----------------------------
+//                    $splitList = explode('_', $qrcode_id);
+//                    //商品详情，格式：soma_detail_商品id_分销员id_泛分销id
+//                    if(count($splitList) == 5){
+//                        if($splitList[0].'_'.$splitList[1].'_' == \App\services\soma\WxService::QR_CODE_PRODUCT_DETAIL){
+//                            $arr = array();
+//                            $type = 'news';
+//                            //商品
+//                            $productId = $splitList[2];
+//                            $this->load->model('soma/Product_package_model', 'productPackageModel');
+//                            $productPackageModel = $this->productPackageModel->getByID($productId, $inter_id);
+//                            if($productPackageModel){
+//                                array_push($arr,
+//                                    array(
+//                                        'Title' => $productPackageModel['name'],
+//                                        'Description' => $productPackageModel['name'],
+//                                        'PicUrl' => $productPackageModel['face_img'],
+//                                        'Url' => site_url('soma/package/package_detail?id='.$inter_id.'&pid='.$productId.'&saler='.$splitList[3].'&fans_saler='.$splitList[4])
+//                                    )
+//                                );
+//                                return array($arr, $type);
+//                            }
+//                        }
+//                    }
+//                    //商城首页，格式：soma_index_分销员id_泛分销id
+//                    if(count($splitList) == 4){
+//                        if($splitList[0].'_'.$splitList[1].'_' == \App\services\soma\WxService::QR_CODE_SOMA_INDEX){
+//                            $arr = array();
+//                            $type = 'news';
+//                            array_push($arr,
+//                                array(
+//                                    'Title' => '商城',
+//                                    'Description' => '点击进入商城',
+//                                    'PicUrl' => '',
+//                                    'Url' => site_url('soma/package/index?id='.$inter_id.'&saler='.$splitList[2].'&fans_saler='.$splitList[3])
+//                                )
+//                            );
+//                            return array($arr, $type);
+//                        }
+//                    }
+//                   //-------------------------------商城：scene_id以44开头的将被拦截，跳至商品详情----------------------------
+
+                    //分销
+                    $this->load->model ( 'wx/Qrcode_model' );
+                    // $this->Qrcode_model->scan_log($data ['EventKey'],$this->token);
+                    $this->Qrcode_model->scan_log ( $data ['EventKey'], $this->token, $data ['FromUserName'], NULL, date ( 'Y-m-d H:i:s' ) );
 
 					//礼包二维码扫码测试
 					if(substr($qrcode_id, 0, 2) == 99){

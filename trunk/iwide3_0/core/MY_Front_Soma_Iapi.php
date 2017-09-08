@@ -38,58 +38,96 @@ class MY_Front_Soma_Iapi extends MY_Front_Iapi
      */
     private function _initLink()
     {
+
+        $tkId = $this->session->tempdata('tkid');
+        $brandName = $this->session->tempdata('brandname');
+
         $this->link = array(
-            'home' => site_url('soma/package/index') . "?id=" . $this->inter_id,
-            'product_link' => site_url('soma/package/package_detail') . "?id=" . $this->inter_id . '&pid=',
-            'order_link' => site_url('soma/order/my_order_list') . "?id=" . $this->inter_id,
-            'center_link' => site_url("membervip/center") . "?id=" . $this->inter_id,
-            'prepay_link' => site_url("soma/package/package_pay"),
+            'home' => site_url('soma/package/index') . "?id=" . $this->inter_id."&tkid=".$tkId.'&brandname='.$brandName,
+            'product_link' => site_url('soma/package/package_detail') . "?id=" . $this->inter_id ."&tkid=".$tkId.'&brandname='.$brandName. '&pid=',
+            'order_link' => site_url('soma/order/my_order_list') . "?id=" . $this->inter_id."&tkid=".$tkId.'&brandname='.$brandName,
+            'center_link' => site_url("membervip/center") . "?id=" . $this->inter_id."&tkid=".$tkId.'&brandname='.$brandName,
+            'prepay_link' => site_url("soma/package/package_pay").'?btype=package'."&tkid=".$tkId.'&brandname='.$brandName,
             // 订单中心
             'my_order_list' => site_url('iapi/soma/order/index') . "?" . http_build_query(['id' => $this->inter_id, 'type' => '']), // 我的订单(全部、待使用、已完成)
-            'my_gift_list' => site_url('iapi/soma/order/gift_list') . "?id=" . $this->inter_id, // 我的礼物
-            'detail_link' => site_url('soma/order/order_detail') . "?id=" . $this->inter_id . '&oid=', //  订单详情
-            'delete_order_link' => site_url('iapi/soma/order/index') . "?id=" . $this->inter_id, // 删除 需要参数 oid=
+            'my_gift_list' => site_url('iapi/soma/order/gift_list') . "?id=" . $this->inter_id."&tkid=".$tkId.'&brandname='.$brandName, // 我的礼物
+            'detail_link' => site_url('soma/order/order_detail') . "?id=" . $this->inter_id."&tkid=".$tkId.'&brandname='.$brandName . '&oid=', //  订单详情
+            'delete_order_link' => site_url('iapi/soma/order/index') . "?id=" . $this->inter_id."&tkid=".$tkId.'&brandname='.$brandName, // 删除 需要参数 oid=
             // 我的礼物
-            'package_received' => site_url('soma/gift/package_received') . '?id=' . $this->inter_id . '&gid=', // 礼物详情
-            'package_list_send' => site_url('soma/gift/package_list_send') . '?id=' . $this->inter_id . '&fans_saler=', // 送出礼物
-            'package_list_received' => site_url('soma/gift/package_list_received') . '?id=' . $this->inter_id . '&fans_saler=', // 收到礼物
+            'package_received' => site_url('soma/gift/package_received') . '?id=' . $this->inter_id ."&tkid=".$tkId.'&brandname='.$brandName. '&gid=', // 礼物详情
+            'package_list_send' => site_url('soma/gift/package_list_send') . '?id=' . $this->inter_id . '&fans_saler='."&tkid=".$tkId.'&brandname='.$brandName, // 送出礼物
+            'package_list_received' => site_url('soma/gift/package_list_received') . '?id=' . $this->inter_id ."&tkid=".$tkId.'&brandname='.$brandName. '&fans_saler=', // 收到礼物
             // 订单明细
             'package_booking' => site_url('soma/consumer/package_booking') . '?' . http_build_query([
-                    'id' => $this->inter_id, 'aiid' => '%s', 'aiidi' => 0, 'bsn' => 'package'
+                    'id' => $this->inter_id,
+                    'aiid' => '%s',
+                    'aiidi' => 0,
+                    'bsn' => 'package',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]), // 预约
             'package_usage' => site_url('soma/consumer/package_usage') . '?' . http_build_query([
-                    'id' => $this->inter_id, 'aiid' => '%s', 'aiidi' => 0, 'bsn' => 'package'
+                    'id' => $this->inter_id,
+                    'aiid' => '%s',
+                    'aiidi' => 0,
+                    'bsn' => 'package',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]), // 验卷
             'package_send' => site_url('soma/gift/package_send') . '?' . http_build_query([
-                    'id' => $this->inter_id, 'aiid' => '%s', 'aiidi' => 0, 'group' => '2',
-                    'send_from' => '1', 'send_order_id' => '', 'bsn' => 'package'
+                    'id' => $this->inter_id,
+                    'aiid' => '%s',
+                    'aiidi' => 0,
+                    'group' => '2',
+                    'send_from' => '1',
+                    'send_order_id' => '',
+                    'bsn' => 'package',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]), // 转赠
             'package_detail' => site_url('soma/package/package_detail') . '?' . http_build_query([
-                    'id' => $this->inter_id, 'pid' => ''
+                    'id' => $this->inter_id,
+                    'pid' => '',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]), // 订单详情
             'show_shipping_info' => site_url('soma/consumer/show_shipping_info') . '?' . http_build_query([
-                    'oid' => '', 'gid' => '', 'bsn' => 'package', 'id' => $this->inter_id,
+                    'oid' => '',
+                    'gid' => '',
+                    'bsn' => 'package',
+                    'id' => $this->inter_id,
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]), // 邮寄
             // 卷码相关
             'get_received_list' => site_url('soma/gift/get_received_list') . '?' . http_build_query([
                     //'gid' => '', // iwide_soma_gift_order_1001.gift_id  || iwide_soma_gift_order_receiver_1001.gift_id
-                    'id' => $this->inter_id, 'bsn' => 'package',
+                    'id' => $this->inter_id,
+                    'bsn' => 'package',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]), // 卷码 - 已赠送（赠送）
             'shipping_detail' => site_url('soma/consumer/shipping_detail') . '?' . http_build_query([
                     //'spid' => '', // iwide_soma_consumer_shipping.shipping_id
-                    'id' => $this->inter_id, 'bsn' => 'package',
+                    'id' => $this->inter_id,
+                    'bsn' => 'package',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]), // 卷码 - 已邮寄（邮寄）
             'package_review' => site_url('soma/consumer/package_review') . '?' . http_build_query([
                     //'ciid' => '',
-                    'id' => $this->inter_id, 'bsn' => 'package',
+                    'id' => $this->inter_id,
+                    'bsn' => 'package',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]), // 卷码 - 已使用（消费）
-            'refund_index_link' => site_url('soma/refund/apply') . "?id=" . $this->inter_id . '&oid=',
+            'refund_index_link' => site_url('soma/refund/apply') . "?id=" . $this->inter_id ."&tkid=".$tkId.'&brandname='.$brandName. '&oid=',
             //微信支付
-            'wx_pay' => site_url('wxpay/soma_pay'),
+            'wx_pay' => site_url('wxpay/soma_pay').'?id=' . $this->inter_id."&tkid=".$tkId.'&brandname='.$brandName,
             //威富通支付
-            'wft_pay' => site_url('Wftpay/soma_pay'),
+            'wft_pay' => site_url('Wftpay/soma_pay').'?id=' . $this->inter_id."&tkid=".$tkId.'&brandname='.$brandName,
             //直接支付
-            'already_pay' => site_url('soma/package/success'),
+            'already_pay' => site_url('soma/package/success').'?id=' . $this->inter_id."&tkid=".$tkId.'&brandname='.$brandName,
 
             // 微信订房 - 选酒店房型 [页面]
             'wx_select_hotel_link' => site_url('soma/booking/wx_select_hotel') . '?' . http_build_query([
@@ -98,6 +136,8 @@ class MY_Front_Soma_Iapi extends MY_Front_Iapi
                     'aiid' => '',
                     'aiidi' => '',
                     'oid' => '',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]),
             // 微信订房 - 选酒店房型 [api]
             'wx_select_hotel_api_link' => site_url('iapi/soma/order/wx_select_hotel') . '?' . http_build_query([
@@ -106,6 +146,8 @@ class MY_Front_Soma_Iapi extends MY_Front_Iapi
                     'aiid' => '',
                     'aiidi' => '',
                     'oid' => '',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]),
 
             // 微信订房 - 价格日历
@@ -118,6 +160,8 @@ class MY_Front_Soma_Iapi extends MY_Front_Iapi
                     'hid' => '',
                     'rmid' => '',
                     'cdid' => '',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]),
 
             // 下单成功跳转的页面
@@ -128,12 +172,14 @@ class MY_Front_Soma_Iapi extends MY_Front_Iapi
                     'bsn' => 'package',
                     'id' => $this->inter_id,
                     'fans_saler' => '',
+                    'tkid' => $tkId,
+                    'brandname' => $brandName
                 ]),
 
             //退款首页
-            'refund_index' => site_url('soma/refund/apply') . "?id=" . $this->inter_id . '&oid=',
+            'refund_index' => site_url('soma/refund/apply') . "?id=" . $this->inter_id."&tkid=".$tkId.'&brandname='.$brandName . '&oid=',
             //退款详情 //http://credit.iwide.cn/index.php/soma/refund/detail?&oid=1000013037&saler=35
-            'refund_detail' => site_url('soma/refund/detail') . "?id=" . $this->inter_id .'&bsn=package',
+            'refund_detail' => site_url('soma/refund/detail') . "?id=" . $this->inter_id .'&bsn=package'."&tkid=".$tkId.'&brandname='.$brandName,
         );
     }
 

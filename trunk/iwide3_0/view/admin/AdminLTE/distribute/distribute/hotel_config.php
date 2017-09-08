@@ -67,7 +67,7 @@ echo $block_left;
 					<fieldset>
 					<div class="form-group">
 							<label class="control-label">分销保护期</label>
-							<p class="control-label">粉丝通过非分销员（包括粉丝或员工）链接购买商品，在&nbsp;<input class="form-control" type="text" id="protection_val" name="protection_val" value=" <?php echo $protection_config->protection_time == 0 ? 0 : intval($protection_config->protection_time/3600)?>" style="width:80px;display:inline;text-align:right;" onkeyup="value=value.replace(/[^\d]/g,'') "onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))" />&nbsp;小时内可将绩效归属最后一个将其带入金房卡平台的分销员</p>
+							<p class="control-label">粉丝通过非分销员链接（如公众号或微信图文中不带分销员ID的链接）购买商品，如在购买时间之前&nbsp;<input class="form-control" type="text" id="protection_val" name="protection_val" value=" <?php echo $protection_config->protection_time == 0 ? 0 : intval($protection_config->protection_time/3600)?>" style="width:80px;display:inline;text-align:right;" onkeyup="value=value.replace(/[^\d]/g,'') "onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))" />&nbsp;小时内，他有点击过分销员分享的链接，则该笔奖励归属于最近一次点击对应的分销员</p>
 						</div>
 						<div class="form-group">
 							<label class="control-label">启用状态 </label>

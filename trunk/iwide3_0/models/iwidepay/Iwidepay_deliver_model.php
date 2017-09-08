@@ -34,7 +34,7 @@ class Iwidepay_Deliver_Model extends MY_Model{
     //查询iwidepay_identify表中数据
     public function get_iwidepay_identify_info($where = array(),$select = '*',$muti = true){
         $this->db->select($select);
-        if(empty($where)){
+        if(!empty($where)){
             $this->db->where($where);
         }
         $res = $this->db->get('iwidepay_identify');
@@ -122,7 +122,7 @@ class Iwidepay_Deliver_Model extends MY_Model{
         $record['partner_trade_no'] = $partner_trade_no;
         $record['type'] = 2;//检测账户转账
         $record['status'] = 0;//0 初始状态（未回调） 1 成功  2失败  3异常
-        $record['iscompay'] = $data['is_company'];//对公对私
+        $record['iscompay'] = $data['isCompay'];//对公对私
         $record['identify'] = $identifier;
         $record['add_time'] = date('Y-m-d H:i:s');
         $ins_res = $this->db->insert('iwidepay_identify',$record);
@@ -138,6 +138,7 @@ class Iwidepay_Deliver_Model extends MY_Model{
         $arr['sign'] = md5($chart.$arr['orderNo'].$arr['orderDate'].$arr['transAmt'].$arr['transId'].$arr['customerName'].$arr['acctNo'].$chart);
         $return_data = doCurlPostRequest ( $this->get_refund_url(), http_build_query($arr),array(),30);
         MYLOG::w('转账返回数据：'.$return_data,'iwidepay/check_send');
+        $return_data = $this->handle_encrypt($return_data,$chart,false);//这里记日志了
         if(!$return_data){       
             $return['errmsg'] = 'exception';
             $return ['remark'] = '签名回来无数据返回，异常' ;
@@ -215,27 +216,30 @@ class Iwidepay_Deliver_Model extends MY_Model{
     //处理转账 对公对私
     public function handle_transfer($data){
         if($this->redis_lock('get')){
+            MYLOG::w('后台转账发起：get锁住了'.$data['bank_card_no'],'iwidepay/send');
             return false;
         }
         if(!$this->check_bank_redis($data)){
+            MYLOG::w('后台转账发起：redis不通过'.$data['bank_card_no'],'iwidepay/send');
             return false;
         }
+        MYLOG::w('后台转账发起，到达handle_transfer：卡号：' .$data['bank_card_no'],'iwidepay/send');
         $res = $this->transfer_pay($data);
         if($res['errmsg'] == 'ok'){//成功的 更新transfer表状态
-            /*$up_param['send_status'] = 1;//转账成功
+            $up_param['send_status'] = 1;//转账成功
             $up_param['partner_trade_no'] = $res['partner_trade_no'];
             $up_param['send_time'] = date('Y-m-d H:i:s');
             $this->db->where(array('record_id'=>$data['id'],'status'=>2));
             $update_st = $this->db->update('iwidepay_transfer',$up_param);
             if(!$this->db->affected_rows()){
-                MYLOG::w('转账后续update失败' . json_encode($data),'iwidepay/send');
+                MYLOG::w('转账后续update失败:transfer|' . json_encode($data),'iwidepay/send');
                 $this->redis_lock('set');
                 return false;
-            }*/
+            }
             $this->db->where(array('bank_card_no'=>$data['bank_card_no'],'handle_date'=>date('Ymd')));
             $this->db->update('iwidepay_settlement',array('status'=>1));
             if(!$this->db->affected_rows()){
-                MYLOG::w('转账后续update失败' . json_encode($data),'iwidepay/send');
+                MYLOG::w('转账后续update失败：settlement|' . json_encode($data),'iwidepay/send');
                 $this->redis_lock('set');
                 return false;
             }
@@ -243,19 +247,19 @@ class Iwidepay_Deliver_Model extends MY_Model{
 
         }elseif($res['errmsg'] == 'exception'){//异常
             MYLOG::w('转账异常' . json_encode($data),'iwidepay/send');
-            /*$this->db->where(array('record_id'=>$data['id'],'status'=>2));
+            $this->db->where(array('record_id'=>$data['id'],'status'=>2));
             $up_param['send_status'] = 3;//转账异常
             $up_param['partner_trade_no'] = isset($res['partner_trade_no'])?$res['partner_trade_no']:'';
             $update_st = $this->db->update('iwidepay_transfer',$up_param);
             if(!$this->db->affected_rows()){
-                MYLOG::w('转账后续update失败' . json_encode($data),'iwidepay/send');
+                MYLOG::w('转账后续update失败：transfer|' . json_encode($data),'iwidepay/send');
                 $this->redis_lock('set');
                 return false;
-            }*/
+            }
             $this->db->where(array('bank_card_no'=>$data['bank_card_no'],'handle_date'=>date('Ymd')));
             $this->db->update('iwidepay_settlement',array('status'=>3));
             if(!$this->db->affected_rows()){
-                MYLOG::w('转账后续update失败' . json_encode($data),'iwidepay/send');
+                MYLOG::w('转账后续update失败：settlement|' . json_encode($data),'iwidepay/send');
                 $this->redis_lock('set');
                 return false;
             }
@@ -273,7 +277,7 @@ class Iwidepay_Deliver_Model extends MY_Model{
             $this->db->where(array('bank_card_no'=>$data['bank_card_no'],'handle_date'=>date('Ymd')));
             $this->db->update('iwidepay_settlement',array('status'=>2));
             if(!$this->db->affected_rows()){
-                MYLOG::w('转账后续update失败' . json_encode($data),'iwidepay/send');
+                MYLOG::w('转账后续update失败:settlement|' . json_encode($data),'iwidepay/send');
                 $this->redis_lock('set');
                 return false;
             }

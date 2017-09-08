@@ -890,3 +890,76 @@ if (! function_exists('with')) {
         return $object;
     }
 }
+
+
+if (! function_exists('arrayColumn')) {
+    /**
+     * Return the given object. Useful for chaining.
+     * 二位数组转指定索引下标的一维数组
+     * @param  mixed  $object
+     * @return mixed
+     */
+    function arrayColumn($array,$field){
+
+        //数组转换
+        $result = array_column($array,$field);
+        //去除重复
+        $result = array_unique($result);
+        //重新下标排序
+        $result = array_values($result);
+
+        //返回结果处理
+        $result = empty($result) ? '' : $result;
+
+        return $result;
+    }
+
+}
+
+
+if (! function_exists('arrayField')) {
+    /**
+     * Return the given object. Useful for chaining.
+     * 二位数组转指定键值为当前数组的索引下标
+     * @param  mixed $object
+     * @return mixed
+     */
+    function arrayField($array, $field)
+    {
+
+        //判断是否是二维数组
+        if (count($array) == count($array, 1)) {
+            //一维数组
+            return $array;
+        }
+
+        $newArray = array();
+        foreach ($array as $key => $val) {
+            //键值为空过滤
+            if (empty($val[$field]) && $val[$field] != 0) {
+                continue;
+            }
+            $newArray[$val[$field]] = $val;
+        }
+
+        return $newArray;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

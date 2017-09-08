@@ -142,7 +142,17 @@
                                     <div class="h20 point room_list_exclusive" style="color:#c3b686"><span><?php echo $tag;?></span></div>
                                     <?php }}?>
                                     <?php if(isset($si['useable_coupon_favour']) && !empty($si['useable_coupon_favour'])){ ?>
-                                        <div class="h20 point room_list_exclusive" style="color:#c3b686"><span><?php echo '券可减'.$si['useable_coupon_favour'].'元';?></span></div>
+                                        <div class="h20 point room_list_exclusive" style="color:#c3b686">
+                                            <span>
+                                                <?php
+                                                if(isset($si['coupon_type']) && $si['coupon_type']!='discount'){
+                                                    echo '券可减'.$si['useable_coupon_favour'].'元';
+                                                }else{
+                                                    echo '可用'.($si['useable_coupon_favour']*10).'折券';
+                                                }
+                                                ?>
+                                            </span>
+                                        </div>
                                     <?php }?>
                                     <?php if($si['wxpay_favour_sign']==1){?>
                                         <div class="h20 point room_list_exclusive" style="color:#c3b686"><span><?php echo '微信支付减'.$si['bookpolicy_condition']['wxpay_favour'].'元';?></span></div>
@@ -376,7 +386,11 @@
                             }
 
                             if(si.useable_coupon_favour !=undefined && si.useable_coupon_favour!=''){
+                                if(si.coupon_type == 'discount'){
+                                    r_temp +='<div class="h20 point room_list_exclusive" style="color:#c3b686"><span>可用'+parseFloat(si.useable_coupon_favour)*10+'折券</span></div>';
+                                }else{
                                     r_temp +='<div class="h20 point room_list_exclusive" style="color:#c3b686"><span>券可减'+si.useable_coupon_favour+'元</span></div>';
+                                }
                             }
 
                             if(si.wxpay_favour_sign ==1){

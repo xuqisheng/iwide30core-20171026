@@ -330,7 +330,7 @@ class Activity_killsec extends \MY_Model_Soma
         $nowTime = date('Y-m-d H:i:s');
         $fieldArr[] = 'start_time < ';
         $valueArr[] = $nowTime;
-        $fieldArr[] = 'killsec_time > ';
+        $fieldArr[] = 'end_time > ';
         $valueArr[] = $nowTime;
         $fieldArr[] = 'product_id';
         $valueArr[] = $pids;

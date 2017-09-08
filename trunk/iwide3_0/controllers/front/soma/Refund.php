@@ -183,7 +183,7 @@ class Refund extends MY_Front_Soma {
 
             $this->_view("header", $title );
         }
-
+        $this->headerDatas['title'] = '订单退款申请';
         $this->_view( 'refund', $data );
     }
 
@@ -491,6 +491,7 @@ class Refund extends MY_Front_Soma {
             );
             $this->_view("header", $title );
         }
+        $this->headerDatas['title'] = '退款详情';
         $this->_view('refund_status', $data );
     }
 

@@ -24,7 +24,27 @@ class Qrcodes extends MY_Admin {
         return 'wx/qrcode_model';
     }
 	public function index(){
-		echo '';
+		$inter_id= $this->session->get_admin_inter_id();
+		if($inter_id== FULL_ACCESS) $filter= array();
+		else if($inter_id) $filter= array('inter_id'=>$inter_id );
+		else $filter= array('inter_id'=>'deny' );
+		//print_r($filter);die;
+		
+		/** 添加 过滤条件js开始  **/
+		$model_name= $this->main_model_name();
+		$model= $this->_load_model($model_name);
+		
+		if(is_ajax_request())
+			//处理ajax请求，参数规格不一样
+			$get_filter= $this->_ajax_params_parse( $this->input->post(), $model );
+			else
+				$get_filter= $this->input->get('filter');
+		
+				if(is_array($get_filter)) $filter= $get_filter+ $filter;
+		
+				/** 添加 过滤条件js结束  **/
+		
+				$this->_grid($filter, []);
 	}
 
 	public function qrcode_list() {

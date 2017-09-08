@@ -6,6 +6,17 @@
 class Send_records_model extends MY_Model{
 	
 	/**
+	 * 成功发放状态
+	 * @var integer
+	 */
+	const SEND_STATUS_SUCCESS = 1;
+	/**
+	 * 发放失败状态
+	 * @var integer
+	 */
+	const SEND_STATUS_FAILD   = 2;
+	
+	/**
 	 * 主发放记录
 	 * 
 	 * @param unknown $inter_id        	
@@ -57,7 +68,7 @@ class Send_records_model extends MY_Model{
 		if($source == 2)
 			return $this->get_records_exts($inter_id, $batch_no, $status, $order_no, $saler_no, $saler_name, $limit, $offset);
 		$sql = "SELECT dc.batch_no,dc.inter_id,dc.saler,dc.openid,ga.hotel_id,dc.`status`,dc.remark,ga.grade_table,ga.grade_openid,
-                        ga.grade_id,ga.order_amount,ga.grade_total,ga.grade_amount,ga.grade_time,ga.partner_trade_no,ge.hotel_name,
+                        ga.grade_id,ga.order_amount,ga.grade_total,ga.grade_amount,ga.grade_time,ga.partner_trade_no,ge.hotel_name,dc.id gid,
                         ge.order_id,ge.product,ge.staff_name,dc.send_time,dc.send_by, ga.grade_table,hoi.startdate,hoi.enddate
 				FROM iwide_distribute_send_record dc 
 				LEFT JOIN iwide_distribute_send_grade_rel gr ON dc.id=gr.sr_id 
@@ -234,5 +245,46 @@ WHERE dc.inter_id=? AND dc.batch_no=?";
 			$param [] = $limit;
 		}
 		return $this->_db('iwide_r1')->query ( $sql, $param );
+	}
+	/**
+	 * 手工重置发放异常绩效状态
+	 * @param integer $id 发放ID
+	 * @param integer $status 新发放状态
+	 * @param boolean $is_staff 是否成功
+	 * @return boolean
+	 */
+	public function set_status($id,$status) {
+		$where = [ 'distribute_send_record.id' => $id ];
+		if ($this->_admin_inter_id != FULL_ACCESS && !empty($this->_admin_inter_id))
+			$where ['inter_id'] = $this->_admin_inter_id;
+		$this->_db ( 'iwide_r1' )->where ( $where );
+		$this->_db ( 'iwide_r1' )->select ( 'distribute_send_grade_rel.ga_id,distribute_send_record.remark,distribute_send_record.source' );
+		$this->_db ( 'iwide_r1' )->from ( 'distribute_send_record' );
+		$this->_db ( 'iwide_r1' )->join ( 'distribute_send_grade_rel', 'distribute_send_grade_rel.sr_id=distribute_send_record.id' );
+		$query = $this->_db ( 'iwide_r1' )->get ()->result_array ();
+		$ids = array_column ( $query, 'ga_id' );
+		
+		if (count ( $ids ) > 0) {
+			//发放状态重置
+			$this->_db ( 'iwide_rw' )->trans_begin ();
+			$this->_db ( 'iwide_rw' )->where($where);
+			$this->_db ( 'iwide_rw' )->update('distribute_send_record',['status'=>$status,'remark' => $query[0]['remark'].' | 管理员 '.$this->session->admin_profile['username'].' | '.$this->session->admin_profile['admin_id'].' 于 '.date('Y-m-d H:i:s').' 重置状态']);
+			if ($this->_admin_inter_id != FULL_ACCESS && !empty($this->_admin_inter_id))
+				$this->_db ( 'iwide_rw' )->where('inter_id', $this->_admin_inter_id);
+			$this->_db ( 'iwide_rw' )->where_in('id',$ids);
+			//员工/粉丝分销绩效状态重置
+			if( $query[0]['source'] == 1)//员工
+				$this->_db ( 'iwide_rw' )->update ( 'distribute_grade_all',['status' => $status == self::SEND_STATUS_SUCCESS ? 2 : 1] );
+			else//粉丝
+				$this->_db ( 'iwide_rw' )->update ( 'distribute_extends',['status' => $status == self::SEND_STATUS_SUCCESS ? 2 : 1] );
+			if ($this->_db ( 'iwide_rw' )->trans_status () === FALSE) {
+				$this->_db ( 'iwide_rw' )->trans_rollback ();
+				return FALSE;
+			} else {
+				$this->_db ( 'iwide_rw' )->trans_commit ();
+				return TRUE;
+			}
+		}
+		return FALSE;
 	}
 }
