@@ -59,6 +59,14 @@ class Hotel_report_model extends MY_Model {
 			$where .= ' and items.enddate <= ? ';
 			$para [] = date ( 'Ymd', strtotime ( $params ['end_date_end'] ) );
 		}
+		if (! empty ( $params ['leavetime_start'] )) {
+			$where .= ' and items.leavetime >= ? ';
+			$para [] = date ( 'Y-m-d H:i:s', strtotime ( $params ['leavetime_start'] ) );
+		}
+		if (! empty ( $params ['leavetime_end'] )) {
+			$where .= ' and items.leavetime <= ? ';
+			$para [] = date ( 'Y-m-d H:i:s', strtotime ( $params ['leavetime_end'] ) );
+		}
 		$limit_s = ' order by orders.id desc ';
 		if (! is_null ( $limit )) {
 			$limit_s .= ' limit ?,? ';

@@ -2375,7 +2375,7 @@ class IwidepayApi extends MY_Controller
         //判断可操作时间
         $enabled_op_time = date('H:i:s',time());
         $op_status = false;
-        if ($enabled_op_time >= '16:00:00' && $enabled_op_time < '18:00:00')
+        if ($enabled_op_time >= '16:00:00' && $enabled_op_time < '17:00:00')
         {
             $op_status = true;
         }

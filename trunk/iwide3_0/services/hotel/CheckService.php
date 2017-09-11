@@ -346,6 +346,9 @@ class CheckService extends HotelBaseService {
 		}
 		
 		if (! empty ( $result )) {
+		    foreach ($result as &$r){
+		        $r->link= \Hotel_base::inst()->get_url('INDEX',array('h'=>$r->hotel_id));
+		    }
 			$data ['result'] = $result;
 			
 			return array (

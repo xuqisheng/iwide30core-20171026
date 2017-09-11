@@ -16,6 +16,7 @@ class MY_Model_Soma extends MY_Model
     const SETTLE_WHOLESALE = 'wholesale';
     const SETTLE_VOUCHER = 'voucher';
     const SETTLE_HOTEL_PACKAGE = 'hotel';
+    const SETTLE_HOTEL_GIFT = 'giftType';
 
     const PRODUCT_TYPE_DEFAULT = 1;
     const PRODUCT_TYPE_PRIVILEGES_VOUCHER = 2;
@@ -145,6 +146,7 @@ class MY_Model_Soma extends MY_Model
             self::SETTLE_WHOLESALE => '大客户预订',
             self::SETTLE_VOUCHER => '礼品卡券',
             self::SETTLE_HOTEL_PACKAGE => '订房套餐',
+            self::SETTLE_HOTEL_GIFT => '礼包派送',
         );
     }
 

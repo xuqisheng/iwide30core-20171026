@@ -895,20 +895,20 @@ if (! function_exists('with')) {
 if (! function_exists('arrayColumn')) {
     /**
      * Return the given object. Useful for chaining.
-     * ¶þÎ»Êý×é×ªÖ¸¶¨Ë÷ÒýÏÂ±êµÄÒ»Î¬Êý×é
+     * äºŒä½æ•°ç»„è½¬æŒ‡å®šç´¢å¼•ä¸‹æ ‡çš„ä¸€ç»´æ•°ç»„
      * @param  mixed  $object
      * @return mixed
      */
     function arrayColumn($array,$field){
 
-        //Êý×é×ª»»
+        //æ•°ç»„è½¬æ¢
         $result = array_column($array,$field);
-        //È¥³ýÖØ¸´
+        //åŽ»é™¤é‡å¤
         $result = array_unique($result);
-        //ÖØÐÂÏÂ±êÅÅÐò
+        //é‡æ–°ä¸‹æ ‡æŽ’åº
         $result = array_values($result);
 
-        //·µ»Ø½á¹û´¦Àí
+        //è¿”å›žç»“æžœå¤„ç†
         $result = empty($result) ? '' : $result;
 
         return $result;
@@ -920,22 +920,22 @@ if (! function_exists('arrayColumn')) {
 if (! function_exists('arrayField')) {
     /**
      * Return the given object. Useful for chaining.
-     * ¶þÎ»Êý×é×ªÖ¸¶¨¼üÖµÎªµ±Ç°Êý×éµÄË÷ÒýÏÂ±ê
+     * äºŒä½æ•°ç»„è½¬æŒ‡å®šé”®å€¼ä¸ºå½“å‰æ•°ç»„çš„ç´¢å¼•ä¸‹æ ‡
      * @param  mixed $object
      * @return mixed
      */
     function arrayField($array, $field)
     {
 
-        //ÅÐ¶ÏÊÇ·ñÊÇ¶þÎ¬Êý×é
+        //åˆ¤æ–­æ˜¯å¦æ˜¯äºŒç»´æ•°ç»„
         if (count($array) == count($array, 1)) {
-            //Ò»Î¬Êý×é
+            //ä¸€ç»´æ•°ç»„
             return $array;
         }
 
         $newArray = array();
         foreach ($array as $key => $val) {
-            //¼üÖµÎª¿Õ¹ýÂË
+            //é”®å€¼ä¸ºç©ºè¿‡æ»¤
             if (empty($val[$field]) && $val[$field] != 0) {
                 continue;
             }

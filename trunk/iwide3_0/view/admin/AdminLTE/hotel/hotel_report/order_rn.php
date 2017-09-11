@@ -1,6 +1,9 @@
 <!-- DataTables -->
 <link rel="stylesheet" href="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datatables/dataTables.bootstrap.css">
 <script src="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datepicker/bootstrap-datepicker.js"></script>
+<link rel="stylesheet" href="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datetimepicker/bootstrap-datetimepicker.css">
+<script src="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datetimepicker/bootstrap-datetimepicker.js"></script>
+<script src="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datetimepicker/locales/bootstrap-datetimepicker.zh-CN.js"></script>
 <link rel="stylesheet" href="<?php echo base_url(FD_PUBLIC). '/'. $tpl ?>/plugins/datepicker/datepicker3.css">
 <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -117,6 +120,12 @@ echo $block_left;
                 		<label>至 </label>
                 		<input class="form_datetime form-control input-sm" data-date-format="yyyymmdd" type="text" name="end_date_end" class="form-control input-sm" placeholder="" aria-controls="data-grid" value="<?php echo empty($posts['end_date_end']) ? '' : $posts['end_date_end']?>">
                 	</div>
+                  <div class="form-group">
+                    <label>操作离店时间 </label>
+                    <input class="form_datetime1 form-control input-sm" data-date-format="yyyymmdd:hh:ii:ss" type="text" name="leavetime_start" placeholder="" aria-controls="data-grid" value="<?php echo empty($posts['leavetime_start']) ? '' : $posts['leavetime_start']?>">
+                    <label>至 </label>
+                    <input class="form_datetime1 form-control input-sm" data-date-format="yyyymmdd:hh:ii:ss" type="text" name="leavetime_end" placeholder="" aria-controls="data-grid" value="<?php echo empty($posts['leavetime_end']) ? '' : $posts['leavetime_end']?>">
+                  </div>
                 	<div class="btn-group">
                 		<button type="submit" class="btn btn-sm bg-green" id="grid-btn-search"><i class="fa fa-search"></i>&nbsp;检索</button>
                 	</div>
@@ -262,6 +271,7 @@ var url_extra= [
 ];
 
 $(".form_datetime").datepicker({format: 'yyyymmdd'});
+$(".form_datetime1").datetimepicker({format:"yyyy-mm-dd hh:ii:ss", language: "zh-CN",clearBtn: false,todayBtn: true,orientation: "auto left"});
 $('#grid-btn-set').click(function(){
 $('#setModal').on('show.bs.modal', function (event) {
 // 	  modal.find('.modal-body input').val(recipient)

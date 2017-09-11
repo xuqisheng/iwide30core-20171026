@@ -44,12 +44,19 @@ class Iwidepayreturn extends MY_Controller {
         $idata = $this->Iwidepay_model->get_iwidepay_order($parse_arr['orderNo']);
 
         MYLOG::w('订单：'.json_encode($idata),'iwidepayreturn');
+
         //处理存在主单号的模块
         if (count($idata) != count($idata, 1))
-        {
+        {   
             MYLOG::w('预约核销：'.json_encode($idata),'iwidepayreturn');
             $this->multi_order($idata,$parse_arr);
             exit;
+        }
+
+        $add_time = $idata['add_time'];
+        //支付成功时间超过下单时间10分钟以上，写入日志
+        if(!empty($add_time)&&(time()-strtotime($add_time))>600){
+            MYLOG::w(json_encode($idata),'iwidepayreturn_ot');
         }
 
         if(!$idata){
@@ -939,6 +946,12 @@ class Iwidepayreturn extends MY_Controller {
      */
     protected function multi_order($data,$parse_arr)
     {
+        $add_time = $data[0]['add_time'];
+        //支付成功时间超过下单时间10分钟以上，写入日志   
+        if(!empty($add_time)&&(time()-strtotime($add_time))>600){
+            MYLOG::w(json_encode($data),'iwidepayreturn_ot');
+        }
+
         if (empty($data))
         {
             MYLOG::w('分账订单查询为空：'.$parse_arr['orderNo'].','.json_encode($data),'iwidepayreturn');

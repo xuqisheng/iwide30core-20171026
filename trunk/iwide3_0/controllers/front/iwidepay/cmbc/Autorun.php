@@ -293,6 +293,10 @@ class Autorun extends MY_Controller {
                         die;
                     }
                 }
+                //start更新前一天放弃转账的record_id
+                $this->db->where(array('handle_date'=>date('Ymd',strtotime('-1 days')),'status'=>10,'bank_card_no'=>$tmp['bank_card_no']));
+                $this->db->update('iwidepay_settlement',array('record_id'=>$insert_id));
+                //end更新前一天放弃转账的record_id
             }
         }
         $this->redis_lock('delete','_CMBC_SUM_RECORD');
@@ -638,7 +642,7 @@ class Autorun extends MY_Controller {
                     'pay_no'    => $value['ori_pay_no'],
                     'trade_type' => $this->get_financial_type($value['order_type']), //3-原款退款
                     'transfer_status' => 3, //3-已结清
-                    'transfer_date' => date('Y-m-d',strtotime($value['add_time'])),
+                    'transfer_date' => date('Y-m-d',strtotime($value['up_time'])),
                     'inter_id' => $value['inter_id'],
                     'hotel_id' => $value['hotel_id'],
                     'trade_time' => $value['add_time'],

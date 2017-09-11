@@ -10,13 +10,11 @@ class Testproduct extends MY_Front_Soma
     public function get_index()
     {
         $inter_id = $this->inter_id;
-        $order_id= $this->input->get('order_id');
+        $start_date = $this->input->get('start_date');
+        $end_date = null;
 
         $this->load->model('soma/Sales_order_model');
-        $order= $this->Sales_order_model->load($order_id);
-
-        $this->load->model('soma/Reward_benefit_model');
-        $result= $this->Reward_benefit_model->bgySpecialHotelReward($inter_id, $order);
+        $result= $this->Sales_order_model->getOrderTotal($inter_id, $start_date, $end_date);
         var_dump($result);
     }
 }

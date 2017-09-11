@@ -25,9 +25,9 @@ class Iwidepay_clears_model extends MY_Model{
 	}
 
 	/**
-	 * 取门店前一天结余金额
+	 * 取门店最新一条未结清的结余金额
 	 */
-	public function get_lastday_surplus_record($inter_id,$hotel_id,$startdate,$enddate){
+	public function get_last_surplus_record($inter_id,$hotel_id){
 		$this->db->where(array(
 			'inter_id' => $inter_id,
 			'hotel_id' => $hotel_id,
@@ -35,12 +35,7 @@ class Iwidepay_clears_model extends MY_Model{
 			'debt_type' => 2,
 			'status' => 0,
 			));
-		if(!empty($startdate)){
-            $this->db->where('add_time>=',$startdate);
-        }
-        if(!empty($enddate)){
-            $this->db->where('add_time<',$enddate);
-        }
+		$this->db->order_by('add_time','desc');
         $this->db->get(self::TAB_DEBT_RECORD)->row_array();
 	}
 
@@ -78,7 +73,16 @@ class Iwidepay_clears_model extends MY_Model{
 	/**
 	 * 生成结余记录
 	 */
-	public function save_residual_record($inter_id,$hotel_id,$amount){
+	public function save_residual_record($inter_id,$hotel_id,$amount,$last_surplus_id=0){
+		$this->db->trans_begin();
+		if($last_surplus_id>0){
+			//修改上一个结余记录为已结清
+			$res = $this->db->where('id',$last_surplus_id)->update(self::TAB_DEBT_RECORD,array('status'=>1));
+			if(!$res){
+				$this->db->trans_rollback();
+				return func_get_args();
+			}
+		}
 		$data = array(
 			'inter_id' => $inter_id,
 			'hotel_id' => $hotel_id,
@@ -92,7 +96,12 @@ class Iwidepay_clears_model extends MY_Model{
 			);
 		$res = $this->db->insert(self::TAB_DEBT_RECORD,$data);
 		if(!$res){
+			$this->db->trans_rollback();
 			return $data;
+		}
+		$res = $this->db->trans_commit();
+		if(!$res){
+			return func_get_args();
 		}
 		return true;
 	}
@@ -159,7 +168,7 @@ class Iwidepay_clears_model extends MY_Model{
 		}
 		$nums = $obj->num_rows();
 		if($nums>1){
-			return array('msg'=>'record already exists','param'=>func_get_args());
+			return array('msg'=>'record nums>1','param'=>func_get_args());
 		}
 		$this->db->trans_begin();
 		$res = $this->db->where('id',$row['id'])->update(self::TAB_SETTLEMENT,array('amount'=>$amount+$row['amount']));

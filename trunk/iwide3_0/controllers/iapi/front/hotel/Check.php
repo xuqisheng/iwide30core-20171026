@@ -56,10 +56,11 @@ class Check extends MY_Front_Hotel_Iapi {
 		if($data['s']==1){
 			unset($data['s']);
         	$this->out_put_msg(1,'',$data['data'],'hotel/check/ajax_hotel_search');
+		}else if (isset($data['data'])){
+        	$this->out_put_msg(1,$data['data'],'','hotel/check/ajax_hotel_search');
 		}else{
-        	$this->out_put_msg(2,$data['data'],'','hotel/check/ajax_hotel_search');
+        	$this->out_put_msg(2,$data['msg'],'','hotel/check/ajax_hotel_search');
 		}
-		
 	}
     function check_order_canpay(){
     	$data = CheckService::getInstance()->check_order_canpay();

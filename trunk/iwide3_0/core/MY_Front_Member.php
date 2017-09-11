@@ -7,6 +7,7 @@ class MY_Front_Member extends MY_Front
     protected $_raw_template;
     protected $_skin_theme='default';
     protected $_template_filed_names;
+    protected $_file_name;
     public $user_info;
 
     public function __construct()
@@ -219,6 +220,7 @@ class MY_Front_Member extends MY_Front
      */
     protected function template_show($route, $template, $file_name, $data = array())
     {
+        $this->_file_name = $file_name;
         $view_path = $route . "/";
         $data['_skin_theme']=$this->_skin_theme;
         if (!empty($template)) {
@@ -286,13 +288,24 @@ class MY_Front_Member extends MY_Front
     {
         $config = array(
             'allskins' => array(
-                'share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201708/qf281646497479.jpg'
+                'share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201709/qf111530113850.jpg',//默认
+                'buydeposit' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529093025.jpg'),//充值
+                'depositcard' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529404765.jpg'),//购卡列表
+                'depositcardinfo' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529404765.jpg'),//购卡详情
+                'sign_index' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529573875.jpg')//签到
             ),
             'highclass' => array(
-                'share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201708/qf081454028608.jpg'
+                'share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201708/qf081454028608.jpg',
+                'buydeposit' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf081738567940.jpg'),//充值
+                'depositcard' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf081739235743.jpg'),//购卡列表
+                'depositcardinfo' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf081739235743.jpg'),//购卡详情
+                'sign_index' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf081739443522.jpg')//签到
             )
         );
-        return empty ($config [$skin_name]) ? $config ['allskins'] : $config [$skin_name];
+        if(empty ($config [$skin_name])){
+            $skin_name = 'allskins';
+        }
+        return empty ($config [$skin_name][$this->_file_name]) ? $config [$skin_name] : $config [$skin_name][$this->_file_name];
     }
 
     /**

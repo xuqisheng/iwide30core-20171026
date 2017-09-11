@@ -132,8 +132,8 @@ class Express extends MY_Front_Soma_Iapi
         if(!preg_match("/^1[34578]{1}\d{9}$/", $params['phone'])) {
             $validator['phone'] = '手机号码不正确';
         }
-        if(!preg_match("/^.{1,20}$/", $params['contact'])) {
-            $validator['contact'] = '联系人不能超过20个字符';
+        if(mb_strlen($params['contact'], 'UTF-8') > 10) {
+            $validator['contact'] = '联系人不能超过10个字符';
         }
         if(!empty($validator)){
             $this->json(BaseConst::OPER_STATUS_FAIL_TOAST, '', ['error' => $validator]);
@@ -530,7 +530,7 @@ class Express extends MY_Front_Soma_Iapi
             'shipping_track' => isset($page_data['shippingTrack'])?array_reverse(array_reverse($page_data['shippingTrack'])):[],
             'status' => $page_data['orders']['status']
         ];
-
+        
         $this->json(BaseConst::OPER_STATUS_SUCCESS, '', $res);
 
     }

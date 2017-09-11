@@ -276,9 +276,13 @@ $(function(){
                                 }
                                 break;
                             case 'money':
+                                var regexp = /^\+?\d+$/; //正整数
                                 if (!value && inputos[i].disabled === false) {
                                     _null = true;
                                     _msg = '请填写储值券金额';
+                                }else if(!regexp.test(value) && (value != '' || value != null)){
+                                    _null = true;
+                                    _msg = '购卡金额必须是正整数';
                                 }
                                 break;
                         }

@@ -455,15 +455,30 @@ class PackageService extends BaseService
     //处理数字
     public function progressNumber($number){
 
-        //去掉.00
-        if (stripos($number, '.00') !== false) {
-            $number = number_format($number, 0, '.', '');
-        }
-//        if(preg_match('/^0.\d{0}+/', $number)){
-//            $number = number_format($number);
+        $number = number_format($number, 2, '.', '');
+
+//        //去掉.00
+//        if (stripos($number, '.00') !== false) {
+//            $number = number_format($number, 0, '.', '');
 //        }
 
-        return $number;
+        //$number = preg_replace(' /^\d+(\.\d[0]+)?$/', '', $number);
+
+        $split = explode('.', $number);
+        $previous = $split[0];
+        $after = $split[1];
+        $dot = '';
+        $after_ = '';
+        if(!empty($after)){
+            foreach (str_split($after) as $val){
+                if($val != '0'){
+                    $after_ .= $val;
+                    $dot = '.';
+                }
+            }
+        }
+
+        return $previous.$dot.$after_;
     }
 
 
@@ -722,13 +737,13 @@ class PackageService extends BaseService
         $uploadUrl = $dir.'/www_front/public/soma/qrcode/';
 
         //首页二维码
-        $qrCodeImg = WxService::QR_CODE_SOMA_INDEX.'_'.$saler.'_'.$fansler.'.png';
-        $qrCodeUrl = site_url('soma/package/index?'. http_build_query([
+        $qrCodeImg = WxService::QR_CODE_SOMA_INDEX.$this->getCI()->inter_id.'_'.$saler.'_'.$fansler.'.png';
+        $qrCodeIndexUrl = site_url('soma/package/index?'. http_build_query([
                 'id' => $this->getCI()->inter_id,
                 'saler' => $saler,
                 'fans_saler' => $fansler
             ]));
-        $qrcodeIndex = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
+        //$qrcodeIndex = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
 
         $productIds = [];
 
@@ -932,15 +947,15 @@ class PackageService extends BaseService
         if(count($productsList) && count($rewardRuleList)){
             foreach ($productsList as $key => $val){
                 //生成二维码图片
-                $qrCodeImg = WxService::QR_CODE_PRODUCT_DETAIL.$val['product_id'].'_'.$saler.'_'.$fansler.'.png';
-                $qrCodeUrl = site_url('soma/package/package_detail?'. http_build_query([
-                        'id' => $this->getCI()->inter_id,
-                        'pid' => $val['product_id'],
-                        'saler' => $saler,
-                        'fans_saler' => $fansler
-                    ]));
-                $qrcode_detail = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
-                $productsList[$key]['qrcode_detail'] = $qrcode_detail;
+//                $qrCodeImg = WxService::QR_CODE_PRODUCT_DETAIL.$val['product_id'].'_'.$saler.'_'.$fansler.'.png';
+//                $qrCodeUrl = site_url('soma/package/package_detail?'. http_build_query([
+//                        'id' => $this->getCI()->inter_id,
+//                        'pid' => $val['product_id'],
+//                        'saler' => $saler,
+//                        'fans_saler' => $fansler
+//                    ]));
+//                $qrcode_detail = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
+//                $productsList[$key]['qrcode_detail'] = $qrcode_detail;
                 $productsList[$key]['sales_cnt'] = (int)$val['sales_cnt'];
                 $productsList[$key]['detail'] = site_url('soma/package/package_detail').'?id='.$this->getCI()->inter_id.'&pid='.$val['product_id'].'&saler='.$saler;
 
@@ -1014,7 +1029,7 @@ class PackageService extends BaseService
             'total' => count($productsList),
             'theme' => json_decode($themeConfig, true),
             'attach' => [
-                'qrcode_index' => $qrcodeIndex
+                'index' => $qrCodeIndexUrl
             ]
         ];
 
@@ -1022,9 +1037,11 @@ class PackageService extends BaseService
     }
 
 
-
-
-    //获取分销员信息
+    /**
+     * 获取分销员信息
+     * @return array
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
     public function getSalerInfo(){
 
         $saler_id = $saler_name = $saler_type = null;
@@ -1059,8 +1076,28 @@ class PackageService extends BaseService
 
     }
 
+    /**
+     * 生成自定义链接二维码，文件流
+     * @param $codeUrl 二维码链接
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
+    public function getQrcodeStream($codeUrl){
 
-    //生成自定义链接二维码
+        //生成二维码
+        $this->getCI()->load->helper('phpqrcode');
+        //生成二维码图片
+        \QRcode::png($codeUrl,false, 'L', 6, 2);
+
+    }
+
+    /**
+     * 生成自定义链接二维码，cdn
+     * @param $filePath 上传文件目录
+     * @param $fileName 上传文件名
+     * @param $codeUrl 二维码跳转链接
+     * @return bool|string
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
     public function getQrcode($filePath, $fileName, $codeUrl){
 
         $redis = $this->getCI()->get_redis_instance();
@@ -1093,7 +1130,12 @@ class PackageService extends BaseService
     }
 
 
-    //cdn上传
+    /**
+     * cdn上传
+     * @param $furl 上传文件路径（包括文件名）
+     * @return string
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
     public function uploadFileToCdn($furl){
 
         //cdn

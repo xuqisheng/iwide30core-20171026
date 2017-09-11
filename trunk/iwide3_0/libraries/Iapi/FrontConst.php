@@ -281,7 +281,7 @@ class FrontConst extends BaseConst
         'hotel/hotel/add_hotel_collection' => array(
             'keys' => array(
                 'inter_id',
-                'mark_id',
+                'mid',
             ),
         ),
         'hotel/hotel/clear_visited_hotel'  => array(
@@ -335,6 +335,7 @@ class FrontConst extends BaseConst
                     'keys' => array(
                         'hotel_id',
                         'name',
+                        'link',
                     ),
                 ),
             ),
@@ -343,6 +344,7 @@ class FrontConst extends BaseConst
             'keys'    => array(
                 'exe_param',
                 'index_url',
+                'landmark',
             ),
             'mul_arr' => array(
                 'result'      => array(
@@ -352,7 +354,6 @@ class FrontConst extends BaseConst
                         'intro_img',
                         'comment_data',
                         'distance',
-                        'landmark',
                         'address',
                         'lowest',
                         'link',

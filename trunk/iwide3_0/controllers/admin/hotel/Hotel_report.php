@@ -18,6 +18,8 @@ class Hotel_report extends MY_Admin {
 		$avgs ['start_date_end'] = $this->input->post ( 'start_date_end' );
 		$avgs ['end_date_start'] = $this->input->post ( 'end_date_start' );
 		$avgs ['end_date_end'] = $this->input->post ( 'end_date_end' );
+		$avgs ['leavetime_start'] = $this->input->post ( 'leavetime_start' );
+		$avgs ['leavetime_end'] = $this->input->post ( 'leavetime_end' );
 		$avgs ['order_status'] = $this->input->post ( 'order_status' );
 		$avgs ['orderid'] = $this->input->post ( 'orderid' );
 		$avgs ['web_orderid'] = $this->input->post ( 'web_orderid' );
@@ -104,6 +106,8 @@ class Hotel_report extends MY_Admin {
 		$avgs ['start_date_end'] = $this->input->get ( 'start_date_end' );
 		$avgs ['end_date_start'] = $this->input->get ( 'end_date_start' );
 		$avgs ['end_date_end'] = $this->input->get ( 'end_date_end' );
+		$avgs ['leavetime_start'] = $this->input->get ( 'leavetime_start' );
+		$avgs ['leavetime_end'] = $this->input->get ( 'leavetime_end' );
 		$avgs ['order_status'] = $this->input->get ( 'order_status' );
 		$avgs ['orderid'] = $this->input->get ( 'orderid' );
 		$avgs ['web_orderid'] = $this->input->get ( 'web_orderid' );

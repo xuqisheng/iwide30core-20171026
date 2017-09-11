@@ -7,21 +7,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Created by Wuqd on.
  * Created Time 2017-09-03 10:00
  */
+use \App\libraries\Iapi\BaseConst;
 
 class Gift_delivery_model extends MY_Model_Soma{
 
-//    /**
-//     * @return string the associated database table name
-//     */
-//    public function table_name($inter_id=NULL)
-//    {
-//        return $this->_shard_table('soma_gift', $inter_id);
-//    }
-//
-//    public function table_primary_key()
-//    {
-//        return 'id';
-//    }
 
     /**
      * 获取礼包列表
@@ -29,9 +18,14 @@ class Gift_delivery_model extends MY_Model_Soma{
     public function getGiftListData($params){
 
         $pageStart = $params['page']*20;
+        $pageLength = 20;
         //入库查询
         $giftListRes = $this->db->select(['id','inter_id','product_id'])->where(['inter_id'=>$params['inter_id']])
-            ->limit($pageStart,20)->get('soma_gift')->result_array();
+            ->limit($pageLength,$pageStart)->get('soma_gift')->result_array();
+
+        $count = $this->db->where(['inter_id'=>$params['inter_id']])->count_all_results('soma_gift');
+
+        $pageCount = ceil($count/$pageLength);
 
         //获取商品name与商品库存stock
         $productIdArr = arrayColumn($giftListRes,'product_id');
@@ -52,8 +46,9 @@ class Gift_delivery_model extends MY_Model_Soma{
             $giftListRes[$key]['stock'] = $productInfoFieldRes[$val['product_id']]['stock'];
             $giftListRes[$key]['cat_name'] = $catInfoFieldRes[$productInfoFieldRes[$val['product_id']]['cat_id']]['cat_name'];
         }
+
         //结果返回
-        return ['giftListData'=>$giftListRes];
+        return ['page_size'=>$pageLength,'count'=>$count,'pageCount'=>$pageCount,'giftListData'=>$giftListRes];
     }
 
 
@@ -71,9 +66,13 @@ class Gift_delivery_model extends MY_Model_Soma{
         if(!empty($params['hotel_id'])){
             $productWhere['hotel_id'] = $params['hotel_id'];
         }
-        $productListRes = $this->db->select(['product_id','stock','cat_id','name'])->where($productWhere)
-            ->where_in('goods_type',['1','3'])->get('soma_catalog_product_package')->result_array();
 
+        //获取已添加到礼包的商品
+        $giftProId = $this->db->select(['product_id'])->where(['inter_id'=>$params['inter_id']])->get('soma_gift')->result_array();
+
+        $giftProIdArr = arrayColumn($giftProId,'product_id');
+        $productListRes = $this->db->select(['product_id','stock','cat_id','name'])->where($productWhere)
+            ->where_in('goods_type',['1','3'])->where_not_in('product_id',$giftProIdArr)->get('soma_catalog_product_package')->result_array();
         //分类id
         $catIdArr = arrayColumn($productListRes,'cat_id');
         //查询分类名称
@@ -174,6 +173,34 @@ class Gift_delivery_model extends MY_Model_Soma{
     }
 
 
+    /***
+     * 删除商品礼包
+     */
+    public function deleteProductGiftData($params){
+
+        //删除商品礼包
+        $result = $this->db->delete('soma_gift',['inter_id'=>$params['inter_id'],'product_id'=>$params['product_id']]);
+
+        if($result === false){
+            return ['status'=>BaseConst::OPER_STATUS_FAIL_TOAST,'message'=>'删除商品礼包失败!'];
+        }
+
+        //查询剩余商品礼包
+        $countNum = $this->db->where(['inter_id'=>$params['inter_id']])->count_all_results('soma_gift');
+
+        if($countNum <= 0){
+            //删除商品礼包时间
+            $this->db->delete('soma_gift_effective_time',['inter_id'=>$params['inter_id']]);
+        }
+
+
+        return ['status'=>BaseConst::OPER_STATUS_SUCCESS,'message'=>'删除成功!'];
+    }
+
+
+
+
+
             /******************前台接口model*******************************/
 
     /**
@@ -217,9 +244,9 @@ class Gift_delivery_model extends MY_Model_Soma{
         //获取商品信息
         $productInfo = $this->db->select(['product_id','name','goods_type','stock','price_market','date_type','use_date','expiration_date'])->where(['inter_id'=>$params['inter_id'],'product_id'=>$giftInfo['product_id']])
             ->get('soma_catalog_product_package')->row_array();
-
+        $productInfo['expiration_date'] = date('Y年m月d日',strtotime($productInfo['expiration_date']));
         //是否是组合商品
-        if($productInfo['goods_type']){
+        if($productInfo['goods_type'] == 3){
             //获取子商品名称
             $groupProductInfo = $this->db->select(['parent_pid','child_pid','num'])->where(['inter_id'=>$params['inter_id'],'parent_pid'=>$productInfo['product_id']])
                 ->get('soma_product_package_link')->result_array();
@@ -257,15 +284,21 @@ class Gift_delivery_model extends MY_Model_Soma{
         $giftProductInfo = $this->db->select(['product_id'])->where(['inter_id'=>$params['inter_id'],'id'=>$params['gift_id']])
             ->get('soma_gift')->row_array();
 
+        if(empty($giftProductInfo)){
+            //结果返回
+            return ['status'=>false,'message'=>'礼包不存在!'];
+        }
+
         //获取商品信息
         $productInfo = $this->db->select(['product_id','name','goods_type','stock','price_market','date_type','use_date','expiration_date'])->where(['inter_id'=>$params['inter_id'],'product_id'=>$giftProductInfo['product_id']])
             ->get('soma_catalog_product_package')->row_array();
 
         //礼包登记信息
         $productInfo['gift_record_info'] = $giftDetailInfo;
+        $productInfo['expiration_date'] = date('Y年m月d日',strtotime($productInfo['expiration_date']));
 
         //是否是组合商品
-        if($productInfo['goods_type']){
+        if($productInfo['goods_type'] == 3){
             //获取子商品名称
             $groupProductInfo = $this->db->select(['parent_pid','child_pid','num'])->where(['inter_id'=>$params['inter_id'],'parent_pid'=>$productInfo['product_id']])
                 ->get('soma_product_package_link')->result_array();
@@ -307,7 +340,7 @@ class Gift_delivery_model extends MY_Model_Soma{
         $giftOrderData = array();
         $giftOrderData['act_id'] = "";
         $giftOrderData['address_id'] = "";
-        $giftOrderData['bpay_passwd'] = "";
+        $giftOrderData['bpay_passwd'] = "giftPasswd";
         $giftOrderData['business'] = "package";
         $giftOrderData['csrf_token'] = "f";
         $giftOrderData['grid'] = "";
@@ -316,14 +349,13 @@ class Gift_delivery_model extends MY_Model_Soma{
         $giftOrderData['name'] = "wwwqqqddd";
         $giftOrderData['password'] = "";
         $giftOrderData['phone'] = "13610117050";
-//        $giftOrderData['product_id'] = $giftDetailRes['product_id'];
-        $giftOrderData['product_id'] = 14044;
+        $giftOrderData['product_id'] = $giftDetailRes['product_id'];
         $giftOrderData['psp_setting'] = "";
         $giftOrderData['qty'] = $giftDetailRes['gift_num'];
         $giftOrderData['quote'] = "";
         $giftOrderData['quote_type'] = "";
         $giftOrderData['scope_product_link_id'] = "";
-        $giftOrderData['settlement'] = "default"; //礼包领取
+        $giftOrderData['settlement'] = "giftType"; //礼包领取
         $giftOrderData['token'] = "";
         $giftOrderData['type'] = "";
         $giftOrderData['u_type'] = "-1";
@@ -334,19 +366,65 @@ class Gift_delivery_model extends MY_Model_Soma{
         $giftOrderData['saler_group'] = '';
         $giftOrderData['inter_id'] = $giftDetailRes['inter_id'];
         $giftOrderData['openid'] = $params['openid'];
-
         //订单
-        $orderRes = \App\services\soma\OrderService::getInstance()->create($giftOrderData);
-        echo '<pre>';
-        var_dump($orderRes);die;
+        $result = \App\services\soma\OrderService::getInstance()->create($giftOrderData);
+        return ['result'=>$result,'params'=>$giftOrderData];
 
     }
 
 
+    /**
+     * 微信支付回调操作
+     * URL format: index.php/soma/payment/wxpay_return/15301616967
+     */
+    public function gift_receive_callback($order_id = '')
+    {
+        $xml = file_get_contents ( 'php://input' );
+        $this->load->model('soma/Sales_order_model');
 
+        $out_trade_no = '';
+        $order_simple= $this->Sales_order_model->get_order_simple($order_id);
+        //初始化数据库分片配置
+        if($order_simple['inter_id'] ){
+            $this->load->model('soma/shard_config_model', 'model_shard_config');
+            $this->current_inter_id= $order_simple['inter_id'];
+            $this->db_shard_config= $this->model_shard_config->build_shard_config($order_simple['inter_id']);
+            //print_r($this->db_shard_config);
+        }else{
+            return false;
+        }
 
+        //签名校验数据的合法性
+        $this->load->model('pay/pay_model');
+        $pay_config= $this->pay_model->get_pay_paras($order_simple['inter_id']);
+        $pay_key= isset($pay_config['key'])? $pay_config['key']: '';
+        if(empty($pay_key) ){
+           return false;
+        }
 
+        //处理结果成功与否
+        $this->load->helper('soma/package');
+        $debug = true;
+        if ($debug) write_log('soma payment wxpay_return invoked');
+        //公共保存部分
+        $this->load->model('soma/sales_payment_model');
+        $payment_model= $this->sales_payment_model;
 
+        $log_data= array();
+        $log_data['paid_ip']= $this->input->ip_address();
+        $log_data['paid_type']= $payment_model::PAY_TYPE_WX;
+        $log_data['order_id']= $order_id;
+        $log_data['openid']= $order_simple['openid'];
+        $log_data['business']= $order_simple['business'];
+        $log_data['settlement']= $order_simple['settlement'];
+        $log_data['inter_id']= $order_simple['inter_id'];
+        $log_data['hotel_id']= $order_simple['hotel_id'];
+        $log_data['grand_total']= $order_simple['grand_total'];
+        $log_data['transaction_id']= '';
+        $this->Sales_order_model->order_payment( $log_data );
+        $this->Sales_order_model->order_payment_post();
+        return true;
+    }
 
 
 }

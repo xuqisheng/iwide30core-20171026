@@ -162,11 +162,11 @@ class Debt extends MY_Controller {
     	//查出启用分账的公众号
     	$open_splits = $this->Iwidepay_debt_model->get_split_status();
     	foreach ($open_splits as $ko => $vo) {
-    		//判断是否开启了现付结算
+    		//判断是否开启了基础月费结算
 			$this->load->model('iwidepay/Iwidepay_clears_model');
-    		$open_offline = $this->Iwidepay_clears_model->get_configs($vo['inter_id'],'synchro_hotel_order');
-    		MYLOG::w('info:synchro_hotel_order config_'.$vo['inter_id'].'-'.json_encode($open_offline),'iwidepay_clears');
-    		if(empty($open_offline['value'])||$open_offline['value']!=1){
+    		$base_pay_settle = $this->Iwidepay_clears_model->get_configs($vo['inter_id'],'base_pay_settle');
+    		MYLOG::w('info:base_pay_settle config_'.$vo['inter_id'].'-'.json_encode($base_pay_settle),'iwidepay_clears');
+    		if(empty($base_pay_settle['value'])||$base_pay_settle['value']!=1){
     			continue;
     		}
 

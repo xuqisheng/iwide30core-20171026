@@ -751,6 +751,7 @@ class OrderService extends BaseService
                 return new Result(Result::STATUS_FAIL, '您的储值不够');
             }
         }
+
         return new Result(Result::STATUS_OK, '', ['discount' => $discountInfo]);
     }
 
@@ -1545,6 +1546,7 @@ class OrderService extends BaseService
             'price_killsec',
             'hotel_name',
             'hotel_tel',
+            'goods_type',
             'expiration_date',
             'if(expiration_date < now(), 1, 2) as expiration_status',
             'can_refund', // 可退
@@ -1574,6 +1576,7 @@ class OrderService extends BaseService
             if(!empty($product)){
                if(in_array($product[0]['type'], [$product_package_model::PRODUCT_TYPE_BALANCE, $product_package_model::PRODUCT_TYPE_POINT])){
                    $item_map[$key]['can_refund'] = (string)$product_package_model::CAN_F;
+                   $item_map[$key]['type'] = $product[0]['type'];
                }
             }
 
@@ -2140,8 +2143,8 @@ class OrderService extends BaseService
                 'post_phone' => null,
                 'post_start' => null,
                 'post_end' => null,
-                'post_room_name' => $price_code[0]['price_name'],
-                'post_code_name' => $price_code[0]['price_code'],
+                'post_room_name' => $room['name'],
+                'post_code_name' => $price_code[0]['price_name'],
                 'post_num' => 1,
                 'post_order_id' => $orderId,
                 'aiid' => $assetItemId,

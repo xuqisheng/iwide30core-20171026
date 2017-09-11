@@ -249,7 +249,7 @@ class Distribute_ext_model extends MY_Model{
 	}
 
 	public function get_grades($inter_id = array(),$order_time_begin = '',$order_time_end = '',$fans_id = '',$send_time_begin = '',$send_time_end = '',$send_status = '',$limit = NULL,$offset = 0){
-		$sql = "SELECT de.saler,de.order_time,de.product,de.grade_id order_id,de.product_count counts,de.grade_total actually_paid,de.grade_total,de.send_time,de.`status`,de.remark,f.nickname,f.openid FROM iwide_distribute_extends de LEFT JOIN iwide_fans f ON de.saler=f.fans_key ";
+		$sql = "SELECT de.saler,de.order_time,de.product,de.grade_id order_id,de.product_count counts,de.grade_amount actually_paid,de.grade_total,de.send_time,de.`status`,de.remark,f.nickname,f.openid FROM iwide_distribute_extends de LEFT JOIN iwide_fans f ON de.saler=f.fans_key ";
 		$params = array();
 		$where = '';
 		if(!empty($inter_id) && $inter_id != 'ALL_PRIVILEGES'){

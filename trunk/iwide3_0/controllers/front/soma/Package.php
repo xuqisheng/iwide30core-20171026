@@ -2217,6 +2217,16 @@ class Package extends MY_Front_Soma
         $this->load->model('soma/Product_package_model', 'productPackageModel');
         $productDetail = $this->productPackageModel->get_product_package_detail_by_product_id($productId, $this->inter_id);
 
+        //做过期处理过滤
+        $productModel = $this->productPackageModel;
+        $productDetail['type'] = isset($productDetail['type']) ? $productDetail['type'] : null;
+        if ($productDetail['type'] == $productModel::PRODUCT_TYPE_BALANCE
+            || $productDetail['type'] == $productModel::PRODUCT_TYPE_POINT
+        ) {
+            $this->check_member_is_login(Soma_const_url::inst()->get_url('*/*/*', $this->input->get()));
+
+        }
+
 
         if($this->isNewTheme()){
 
@@ -2292,17 +2302,6 @@ class Package extends MY_Front_Soma
                         }
                     }
                 }
-            }
-
-            //做过期处理过滤
-            $productModel = $this->productPackageModel;
-
-            $productDetail['type'] = isset($productDetail['type']) ? $productDetail['type'] : null;
-            if ($productDetail['type'] == $productModel::PRODUCT_TYPE_BALANCE
-                || $productDetail['type'] == $productModel::PRODUCT_TYPE_POINT
-            ) {
-                $this->check_member_is_login(Soma_const_url::inst()->get_url('*/*/*', $this->input->get()));
-
             }
 
             $is_expire = false;

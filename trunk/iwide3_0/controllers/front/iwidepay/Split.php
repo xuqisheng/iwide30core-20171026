@@ -310,7 +310,7 @@ class Split extends MY_Controller {
                     }
                     if($type!=''){
                         //临时写死部分号不计算分销
-                        if(!in_array($order['inter_id'],array('a501472631','a467012702','a500304280','a502439398'))){
+                        if(!in_array($order['inter_id'],array('a501472631','a467012702','a500304280','a502439398','a503075198'))){
                             //临时写死该号的订房不计算分销
                             if(!in_array($order['inter_id'],array('a470896520'))||$order['module']!='hotel'){
                                 if(($stype=='online'&&$order['is_dist']==2&&$order['dist_amt']>0)||($stype=='offline'&&$order['dist_amt']>0)){

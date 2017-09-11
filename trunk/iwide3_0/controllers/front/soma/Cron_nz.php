@@ -1740,6 +1740,217 @@ class Cron_nz extends MY_Controller
      */
     public function lghgjr_0908()
     {
+
+
+        $orderArrInfo = array(
+            array('order_id' => '1000329409','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjjQ48o2a2UMhrmU0Oo6cXjk'),
+            array('order_id' => '1000329444','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjpBYLeei1KKDW3xJzXvdxZU'),
+            array('order_id' => '1000329452','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjoyDGnkxWZDJf_qAw9hZy20'),
+            array('order_id' => '1000329459','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjuf2HjWiWB7i0_ISQww-oVA'),
+            array('order_id' => '1000329467','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjnvs_qOuKLO-hpKQErL9c4c'),
+            array('order_id' => '1000329470','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqUf9qorSnI_wTSv1-dgLC4'),
+            array('order_id' => '1000329471','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjufiVBF0bM_h3rm4_t-U-6A'),
+            array('order_id' => '1000329490','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsm4sa2Y_yH9KYjs_y8tQiY'),
+            array('order_id' => '1000329495','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlbCAWe2rDY1DUoZ8ITjAuk'),
+            array('order_id' => '1000329502','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrtiXj3q0gQn4jf3dShn8Yw'),
+            array('order_id' => '1000329507','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrEjDLB8bHVgGfodLYTlHo4'),
+            array('order_id' => '1000329513','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrnFvnYhqS9Dpvm2siOKh8w'),
+            array('order_id' => '1000329516','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjpXgVNuo251_1oFCe1hLrD8'),
+            array('order_id' => '1000329517','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjkEFoWMU5PXIrGn--OIZLJw'),
+            array('order_id' => '1000329530','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjmirUfEw0R3If9-VYUVbPTM'),
+            array('order_id' => '1000329532','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjs_oQ5XFSddd6gIKwgl41kY'),
+            array('order_id' => '1000329535','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjpX0NtV_UUWreuWojtdrrBs'),
+            array('order_id' => '1000329536','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrQNlC_dFbuiQ3xe2mUuvt8'),
+            array('order_id' => '1000329538','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjkEFoWMU5PXIrGn--OIZLJw'),
+            array('order_id' => '1000329545','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjihac7pT3l6Uxc4--CQwlwc'),
+            array('order_id' => '1000329553','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqubPZ6SfXbjYXTH3IppUa8'),
+            array('order_id' => '1000329563','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjq6Pi0O4qxyXBZqudAv3hP4'),
+            array('order_id' => '1000329565','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrP8hP1U5y5-PS22MqWWhSQ'),
+            array('order_id' => '1000329566','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsXF25wTGz23idMb1xCS5RI'),
+            array('order_id' => '1000329573','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsC5F6L6HiSrPYPLMcmgq0A'),
+            array('order_id' => '1000329595','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsWOZsx0W3PpRJA1Ria1gkA'),
+            array('order_id' => '1000329596','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjn1W4Y_aSRjccpQBCh1VwJA'),
+            array('order_id' => '1000329618','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjufiVBF0bM_h3rm4_t-U-6A'),
+            array('order_id' => '1000329624','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhgKjh484P6dukMwWkBjDR8'),
+            array('order_id' => '1000329633','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhgKjh484P6dukMwWkBjDR8'),
+            array('order_id' => '1000329635','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjigWJNpye_unDwPLpZbOkfs'),
+            array('order_id' => '1000329642','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvi26cvVj9IOBc-xkwWtIXs'),
+            array('order_id' => '1000329649','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjoNA4gYh3TLOO8dVEOzh-No'),
+            array('order_id' => '1000329664','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjjXfncf2j4usZYLqkn9tUGw'),
+            array('order_id' => '1000329687','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjl6VxGybRvdFC48XEO4MFR8'),
+            array('order_id' => '1000329689','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjnfb7h9ImtVdvbQModB2cfU'),
+            array('order_id' => '1000329699','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjnx9OsIXruBJ9zuQgrv5jJo'),
+            array('order_id' => '1000329700','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjmhsIKDSPIVrv_JpnAANmSU'),
+            array('order_id' => '1000329703','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlTGdgm2Fo_waFfACFDW2n4'),
+            array('order_id' => '1000329708','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjtgoZ07ts-QrdYXFOzPuUno'),
+            array('order_id' => '1000329710','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjilTgmgt8PBjtrMZK8cF-gM'),
+            array('order_id' => '1000329720','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjnzGlu00adNuyM2JTpLmg1Y'),
+            array('order_id' => '1000329723','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjtIOyCHyovYynW2rRG3biKk'),
+            array('order_id' => '1000329742','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjm_UmpXMWJjTm-Gm9BtjK_M'),
+            array('order_id' => '1000329751','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsVUU6a0LLFwTVCqj_GmeHU'),
+            array('order_id' => '1000329764','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjnIJn4ibeEMIRpetOUmwslU'),
+            array('order_id' => '1000329767','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhp20iijU8iWH7IpoxQa1mg'),
+            array('order_id' => '1000329786','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjtR3D5PVA39maPSMsP4dXls'),
+            array('order_id' => '1000329787','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvr7jvhgbEMmmJua35RUt9I'),
+            array('order_id' => '1000329795','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjjUe10ImPtovKsFsjncmhT0'),
+            array('order_id' => '1000329798','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvqbYm-148mplIgzhN7W2Jw'),
+            array('order_id' => '1000329806','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjp6WrFhD08kpGsC-Lh0kQ1I'),
+            array('order_id' => '1000329822','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjjUe10ImPtovKsFsjncmhT0'),
+            array('order_id' => '1000329827','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjm1G7Se7k6nUjYuT-tuE_NI'),
+            array('order_id' => '1000329840','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjmZIi4dSX5BkQI_Au1CqjJw'),
+            array('order_id' => '1000329842','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjmkFSPTY6-OsmliPpbNofs0'),
+            array('order_id' => '1000329854','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjjUdBCDvopNiB7xLu78E1nI'),
+            array('order_id' => '1000329861','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhBEdJjVvLcIR5KdCih-s0k'),
+            array('order_id' => '1000329869','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrOIPBNYdyi9DmpAMAtuM6Q'),
+            array('order_id' => '1000329891','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlpp3wsq3O7EE1L5UKOKxLU'),
+            array('order_id' => '1000329897','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhkaIQjvp7hKd9fuxFpvIpg'),
+            array('order_id' => '1000329907','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvRLztlps_kzinqMlwsAPKk'),
+            array('order_id' => '1000329920','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsuFxMVG6y248EiozXz2FeE'),
+            array('order_id' => '1000329926','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjr6IL1kno8edNe9tCg2mWCQ'),
+            array('order_id' => '1000329959','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjr8uIpw_lTLtaxi1q2oL6SA'),
+            array('order_id' => '1000329960','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjjmI7U63s8-Wpde0JeL2vYM'),
+            array('order_id' => '1000329968','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjjmI7U63s8-Wpde0JeL2vYM'),
+            array('order_id' => '1000329976','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjs0C8ehYVWX2nR2Oe_Ca50Q'),
+            array('order_id' => '1000329980','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqVwY-h0IWirCWRrcVm7EEk'),
+            array('order_id' => '1000329982','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjh1gIb3czOUr4XYT4VHih6Y'),
+            array('order_id' => '1000329997','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjr6IL1kno8edNe9tCg2mWCQ'),
+            array('order_id' => '1000329998','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjiRWHbaDPYi8gWwAfxSVUgQ'),
+            array('order_id' => '1000329999','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvYF0AOuqWYvIyNUphrYCE4'),
+            array('order_id' => '1000330007','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjjr1Agm1IQm_FjlVj5Pu1-g'),
+            array('order_id' => '1000330015','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjpzerf0QKbBDnMWOskdHfQU'),
+            array('order_id' => '1000330038','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjuRkepfVD5AGrjypuCrXIzw'),
+            array('order_id' => '1000330039','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlG-g90krBcobLcPJSFBU8w'),
+            array('order_id' => '1000330044','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlo3eKafMvOLVCWpmjut12c'),
+            array('order_id' => '1000330058','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjoBeZVpzQTDMhhHO1N0tVZA'),
+            array('order_id' => '1000330070','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjtREg-iMJuW8y1i58Gkb7wQ'),
+            array('order_id' => '1000330072','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjivS5bTAIHRptnzDyreB0BI'),
+            array('order_id' => '1000330089','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqwSD_5UMRjKclw9d8r58k8'),
+            array('order_id' => '1000330104','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqwSD_5UMRjKclw9d8r58k8'),
+            array('order_id' => '1000330108','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqwSD_5UMRjKclw9d8r58k8'),
+            array('order_id' => '1000330114','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjpE0ezCj02DbuK3f9SaAQVs'),
+            array('order_id' => '1000330126','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsGC837ZoYaiKfRVvEu0BSI'),
+            array('order_id' => '1000330156','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqigsLo3D_iE6ff5oMbKhls'),
+            array('order_id' => '1000330169','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjuj6NTIop7Re6gNCiChVMsk'),
+            array('order_id' => '1000330280','expiration_date' => '2017-10-10 12:08:59','openid' => 'o7B6cjhrE0fVrcvfgC1YcMNydt0s'),
+            array('order_id' => '1000330297','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjs1ES3INEtdjYvjD8J_ewRY'),
+            array('order_id' => '1000330303','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjm6Aui199Sr0ASyUByb1GPg'),
+            array('order_id' => '1000330344','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsGC837ZoYaiKfRVvEu0BSI'),
+            array('order_id' => '1000330354','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjkMoXosXuu02E3HfV2D92qQ'),
+            array('order_id' => '1000330381','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjm0SJfbUDqCMjtPdlgJWNyc'),
+            array('order_id' => '1000330385','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjp3SGQ6upmjDLYGPQGnpdXc'),
+            array('order_id' => '1000330395','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhFu_2MtjwO3PT0SL4pTzJQ'),
+            array('order_id' => '1000330428','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlCxXJJWO9MQTskcgEyqcZI'),
+            array('order_id' => '1000330464','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjoM670RF9CZcGaErOq-WoMw'),
+            array('order_id' => '1000330467','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvb7xugbtLqNIF4jpxcaAzI'),
+            array('order_id' => '1000330482','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjn6t8Ydjt83yRwhDDbKtCwc'),
+            array('order_id' => '1000330512','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvZSrJ4eTWHhUWv29Q8DJN8'),
+            array('order_id' => '1000330528','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjoseWHaW6sQMyFpKDMM4UkA'),
+            array('order_id' => '1000330565','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjl70AbpJYsrOyihkYnf6iYE'),
+            array('order_id' => '1000330673','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrItqjNedjeUM9pchOeLJ1g'),
+            array('order_id' => '1000330679','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhrE0fVrcvfgC1YcMNydt0s'),
+            array('order_id' => '1000330681','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrItqjNedjeUM9pchOeLJ1g'),
+            array('order_id' => '1000330704','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjoFlAP1K0paUhur0vJvDJDA'),
+            array('order_id' => '1000330715','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjg45uhFH6F2wpW5ECAWH2rA'),
+            array('order_id' => '1000330719','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjg45uhFH6F2wpW5ECAWH2rA'),
+            array('order_id' => '1000330733','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjr-vrZNEYPbCyFhHDrCum9g'),
+            array('order_id' => '1000330735','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrfotFcAOr5B_5UW4twq_sk'),
+            array('order_id' => '1000330797','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsVr5NPf9gL39Q7dQqFGQNE'),
+            array('order_id' => '1000330804','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjtTwW24cWuUV4lMubKdaLHU'),
+            array('order_id' => '1000330809','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhYjD_EX-lGyCYJWXTLvJ9Y'),
+            array('order_id' => '1000330810','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhYjD_EX-lGyCYJWXTLvJ9Y'),
+            array('order_id' => '1000330824','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjnQaiT-wK8ZScs12a6GNPjw'),
+            array('order_id' => '1000330831','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjuYVS8kqpS13KH2WB0wFUUc'),
+            array('order_id' => '1000330850','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsdquqz5maSnBO-lMVKW_ig'),
+            array('order_id' => '1000330872','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlLlmnHtG4K4K7UR4bdrq8I'),
+            array('order_id' => '1000330911','expiration_date' => '2017-10-04 23:59:59','openid' => 'o7B6cjp-I-kw_ZqzAFqrC_cW_xQI'),
+            array('order_id' => '1000330971','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhVJec33qQDomfAVBPPhIxE'),
+            array('order_id' => '1000331059','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjpTCDV7rRpx3bZTKA2vCnPk'),
+            array('order_id' => '1000331114','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhVJec33qQDomfAVBPPhIxE'),
+            array('order_id' => '1000331115','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrYO5FXZdhxr3ih_R9kghLw'),
+            array('order_id' => '1000331267','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjnraKpz_ANSqZawDsEI1j6o'),
+            array('order_id' => '1000331270','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjq4sP5ZGRupHYaCBA9AP8tU'),
+            array('order_id' => '1000331276','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjnraKpz_ANSqZawDsEI1j6o'),
+            array('order_id' => '1000331296','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlblilY8CKRZ2nmdkfn9JEs'),
+            array('order_id' => '1000331301','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjkU8llvBUZZ9oZcmxIIaCG0'),
+            array('order_id' => '1000331306','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlblilY8CKRZ2nmdkfn9JEs'),
+            array('order_id' => '1000331327','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhyoYso-_Z1gBzVSGm31L0k'),
+            array('order_id' => '1000331351','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjgQ29VU7CoUdxrLgNrIeoI4'),
+            array('order_id' => '1000331356','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhBm2ZiTUr16-lCXJ2ifzk4'),
+            array('order_id' => '1000331363','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjmKOlhxvJAvzPOXozErfEP4'),
+            array('order_id' => '1000331368','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjuOdo7Hzhfgq9d5OPzndgBU'),
+            array('order_id' => '1000331557','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqizjfSjV02K9J1RocGsixg'),
+            array('order_id' => '1000331593','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjtgOo9u0C8Ak_2jzR01f3Tw'),
+            array('order_id' => '1000331674','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhIjIy3ZLFTNRjBubKxlZXc'),
+            array('order_id' => '1000331917','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjgztwuwEi0lg8Y5QH-RDpmc'),
+            array('order_id' => '1000332007','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjgcV3_EwIYm_eDkFLyuJ8kk'),
+            array('order_id' => '1000332011','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsxmE2j2gymdEyj2xRHhgdM'),
+            array('order_id' => '1000332014','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjoW_H-9SHbOf--9wINl0-00'),
+            array('order_id' => '1000332154','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrJImGx4Oowsrw80iHWO5Ac'),
+            array('order_id' => '1000332197','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjnLGIZui7rJ6XfDDaIHkFfo'),
+            array('order_id' => '1000332262','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqjtO-p3wi38LsJbGRxFxRU'),
+            array('order_id' => '1000332310','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlM2XL0rgfj6S7EJE-0obz0'),
+            array('order_id' => '1000332348','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjs2fYZ1SI8JHC69ckh2irKY'),
+            array('order_id' => '1000332388','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjurmElxrQkzsREWeYG2_uz4'),
+            array('order_id' => '1000332418','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjscb0RfTve52iXcsc-PteTc'),
+            array('order_id' => '1000332437','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlCxXJJWO9MQTskcgEyqcZI'),
+            array('order_id' => '1000332475','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjl_hqoM-Hgji-SbpbGxdmgQ'),
+            array('order_id' => '1000332477','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjl_hqoM-Hgji-SbpbGxdmgQ'),
+            array('order_id' => '1000332496','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjgnC-tgI1p_vHdIBAI2QKH8'),
+            array('order_id' => '1000332806','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjkEXLZWo-_zt6jSnUSimWV0'),
+            array('order_id' => '1000332843','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjkSq9KNVGmyeSD_wmcQAoBE'),
+            array('order_id' => '1000332932','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjgztwuwEi0lg8Y5QH-RDpmc'),
+            array('order_id' => '1000332987','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrFov6R1yzwnwCaQ8kxs3vw'),
+            array('order_id' => '1000332991','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvjzvvGxPoRC0GZz9FfkBnA'),
+            array('order_id' => '1000333023','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsqhO0jD4Zd6MBeyNmDZ0hI'),
+            array('order_id' => '1000333050','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjs2zoywdhthV74VMO5itp5s'),
+            array('order_id' => '1000333180','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjkCRVl42zln61kEyPhf8OXA'),
+            array('order_id' => '1000333386','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjp-I-kw_ZqzAFqrC_cW_xQI'),
+            array('order_id' => '1000333444','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlHYujFNBkvrQO5tgJQtknM'),
+            array('order_id' => '1000333484','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjtljSpqbcpWAYh9cRTZV0QM'),
+            array('order_id' => '1000333587','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrumlP-xM4geEVU9H53lxwY'),
+            array('order_id' => '1000333615','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlDRTXs_6hZI68k2firivRQ'),
+            array('order_id' => '1000333671','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjtTms5DEwjUOzzJV2f3EbtY'),
+            array('order_id' => '1000333696','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjo17lxDOFFl3I_ZJL3uqEfk'),
+            array('order_id' => '1000333729','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqZfM5YpYhmHUi0mQC6WSBw'),
+            array('order_id' => '1000333855','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjm3O-OYdTRC1YMb5F7qbrMo'),
+            array('order_id' => '1000333864','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlHYujFNBkvrQO5tgJQtknM'),
+            array('order_id' => '1000333868','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlHYujFNBkvrQO5tgJQtknM'),
+            array('order_id' => '1000333880','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvlqE2B6ErzUBWYo2OPO8UE'),
+            array('order_id' => '1000334017','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjkx-lAm-YyBh0J_312x36_g'),
+            array('order_id' => '1000334050','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjpJp4IXBu1lPFFdglP2TLas'),
+            array('order_id' => '1000334078','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjptoEceipeJG-Yp9wstcyzI'),
+            array('order_id' => '1000334115','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjq6Q1EEztDRL-uYhGCds8vg'),
+            array('order_id' => '1000334174','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvJxZU1WfaaFLFGKz-6aI84'),
+            array('order_id' => '1000334290','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjj6fMFx3bBXUVi88I2x0GrE'),
+            array('order_id' => '1000334312','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjpN4dVRDarGdeO5Y9cJIbvg'),
+            array('order_id' => '1000334329','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjrQvlPoSTao0fZJSWaAfU_E'),
+            array('order_id' => '1000334344','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsJQOHZZPJVNMntJ9z50ipg'),
+            array('order_id' => '1000334362','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjluYKMOd4GHZ8Nho4aRPncs'),
+            array('order_id' => '1000334373','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjt8RiI5BHEBpCcsuORfxGpE'),
+            array('order_id' => '1000334383','expiration_date' => '2018-02-08 21:07:14','openid' => 'o7B6cjoCB_EhyVbTRZ2tbTH9EHOo'),
+            array('order_id' => '1000334385','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjoCB_EhyVbTRZ2tbTH9EHOo'),
+            array('order_id' => '1000334405','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjopd56J6tDWknRmeS7wRKV0'),
+            array('order_id' => '1000334431','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvjTpYXBAy1bmJMYeAMBeNI'),
+            array('order_id' => '1000334433','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjvvWtSclk3HxUlRqm6-TTyU'),
+            array('order_id' => '1000334483','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhIjIy3ZLFTNRjBubKxlZXc'),
+            array('order_id' => '1000334488','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjupUSptcTqQnfVQ4Lz-vliM'),
+            array('order_id' => '1000334510','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhLbTR84QsX0zbQt86RZ71s'),
+            array('order_id' => '1000334518','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjiRlHaBjTIBF7u85KLrku1k'),
+            array('order_id' => '1000334528','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjqR3fyghQelKZlBcZ7QsYzk'),
+            array('order_id' => '1000334542','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjutJGY9LcW04s6vnUkNwkHg'),
+            array('order_id' => '1000334604','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjmJORAZYUOdg3vrkT0s_KYo'),
+            array('order_id' => '1000334609','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjjK-PfHY3KsVZAJpYdV-5Iw'),
+            array('order_id' => '1000334634','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjmxJG14xARGxZEGIyERCnVs'),
+            array('order_id' => '1000334639','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjtuGfRa53r_nKSLTIZR_CzI'),
+            array('order_id' => '1000334643','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjsgyk16TQ689tecq_x0ttsc'),
+            array('order_id' => '1000334644','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjv3nFU26CH7JuDuUjygkyzA'),
+            array('order_id' => '1000334655','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjlzvHYEh3sT4SZwU3SQaCG8'),
+            array('order_id' => '1000334670','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjnBoQHYSwCZTbSifff8mz2k'),
+            array('order_id' => '1000334684','expiration_date' => '2017-10-31 23:59:59','openid' => 'o7B6cjhVNbFiIkiA8_fS6YS_k2q4'),
+            array('order_id' => '1000360814','expiration_date' => '2017-09-24 10:01:11','openid' => 'o7B6cjmJIdTUf6ngWPncsltIJsAs'),
+            array('order_id' => '1000360816','expiration_date' => '2017-09-24 10:01:14','openid' => 'o7B6cjmQZo301ET70HPsUyFReWWk'),
+            array('order_id' => '1000377487','expiration_date' => '2017-10-04 23:59:59','openid' => 'o7B6cjiBIgT-WOBUrc-PMUK458MA')
+        );
         // 1000331591//
         $inter_id = 'a501733480';
         $template_id = 'swxh6IRg24ET70J-un2k0o74MU6yMPX2zhg-ZICZ958';
@@ -1748,8 +1959,124 @@ class Cron_nz extends MY_Controller
         $data['template_id'] = $template_id;
         $data['url'] = 'http://assist.iwide.cn/index.php/soma/order/my_order_list?id=a501733480';
         $data['topcolor'] = '#000000';
+
+        $this->load->model('soma/Message_wxtemp_template_model', 't_model');
+        $base_key = 'Soma_cron_nz:' . date('Y-m-d') . ':' . __FUNCTION__ . ':';
+        foreach ($orderArrInfo as $key=>$val) {
+            //动态模板内容
+            $subdata['first'] = array(
+                'value' => '您的券即将到期',
+                'color' => '#000000'
+            );
+            $subdata['keyword1'] = array(
+                'value' => $val['order_id'],
+                'color' => '#000000'
+            );
+            $subdata['keyword2'] = array(
+                'value' => '',
+                'color' => '#000000'
+            );
+            $subdata['keyword3'] = array(
+                'value' => $val['expiration_date'],
+                'color' => '#000000'
+            );
+            $subdata['remark'] = array(
+                'value' => '点击立即使用',
+                'color' => '#000000'
+            );
+            $data['data'] = $subdata;
+
+
+            $redis_key = $base_key . $val['openid'];
+            if($this->_redis->exists($redis_key))
+            {
+                continue;
+            }
+            $data['touser'] = $val['openid'];
+            $res = $this->t_model->send_template(json_encode($data), $inter_id);
+            $this->_redis->set($redis_key, json_encode($res));
+        }
+        echo 'success';
+    }
+
+	/**
+	 * 烟台万达文华酒店
+	 */
+	public function ytwdwh_booking_suceess()
+	{
+		// 1000322982
+		$inter_id = 'a503998048';
+		$template_id = 'RhKVOACzhoPfWttuAnM9AyQA1nbuj2fLV_00auElYbA';
+		$file = $this->_basic_path . 'ytwdwh_booking_suceess.csv';
+
+		$data['template_id'] = $template_id;
+		$data['url'] = 'http://assist.iwide.cn/index.php/soma/package/index?id=a503998048&saler=290';
+		$data['topcolor'] = '#000000';
+		$subdata['first'] = array(
+			'value' => '您已成功预约烟台万达文华酒店开业三周年微信商城促销活动！',
+			'color' => '#000000'
+		);
+		$subdata['keyword1'] = array(
+			'value' => '微信商城首促活动',
+			'color' => '#000000'
+		);
+		$subdata['keyword2'] = array(
+			'value' => '',
+			'color' => '#000000'
+		);
+		$subdata['remark'] = array(
+			'value' => '活动倒计时14小时！错过本次再等一年！点击详情进入购买',
+			'color' => '#000000'
+		);
+		$data['data'] = $subdata;
+
+		$openids = $this->get_target_openids_from_csv($inter_id, $file);
+		// 已下单openid
+		$orderOpenidsData = $this->soma_db_conn_read
+			->distinct()
+			->select('openid')
+			->where('inter_id', 'a503998048')
+			->from('iwide_soma_sales_order_1001')
+			->get()
+			->result_array();
+		$orderOpenids = array_column($orderOpenidsData, 'openid');
+		// 没下单openid
+		$openids = array_diff($openids, $orderOpenids);
+
+		$this->load->model('soma/Message_wxtemp_template_model', 't_model');
+		$base_key = 'Soma_cron_nz:' . date('Y-m-d') . ':' . __FUNCTION__ . ':';
+		foreach ($openids as $openid) {
+			$redis_key = $base_key . $openid;
+			if($this->_redis->exists($redis_key))
+			{
+				continue;
+			}
+			$data['touser'] = $openid;
+			$res = $this->t_model->send_template(json_encode($data), $inter_id);
+			$this->_redis->set($redis_key, json_encode($res));
+			echo $openid . PHP_EOL; 
+		}
+		echo 'success';
+	}
+	
+	
+	  /**
+     * Wuqd 2017-09-11
+     * 手动发送微信模板消息
+     * 成都世纪城洲际大饭店
+     */
+    public function sjczj_0911()
+    {
+        // 1000331591//
+        $inter_id = 'a484122795';
+        $template_id = 'BM20NbWAxqv0D-EBD1csiilkMPdRoonm5QHdsjJCvOo';
+        $file = $this->_basic_path . 'sjczj_0911.csv';
+
+        $data['template_id'] = $template_id;
+        $data['url'] = '';
+        $data['topcolor'] = '#000000';
         $subdata['first'] = array(
-            'value' => '您的券即将到期',
+            'value' => '您购买的618活动商品即将在9月18日到期，因会展活动9月11日-16日酒店不可接待已经为您延期至9月30日',
             'color' => '#000000'
         );
         $subdata['keyword1'] = array(
@@ -1761,7 +2088,7 @@ class Cron_nz extends MY_Controller
             'color' => '#000000'
         );
         $subdata['remark'] = array(
-            'value' => '点击立即使用',
+            'value' => '请在有效期前使用完毕',
             'color' => '#000000'
         );
         $data['data'] = $subdata;
@@ -1782,7 +2109,4 @@ class Cron_nz extends MY_Controller
         }
         echo 'success';
     }
-
-
-
 }

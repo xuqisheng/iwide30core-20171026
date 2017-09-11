@@ -1959,8 +1959,8 @@ class Order extends MY_Front_Soma_Iapi
         $params['openid'] = $this->openid;
         $params['name'] = empty($request_param->get('name')) ? null : $request_param->get('name');
         $params['phone'] = empty($request_param->get('phone')) ? null : $request_param->get('phone');
-        if (!preg_match("/^.{1,20}$/", $params['name'])) {
-            $this->json(BaseConst::OPER_STATUS_FAIL_TOAST, '购买人信息不能超过20个字符');
+        if (mb_strlen($params['name'], 'UTF-8') > 10) {
+            $this->json(BaseConst::OPER_STATUS_FAIL_TOAST, '购买人信息不能超过10个字符');
             return;
         }
         if (!preg_match("/^1[34578]{1}\d{9}$/", $params['phone'])) {

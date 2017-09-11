@@ -102,7 +102,7 @@ class Member_related_model extends MY_Model_Member {
         $m_ct = $this->member_card_table_name();
         $list = $this->_shard_db()
             ->select($m_ct.'.*')
-            ->where(array('is_giving_time < ' => $expire_date , 'is_giving '=>'t','is_use'=> 'f','is_useoff '=>'f' ))
+            ->where(array('is_giving_time < ' => $expire_date , 'is_giving_time !=' => 0 , 'is_giving '=>'t','is_use'=> 'f','is_useoff '=>'f' ))
             ->order_by('is_giving_time asc')->limit($limit)
             ->get($m_ct)->result_array();
         return $list;

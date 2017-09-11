@@ -1008,5 +1008,32 @@ class KillsecService extends BaseService
 
     }
 
+    /**
+     * 获取用户订阅的秒杀
+     * @param array $actids
+     * @param $inter_id
+     * @param $openid
+     * @param $killsec
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    public function getOpenidSubscribKilltime(Array $actids, $inter_id, $openid, $killsec)
+    {
+        $this->getCI()->load->model('soma/Activity_killsec_notice_model');
+        $killSecModel = $this->getCI()->Activity_killsec_notice_model;
+
+        $field = array('inter_id', 'openid', 'killsec_time');
+        $field_value = array($inter_id, $openid, $killsec);
+        $select = 'act_id';
+        $option = array(
+            'limit' => count($actids),
+        );
+        $result = $killSecModel->get($field, $field_value, $select, $option);
+
+        return $result;
+
+    }
+
+
+
 
 }

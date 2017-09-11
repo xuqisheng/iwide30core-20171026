@@ -147,7 +147,7 @@ class Package extends MY_Front_Soma_Iapi
                 if($ps_detail) {
                     $specProduct = true;
                     foreach ($ps_detail as $pid => $setting){
-                        $productDetail['price_package'] = $setting[0]['spec_price'];
+                        $productDetail['price_package'] = PackageService::getInstance()->progressNumber($setting[0]['spec_price']);
                     }
                 }
             }
@@ -269,8 +269,7 @@ class Package extends MY_Front_Soma_Iapi
             $qrCode = WxService::getInstance()->getQrcode(WxService::QR_CODE_SOMA_PUBLIC)->getData();
         }
         catch (Exception $e){
-            //todo 上线去掉
-            //$qrCode = 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=gQEh8TwAAAAAAAAAAS5odHRwOi8vd2VpeGluLnFxLmNvbS9xLzAyeGVOSHRMUm1mSjMxMDAwMHcwN3IAAgT_G4BZAwQAAAAA';
+
         }
         $hotelInfo = [
             'name' => data_get($hotelInfo, 'name'),
@@ -459,7 +458,7 @@ class Package extends MY_Front_Soma_Iapi
             'sort', 'status', 'type','date_type', 'expiration_date', 'sales_cnt', 'show_sales_cnt'
         ];
         $options = [
-            'limit' => $page_size, 'offset' => ($page - 1) * $page_size, 
+            'limit' => $page_size, 'offset' => ($page - 1) * $page_size,
             'orderBy' => 'sort DESC, product_id DESC', 'page' => $page
         ];
 
@@ -545,16 +544,18 @@ class Package extends MY_Front_Soma_Iapi
 
         //取出秒杀id
         $act_id = array();
+        $kill_sec_times = array();
         foreach ($page_data['products'] as $p) {
             if ($p['product_type'] == $productModel::PRODUCT_ACTIVITY_KILLSEC) {
                 $act_id[] = $p['killsec']['act_id'];
+                $kill_sec_times[] = $p['killsec']['killsec_time'];
             }
         }
 
         //获取用户订阅的act_id
         $actids = array();
         if (!empty($act_id)) {
-            $openid_actid = KillsecService::getInstance()->getOpenidSubscribActid($act_id, $this->inter_id, $this->openid);
+            $openid_actid = KillsecService::getInstance()->getOpenidSubscribKilltime($act_id, $this->inter_id, $this->openid, $kill_sec_times);
         }
         if (!empty($openid_actid)) {
             $actids = array_column($openid_actid, 'act_id');
@@ -1358,5 +1359,35 @@ class Package extends MY_Front_Soma_Iapi
         $this->json(BaseConst::OPER_STATUS_SUCCESS, '', $result);
     }
 
+
+    /**
+     * 获取绩效商品/商城首页 二维码
+     * @SWG\Get(
+     *     tags={"package"},
+     *     path="/package/distribute_qrcode",
+     *     summary="获取绩效商品",
+     *     description="获取绩效商品",
+     *     operationId="distribute_qrcode",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         description="二维码跳转链接",
+     *         in="query",
+     *         name = "url",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Response(
+     *         response="200",
+     *         description="successful operation",
+     *         @SWG\Schema(
+     *              type="object"
+     *         )
+     *     )
+     * )
+     */
+    public function get_distribute_qrcode(){
+
+        PackageService::getInstance()->getQrcodeStream($this->input->get('url', null, $this->link['home']));
+    }
 
 }

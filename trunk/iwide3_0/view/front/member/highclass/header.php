@@ -29,3 +29,9 @@
 <?php } else { ?>
 <link rel="stylesheet" href="<?php echo refer_res('dark.css','public/user') ?>">
 <?php } ?>
+<script type="text/javascript">
+  window.jfkConfig = {
+    interID: '<?php echo $inter_id;?>',
+    wxShare: <?php echo json_encode($js_share_config);?>,
+};
+</script>

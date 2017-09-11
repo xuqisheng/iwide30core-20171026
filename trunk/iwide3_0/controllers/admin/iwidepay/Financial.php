@@ -298,7 +298,7 @@ class Financial extends MY_Admin
         $this->load->model('iwidepay/Iwidepay_financial_model');
 
         //退款记录
-        $stat_time = date('Y-m-d');//,strtotime('-50 days')
+        $stat_time = date('Y-m-d',strtotime('-50 days'));//,strtotime('-50 days')
         $end_time = date('Y-m-d 23:59:60');
         $list_debt = $this->Iwidepay_financial_model->debt_order($stat_time,$end_time);
         if (!empty($list_debt))
@@ -312,7 +312,7 @@ class Financial extends MY_Admin
                     'pay_no'    => $value['ori_pay_no'],
                     'trade_type' => $this->get_financial_type($value['order_type']), //3-原款退款
                     'transfer_status' => 3, //3-已结清
-                    'transfer_date' => date('Y-m-d',strtotime($value['add_time'])),
+                    'transfer_date' => date('Y-m-d',strtotime($value['up_time'])),
                     'inter_id' => $value['inter_id'],
                     'hotel_id' => $value['hotel_id'],
                     'trade_time' => $value['add_time'],
@@ -430,6 +430,40 @@ class Financial extends MY_Admin
             }
         }
     }
+
+    /**
+     * 修复 对账单记录
+     */
+    public function run_settlement_record_id()
+    {
+        $sql = "SELECT * FROM iwide_iwidepay_sum_record WHERE handle_date = '20170911' AND status = 0";
+        $data = $this->db->query($sql)->result_array();
+        $num = 0;
+        if (!empty($data))
+        {
+            foreach ($data as $value)
+            {
+                $where_arr = array(
+                    'status' => 10,
+                    'handle_date' => '20170909',
+                    'bank_card_no' => trim($value['bank_card_no']),
+                );
+
+                $this->db->where($where_arr);
+
+                $this->db->update('iwidepay_settlement',array('record_id' => $value['id']));
+                $row = $this->db->affected_rows();
+                if ($row > 0)
+                {
+                    $num = $num + $row;
+                }
+            }
+        }
+
+        echo '今天总行号：'.count($data).',更改行数：'.$num;
+
+    }
+
 
     /**
      * 或者对账单类型

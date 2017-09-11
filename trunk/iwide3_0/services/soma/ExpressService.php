@@ -159,7 +159,7 @@ class ExpressService extends BaseService
         $customerAddressModel = $this->getCI()->customerAddressModel;
         $cmsRegionModel = $this->getCI()->cmsRegionModel;
 
-        $field = ['openid', 'address_id', 'status', 'inter_id'];
+        $field = ['openid = ', 'address_id = ', 'status = ', 'inter_id = '];
         $value = [$openId, $addressId, $customerAddressModel::STATUS_ACTIVE, $interId];
         $model = $customerAddressModel->get($field, $value);
 

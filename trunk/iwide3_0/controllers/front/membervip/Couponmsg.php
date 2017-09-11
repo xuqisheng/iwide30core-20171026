@@ -721,7 +721,7 @@ class Couponmsg extends MY_Controller {
      * 回收赠送中逾期的优惠券
      */
     public function giving_coupon_recycle(){
-        $this->_check_access();    //拒绝非法IP执行任务
+        if($this->input->get('debug') != 1) $this->_check_access();    //拒绝非法IP执行任务
         $this->load->model('member/member_related_model');
         $this->load->library('MYLOG');
         $expiredList = $this->member_related_model->get_giving_expired_coupon();

@@ -85,26 +85,15 @@ class Clears extends MY_Controller {
     	$hotel_advances = $this->Iwidepay_clears_model->get_settlement_record($startdate,$enddate);
 
     	foreach ($hotel_advances as $kh => $vh) {
-    		//判断是否开启了现付结算
-    		$open_offline = $this->Iwidepay_clears_model->get_configs($vh['inter_id'],'synchro_hotel_order');
-    		MYLOG::w('info:synchro_hotel_order config_'.$vh['inter_id'].'-'.json_encode($open_offline),'iwidepay_clears');
-    		if(empty($open_offline)||$open_offline['value']!=1){
-    			//没开启
-    			// 现付分账没开启
-    			$hotel_advances[$kh]['open_offline'] = 0;
-    			continue;
-    		}else{
-    			// 现付分账开启
-    			$hotel_advances[$kh]['open_offline'] = 1;
-    		}
-
     		$deductible_amount = $vh['amount'];
-	    	//取门店前一天结余金额
-	    	$startdate = date('Y-m-d 00:00:00',strtotime('-1 day'));
-	    	$enddate = date('Y-m-d 00:00:00');
-	    	$lastday_surplus = $this->Iwidepay_clears_model->get_lastday_surplus_record($vh['inter_id'],$vh['hotel_id'],$startdate,$enddate);
+	    	//取门店最近一条未结清的结余金额
+	    	$last_surplus = $this->Iwidepay_clears_model->get_last_surplus_record($vh['inter_id'],$vh['hotel_id']);
 	    	//汇总抵扣金额
-	    	$deductible_amount += $lastday_surplus['amount'];
+	    	$last_surplus_id = 0;
+	    	if(!empty($last_surplus['amount'])){
+	    		$deductible_amount += $last_surplus['amount'];
+	    		$last_surplus_id = $last_surplus['id'];
+	    	}
 
 	    	//查出酒店的所有未结清欠款记录
         	$debt_records = $this->Iwidepay_clears_model->get_debt_record($vh['inter_id'],$vh['hotel_id']);
@@ -116,7 +105,7 @@ class Clears extends MY_Controller {
         	//记录结余金额和是否有未结清的欠款记录
         	$hotel_advances[$kh]['balance_amount'] = $return['amount'];
         	$hotel_advances[$kh]['is_settle'] = $return['is_settle'];
-        	$hotel_advances[$kh]['debt_records'] = $debt_records;
+        	$hotel_advances[$kh]['debt_records'] = $return['debted_records'];
 
         	//没有欠款跳过该条汇总
         	if(empty($debt_records)){
@@ -127,9 +116,9 @@ class Clears extends MY_Controller {
 	    	if($return['amount']>=0){
 	    		//生成结余记录
 	    		if($return['is_settle']==0){
-	    			$res = $this->Iwidepay_clears_model->save_residual_record($vh['inter_id'],$vh['hotel_id'],0);
+	    			$res = $this->Iwidepay_clears_model->save_residual_record($vh['inter_id'],$vh['hotel_id'],0,$last_surplus_id);
 	    		}else{
-	    			$res = $this->Iwidepay_clears_model->save_residual_record($vh['inter_id'],$vh['hotel_id'],$return['amount']);
+	    			$res = $this->Iwidepay_clears_model->save_residual_record($vh['inter_id'],$vh['hotel_id'],$return['amount'],$last_surplus_id);
 	    		}
 	    		if($res!==true){
 					MYLOG::w('err:save_residual_record fail-'.json_encode($res),'iwidepay_clears');
@@ -174,12 +163,13 @@ class Clears extends MY_Controller {
     	
     	//记录是否有未结清的欠款记录
     	$is_settle = 0;
-
+    	$debted_records = array();
     	//垫付退款抵扣逻辑
     	$return = $this->deductible_handle($deductible_amount,$refund_records);
     	if($return['is_settle']==1){
     		$is_settle = 1;
     	}
+    	$debted_records = array_merge($debted_records,$return['debted_records']);
 
     	if($return['amount']>0){
     		//首单奖励抵扣逻辑
@@ -187,6 +177,7 @@ class Clears extends MY_Controller {
     		if($return['is_settle']==1){
     			$is_settle = 1;
     		}
+    		$debted_records = array_merge($debted_records,$return['debted_records']);
 
     		if($return['amount']>0){
     			//额外奖励抵扣逻辑
@@ -194,6 +185,7 @@ class Clears extends MY_Controller {
     			if($return['is_settle']==1){
     				$is_settle = 1;
     			}
+    			$debted_records = array_merge($debted_records,$return['debted_records']);
 
 	    		if($return['amount']>0){
 	    			//订单分成抵扣逻辑
@@ -201,6 +193,7 @@ class Clears extends MY_Controller {
 	    			if($return['is_settle']==1){
     					$is_settle = 1;
     				}
+    				$debted_records = array_merge($debted_records,$return['debted_records']);
 
 	    			if($return['amount']>0){
 	    				//基础月费抵扣逻辑
@@ -208,16 +201,17 @@ class Clears extends MY_Controller {
 	    				if($return['is_settle']==1){
     						$is_settle = 1;
     					}
+    					$debted_records = array_merge($debted_records,$return['debted_records']);
 	    			}
 	    		}
     		}
     	}
-    	return array('amount'=>$return['amount'],'is_settle'=>$is_settle);
+    	return array('amount'=>$return['amount'],'is_settle'=>$is_settle,'debted_records'=>$debted_records);
     }
 
     //抵扣处理
     protected function deductible_handle($amount,$records){
-    	$msg = array('amount'=>0,'is_settle'=>0);
+    	$msg = array('amount'=>0,'is_settle'=>0,'debted_records'=>array());
     	if($amount>0&&!empty($records)){
     		foreach ($records as $kr => $vr) {
     			if($amount==0){
@@ -230,9 +224,9 @@ class Clears extends MY_Controller {
     				if($res!==true){
     					MYLOG::w('err:update debt_status fail-'.json_encode($res),'iwidepay_clears');
     				}
+    				$msg['debted_records'][] = $vr;
     			}else{
     				$msg['is_settle'] = 1;
-    				continue;
     			}
     		}
     	}
@@ -247,53 +241,60 @@ class Clears extends MY_Controller {
 		$debt_ids = array();
     	MYLOG::w('info:summary_hotel_advances-'.json_encode($hotel_advances),'iwidepay_clears');
     	foreach ($hotel_advances as $ka => $va) {
-    		if($va['open_offline']!=1){
-    			//现付分账没开启
+    		if(empty($va['debt_records'])){
     			continue;
     		}
     		$debt_ids_va = array();
     		foreach ($va['debt_records'] as $kd => $vd) {
-    			$ext_info_arr = json_decode($vd['ext_info'],true);
-    			//集团汇总
-    			$group_total_amounts[$vd['inter_id']]['total_amount'] += $ext_info_arr['group_amount'];
-    			$group_total_amounts[$vd['inter_id']]['debt_ids'][] = $vd['id'];
-    			//金房卡汇总
-    			$jfk_total_amount += $ext_info_arr['jfk_amount'];
-    			$jfk_total_amount += $ext_info_arr['dist_amount'];
-    			//关联id汇总
-    			$debt_ids[] = $vd['id'];
-    			$debt_ids_va[] = $vd['id'];
+    			if($vd['order_type']=='order'){
+	    			$ext_info_arr = json_decode($vd['ext_info'],true);
+	    			//集团汇总
+	    			$group_total_amounts[$vd['inter_id']]['total_amount'] += $ext_info_arr['group_amount'];
+	    			$group_total_amounts[$vd['inter_id']]['debt_ids'][] = $vd['id'];
+	    			//金房卡汇总
+	    			$jfk_total_amount += $ext_info_arr['jfk_amount'];
+	    			$jfk_total_amount += $ext_info_arr['dist_amount'];
+	    			//关联id汇总
+    				$debt_ids[] = $vd['id'];
+    				$debt_ids_va[] = $vd['id'];
+    			}elseif($vd['order_type']=='base_pay'){
+    				$jfk_total_amount += $vd['amount'];
+	    			//关联id汇总
+    				$debt_ids[] = $vd['id'];
+    				$debt_ids_va[] = $vd['id'];
+    			}elseif ($vd['order_type']=='orderReward') {
+    				$jfk_total_amount += $vd['amount'];
+    				//关联id汇总
+    				$debt_ids[] = $vd['id'];
+    				$debt_ids_va[] = $vd['id'];
+    			}elseif ($vd['order_type']=='extraReward') {
+    				$jfk_total_amount += $vd['amount'];
+    				//关联id汇总
+    				$debt_ids[] = $vd['id'];
+    				$debt_ids_va[] = $vd['id'];
+    			}
     		}
 
     		//门店汇总
-    		//无未结清的欠款记录
-    		if($va['is_settle']==0){
-    			//更新门店转账汇总记录金额
-    			$res = $this->Iwidepay_clears_model->handle_settlement_record($va,$va['is_settle'],$debt_ids_va);
-    		}elseif($va['is_settle']==1){
-    			$res = $this->Iwidepay_clears_model->handle_settlement_record($va,$va['is_settle'],$debt_ids_va);
-    		}
+			//更新门店转账汇总记录金额
+			$res = $this->Iwidepay_clears_model->handle_settlement_record($va,$va['is_settle'],$debt_ids_va);
     		if($res!==true){
 				MYLOG::w('err:handle settlement_record fail-'.json_encode($res),'iwidepay_clears');
 			}
     	}
     	MYLOG::w('info:group_total_amounts-'.json_encode($group_total_amounts),'iwidepay_clears');
     	foreach ($group_total_amounts as $kg => $vg) {
-	    	if($vg['total_amount']>0){
-				//更新集团转账汇总记录金额
-				$res = $this->Iwidepay_clears_model->save_settlement_record($kg,0,'group',$vg['total_amount'],$vg['debt_ids']);
-				if($res!==true){
-					MYLOG::w('err:save settlement_record fail-'.json_encode($res),'iwidepay_clears');
-				}
-			}
-		}
-		MYLOG::w('info:jfk_total_amount-'.$jfk_total_amount,'iwidepay_clears');
-		if($jfk_total_amount>0){
-			//更新金房卡转账汇总记录金额
-			$res = $this->Iwidepay_clears_model->save_settlement_record('jinfangka',0,'jfk',$jfk_total_amount,$debt_ids);
+			//更新集团转账汇总记录金额
+			$res = $this->Iwidepay_clears_model->save_settlement_record($kg,0,'group',$vg['total_amount'],$vg['debt_ids']);
 			if($res!==true){
 				MYLOG::w('err:save settlement_record fail-'.json_encode($res),'iwidepay_clears');
 			}
+		}
+		MYLOG::w('info:jfk_total_amount-'.$jfk_total_amount,'iwidepay_clears');
+		//更新金房卡转账汇总记录金额
+		$res = $this->Iwidepay_clears_model->save_settlement_record('jinfangka',0,'jfk',$jfk_total_amount,$debt_ids);
+		if($res!==true){
+			MYLOG::w('err:save settlement_record fail-'.json_encode($res),'iwidepay_clears');
 		}  	
     }
 }

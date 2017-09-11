@@ -161,7 +161,7 @@ class MY_Front_Soma extends MY_Front
                 $this->theme = $themeConfig['theme_path'];
                 if(isset($themeConfig['theme_id'])){
                     $themeConfigInfo = $this->Theme_config_model->get(['theme_id'], [$themeConfig['theme_id']]);
-                    if($themeConfigInfo){
+                    if($themeConfigInfo[0]['version']){
                         $this->version = $themeConfigInfo[0]['version'];
                     }
                 }
@@ -385,6 +385,11 @@ EOF;
         $brandname = $this->input->get('brandname', null, '');
         if($brandname){
             $this->session->set_tempdata('brandname', $brandname, $ttl);
+        }
+	 //layout
+        $layout = $this->input->get('layout', null, '');
+        if($layout){
+            $this->session->set_tempdata('layout', $layout, $ttl);
         }
 
 

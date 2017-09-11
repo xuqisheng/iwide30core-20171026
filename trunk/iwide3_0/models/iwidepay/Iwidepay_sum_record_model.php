@@ -14,9 +14,8 @@ class Iwidepay_sum_record_model extends MY_Model{
 	}
 
     protected function db_read(){
-        
-        $db_read = $this->load->database('iwide_r1',true);
-        return $db_read;
+
+        return $this->db;
         
     }
     

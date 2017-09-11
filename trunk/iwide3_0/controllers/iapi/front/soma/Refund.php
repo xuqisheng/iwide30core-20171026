@@ -424,6 +424,9 @@ class Refund extends MY_Front_Soma_Iapi
             return;
         }
 
+        /**
+         * @var \Sales_order_model $order
+         */
         //订单信息
         $this->load->model('soma/Sales_order_model', 'sales_order_model');
         $order = $this->sales_order_model->load($order_id);
@@ -437,6 +440,7 @@ class Refund extends MY_Front_Soma_Iapi
         $data['total'] = $order->m_get('real_grand_total');
         $data['status'] = $refund_info['status'];
         $data['refund_type'] = $refund_info['refund_type'];
+        $data['create_time'] = date('Y/m/d H:i:s', strtotime($order->m_get('create_time')));
 
         //审核状态
         $pending = $sales_refund_model::STATUS_PENDING;//已审核
