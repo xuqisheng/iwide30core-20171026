@@ -17,7 +17,7 @@
     <script src="<?php echo base_url(FD_PUBLIC)?>/js/ajaxForm.js"></script>
     <script src="<?php echo base_url("public/member/phase2/scripts/alert.js");?>"></script>
 <?php include 'wxheader.php' ?>
-<title><?php echo $inter_id=='a492669988'? '绑定':'登陆'?></title>
+<title><?php echo $inter_id=='a492669988'? '绑定':'登录'?></title>
 </head>
 <body>
 

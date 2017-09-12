@@ -278,7 +278,7 @@
                                 new AlertBox({content:'短信已发送,请注意查收!',type:'tip',site:'bottom'}).show();
                             }else if(result.err != '0' && result.msg !='' && result.msg != undefined){
 								if(result.err == '2019'){
-									new AlertBox({content:result.msg,type:'confirm',site:'topmid',okVal:'登陆',cancelVal:'关闭',dourl:"<?php echo base_url('index.php/membervip/login').'?redir='.$redir;?>",
+									new AlertBox({content:result.msg,type:'confirm',site:'topmid',okVal:'登录',cancelVal:'关闭',dourl:"<?php echo base_url('index.php/membervip/login').'?redir='.$redir;?>",
 		                        		ok:function () {	var locat_url = '<?php echo base_url('index.php/membervip/login').'?redir='.$redir;?>';location.href = locat_url;}
 		                             }
 		                              ).show();
@@ -407,7 +407,7 @@
                         btn.prop('disabled',false).removeClass('weui_btn_disabled').text(text.replace('中...', ''));
                         if(result.err>1){
                         	if(result.err== 2019){
-								new AlertBox({content:result.msg,type:'confirm',site:'topmid',okVal:'登陆',cancelVal:'关闭',dourl:"<?php echo base_url('index.php/membervip/reg').'?redir='.$redir;?>",
+								new AlertBox({content:result.msg,type:'confirm',site:'topmid',okVal:'登录',cancelVal:'关闭',dourl:"<?php echo base_url('index.php/membervip/reg').'?redir='.$redir;?>",
 	                        		ok:function () {	var locat_url = '<?php echo site_url('membervip/login').'?redir='.$redir;?>'; location.href = locat_url;}
 	                             }
 	                              ).show();

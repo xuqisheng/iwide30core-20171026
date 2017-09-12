@@ -186,6 +186,13 @@ class Split extends MY_Controller {
      */
     private function count_split($nosplitorders,$bank_infos,$stype){
         $iresult = array();
+        //查出不计算分销的号
+        $this->load->model('IwidePay/IwidePay_configs_model');
+        $unsplit_ids = $this->IwidePay_configs_model->get_unsplit_configs_by_iwidepay();
+        MYLOG::w('info:unsplit_ids-'.json_encode($unsplit_ids),'iwidepay_split');
+        //查出不计算分销的号和模块
+        $unsplit_configs = $this->IwidePay_configs_model->get_unsplit_configs_no_iwidepay();
+        MYLOG::w('info:unsplit_configs-'.json_encode($unsplit_configs),'iwidepay_split');
         foreach ($nosplitorders as $k => $order) {
             if($stype == 'online'){
                 //不可退款或退款成功的商城订单跳过分账
@@ -309,15 +316,8 @@ class Split extends MY_Controller {
                         }
                     }
                     if($type!=''){
-                        //查出不计算分销的号
-                        $this->load('IwidePay/IwidePay_configs_model');
-                        $unsplit_ids = $this->IwidePay_configs_model->get_unsplit_configs_by_iwidepay();
-                        MYLOG::w('info:unsplit_ids-'.json_encode($unsplit_ids),'iwidepay_split');
                         if(!in_array($order['inter_id'],$unsplit_ids)){
                         // if(!in_array($order['inter_id'],array('a501472631','a467012702','a500304280','a502439398','a503075198'))){
-                            //查出不计算分销的号和模块
-                            $unsplit_configs = $this->IwidePay_configs_model->get_unsplit_configs_no_iwidepay();
-                            MYLOG::w('info:unsplit_configs-'.json_encode($unsplit_configs),'iwidepay_split');
                             if(!in_array($order['inter_id'],$unsplit_configs['ids'])||!in_array($order['module'],$unsplit_configs['modules'])){
                             // if(!in_array($order['inter_id'],array('a470896520'))||$order['module']!='hotel'){
                                 if(($stype=='online'&&$order['is_dist']==2&&$order['dist_amt']>0)||($stype=='offline'&&$order['dist_amt']>0)){

@@ -1,10 +1,10 @@
 {
-  "app.css": "soma/vue_accor/css/app.94c0a45b84b8cb8a571fde1bec61c73f.css",
+  "app.css": "soma/vue_accor/css/app.e152defd97859db26bc19b2450ab54f4.css",
   "app.js": "soma/vue_accor/js/app.da993b646ea1ac1e2304.js",
-  "booking.js": "soma/vue_accor/js/booking.cf4031d9f34349600611.js",
+  "booking.js": "soma/vue_accor/js/booking.b1544e232f7b356120c2.js",
   "coupon.js": "soma/vue_accor/js/coupon.c165ee7709e7286c6b09.js",
-  "detail.js": "soma/vue_accor/js/detail.c4ba2aa0ce640b2b2a32.js",
-  "gift.js": "soma/vue_accor/js/gift.182d64866c4852cbdae2.js",
+  "detail.js": "soma/vue_accor/js/detail.60273d81342098574677.js",
+  "gift.js": "soma/vue_accor/js/gift.b39d7f7b821cd98130c5.js",
   "giftInvalid.js": "soma/vue_accor/js/giftInvalid.aa200460be34eef0a0e0.js",
   "giftList.js": "soma/vue_accor/js/giftList.2c2458e00e5322054cc4.js",
   "giftOrderDetail.js": "soma/vue_accor/js/giftOrderDetail.59cf9ac30873032a8d7d.js",
@@ -15,9 +15,9 @@
   "light.css": "soma/vue_accor/css/light.fe81e68be0e379b5510f710f1d18f017.css",
   "light.js": "soma/vue_accor/js/light.6592a6fb311d0a467776.js",
   "logisticsDetail.js": "soma/vue_accor/js/logisticsDetail.f22604b3b6ecfc4d2d95.js",
-  "manifest.js": "soma/vue_accor/js/manifest.1b08b7be4903cfc7e42a.js",
+  "manifest.js": "soma/vue_accor/js/manifest.9b21cb10011e07725ccc.js",
   "orderCenter.js": "soma/vue_accor/js/orderCenter.7531244b1000887b5fe3.js",
-  "orderDetail.js": "soma/vue_accor/js/orderDetail.d53e4c8ce084e49ee647.js",
+  "orderDetail.js": "soma/vue_accor/js/orderDetail.3055c9859c1f0708c33a.js",
   "packageList.js": "soma/vue_accor/js/packageList.0edb5c2eae41cf4eb7b1.js",
   "post.js": "soma/vue_accor/js/post.1d22ab9d39e5350d3858.js",
   "refund.js": "soma/vue_accor/js/refund.8b69b1fec4c719e6dad4.js",
@@ -46,5 +46,5 @@
   "soma/vue_accor/js/33.84fe3b7a2fb230cc9725.js": "soma/vue_accor/js/33.84fe3b7a2fb230cc9725.js",
   "soma/vue_accor/js/34.0f374c151bb1c225b326.js": "soma/vue_accor/js/34.0f374c151bb1c225b326.js",
   "success.js": "soma/vue_accor/js/success.cd0e0108b47309bfe0b7.js",
-  "vendor.js": "soma/vue_accor/js/vendor.a62158d283730770644d.js"
+  "vendor.js": "soma/vue_accor/js/vendor.cc9b715db8e23c959135.js"
 }

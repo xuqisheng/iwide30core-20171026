@@ -1946,6 +1946,36 @@ class Club extends MY_Front {
     }
 
 
+    public function reset_comment_count(){
+
+        $this->load->model ( 'hotel/Comment_model' );
+        $this->load->model ( 'hotel/Hotel_model' );
+
+        $hotel_id = $this->input->get('h');
+
+        $inter_id = $this->inter_id;
+
+        $inter_id = 'a457946152';
+
+        if($inter_id =='a426755343' || $inter_id ='a457946152' || $inter_id = 'a452233816' || $inter_id = 'a469428180'){
+            if(!empty($hotel_id)){
+                $hotel_ids = array($hotel_id);
+            }else{
+                $hotels= $this->Hotel_model->get_all_hotels($inter_id);
+                $hotel_ids = $this->Hotel_model->array_to_hash($hotels,'hotel_id');
+            }
+            $res = $this->Comment_model->set_hotel_score_from_redis($inter_id,$hotel_ids);
+            print_r($hotel_ids);
+            print_r($res);
+        }else{
+            return;
+        }
+
+
+
+    }
+
+
 
 
 

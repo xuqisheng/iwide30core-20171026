@@ -1218,7 +1218,7 @@ class Presents extends MY_Front_Soma_Iapi
             return;
         }
 
-        $fans = $this->Publics_model->get_fans_info($this->inter_id, $orders['openid_give'] );
+        $fans = $this->Publics_model->get_fans_info($orders['openid_give'], $this->inter_id);
 
         $items = $giftOrderModel->load( $gift_id )->get_order_items($business, $this->inter_id);
         $item = $items[0];

@@ -747,13 +747,11 @@ class PackageService extends BaseService
         $uploadUrl = $dir.'/www_front/public/soma/qrcode/';
 
         //首页二维码
-        $qrCodeImg = WxService::QR_CODE_SOMA_INDEX.$this->getCI()->inter_id.'_'.$saler.'_'.$fansler.'.png';
-        $qrCodeIndexUrl = site_url('soma/package/index?'. http_build_query([
+        $indexUrl = site_url('soma/package/index?'. http_build_query([
                 'id' => $this->getCI()->inter_id,
                 'saler' => $saler,
                 'fans_saler' => $fansler
             ]));
-        $qrcodeIndex = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
 
         $productIds = [];
 
@@ -957,15 +955,15 @@ class PackageService extends BaseService
         if(count($productsList) && count($rewardRuleList)){
             foreach ($productsList as $key => $val){
                 //生成二维码图片
-                $qrCodeImg = WxService::QR_CODE_PRODUCT_DETAIL.$val['product_id'].'_'.$saler.'_'.$fansler.'.png';
-                $qrCodeUrl = site_url('soma/package/package_detail?'. http_build_query([
-                        'id' => $this->getCI()->inter_id,
-                        'pid' => $val['product_id'],
-                        'saler' => $saler,
-                        'fans_saler' => $fansler
-                    ]));
-                $qrcode_detail = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
-                $productsList[$key]['qrcode_detail'] = $qrcode_detail;
+//                $qrCodeImg = WxService::QR_CODE_PRODUCT_DETAIL.$val['product_id'].'_'.$saler.'_'.$fansler.'.png';
+//                $qrCodeUrl = site_url('soma/package/package_detail?'. http_build_query([
+//                        'id' => $this->getCI()->inter_id,
+//                        'pid' => $val['product_id'],
+//                        'saler' => $saler,
+//                        'fans_saler' => $fansler
+//                    ]));
+//                $qrcode_detail = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
+//                $productsList[$key]['qrcode_detail'] = $qrcode_detail;
                 $productsList[$key]['sales_cnt'] = (int)$val['sales_cnt'];
                 $productsList[$key]['detail'] = site_url('soma/package/package_detail').'?id='.$this->getCI()->inter_id.'&pid='.$val['product_id'].'&saler='.$saler;
 
@@ -1039,7 +1037,7 @@ class PackageService extends BaseService
             'total' => count($productsList),
             'theme' => json_decode($themeConfig, true),
             'attach' => [
-                'index' => $qrCodeIndexUrl
+                'index' => $indexUrl
             ]
         ];
 

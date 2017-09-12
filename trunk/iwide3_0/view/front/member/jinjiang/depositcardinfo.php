@@ -295,7 +295,7 @@
         <div>
             <div>温馨提示</div>
             <div>尊敬的会员，为了保障您的个人信息安全</div>
-            <div>请您登陆后再购买会员卡</div>
+            <div>请您登录后再购买会员卡</div>
             <flex between>
                 <ib class="back"><a href="<?=site_url('membervip/reg?id='.$inter_id);?>">注册</a></ib>
                 <ib class="ok"><a href="<?=site_url('membervip/login?id='.$inter_id);?>">登录</a></ib>

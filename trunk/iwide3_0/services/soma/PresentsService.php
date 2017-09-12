@@ -151,7 +151,7 @@ class PresentsService extends BaseService
      * @author zhangyi  <zhangyi@mofly.cn>
      */
     public static function usage_btn_format($inter_id, $gift_id ,$item , $business ,$giftOrderModel ,$code = array()){
-        
+
         if($item['qty'] < 1) return array();
         $links =  self::getInstance()->getCI()->link;
         /*提前预约*/

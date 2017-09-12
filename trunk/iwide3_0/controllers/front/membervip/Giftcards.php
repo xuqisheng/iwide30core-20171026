@@ -156,7 +156,7 @@ class Giftcards extends MY_Front_Member
         if ($this->center_data['is_login'] == 'f' && $this->center_data['value'] == 'login') {
             echo json_encode([
                 'err' => 40003,
-                'msg' => '请先登陆再执行解绑操作'
+                'msg' => '请先登录再执行解绑操作'
             ]);
             exit();
         } else {
@@ -202,7 +202,7 @@ class Giftcards extends MY_Front_Member
         if ($this->center_data['is_login'] == 'f' && $this->center_data['value'] == 'login') {
             $res = [
                 'err' => 40003,
-                'msg' => '请先登陆再执行绑卡操作'
+                'msg' => '请先登录再执行绑卡操作'
             ];
         } else {
             $post_bind = [

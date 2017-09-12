@@ -106,6 +106,12 @@ class Transfer extends MY_Controller {
         }
         $this->load->model ( 'iwidepay/iwidepay_transfer_model' );
         $configedata = array('saler_inter_id'=>'jinfangka','iwide'=>'jinfangka','iwide_tips'=>'jinfangka');
+        //查出不计算分销的号
+        $this->load('IwidePay/IwidePay_configs_model');
+        $unsplit_ids = $this->IwidePay_configs_model->get_unsplit_configs_by_iwidepay();
+        //查出不计算分销的号和模块
+        $unsplit_configs = $this->IwidePay_configs_model->get_unsplit_configs_no_iwidepay();
+        MYLOG::w('分账配置数据：unsplit_ids:'.json_encode($unsplit_ids) . '|unsplit_configs:' . json_encode($unsplit_configs), 'iwidepay/transfer');
         //取分账规则 根据inter_id拿
         foreach($orders as $k=>$v){
             //查询对应的inter_id规则
@@ -133,8 +139,8 @@ class Transfer extends MY_Controller {
             }else{
                 $regular = array('regular_jfk_cost','regular_group','regular_hotel','regular_jfk');
                 //所有模块分销不自动扣：a501472631、a467012702 订房模块分销不自动扣：a470896520
-                if(!in_array($v['inter_id'],array('a501472631','a467012702','a500304280','a502439398','a503075198'))){
-                    if(!($v['inter_id'] == 'a470896520' && $v['module']=='hotel')){
+                if(!in_array($v['inter_id'],$unsplit_ids)){
+                    if(!in_array($v['inter_id'],$unsplit_configs['ids'])||!in_array($v['module'],$unsplit_configs['modules'])){
                         if((isset($v['is_dist']) || $order_type == 'offline') && $v['dist_amt'] > 0){//是分销的单 做处理
                             $money_arr['regular_dist'] = $v['dist_amt'];//分销员的
                         }
