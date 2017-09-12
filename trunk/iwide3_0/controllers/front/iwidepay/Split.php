@@ -309,10 +309,15 @@ class Split extends MY_Controller {
                         }
                     }
                     if($type!=''){
-                        //临时写死部分号不计算分销
-                        if(!in_array($order['inter_id'],array('a501472631','a467012702','a500304280','a502439398','a503075198'))){
-                            //临时写死该号的订房不计算分销
-                            if(!in_array($order['inter_id'],array('a470896520'))||$order['module']!='hotel'){
+                        //查出不计算分销的号
+                        $this->load('IwidePay/IwidePay_configs_model');
+                        $unsplit_ids = $this->IwidePay_configs_model->get_unsplit_configs_by_iwidepay();
+                        if(!in_array($order['inter_id'],$unsplit_ids)){
+                        // if(!in_array($order['inter_id'],array('a501472631','a467012702','a500304280','a502439398','a503075198'))){
+                            //查出不计算分销的号和模块
+                            $unsplit_configs = $this->IwidePay_configs_model->get_unsplit_configs_no_iwidepay();
+                            if(!in_array($order['inter_id'],$unsplit_configs['ids'])||!in_array($order['module'],$unsplit_configs['modules'])){
+                            // if(!in_array($order['inter_id'],array('a470896520'))||$order['module']!='hotel'){
                                 if(($stype=='online'&&$order['is_dist']==2&&$order['dist_amt']>0)||($stype=='offline'&&$order['dist_amt']>0)){
                                     $bank_info_dist = $bank_infos['jinfangka_0_jfk']; 
                                     if($dist_exist==1){  

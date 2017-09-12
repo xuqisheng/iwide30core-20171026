@@ -274,4 +274,17 @@ class Iwidepay_sum_record_model extends MY_Model{
         $this->db->query($sql);
         return $this->db->affected_rows();
     }
+
+    //按条件取数据
+    public function get_sum_record_by_filter($where = array(),$multi = true){
+        if(!empty($where)){
+            $this->db->where($where);
+        }
+        $query = $this->db->get('iwidepay_sum_record');
+        if($multi){
+            return $query->result_array();
+        }else{
+            return $query->row_array();
+        }
+    }
 }

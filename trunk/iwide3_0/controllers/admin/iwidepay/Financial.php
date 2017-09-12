@@ -258,7 +258,7 @@ class Financial extends MY_Admin
      */
     public function run_refund_financial()
     {
-        //die('no allow');
+        die('no allow');
         $this->load->model('iwidepay/Iwidepay_financial_model');
 
         //退款记录
@@ -294,7 +294,7 @@ class Financial extends MY_Admin
      */
     public function run_debt_financial()
     {
-        //die('no allow');
+        die('no allow');
         $this->load->model('iwidepay/Iwidepay_financial_model');
 
         //退款记录
@@ -350,7 +350,7 @@ class Financial extends MY_Admin
      */
     public function run_transfer_financial()
     {
-        //die('no allow');
+        die('no allow');
         $this->load->model('iwidepay/Iwidepay_financial_model');
         $this->load->model('iwidepay/Iwidepay_order_model');
         $this->load->model('iwidepay/Iwidepay_transfer_model');
@@ -436,7 +436,8 @@ class Financial extends MY_Admin
      */
     public function run_settlement_record_id()
     {
-        $sql = "SELECT * FROM iwide_iwidepay_sum_record WHERE handle_date = '20170911' AND status = 0";
+        die('no allow');
+        $sql = "SELECT * FROM iwide_iwidepay_sum_record WHERE handle_date = '20170910' AND status = 10";
         $data = $this->db->query($sql)->result_array();
         $num = 0;
         if (!empty($data))

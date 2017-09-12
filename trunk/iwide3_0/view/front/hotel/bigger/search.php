@@ -144,7 +144,7 @@ $(".j_whole_show collect").on("click",function(){
                   <p class="h24 color3 mar_b40">历史搜索</p>
                   <div class="city_search_history h30 color2">
                     <?php foreach($last_orders as $lo){?>
-                        <div class="hotel_search"><?php echo str_replace(array('市','区','县'),'',$lo['hcity']);?></div>
+                        <div class="hotel_search"><?php echo $lo['hcity'];?></div>
                     <?php }?>
                   </div>
               </div>
@@ -154,7 +154,7 @@ $(".j_whole_show collect").on("click",function(){
                   <p class="h24 color3 mar_b40">热门搜索</p>
                    <div class="city_search_history h30 color2">
                         <?php foreach($hot_city as $hc){?>
-                            <div class="hotel_search"><?php echo str_replace(array('市','区','县'),'',$hc);?></div>
+                            <div class="hotel_search"><?php echo $hc;?></div>
                         <?php }?>
                   </div>
               </div>
@@ -170,15 +170,11 @@ $(".j_whole_show collect").on("click",function(){
                         <?php if(isset($c['area'])){ ?>
                             <p class="hotel_search" city="<?php echo $c['city'];?>" area="<?php echo $c['area'];?>">
                                 <?php
-                                    if(strlen($c['area'])>6){
-                                        echo str_replace(array('市','区','县'),'',$c['area']).'('.str_replace(array('市','区','县'),'',$c['city']).')';
-                                    }else{
-                                        echo $c['area'].'('.str_replace(array('市','区','县'),'',$c['city']).')';
-                                    }
+                                    echo $c['area'].'('.$c['city'].')';
                                 ?>
                             </p>
                         <?php }else{  ?>
-                            <p class="hotel_search"><?php echo str_replace(array('市','区','县'),'',$c['city']); ?></p>
+                                <p class="hotel_search"><?php echo $c['city']; ?></p>
                         <?php }}?>
                     </div>
                   <?php }?>

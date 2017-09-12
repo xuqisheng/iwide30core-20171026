@@ -341,9 +341,8 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
                 'gift_detail' => $link
             ]
         ];
-        $data['page_resource'] = $page_resource;
         if($resultInfo){
-            return $this->json(BaseConst::OPER_STATUS_SUCCESS,'',['gift_detail_id'=>$resultInfo,'request_token'=>$request_token,$data]);
+            return $this->json(BaseConst::OPER_STATUS_SUCCESS,'',['gift_detail_id'=>$resultInfo,'request_token'=>$request_token,'page_resource'=>$page_resource]);
         }else{
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'生成失败!','');
         }
@@ -423,6 +422,7 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         //生成礼包二维码地址
         $baseUrl = base_url();
         $requestUrl = trim($_SERVER['REQUEST_URI'],'/');
+        $requestUrl = str_replace('/iapi','',$requestUrl);
         $qrCodeUrl = $baseUrl.$requestUrl;
 
         //礼包详情
@@ -677,11 +677,11 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         $params['saler_id'] = intval($this->input->get('saler_id'));
         $params['inter_id'] = $this->input->get('inter_id');
         $params['request_token'] = $this->input->get('request_token');
-//        $params['id'] = 5;
+//        $params['id'] = 27;
 //        $params['inter_id'] = 'a450089706';
 //        $params['saler_id'] = '64888';
-//        $params['request_token'] = 'da3086a1badf3c19b0234cebdac741dc'; //校验token
-//        $params['gift_id'] = '34';
+//        $params['request_token'] = '104b0dc62aceb8354b38a415d1c3a2ef'; //校验token
+//        $params['gift_id'] = '265';
         $paramsArr = ['id','gift_id','saler_id','inter_id','request_token'];
         foreach($paramsArr as $key=>$val){
             if(empty($params[$val])){
@@ -823,8 +823,8 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
 
         //加载gift_delivery_model
         $this->load->model('soma/gift_delivery_model');
-//        $params['openid'] = $openid;
-        $params['openid'] = 'o9Vbtw6_N8ICoy2wuaWDSwZsDNO4';
+        $params['openid'] = $openid;
+//        $params['openid'] = 'o9Vbtw6_N8ICoy2wuaWDSwZsDNO4';
         $resultInfo = $this->gift_delivery_model->giftOrderCreate($params);
         $result = $resultInfo['result'];
         $params = $resultInfo['params'];

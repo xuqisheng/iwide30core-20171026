@@ -199,16 +199,4 @@ class Iwidepay_clears_model extends MY_Model{
 		}
 		return array('msg'=>'debt_ids is empty','data'=>func_get_args());
 	}
-
-	/**
-	 * 获取分账通用类型配置
-	 */
-	public function get_configs($inter_id,$type,$module='hotel'){
-		$this->db->where(array(
-			'inter_id' => $inter_id,
-			'module' => $module,
-			'type' => $type,
-			));
-		return $this->db->get(self::TAB_CONFIGS)->row_array();
-	}
 }

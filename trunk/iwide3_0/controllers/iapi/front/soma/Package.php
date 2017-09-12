@@ -1365,8 +1365,8 @@ class Package extends MY_Front_Soma_Iapi
      * @SWG\Get(
      *     tags={"package"},
      *     path="/package/distribute_qrcode",
-     *     summary="获取绩效商品",
-     *     description="获取绩效商品",
+     *     summary="获取绩效商品/商城首页 二维码",
+     *     description="获取绩效商品/商城首页 二维码",
      *     operationId="distribute_qrcode",
      *     produces={"application/json"},
      *     @SWG\Parameter(
@@ -1388,6 +1388,61 @@ class Package extends MY_Front_Soma_Iapi
     public function get_distribute_qrcode(){
 
         PackageService::getInstance()->getQrcodeStream($this->input->get('url', null, $this->link['home']));
+    }
+
+
+
+    /**
+     * 用户是否已经关注该公众号，并返回公众号二维码
+     * @SWG\Get(
+     *     tags={"package"},
+     *     path="/package/is_subscribe",
+     *     summary="用户是否已经关注该公众号，并返回公众号二维码",
+     *     description="用户是否已经关注该公众号，并返回公众号二维码",
+     *     operationId="is_subscribe",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         description="二维码跳转链接",
+     *         in="query",
+     *         name = "url",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Response(
+     *         response="200",
+     *         description="successful operation",
+     *         @SWG\Schema(
+     *              type="object",
+     *              @SWG\Property(
+     *                  property="subscribe_status",
+     *                  description="关注状态，true：已关注，false：未关注",
+     *                  type = "bool",
+     *              ),
+     *              @SWG\Property(
+     *                  property="qr_code_url",
+     *                  description="公众号二维码",
+     *                  type = "string",
+     *              ),
+     *         )
+     *     )
+     * )
+     */
+    public function get_is_subscribe(){
+
+        /**
+         * @var \Fans_model $fansModel
+         */
+        $this->load->model('wx/Fans_model', 'fansModel');
+        $fansModel = $this->fansModel;
+        $subscribeStatus = $fansModel->subscribeStatus($this->inter_id, $this->openid);
+        $qrCodeUrl = WxService::getInstance()->getQrcode(WxService::QR_CODE_KILLSEC_SUBSCRIBE)->getData();
+
+        $res = [
+            'subscribe_status' => $subscribeStatus,
+            'qr_code_url' => $qrCodeUrl
+        ];
+
+        $this->json(BaseConst::OPER_STATUS_SUCCESS, '', $res);
     }
 
 }

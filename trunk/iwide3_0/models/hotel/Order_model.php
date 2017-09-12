@@ -230,6 +230,9 @@ class Order_model extends MY_Model {
 				}
 				if (!isset($my_coupons[$pcs['coupon_condition']['couprel']])){
 					continue;
+				}else{
+					//关联房券信息，放到数据，
+					$pcs['coupon_condition']['couprel_info']=$my_coupons[$pcs['coupon_condition']['couprel']];
 				}
 			}
 
@@ -747,17 +750,51 @@ class Order_model extends MY_Model {
 			}
 
 			//@Editor lGh 2016-5-31 21:22:07 增加开始与结束日期配置
+// 			if (!empty( $pcs ['use_condition'] ['s_date_s'] )&&strtotime($pcs ['use_condition'] ['s_date_s'])&&$condit ['startdate']<$pcs ['use_condition'] ['s_date_s']) {
+// 				continue;
+// 			}
+// 			if (!empty( $pcs ['use_condition'] ['s_date_e'] )&&strtotime($pcs ['use_condition'] ['s_date_e'])&&$condit ['startdate']>$pcs ['use_condition'] ['s_date_e']) {
+// 				continue;
+// 			}
+// 			if (!empty( $pcs ['use_condition'] ['e_date_s'] )&&strtotime($pcs ['use_condition'] ['e_date_s'])&&$condit ['enddate']<$pcs ['use_condition'] ['e_date_s']) {
+// 				continue;
+// 			}
+// 			if (!empty( $pcs ['use_condition'] ['e_date_e'] )&&strtotime($pcs ['use_condition'] ['e_date_e'])&&$condit ['enddate']>$pcs ['use_condition'] ['e_date_e']) {
+// 				continue;
+// 			}
+			$check_sdate_s = 1;
+			$check_sdate_e = 1;
 			if (!empty( $pcs ['use_condition'] ['s_date_s'] )&&strtotime($pcs ['use_condition'] ['s_date_s'])&&$condit ['startdate']<$pcs ['use_condition'] ['s_date_s']) {
-				continue;
+			    $check_sdate_s = 0;
 			}
 			if (!empty( $pcs ['use_condition'] ['s_date_e'] )&&strtotime($pcs ['use_condition'] ['s_date_e'])&&$condit ['startdate']>$pcs ['use_condition'] ['s_date_e']) {
-			        continue;
+			    $check_sdate_e = 0;
 			}
+			if(!empty( $pcs ['use_condition'] ['s_date_m'] ) && $pcs ['use_condition'] ['s_date_m'] == 2){
+			    if (!($check_sdate_s | $check_sdate_e)){
+			        continue;
+			    }
+			}else{
+			    if (!($check_sdate_s & $check_sdate_e)){
+			        continue;
+			    }
+			}
+			$check_edate_s = 1;
+			$check_edate_e = 1;
 			if (!empty( $pcs ['use_condition'] ['e_date_s'] )&&strtotime($pcs ['use_condition'] ['e_date_s'])&&$condit ['enddate']<$pcs ['use_condition'] ['e_date_s']) {
-				continue;
+			    $check_edate_s = 0;
 			}
 			if (!empty( $pcs ['use_condition'] ['e_date_e'] )&&strtotime($pcs ['use_condition'] ['e_date_e'])&&$condit ['enddate']>$pcs ['use_condition'] ['e_date_e']) {
+			    $check_edate_e = 0;
+			}
+			if(!empty( $pcs ['use_condition'] ['e_date_m'] ) && $pcs ['use_condition'] ['e_date_m'] == 2){
+			    if (!($check_edate_s | $check_edate_e)){
 			        continue;
+			    }
+			}else{
+			    if (!($check_edate_s & $check_edate_e)){
+			        continue;
+			    }
 			}
 
 			//@Editor lGh 2016-7-6 16:03:25 最大天数限制
@@ -781,6 +818,9 @@ class Order_model extends MY_Model {
 				}
 				if (!isset($my_coupons[$pcs['coupon_condition']['couprel']])){
 					continue;
+				}else{
+					//关联房券信息，放到数据，
+					$pcs['coupon_condition']['couprel_info']=$my_coupons[$pcs['coupon_condition']['couprel']];
 				}
 			}
 
@@ -1419,7 +1459,7 @@ class Order_model extends MY_Model {
                     if (! $this->Member_model->consum_point ( $data ['inter_id'], $data ['orderid'], $data ['openid'], $order_addition ['point_used_amount'],$bonus_condit)) {
                         $tips=$this->session->userdata('text_msg');
                         $tips=empty($tips)?'':$tips;
-                        $this->db->trans_rollback ();
+//                         $this->db->trans_rollback ();
                         return array (
                                 's' => 0,
                                 'errmsg' => '扣减积分失败。'.$tips
@@ -1429,7 +1469,7 @@ class Order_model extends MY_Model {
 			}
 
 			if ($this->db->trans_status () === FALSE) {
-				$this->db->trans_rollback ();
+// 				$this->db->trans_rollback ();
 				return array (
 						's' => 0,
 						'errmsg' => '下单失败'
@@ -1444,7 +1484,7 @@ class Order_model extends MY_Model {
 // 							$this->update_order_status ( $data ['inter_id'], $data ['orderid'], 1, $data ['openid'], true );
 							$has_paid=1;
 						} else {
-							$this->db->trans_rollback ();
+// 							$this->db->trans_rollback ();
 							return array (
 									's' => 0,
 									'errmsg' => '支付失败'
@@ -1469,7 +1509,7 @@ class Order_model extends MY_Model {
 						if (! $this->Member_model->consum_point ( $data ['inter_id'], $data ['orderid'], $data ['openid'], $order_addition ['point_used_amount'],$bonus_condit)) {
 							$tips=$this->session->userdata('text_msg');
 							$tips=empty($tips)?'':$tips;
-							$this->db->trans_rollback ();
+// 							$this->db->trans_rollback ();
 							return array (
 									's' => 0,
 									'errmsg' => '积分支付失败。'.$tips
@@ -2507,6 +2547,28 @@ class Order_model extends MY_Model {
 								}
 							}
 						}
+						// 订单完成时发放储值返现
+						if ($order ['complete_balance_given'] == 2) {
+							$balance_info = json_decode ( $order ['complete_balance_info'], TRUE );
+							if (! empty ( $balance_info ['give_amount'] )) {
+							    $this->load->model ( 'hotel/Member_new_model' );
+							    $membership_number = empty( $order['member_no'] )? $order['jfk_member_no'] : $order['member_no'];
+								$balance_reward = $this->Member_new_model->addBalanceByCard($inter_id,$order ['openid'],$membership_number,$order ['orderid'],$balance_info ['give_amount'],'离店送','离店返现',array('crsNo'=>$order['web_orderid']));//余额退款处理
+								$this->db->where ( array (
+										'orderid' => $order ['orderid'],
+										'inter_id' => $inter_id
+								) );
+								if ($balance_reward) {
+									$this->db->update ( self::TAB_HOA, array (
+											'complete_balance_given' => 3
+									) );
+								} else {
+									$this->db->update ( self::TAB_HOA, array (
+											'complete_balance_given' => 4
+									) );
+								}
+							}
+						}
 						if ($same_count == count ( $order ['order_details'] )) {
 							$this->db->where ( array (
 									'orderid' => $order ['orderid'],
@@ -2995,7 +3057,29 @@ $this->db->insert('weixin_text',array('content'=>'order_weixin_refund+订单号�
                         }
 
                     }
+                    //储值返现
+                    if ($order ['complete_balance_given'] == 0) {
+                    	$this->load->model ( 'hotel/Hotel_config_model' );
+                    	$config_data = $this->Hotel_config_model->get_hotel_config ( $inter_id, 'HOTEL', $order['hotel_id'], array (
+                    			'BALANCE_BACK_RATE'
+                    	) );
+                        $balance_given=$this->Member_model->check_balance_giverules( $inter_id, $order, $config_data);
 
+                        $this->db->where ( array (
+                            'orderid' => $order ['orderid'],
+                            'inter_id' => $inter_id
+                        ) );
+                        if ($balance_given ['code'] == 1) {
+                            $this->db->update ( self::TAB_HOA, array (
+                                'complete_balance_info' => json_encode ( $balance_given ['result'] ),
+                                'complete_balance_given' => 2
+                            ) );
+                        } else {
+                            $this->db->update ( self::TAB_HOA, array (
+                                'complete_balance_given' => 1
+                            ) );
+                        }
+                    }
 
                     //生成分销信息 start
 					$this->load->model ( 'distribute/Idistribution_model' );
@@ -3063,6 +3147,8 @@ $this->db->insert('weixin_text',array('content'=>'order_weixin_refund+订单号�
 						'saler' => isset($saler['id'])? $saler['id']:0,//分销员id
 						'link_saler' => $order['link_saler'],//链接分销员id
 						'own_saler' => $order['own_saler'],//下单分销员id
+						'link_f_saler' => $order['link_f_saler'],//链接泛分销员id
+						'own_f_saler' => $order['own_f_saler'],//下单泛分销员id
 					);
 					$this->Idistribution_model->get_best_by_order($O_params);
 					$this->write_log($order,$O_params,'主单下单');//调试
@@ -3448,6 +3534,14 @@ $this->db->insert('weixin_text',array('content'=>'order_weixin_refund+订单号�
 							}
 							$order_update ['complete_point_info'] = json_encode ( $point_info );
 						}
+					}
+					//更新离店储值返现
+					if ($main_order ['complete_balance_given'] == 2) {
+						$balance_info = json_decode ( $main_order ['complete_balance_info'], TRUE );
+						if (! empty ( $balance_info ['give_amount'] )) {
+							$balance_info ['give_amount'] -= $this_item ['iprice'] * $balance_info ['give_rate'];
+						}
+						$order_update ['complete_balance_info'] = json_encode ( $balance_info );
 					}
 					$updata ['handled'] = 1;
 

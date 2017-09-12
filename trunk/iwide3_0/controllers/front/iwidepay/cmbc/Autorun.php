@@ -152,7 +152,17 @@ class Autorun extends MY_Controller {
             $this->db->where_in('status',array(0,2));
             $this->db->where('add_time <',date('Y-m-d 00:00:00'));
             $this->db->update('iwidepay_sum_record',array('status'=>10));
-           
+            //取出前一天放弃转账的数据
+            $old_where = array('handle_date'=>date('Ymd',strtotime('-1 days')),'status'=>10);
+            $old_sum = $this->iwidepay_sum_record_model->get_sum_record_by_filter($old_where);
+            $old_sum_res = array();
+            if(!empty($old_sum)){
+                foreach($old_sum as $ook=>$oov){
+                    $old_sum_res[$oov['bank_card_no']] = $oov;
+                }
+                unset($old_sum);
+            }
+            
             $res = $this->iwidepay_transfer_model->get_transfer_data();
             /*if(empty($res)){//加了代扣 不能加这个
                 echo 'transfer没有预付订单，只处理旧的sum_record记录';
@@ -294,8 +304,9 @@ class Autorun extends MY_Controller {
                     }
                 }
                 //start更新前一天放弃转账的record_id
-                $this->db->where(array('handle_date'=>date('Ymd',strtotime('-1 days')),'status'=>10,'bank_card_no'=>$tmp['bank_card_no']));
-                $this->db->update('iwidepay_settlement',array('record_id'=>$insert_id));
+                if(isset($old_sum_res[$tmp['bank_card_no']])){
+                    $this->iwidepay_transfer_model->update_settlement_data(array('record_id'=>$old_sum_res[$tmp['bank_card_no']]['id']),array('record_id'=>$insert_id));
+                }
                 //end更新前一天放弃转账的record_id
             }
         }

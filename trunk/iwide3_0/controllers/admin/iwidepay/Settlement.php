@@ -400,6 +400,7 @@ class Settlement extends MY_Admin
                 }
 
                 $list_debt = $this->Iwidepay_financial_model->transfer_accounts_debt_order($where_sql);
+
                 if (!empty($list_debt))
                 {
                     foreach ($list_debt as $value)
@@ -473,8 +474,6 @@ class Settlement extends MY_Admin
                 }
             }
         }
-
-
 
         $headArr = array('交易时间','所属公众号','所属门店','来源模块','平台订单号','支付订单号','交易类型','分账状态','分账时间','交易/退款金额(元)','核销门店','交易手续费','金房卡分成','集团分成','门店分成','分销员分成');
         $widthArr = array(20,20,20,12,25,25,12,12,12,18,12,12,12,12,12,15);

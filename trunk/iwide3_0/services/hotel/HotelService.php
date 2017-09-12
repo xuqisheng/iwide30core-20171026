@@ -54,7 +54,8 @@ class HotelService extends HotelBaseService {
 		        'MAX_BOOK_DAY',
 		        'LOGIN_ACTION_NAME',
 		        'INDEX_TEL',
-		        'MIN_START_DATE'
+		        'MIN_START_DATE',
+                'SHORT_CITY'
 		) );
 		$data['login_action_name']=isset($config_data['LOGIN_ACTION_NAME'])?$config_data['LOGIN_ACTION_NAME']:'登录';
 		$data['index_tel']=isset($config_data['INDEX_TEL'])?$config_data['INDEX_TEL']:NULL;
@@ -121,6 +122,27 @@ class HotelService extends HotelBaseService {
                 }
                 if(isset( $data['citys'][0]))unset($data['citys'][0]);
                 ksort ( $data['citys'] );
+            }
+        }
+
+        if (isset($config_data['SHORT_CITY']) && $config_data['SHORT_CITY']==1){
+            if(!empty($data['last_orders'])){
+                foreach($data['last_orders'] as $key => $last_orders){
+                    $data['last_orders'][$key]['hcity'] = str_replace(array('市','区','县'),'',$last_orders['hcity']);
+                }
+            }
+            if(!empty($data['hot_city'])){
+                foreach($data['hot_city'] as $key => $hot_city){
+                    $data['hot_city'][$key] = str_replace(array('市','区','县'),'',$hot_city);
+                }
+            }
+            if(!empty($data['citys'])){
+                foreach($data['citys'] as $key => $temp_letters){
+                    foreach($temp_letters as $t_key => $temp_cities){
+                        $data['citys'][$key][$t_key]['city'] = str_replace(array('市','区','县'),'',$temp_cities['city']);
+                        if(isset($data['citys'][$key][$t_key]['area'])) $data['citys'][$key][$t_key]['area'] = str_replace(array('市','区','县'),'',$temp_cities['area']);
+                    }
+                }
             }
         }
 
