@@ -154,9 +154,13 @@ $inter_id_tmp_array = array(
         else{$soma_in_array=false;}
     ?>
     <a href="<?php echo site_url('soma/package/distribute_products')?>?id=<?php echo $inter_id?>" class="item">
-	  <em class="ui_ico ui_ico13"></em>
-        <tt>商城奖励商品列表</tt>
-    </a>
+		<em class="ui_ico ui_ico13"></em>
+		<tt>商城奖励商品列表</tt>
+	</a>
+	<a href="<?php echo site_url('soma/GiftDelivery/gift_list')?>?id=<?php echo $inter_id.'&saler_id='.$saler_details['id'].'&saler_name='.$saler_details['name'].'&inter_id='.$inter_id; ?> " class="item">
+		<em class="ui_ico ui_ico13"></em>
+		<tt>礼包派送</tt>
+	</a>
 </div>
 
 <?php  /*会员部分*/ ?>

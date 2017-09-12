@@ -70,7 +70,7 @@ function refer_res($name, $path = 'ADMIN', $filename = 'manifest.json') {
     $config = & get_config ();
     $res_domain = '';
     if (WEB_AREA == 'front') {
-        if (isset ( $config ['cdn_host'] ) && $config ['cdn_host'] != "") {
+        if (isset ( $config ['cdn_host1'] ) && $config ['cdn_host1'] != "") {
             $res_domain = $config ['cdn_host'] . '/public/';
             $filename = 'manifest-cdn.json';
         } else {

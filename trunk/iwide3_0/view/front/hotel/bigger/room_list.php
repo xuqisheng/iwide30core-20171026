@@ -178,7 +178,7 @@
                             </div>
                             <?php }else{ ?>
                                     <div class="pad_tb20 pad_lr20 h24">
-                                        <span class="h30 color2 room_list_card"><?php echo $si['price_name'];?></span>
+                                        <span class="h30 color2 room_list_card" name="<?php echo $si['price_name'];?>" price_des="<?php echo $si['des'];?>"><?php echo $si['price_name'];?></span>
                                         <span class="floatr pad_t10"> 满房</span>
                                     </div>
                             <?php }}}?>
@@ -376,7 +376,7 @@
 
                             r_temp+='<div class="flex flexjustify relative h24"><div class="room_list_word">';
 
-                            r_temp+='<span class="h30 color2 room_list_card">'+si.price_name+' <em class="iconfont color3 room_list_question">&#xE011;</em></span>';
+                            r_temp+='<span class="h30 color2 room_list_card" name='+si.price_name+'>'+si.price_name+' <em class="iconfont color3 room_list_question" price_des='+ si.des +'>&#xE011;</em></span>';
 
                             if(si.price_tags !=undefined){
 

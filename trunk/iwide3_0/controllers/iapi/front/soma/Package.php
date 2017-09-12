@@ -433,6 +433,30 @@ class Package extends MY_Front_Soma_Iapi
             $page_data['categories'] = $this->categoryModel->get(array_keys($filter), array_values($filter), '*', $option);
         }
 
+
+        //多店铺
+        $redis = $this->get_redis_instance();
+        $ticketId = $redis->get('tkid');
+        $pIds = [];
+        if ($ticketId) {
+
+            //获取产品id列表
+            $serviceName = $this->serviceName(Product_Service::class);
+            $serviceAlias = $this->serviceAlias(Product_Service::class);
+            $this->load->service($serviceName, null, $serviceAlias);
+            $catId = $filter_cat;
+            $info = $this->soma_product_service->getProductPackageTicketProductIds($ticketId);
+            if($info){
+                $pIds = array_column($info['products'], 'product_id');
+                $ticketDetail = current($info['ticketList']);
+            }
+            //门店设置了皮肤
+            if (isset($ticketDetail['theme_path']) && $ticketDetail['theme_path']) {
+                $this->theme = $ticketDetail['theme_path'];
+            }
+        }
+
+
         //商品
         $this->load->model('soma/Product_package_model', 'productPackageModel');
         $productModel = $this->productPackageModel;
@@ -448,6 +472,10 @@ class Package extends MY_Front_Soma_Iapi
             'or (date_type = '        => $productModel::DATE_TYPE_STATIC,
             'and expiration_date > '  => "'" . $nowTime . "'))",
         ];
+        if(!empty($pIds)){
+            $pIds = "'" . implode("','", $pIds) . "'";;
+            $where['and product_id in ('] = $pIds.')';
+        }
         if(!empty($filter_cat)) {
             $where['and cat_id = '] = $filter_cat;
         }

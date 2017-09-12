@@ -82,12 +82,12 @@ class Depositcard extends MY_Front_Member_Iapi
      *
      */
     public function buydeposit(){
-        $data = DepositcardService::getInstance()->buydeposit($this->inter_id,$this->openid,$this->_token,$this->_template,$this->_template_filed_names,false);
+        $data = DepositcardService::getInstance()->buydeposit($this->inter_id,$this->openid,$this->_token,$this->_template,$this->_template_filed_names,true);
         $ext = array();
-        // if(!empty($data['redirect'])){
-        //     $ext['links']['redirect'] = $data['redirect'];
-        //     $this->out_put_msg(1,'','','membervip/depositcard/buydeposit',$ext);
-        // }
+        if(!empty($data['redirect'])){
+            $ext['links']['redirect'] = $data['redirect'];
+            $this->out_put_msg(1,'','','membervip/depositcard/buydeposit',$ext);
+        }
         if(isset($data['err']) && $data['err']>0){
             $this->out_put_msg(3,$data['msg'],'','membervip/depositcard/buydeposit');
         }

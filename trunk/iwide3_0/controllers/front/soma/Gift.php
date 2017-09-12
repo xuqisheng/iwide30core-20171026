@@ -2066,6 +2066,12 @@ class Gift extends MY_Front_Soma {
      * @author zhangyi  <zhangyi@mofly.cn>
      */
     public function gift_new_router(){
+
+        $redis = $this->get_redis_instance();
+        $layout = $redis->get('layout');
+        $tkId = $redis->get('tkid');
+        $brandName = $redis->get('brandname');
+
         //初始化数据库分片配置
         $this->load->model('soma/shard_config_model', 'model_shard_config');
         $this->db_shard_config = $this->model_shard_config->build_shard_config($this->inter_id);
@@ -2085,7 +2091,12 @@ class Gift extends MY_Front_Soma {
         /***************自己送出去的礼物****************/
         if( $this->openid== $gift_data['openid_give'] ){
             //针对赠送本人
-            $url= Soma_const_url::inst()->get_url('*/*/get_received_list', array('id'=> $this->inter_id,'gid'=>$gift_id,'bsn'=>$business ) );
+            $url= Soma_const_url::inst()->get_url('*/*/get_received_list', array(
+                'id'=> $this->inter_id,'gid'=>$gift_id,'bsn'=>$business,
+                'tkid' => $tkId,
+                'brandname' => $brandName,
+                'layout' => $layout
+            ) );
             redirect( $url );exit();
         }
 
@@ -2118,7 +2129,12 @@ class Gift extends MY_Front_Soma {
 
         if( !in_array( $gift_data['status'], $gift_received_status ) ){
             //不能再领取：1，已经领完；2，自己已经领过；3, 礼物退回
-            $url= Soma_const_url::inst()->get_url('*/*/received_gift_empty', array('id'=> $this->inter_id,'gid'=>$gift_id,'bsn'=>$business ) );
+            $url= Soma_const_url::inst()->get_url('*/*/received_gift_empty', array(
+                'id'=> $this->inter_id,'gid'=>$gift_id,'bsn'=>$business ,
+                'tkid' => $tkId,
+                'brandname' => $brandName,
+                'layout' => $layout
+            ) );
             redirect( $url );exit();
         }
 
@@ -2126,7 +2142,12 @@ class Gift extends MY_Front_Soma {
         /*********可以领取的礼物***********/
         $validation_of_order = \App\services\soma\PresentsService::validation_of_received_status( $this->inter_id , $gift_id, $gift_data ,$receive_list);
         if(!$validation_of_order){  //领取人数已超
-            $url= Soma_const_url::inst()->get_url('*/*/received_gift_empty', array('id'=> $this->inter_id,'gid'=>$gift_id,'bsn'=>$business ) );
+            $url= Soma_const_url::inst()->get_url('*/*/received_gift_empty', array(
+                'id'=> $this->inter_id,'gid'=>$gift_id,'bsn'=>$business,
+                'tkid' => $tkId,
+                'brandname' => $brandName,
+                'layout' => $layout
+            ) );
             redirect( $url );exit();
         }else{
             $this->datas = array();

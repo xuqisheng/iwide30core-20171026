@@ -933,7 +933,7 @@ class Auto_gogogo extends MY_Controller {
 		foreach ( $hotel_pms_set as $hps ) {
 			$pms_sets [$hps ['hotel_id']] = $hps;
 		}
-		$time_s=time()-2592000;
+		$time_s=time()-31536000;
 		$sql = "select oa.*,o.* from
 		(SELECT * FROM `iwide_hotel_orders` WHERE inter_id = '$inter_id' and isdel=0 and status in (0,1,2,4) and handled=0 and order_time >".$time_s." ORDER BY `id` asc
 		) o join

@@ -20,7 +20,7 @@
     require_once VIEWPATH. $tpl .DS .'privilege'. DS. 'footer.php';
     ?>
 </div>
-<div id="scriptArea" data-page-id="logisticsList"></div>
+<div id="scriptArea" data-page-id="giftPackage"></div>
 <script type=text/javascript src="<?php echo base_url(FD_PUBLIC).'/'.refer_res('manifest.js') ?>"></script>
 <script type=text/javascript src="<?php echo base_url(FD_PUBLIC).'/'.refer_res('vendor.js') ?>"></script>
 <script type=text/javascript src="<?php echo base_url(FD_PUBLIC).'/'.refer_res('app.js') ?>"></script>

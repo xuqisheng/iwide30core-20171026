@@ -465,6 +465,23 @@ class Financial extends MY_Admin
 
     }
 
+    /**
+     * 统计订单
+     */
+    public function count_order()
+    {
+        $sql = "SELECT count(id) AS num,DATE_FORMAT(add_time,'%Y-%m-%d') AS dates FROM iwide_iwidepay_order WHERE transfer_status > 0 GROUP BY dates";
+        $data = $this->db->query($sql)->result_array();
+        if ($data)
+        {
+            foreach ($data as $value)
+            {
+                $list[] = array($value['dates'],$value['num']);
+            }
+        }
+        $list = json_encode($list);
+        print_r($list);exit();
+    }
 
     /**
      * 或者对账单类型

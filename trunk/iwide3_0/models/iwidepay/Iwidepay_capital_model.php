@@ -163,12 +163,12 @@ class Iwidepay_capital_model extends MY_Model
 
         if (!empty($where_arr['start_time']))
         {
-            $sql .= " AND add_time >= '{$where_arr['start_time']}'";
+            $sql .= " AND update_time >= '{$where_arr['start_time']}'";
         }
 
         if (!empty($where_arr['end_time']))
         {
-            $sql .= " AND add_time <= '{$where_arr['end_time']} 23:59:60'";
+            $sql .= " AND update_time <= '{$where_arr['end_time']} 23:59:60'";
         }
 
         $data = $this->db_read()->query($sql)->row_array();
@@ -194,12 +194,12 @@ class Iwidepay_capital_model extends MY_Model
 
         if (!empty($where_arr['start_time']))
         {
-            $sql .= " AND add_time >= '{$where_arr['start_time']}'";
+            $sql .= " AND update_time >= '{$where_arr['start_time']}'";
         }
 
         if (!empty($where_arr['end_time']))
         {
-            $sql .= " AND add_time <= '{$where_arr['end_time']} 23:59:60'";
+            $sql .= " AND update_time <= '{$where_arr['end_time']} 23:59:60'";
         }
 
         $data = $this->db_read()->query($sql)->row_array();

@@ -16,7 +16,7 @@ class GiftDelivery extends MY_Front_Soma {
 
         //请求校验
         $this->db->db_select('iwide30soma');
-        $giftInfo = $this->db->select(['gift_id'])->where(['id'=>$params['gift_detail_id'],'inter_id'=>$params['inter_id'],'request_token'=>$params['request_token']])
+        $giftInfo = $this->db->select(['gift_id'])->where(['id'=>$params['id'],'inter_id'=>$params['inter_id'],'request_token'=>$params['request_token']])
             ->get('soma_gift_detail')->row_array();
 
         if(empty($giftInfo)){
@@ -32,6 +32,10 @@ class GiftDelivery extends MY_Front_Soma {
      * 礼包礼包页面
      */
     public function gift_list(){
+
+        $parmas['inter_id'] = $this->input->get('inter_id');
+        $parmas['saler_id'] = $this->input->get('saler_id');
+        $parmas['saler_name'] = $this->input->get('saler_name');
 
         $this->_view('gift_delivery/gift_list');
     }

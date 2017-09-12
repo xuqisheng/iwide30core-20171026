@@ -365,13 +365,22 @@ class Hotel_model extends CI_Model {
 	}
     function get_front_marks_local($idents, $sort = 'mark_time desc', $nums = null, $offset = null){
     	$db_read = $this->load->database('iwide_r1',true);
+    	$replace_host = empty($idents['replace_host'])?'':$idents['replace_host'];
+    	unset($idents['replace_host']);
         $db_read->select ( '*,count(mark_name) mark_nums' );
 		$db_read->order_by ( $sort );
 		if (! is_null ( $nums ))
 			$db_read->limit ( $nums, $offset );
 		$db_read->group_by ( 'mark_name' );
 		$db_read->where ( $idents );
-		return $db_read->get ( self::TAB_HFM )->result_array ();
+		$result = $db_read->get ( self::TAB_HFM )->result_array ();
+		if ($replace_host && $result){
+		    $reg = '/(http)s{0,1}:\/\/([^\/]+)/i';
+		    foreach ($result as &$r){
+		        $r['mark_link'] = 'http://'.preg_replace($reg,$replace_host, $r['mark_link'],1);
+		    }
+		}
+		return $result;
     }
 
 	function get_type_mark($idents, $status = 1) {

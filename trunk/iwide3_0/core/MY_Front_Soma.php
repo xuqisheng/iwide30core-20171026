@@ -169,6 +169,7 @@ class MY_Front_Soma extends MY_Front
 
             //把公众号配置的特殊信息放入配置
             $this->statis_code = $this->_get_statis_code($this->inter_id, $themeConfig);
+            $this->getTicketTheme();
         }
 
         if (ENVIRONMENT != 'production') {
@@ -280,9 +281,41 @@ EOF;
             $this->datas['refund'] = false;
         }
 
+
         // 分销保护期处理
         $this->_salarProtection();
     }
+
+    public function getTicketTheme(){
+        $ticketId = $this->input->get('tkid');
+        //获取皮肤
+        if(!empty($ticketId)){
+            $this->load->model('soma/Product_package_ticket_model', 'ProductPackageTicketModel');
+            $ticket = $this->ProductPackageTicketModel->get_product_package_ticket_byIds([$ticketId], $this->inter_id);
+            if(!empty($ticket)){
+                $this->load->model('soma/Theme_config_use_model', 'ThemeConfigUseModel');
+                $this->load->model('soma/Theme_config_model', 'themeConfigModel');
+                $themeConfigUse = $this->ThemeConfigUseModel->get(
+                    ['inter_id', 'theme_id'],
+                    [$this->inter_id, $ticket[0]['theme_id']]
+                );
+                $themeConfig = $this->themeConfigModel->get(
+                    ['theme_id'],
+                    [$ticket[0]['theme_id']]
+                );
+                if(!empty($themeConfig)){
+                    if(!empty($themeConfigUse)){
+                        $this->themeConfig['index_bg'] = $themeConfigUse[0]['index_bg'];
+                        $this->themeConfig['cat_bg'] = $themeConfigUse[0]['cat_bg'];
+                    }
+                    $this->theme = $themeConfig[0]['theme_path'];
+                    $this->version = $themeConfig[0]['version'];
+                }
+            }
+
+        }
+    }
+
 
     /**
      *
@@ -305,6 +338,8 @@ EOF;
     private function saveQueryParams()
     {
         $ttl = 24 * 3600;
+
+        $redis = $this->get_redis_instance();
 
         //分销员ID
         $saler_id = $this->input->get('saler', null, 0);
@@ -377,19 +412,22 @@ EOF;
 
         //tkid
         $tkid = $this->input->get('tkid', null, '');
-        if($tkid){
-            $this->session->set_tempdata('tkid', $tkid, $ttl);
-        }
+        //if($tkid){
+            $redis->set('tkid', $tkid, $ttl);
+        //}
 
         //brandname
         $brandname = $this->input->get('brandname', null, '');
-        if($brandname){
-            $this->session->set_tempdata('brandname', $brandname, $ttl);
-        }
-	 //layout
+        //if($brandname){
+            $redis->set('brandname', $brandname, $ttl);
+            //$this->session->set_tempdata('brandname', $brandname, $ttl);
+        //}
+
+        //layout
         $layout = $this->input->get('layout', null, '');
         if($layout){
-            $this->session->set_tempdata('layout', $layout, $ttl);
+            $redis->set('layout', $layout, $ttl);
+            //$this->session->set_tempdata('layout', $layout, $ttl);
         }
 
 
@@ -1304,26 +1342,13 @@ var _hmt = _hmt || [];
         $salerId        = $this->input->get('saler');
         $fansSalerId    = $this->input->get('fans_saler');
 
-        /* add by chencong 20170826 分销保护期 start */
-        if(!$salerId && !$fansSalerId){
-            $this->load->model('distribute/Idistribute_model');
-            $trueSaler = $this->Idistribute_model->get_protection_saler($this->openid, $this->inter_id);
-            if($trueSaler){
-                if($trueSaler >= 10000000){// 泛分销10000000起的
-                    $fansSalerId = $trueSaler;
-                }else{
-                    $salerId = $trueSaler;
-                }
-            }
-        }
-        /* add by chencong 20170826 分销保护期 end */
+        //需要跳转
+        $url = Url::current();
 
         if( $salerId ) {
             //如果链接存在分销号，就不刷新链接的分销号，转发刷新，购买计算绩效
             $this->session->set_userdata( 'giveDistribute'.$this->inter_id.$this->openid, $salerId );
         } else {
-            //需要跳转
-            $url = Url::current();
 
             //如果链接不存在分销号，判断是否为分销员
             $staff = $this->get_user_saler_or_fans_id();

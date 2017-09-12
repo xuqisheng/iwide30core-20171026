@@ -151,16 +151,27 @@ class PresentsService extends BaseService
      * @author zhangyi  <zhangyi@mofly.cn>
      */
     public static function usage_btn_format($inter_id, $gift_id ,$item , $business ,$giftOrderModel ,$code = array()){
+        
         if($item['qty'] < 1) return array();
         $links =  self::getInstance()->getCI()->link;
         /*提前预约*/
         if($item['can_reserve'] == Soma_base::STATUS_TRUE && !empty($code)){
-            $url = Soma_const_url::inst()->get_url('soma/consumer/package_booking', array('aiid'=>$item['item_id'], 'aiidi'=>0,'id'=>$inter_id,'bsn'=>$business ,'code_id'=>$code[0]['code_id'] ) );
-//            $url  =  sprintf(urldecode($links['package_booking']), $item['item_id']);
+//            $url = Soma_const_url::inst()->get_url('soma/consumer/package_booking', array(
+//                'aiid'=>$item['item_id'],
+//                'aiidi'=>0,
+//                'id'=>$inter_id,
+//                'bsn'=>$business ,
+//                'code_id'=>$code[0]['code_id'],
+//                'layout' => $layout,
+//                'tkid' => $tkId,
+//                'brandname' => $brandName,
+//            ) );
+
+            $url  =  sprintf(urldecode($links['package_booking']), $item['item_id']).'&code_id='.$code[0]['code_id'];
             $returnData[] = array(
                 'type'  => 'reserve',
                 'url'   =>   $url,
-                'label' =>  '提前预约'
+                'label' =>  '提前预约',
             );
         }
 
@@ -175,7 +186,7 @@ class PresentsService extends BaseService
             $returnData[] = array(
                 'type'  => 'mail',
                 'url'   =>   $mail_url,
-                'label' =>   '邮寄到家'
+                'label' =>   '邮寄到家',
             );
         }
 
@@ -190,7 +201,7 @@ class PresentsService extends BaseService
 //                'send_order_id' => $gift_id,
 //            )
 //        );
-        $send_friend_url = sprintf(urldecode($links['package_send']),$item['item_id']);;
+        $send_friend_url = sprintf(urldecode($links['package_send']),$item['item_id']);
         $returnData[] = array(
             'type'  => 'gift',
             'url'   =>   $send_friend_url,
@@ -211,7 +222,8 @@ class PresentsService extends BaseService
 //                )
 //            );
 //            $url = $links['package_detail'];
-            $url = Soma_const_url::inst()->get_url('soma/consumer/package_usage', array('aiid'=>$item['item_id'], 'aiidi'=>0, 'id'=>$inter_id,'bsn'=>$business ,'code_id'=>$code[0]['code_id']) );
+            //$url = Soma_const_url::inst()->get_url('soma/consumer/package_usage', array('aiid'=>$item['item_id'], 'aiidi'=>0, 'id'=>$inter_id,'bsn'=>$business ,'code_id'=>$code[0]['code_id']) );
+            $url = sprintf(urldecode($links['package_usage']), $item['item_id']).'&code_id='.$code[0]['code_id'];
             $returnData[] = array(
                 'type'  => 'pickup',
                 'url'   =>   $url,
@@ -242,16 +254,16 @@ class PresentsService extends BaseService
         self::getInstance()->getCI()->load->model('soma/product_package_model');
         $productionPackageModel = self::getInstance()->getCI()->product_package_model;
         if($item['can_wx_booking'] == $productionPackageModel::CAN_T ){
-            $url = Soma_const_url::inst()->get_url('*/booking/wx_select_hotel',
-                array(
-                    'aiid'=>$item['item_id'],
-                    'oid'=>$item['order_id'],
-                    'aiidi'=>0,  //TODO 不确定这个值是什么意思
-                    'id'=>$inter_id,
-                    'bsn'=>$business
-                )
-            );
-//            $url =  $links['wx_select_hotel_link'];
+//            $url = Soma_const_url::inst()->get_url('*/booking/wx_select_hotel',
+//                array(
+//                    'aiid'=>$item['item_id'],
+//                    'oid'=>$item['order_id'],
+//                    'aiidi'=>0,  //TODO 不确定这个值是什么意思
+//                    'id'=>$inter_id,
+//                    'bsn'=>$business
+//                )
+//            );
+            $url = sprintf(urldecode($links['wx_select_hotel']), $item['item_id'], $item['order_id'], $business);
             $returnData[] = array(
                 'type'  => 'wx_booking',
                 'url'   =>   $url,

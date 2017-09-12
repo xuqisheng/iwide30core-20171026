@@ -277,7 +277,7 @@ class BalanceService extends MemberBaseService
 //        }
 
         $this->getCI()->load->model('membervip/front/Member_model','Member');
-        $user_info = $this->getCI()->Member->get_user_info($inter_id,$openid); //获取会员信息
+        $user_info = $this->getCI()->Member->get_user_info($inter_id,$openid,'member_info_id,balance'); //获取会员信息
 
         if(empty($user_info)){
             return array('err'=>40003,'msg'=>'会员信息不存在','data'=>'');  
@@ -307,6 +307,10 @@ class BalanceService extends MemberBaseService
             return array('err'=>40003,'msg'=>'支付失败！订单信息错误。','data'=>site_url("membervip/balance/nopay?id={$inter_id}&orderid={$orderId}")); 
         }
 
+        $balance = floatval($user_info['balance']) - floatval($order_info['pay_money']);
+        if($balance < 0){
+            return array('err'=>40003,'msg'=>'支付失败！余额不足。','data'=>site_url("membervip/depositcard/buydeposit?id={$inter_id}")); 
+        }
         //查询购卡信息
         $post_cardinfo_url = PMS_PATH_URL."depositcard/getinfo";
         $post_cardinfo_data = array(
@@ -347,15 +351,11 @@ class BalanceService extends MemberBaseService
         $this->getCI()->load->model('membervip/common/Public_model','p_model');
         $this->getCI()->load->model('membervip/front/Member_model','mem_model');
 
-        $user_info = $this->getCI()->mem_model->get_user_info($inter_id,$openid,'member_info_id,balance');
+        // $user_info = $this->getCI()->mem_model->get_user_info($inter_id,$openid,'member_info_id,balance');
 
         $params['inter_id'] = $inter_id;
         $params['pk'] = 'member_info_id';
         $params['member_info_id'] = $user_info['member_info_id'];
-        $balance = floatval($user_info['balance']) - floatval($order_info['pay_money']);
-        if($balance < 0){
-            return array('err'=>40003,'msg'=>'支付失败！余额不足。','data'=>site_url("membervip/depositcard/buydeposit?id={$inter_id}")); 
-        }
 //         $save_data = array(
 //             'balance' => $balance
 //         );

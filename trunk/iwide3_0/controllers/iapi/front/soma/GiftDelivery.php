@@ -119,8 +119,7 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         $params = array();
         $params['inter_id'] = $this->input->get('inter_id');
         $params['saler_id'] = $this->input->get('saler_id');
-//        $params['inter_id'] = 'a450089706';
-//        $params['saler_id'] = '64888';
+
         $params['page'] = $this->input->get('page');
         $params['page'] = empty($params['page']) ? 0 : intval($params['page'] - 1);
 
@@ -129,7 +128,7 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         }
 
         //验证分销员saler_id 是否属于inter_id
-        $countRes = $this->db->where(['id'=>$params['saler_id'],'inter_id'=>$params['inter_id'],'distribute_hidden'=>0])
+        $countRes = $this->db->where(['inter_id'=>$params['inter_id'],'qrcode_id'=>$params['saler_id'],'distribute_hidden'=>0])
             ->count_all_results('hotel_staff');
         if($countRes == 0){
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'分销员信息有误!','');
@@ -291,12 +290,6 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         $params['record_info'] = $paramsJson['record_info'];
         $params['orther_remark'] = $paramsJson['orther_remark'];
         $params['inter_id'] = $paramsJson['inter_id'];
-//        $params['saler_name'] = 'Wuqd';
-//        $params['orther_remark'] = '其他';
-//        $params['record_info'] = '2031房间';
-//        $params['inter_id'] = 'a450089706';
-//        $params['saler_id'] = '64888';
-//        $params['gift_id'] = 34;
 
         $fieldArr = ['inter_id','gift_id','saler_id','saler_name','record_info'];
         foreach($fieldArr as $key=>$val){
@@ -307,7 +300,7 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         $params['gift_num'] = empty($params['gift_num']) ? 1 : $params['gift_num'];
 
         //验证saler_id 与 gift_id是否同属inter_id
-        $countStaffRes = $this->db->where(['id'=>$params['saler_id'],'inter_id'=>$params['inter_id'],'distribute_hidden'=>0])
+        $countStaffRes = $this->db->where(['inter_id'=>$params['inter_id'],'qrcode_id'=>$params['saler_id'],'distribute_hidden'=>0])
             ->count_all_results('hotel_staff');
 
         $this->db->db_select('iwide30soma');
@@ -398,21 +391,18 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
      * )
      */
     public function get_generate_gift_qrcode(){
-
         $params = array();
         $params['gift_detail_id'] = $this->input->get('gift_detail_id'); //礼包详情id
         $params['inter_id'] = $this->input->get('inter_id'); //公众号id
         $params['request_token'] = $this->input->get('request_token'); //校验token
-//        $params['gift_detail_id'] = 5;
-//        $params['inter_id'] = 'a450089706';
-//        $params['request_token'] = 'da3086a1badf3c19b0234cebdac741dc'; //校验token
 
         if(empty($params['gift_detail_id']) || empty($params['inter_id'])){
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'参数有误或为空!','');
         }
 
+
         $this->db->db_select('iwide30soma');
-        $giftDetailRes = $this->db->select(['id','gift_id','saler_id','inter_id','request_token'])->where(['id'=>$params['gift_detail_id'],'inter_id'=>$params['inter_id'],'request_token'=>$params['request_token']])
+        $giftDetailRes = $this->db->select(['id as gift_detail_id','gift_id','saler_id','inter_id','request_token'])->where(['id'=>$params['gift_detail_id'],'inter_id'=>$params['inter_id'],'request_token'=>$params['request_token']])
             ->get('soma_gift_detail')->row_array();
 
         if(empty($giftDetailRes)){
@@ -421,13 +411,15 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
 
         //生成礼包二维码地址
         $baseUrl = base_url();
-        $requestUrl = trim($_SERVER['REQUEST_URI'],'/');
+        $requestUrl = trim($_SERVER['PHP_SELF'],'/');
+        $requestUrl = explode('?',$requestUrl)[0];
         $requestUrl = str_replace('/iapi','',$requestUrl);
         $qrCodeUrl = $baseUrl.$requestUrl;
 
         //礼包详情
         $qrCodeAction = 'receive_gift_detail';
         $paramsStr = '?';
+        $giftDetailRes['id'] = $giftDetailRes['inter_id'];
         foreach($giftDetailRes as $key=>$val){
             $paramsStr.=$key.'='.$val.'&';
         }
@@ -437,7 +429,6 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
             $paramsStr = trim($paramsStr,'&');
             $qrCodeAction.=$paramsStr;
         }
-
         //url function替换
         $currentFunName = $this->uri->segment(4);
         $qrCodeUrl = str_replace($currentFunName,$qrCodeAction,$qrCodeUrl);
@@ -446,6 +437,8 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         $value = $qrCodeUrl; //二维码内容
         $errorCorrectionLevel = 'L';//容错级别
         $matrixPointSize = 6;//生成图片大小
+        $value = str_replace('index.php/index.php','index.php',$value);
+
         //生成二维码图片
         QRcode::png($value,false, $errorCorrectionLevel, $matrixPointSize, 2);
 
@@ -546,9 +539,6 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         $params['gift_detail_id'] = intval($this->input->get('gift_detail_id')); //礼包详情id
         $params['inter_id'] = $this->input->get('inter_id'); //公众号id
         $params['request_token'] = $this->input->get('request_token'); //校验token
-//        $params['gift_detail_id'] = 5;
-//        $params['inter_id'] = 'a450089706';
-//        $params['request_token'] = 'da3086a1badf3c19b0234cebdac741dc'; //校验token
 
         //加载gift_delivery_model
         $this->load->model('soma/gift_delivery_model');
@@ -677,11 +667,7 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         $params['saler_id'] = intval($this->input->get('saler_id'));
         $params['inter_id'] = $this->input->get('inter_id');
         $params['request_token'] = $this->input->get('request_token');
-//        $params['id'] = 27;
-//        $params['inter_id'] = 'a450089706';
-//        $params['saler_id'] = '64888';
-//        $params['request_token'] = '104b0dc62aceb8354b38a415d1c3a2ef'; //校验token
-//        $params['gift_id'] = '265';
+
         $paramsArr = ['id','gift_id','saler_id','inter_id','request_token'];
         foreach($paramsArr as $key=>$val){
             if(empty($params[$val])){
@@ -775,9 +761,7 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         $params['id'] = intval($paramsJson['gift_detail_id']);
         $params['inter_id'] = $paramsJson['inter_id'];
         $params['request_token'] = $paramsJson['request_token'];
-//        $params['id'] = 5;
-//        $params['inter_id'] = 'a450089706';
-//        $params['request_token'] = 'da3086a1badf3c19b0234cebdac741dc'; //校验token
+        $gift_detail_id = $params['id'];
 
         $openid = $this->openid;
         if(empty($openid)){
@@ -824,7 +808,6 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         //加载gift_delivery_model
         $this->load->model('soma/gift_delivery_model');
         $params['openid'] = $openid;
-//        $params['openid'] = 'o9Vbtw6_N8ICoy2wuaWDSwZsDNO4';
         $resultInfo = $this->gift_delivery_model->giftOrderCreate($params);
         $result = $resultInfo['result'];
         $params = $resultInfo['params'];
@@ -853,7 +836,9 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
                 ]
             ];
             $data['page_resource'] = $page_resource;
-
+            $this->db->db_select('iwide30soma');
+            //更改礼包状态
+            $this->db->where(['inter_id'=>$params['inter_id'],'id'=>$gift_detail_id])->update('soma_gift_detail',['openid'=>$params['openid'],'is_receive'=>2]);
             return $this->json(BaseConst::OPER_STATUS_SUCCESS,'支付成功!',$data);
 
         } else {

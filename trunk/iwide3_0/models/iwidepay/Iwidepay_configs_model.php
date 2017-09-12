@@ -52,12 +52,23 @@ class Iwidepay_configs_model extends MY_Model{
 	}
 
 	//获取指定inter_id的配置
-	public function get_configs_by_interid($inter_id,$type,$module='base_pay'){
+	public function get_configs_by_interid($inter_id,$format=0,$type='',$module=''){
 		$this->db->where(array(
 			'inter_id' => $inter_id,
-			'module' => $module,
-			'type' => $type,
 			));
-		return $this->db->get(self::TAB_CONFIGS)->row_array();
+		if(!empty($type)){
+			$this->db->where(array(
+				'type' => $type,
+				));
+		}
+		if(!empty($module)){
+			$this->db->where(array(
+				'module' => $module,
+				));
+		}
+		if($format==1){
+			return $this->db->get(self::TAB_CONFIGS)->row_array();
+		}
+		return $this->db->get(self::TAB_CONFIGS)->result_array();
 	}
 }

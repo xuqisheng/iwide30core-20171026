@@ -1871,7 +1871,7 @@ class Sales_order_model extends MY_Model_Soma {
                         'note' => !empty($mailInfo['note']) ? $mailInfo['note'] :'',                //备注
                     );
                     $result = $ConsumerOrderModel->mail_consumer( $mailPost, $openid, $inter_id, $business );
-                    \App\libraries\Support\Log::error('邮寄：' . $order_id. ' | aiid : '.$mailItem['item_id'], $result);
+                    \App\libraries\Support\Log::debug('邮寄：' . $order_id. ' | aiid : '.$mailItem['item_id'], $result);
 
                     if( isset( $result['status'] ) && $result['status'] == Soma_base::STATUS_TRUE ){
 

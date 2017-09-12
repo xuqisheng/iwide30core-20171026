@@ -671,7 +671,7 @@ class Iwidepay_model extends MY_Model{
 				'order_no' => $order_no,
 			))->get(self::TAB_IIP_O)->row_array();
 		}
-		if(!empty($order)){
+		if(($type == 1 && !empty($order)) || $type == 2){
 			$data = array(
 				'requestNo' => md5($order_no . time().rand(10000,99999)),
 				'transId' => '04',
@@ -679,14 +679,14 @@ class Iwidepay_model extends MY_Model{
 				'orderDate' => $type==1?$order['order_date']:$order_date,//原订单日期
 				);
 			$this->load->helpers('common');
-			MYLOG::w('查询订单发送数据：'.json_encode($data),'iwidepay/send');
+			MYLOG::w('查询订单发送数据：'.json_encode($data),'iwidepay/refund_send');
 			$this->load->library('IwidePay/IwidePayService',null,'IwidePayApi');
 			// $res = $this->IwidePayApi->queryOrderRequest($data);
 			//改为调接口
 			$chart = IwidePayConfig::QUERY_ORDER_SECRET;//验证key
 			$data['sign'] = $this->handle_encrypt_order($data,$chart);
 			$return_data = doCurlPostRequest ( $this->get_query_order_url(), http_build_query($data),array(),30);
-			MYLOG::w('查询订单响应数据：'.$return_data,'iwidepay/send');
+			MYLOG::w('查询订单响应数据：'.$return_data,'iwidepay/refund_send');
 			$return = $this->handle_encrypt_order($return_data,$chart,false);//这里记日志了
 			if(!$return){       
 	            return false;

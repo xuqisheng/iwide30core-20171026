@@ -14,42 +14,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Package extends MY_Front_Soma
 {
-    private function getTicketTheme(){
-        $ticketId = $this->input->get('tkid');
-        if($ticketId != null) {
-            //$this->session->set_tempdata('tkid', $ticketId, 60);
-            //setcookie('tkid', $ticketId, 0);
-        }
-        else{
-            //$ticketId = $this->session->tempdata('tkid');
-            //$ticketId = isset($_COOKIE['tkid']) ? $_COOKIE['tkid'] : null;
-        }
-        //获取皮肤
-        if(!empty($ticketId)){
-            $this->load->model('soma/Product_package_ticket_model', 'ProductPackageTicketModel');
-            $ticket = $this->ProductPackageTicketModel->get_product_package_ticket_byIds([$ticketId], $this->inter_id);
-            if(!empty($ticket)){
-                $this->load->model('soma/Theme_config_use_model', 'ThemeConfigUseModel');
-                $this->load->model('soma/Theme_config_model', 'themeConfigModel');
-                $themeConfigUse = $this->ThemeConfigUseModel->get(
-                    ['inter_id', 'theme_id'],
-                    [$this->inter_id, $ticket[0]['theme_id']]
-                );
-                $themeConfig = $this->themeConfigModel->get(
-                    ['theme_id'],
-                    [$ticket[0]['theme_id']]
-                );
-                if(!empty($themeConfig)){
-                    if(!empty($themeConfigUse)){
-                        $this->themeConfig['index_bg'] = $themeConfigUse[0]['index_bg'];
-                        $this->themeConfig['cat_bg'] = $themeConfigUse[0]['cat_bg'];
-                    }
-                    $this->theme = $themeConfig[0]['theme_path'];
-                }
-            }
-
-        }
-    }
 
     /**
      * 商城首页入口
@@ -2728,6 +2692,13 @@ class Package extends MY_Front_Soma
      */
     public function pay_success_stay()
     {
+
+
+        $redis = $this->get_redis_instance();
+        $layout = $redis->get('layout');
+        $tkId = $redis->get('tkid');
+        $brandName = $redis->get('brandname');
+
         $this->datas = [];
         if (!$this->isNewTheme()) {
             $oid = $this->input->get('oid');
@@ -2769,10 +2740,18 @@ class Package extends MY_Front_Soma
             $params = [
                 'oid' => $oid,
                 'id' => $this->inter_id,
-                'bsn' => $order['business']
+                'bsn' => $order['business'],
+                'layout' => $layout,
+                'tkid' => $tkId,
+                'brandname' => $brandName,
             ];
             $orderDetailLink = Soma_const_url::inst()->get_url('soma/order/order_detail/', $params);
-            $productDetailLink = Soma_const_url::inst()->get_url('soma/package/package_detail/', ['pid' => $productID, 'id' => $this->inter_id]);
+            $productDetailLink = Soma_const_url::inst()->get_url('soma/package/package_detail/', [
+                'pid' => $productID, 'id' => $this->inter_id,
+                'layout' => $layout,
+                'tkid' => $tkId,
+                'brandname' => $brandName,
+            ]);
 
             $result = WxService::getInstance()->getQrcode(WxService::QR_CODE_KILLSEC_SUBSCRIBE);
             $this->load->model('wx/Fans_model', 'fansModel');
@@ -2793,7 +2772,7 @@ class Package extends MY_Front_Soma
             $this->_view("header", $header);
         }
 
-        $this->_view('pay_success_stay', $this->datas);
+       $this->_view('pay_success_stay', $this->datas);
 
     }
 
@@ -2816,6 +2795,18 @@ class Package extends MY_Front_Soma
             'title' => '支付成功'
         );
 
+        $redis = $this->get_redis_instance();
+        $layout = $redis->get('layout');
+        $tkId = $redis->get('tkid');
+        $brandName = $redis->get('brandname');
+
+        $params = array(
+            'id' => $this->inter_id,
+            'layout' => $layout,
+            'tkid' => $tkId,
+            'brandname' => $brandName,
+        );
+
         $settlement = $this->input->get('settlement');
         $order_id = $this->input->get('order_id');
 
@@ -2824,18 +2815,16 @@ class Package extends MY_Front_Soma
             $grouponInfo = $this->activityGrouponModel->get_groupon_by_order_id($order_id, $this->inter_id);
             $grouponId = $grouponInfo['group_id'];
 
+            $params['grid'] = $grouponId;
 
-            $params = array(
-                'id' => $this->inter_id,
-                'grid' => $grouponId
-
-            );
+//            $params = array(
+//                'id' => $this->inter_id,
+//                'grid' => $grouponId
+//
+//            );
             $jumpLink = Soma_const_url::inst()->get_url('soma/groupon/groupon_detail/', $params);
 
         } else {
-            $params = array(
-                'id' => $this->inter_id,
-            );
 
             $this->load->library('session');
             $u_type = $this->session->userdata('order_use_type');
@@ -2856,7 +2845,6 @@ class Package extends MY_Front_Soma
                 $params['send_from'] = $model::SEND_FROM_ORDER;
                 $params['send_order_id'] = $order_id;
                 $params['oid'] = $order_id;
-
                 $jumpLink = Soma_const_url::inst()->get_url('soma/gift/package_pre_send', $params);
             } else {
                 $params['oid'] = $order_id;

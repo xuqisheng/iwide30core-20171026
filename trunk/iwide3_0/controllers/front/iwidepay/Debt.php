@@ -164,8 +164,8 @@ class Debt extends MY_Controller {
     	foreach ($open_splits as $ko => $vo) {
     		//判断是否开启了基础月费结算
 			$this->load->model('iwidepay/Iwidepay_configs_model');
-    		$base_pay_settle = $this->Iwidepay_configs_model->get_configs_by_interid($vo['inter_id'],'base_pay_settle');
-    		MYLOG::w('info:base_pay_settle config_'.$vo['inter_id'].'-'.json_encode($base_pay_settle),'iwidepay_clears');
+    		$base_pay_settle = $this->Iwidepay_configs_model->get_configs_by_interid($vo['inter_id'],1,'base_pay_settle','base_pay');
+    		MYLOG::w('info:base_pay_settle config_'.$vo['inter_id'].'-'.json_encode($base_pay_settle),'iwidepay_debt');
     		if(empty($base_pay_settle['value'])||$base_pay_settle['value']!=1){
     			continue;
     		}

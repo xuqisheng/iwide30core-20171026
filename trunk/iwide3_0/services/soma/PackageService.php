@@ -435,7 +435,7 @@ class PackageService extends BaseService
             else{
                 $activity = array('status' => 2, 'auto_rule' => array());
             }
-            if(isset($rules['cal_rule'])) {
+            if(isset($rules['cal_rule']) && isset($rules['cal_rule']['reduce_cost'])) {
                 $rules['cal_rule']['reduce_cost'] = $this->progressNumber($rules['cal_rule']['reduce_cost']);
                 $rules['cal_rule']['quote'] = $this->progressNumber($rules['cal_rule']['quote']);
 
@@ -470,11 +470,21 @@ class PackageService extends BaseService
         $dot = '';
         $after_ = '';
         if(!empty($after)){
-            foreach (str_split($after) as $val){
-                if($val != '0'){
-                    $after_ .= $val;
+            $arr = str_split($after);
+            $arr_ = [];
+            for($i = count($arr) - 1; $i >= 0; $i--){
+                if($arr[$i] != '0'){
+                    $arr_[] = $arr[$i];
                     $dot = '.';
                 }
+                else{
+                    if(!empty($arr_)){
+                        $arr_[] = $arr[$i];
+                    }
+                }
+            }
+            if(!empty($arr_)){
+                $after_ = implode('', array_reverse($arr_));
             }
         }
 
@@ -743,7 +753,7 @@ class PackageService extends BaseService
                 'saler' => $saler,
                 'fans_saler' => $fansler
             ]));
-        //$qrcodeIndex = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
+        $qrcodeIndex = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
 
         $productIds = [];
 
@@ -947,15 +957,15 @@ class PackageService extends BaseService
         if(count($productsList) && count($rewardRuleList)){
             foreach ($productsList as $key => $val){
                 //生成二维码图片
-//                $qrCodeImg = WxService::QR_CODE_PRODUCT_DETAIL.$val['product_id'].'_'.$saler.'_'.$fansler.'.png';
-//                $qrCodeUrl = site_url('soma/package/package_detail?'. http_build_query([
-//                        'id' => $this->getCI()->inter_id,
-//                        'pid' => $val['product_id'],
-//                        'saler' => $saler,
-//                        'fans_saler' => $fansler
-//                    ]));
-//                $qrcode_detail = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
-//                $productsList[$key]['qrcode_detail'] = $qrcode_detail;
+                $qrCodeImg = WxService::QR_CODE_PRODUCT_DETAIL.$val['product_id'].'_'.$saler.'_'.$fansler.'.png';
+                $qrCodeUrl = site_url('soma/package/package_detail?'. http_build_query([
+                        'id' => $this->getCI()->inter_id,
+                        'pid' => $val['product_id'],
+                        'saler' => $saler,
+                        'fans_saler' => $fansler
+                    ]));
+                $qrcode_detail = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
+                $productsList[$key]['qrcode_detail'] = $qrcode_detail;
                 $productsList[$key]['sales_cnt'] = (int)$val['sales_cnt'];
                 $productsList[$key]['detail'] = site_url('soma/package/package_detail').'?id='.$this->getCI()->inter_id.'&pid='.$val['product_id'].'&saler='.$saler;
 

@@ -317,6 +317,10 @@ class DepositcardService extends MemberBaseService
 
         $cardId = isset($_GET['cardId']) ? (int)$_GET['cardId'] : 0;
         $pay_type = isset($_GET['pay']) ? $_GET['pay'] : 'wechat';
+        $userInfo = $this->check_user_login($inter_id, $openid);
+        if (!empty($userInfo['redirect']) || (!empty($userInfo['err']) && $userInfo['err'] == 40003)) {
+            return $userInfo;
+        }
         $this->getCI()->load->model('membervip/common/Public_model', 'p_model');
         $deposit_card = $this->getCI()->p_model->get_info(array('deposit_card_id' => $cardId), 'deposit_card', 'pay_type');
         if (!empty($deposit_card)) {
