@@ -262,6 +262,10 @@ class Consumer extends MY_Front_Soma
 	 */
 	public function consumer_scaner()
 	{
+        //todo 由于改版此功能没错，故写死皮肤
+        $this->theme = 'v1';
+
+        if(!$this->isNewTheme()){
 	    //print_r($this);die;
 	    //TODO: 是否在管理员授权表中状态正常
 	    $this->load->model('core/priv_admin_authid', 'admin_authid');
@@ -301,7 +305,7 @@ class Consumer extends MY_Front_Soma
 	        $this->_view('consumer_deny', $data );
 	    }
 	}
-	
+    }
     /**
      * 扫码核销异步请求
      */

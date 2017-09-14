@@ -2100,6 +2100,7 @@ class Gift extends MY_Front_Soma {
             redirect( $url );exit();
         }
 
+
         /***************自己领取过的的礼物****************/
         if( $gift_data['is_p2p']== Soma_base::STATUS_TRUE ){
             //对于个人对个人，已经领过的情况
@@ -2123,9 +2124,8 @@ class Gift extends MY_Front_Soma {
                 $this->_view("package_received", $this->datas);
                 return TRUE;
             }
-
-
         }
+
 
         if( !in_array( $gift_data['status'], $gift_received_status ) ){
             //不能再领取：1，已经领完；2，自己已经领过；3, 礼物退回

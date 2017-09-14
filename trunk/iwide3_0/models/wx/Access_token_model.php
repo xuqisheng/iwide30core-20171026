@@ -228,7 +228,8 @@ if (! defined ( 'BASEPATH' ))
 			}
 		}
 		function get_api_ticket($inter_id, $return_expire_time = FALSE) {
-			$res = $this->get_ticket_redis ( $inter_id, self::API_TICKET, $return_expire_time );
+			$app_info = $this->get_redis_key_status ( $inter_id . '_AUTH_INFO' );
+			$res = $this->get_ticket_redis ( $inter_id, empty ( $app_info ) ? self::API_TICKET : self::AUTHORIZER_JSAPI_TICKET, $return_expire_time );
 			return $return_expire_time ? array ( 'ticket' => $res['ticket'], 'expire_in' => $res['expire_in'] ) : $res;
 		}
 		function get_card_ticket($inter_id, $return_expire_time = FALSE) {

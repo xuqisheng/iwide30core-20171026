@@ -2113,7 +2113,7 @@ class HotelService extends HotelBaseService {
 					'pay_type'=>array($list['paytype']),
 					'key'=>'value'
 			) );
-
+			$list ['paytype_des'] = $data ['pay_ways'][$list['paytype']]->pay_name;
 			// 显示订单状态，判断评论和可否取消
 			$this->_hotel_ci->load->model ( 'hotel/Order_check_model' );
 			$state = $this->_hotel_ci->Order_check_model->check_order_state ( $list, $data ['status_des'] ['HOTEL_ORDER_STATUS'] );
@@ -2733,7 +2733,7 @@ class HotelService extends HotelBaseService {
 
         if($mediaid){
             $images_url = '';
-            $this->_hotel_ci->load->model('wx/access_token_model');
+            $this->_hotel_ci->load->model('wx/Access_token_model');
             $access_token= $this->_hotel_ci->Access_token_model->get_access_token( $this->_hotel_ci->inter_id );
 
             foreach($mediaid as $arr){

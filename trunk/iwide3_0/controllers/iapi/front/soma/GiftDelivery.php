@@ -311,12 +311,12 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         }
 
         //礼包库存校验
-        $countProductRes = $this->db->select('sf.product_id')->from('soma_gift sf')
+        $countProductRes = $this->db->select(['sf.product_id','scp.stock'])->from('soma_gift sf')
             ->join('soma_catalog_product_package scp','scp.product_id = sf.product_id','left')
             ->where(['sf.inter_id'=>$params['inter_id'],'sf.id'=>$params['gift_id'],'scp.stock >'=>0,'scp.status'=>1])
-            ->get()->result_array();
+            ->get()->row_array();
 
-        if($countProductRes <= 0){
+        if($countProductRes['stock'] < $params['gift_num']){
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'库存不足!','');
         }
 
@@ -683,21 +683,33 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包二维码有误,请重新生成!','');
         }
 
+
+        $page_resource = [
+            'link' => [
+                'gift_detail' => $this->link['home']
+            ],
+            'gift_status'=>2
+        ];
+
+        $data['page_resource'] = $page_resource;
+
         $time = time();
         $gift_expiration_date = intval($giftDetailInfo['add_time']) + 600;
         if($gift_expiration_date < $time){
-            return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包二维码已失效,请重新生成!','');
+            return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包二维码已失效,请重新生成!',$data);
         }
 
         //判断是否被领取
         if($giftDetailInfo['is_receive'] == 2){
-            return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包已被领取!','');
+            //159用于前段特殊判断 跳转至商城首页
+            return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包已被领取!',$data);
         }
 
         //加载gift_delivery_model
         $this->load->model('soma/gift_delivery_model');
 
         $resultInfo = $this->gift_delivery_model->getQrcodeGiftDetailData($params);
+
         if($resultInfo['status'] == false){
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,$resultInfo['message'],[]);
         }
@@ -764,14 +776,14 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         $gift_detail_id = $params['id'];
 
         $openid = $this->openid;
-        if(empty($openid)){
+            if(empty($openid)){
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'获取用户信息失败，请重试!','');
         }
 
         //获取礼包详情信息
         $this->db->db_select('iwide30soma');
         //判断二维码是否失效
-        $giftDetailInfo = $this->db->select(['gift_id','add_time','is_receive'])->where($params)->get('soma_gift_detail')->row_array();
+        $giftDetailInfo = $this->db->select(['gift_id','add_time','is_receive','gift_num'])->where($params)->get('soma_gift_detail')->row_array();
 
         if(empty($giftDetailInfo)){
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包二维码有误,请重新生成!','');
@@ -792,7 +804,7 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包商品不存在!','');
         }
 
-        if($productRes['stock'] <= 0){
+        if($productRes['stock'] < $giftDetailInfo['gift_num']){
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包商品库存不足!','');
         }
 
@@ -822,12 +834,12 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
             } //微信支付
             elseif ($result['payChannel'] == 'wx_pay') {
                 $this->gift_delivery_model->gift_receive_callback($result['orderInfo']['order_id']);
-                $link = base_url().'index.php/soma/package/pay_success_stay?id='.$params['inter_id'].'&oid='.$result['orderInfo']['order_id'];
+                $link = base_url().'index.php/soma/package/pay_success_stay?id='.$params['inter_id'].'&oid='.$result['orderInfo']['order_id']. '&settlement=' . $params['settlement'];
 
             } //威付通支付
             elseif ($result['payChannel'] == 'wft_pay') {
                 $this->gift_delivery_model->gift_receive_callback($result['orderInfo']['order_id']);
-                $link = base_url().'index.php/soma/package/pay_success_stay?id='.$params['inter_id'].'&oid='.$result['orderInfo']['order_id'];
+                $link = base_url().'index.php/soma/package/pay_success_stay?id='.$params['inter_id'].'&oid='.$result['orderInfo']['order_id']. '&settlement=' . $params['settlement'];
             }
 
             $page_resource = [
@@ -838,7 +850,7 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
             $data['page_resource'] = $page_resource;
             $this->db->db_select('iwide30soma');
             //更改礼包状态
-            $this->db->where(['inter_id'=>$params['inter_id'],'id'=>$gift_detail_id])->update('soma_gift_detail',['openid'=>$params['openid'],'is_receive'=>2]);
+            $this->db->where(['inter_id'=>$params['inter_id'],'id'=>$gift_detail_id])->update('soma_gift_detail',['openid'=>$params['openid'],'is_receive'=>2,'order_id'=>$result['orderInfo']['order_id']]);
             return $this->json(BaseConst::OPER_STATUS_SUCCESS,'支付成功!',$data);
 
         } else {

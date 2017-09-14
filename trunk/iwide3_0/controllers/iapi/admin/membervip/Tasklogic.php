@@ -399,7 +399,7 @@ class Tasklogic extends MY_Admin_Iapi
 
         $this->common_model->_shard_db(true)->trans_commit();
 
-        if ($post_data['send_time_mode'] == 1 && $send_num <= 500) {
+        /*if ($post_data['send_time_mode'] == 1 && $send_num <= 500) {
             $_url = 'http://test1.lostsk.com/membervip/TimingTask/welfaretask';
             $con = curl_init(( string )$_url);
             curl_setopt($con, CURLOPT_HEADER, false);
@@ -408,7 +408,7 @@ class Tasklogic extends MY_Admin_Iapi
             curl_setopt($con, CURLOPT_SSL_VERIFYPEER, false);
             $res = curl_exec($con);
             MYLOG::w(@json_encode(array($res, $_url)), 'admin/membervip/debug-log', 'add-send_task');
-        }
+        }*/
 
         $msg['status'] = 1000;
         $msg['err'] = '0';

@@ -47,6 +47,8 @@ class Split extends MY_Controller {
             $ok = $this->redis_proxy->setNX ( $key, $value );
         }elseif($type == 'delete' ){
             $ok = $this->redis_proxy->del ( $key );
+        }elseif ($type == 'get') {
+            $ok = $this->redis_proxy->get( $key );
         }
         return $ok;
     }
@@ -59,9 +61,23 @@ class Split extends MY_Controller {
         $this->redis_lock('delete',$key);
     }
 
+    /**
+     * [check_key 检测此前是否有脚本未正常执行完成]
+     */
+    protected function check_key(){
+        $keys = array('synchro_lock','_sync_offline_lock');
+        foreach ($keys as $k) {
+            if($this->redis_lock('get',$k)){
+                MYLOG::w('err:此前有脚本未正常执行完成:'.$k, 'iwidepay_split');
+                exit('此前有脚本未正常执行完成:'.$k);
+            }
+        }
+    }
+
     //处理分账
     public function check(){
         $this->check_arrow();
+        $this->check_key();
         // 上锁
         $ok = $this->redis_lock();
         if(!$ok){
@@ -187,7 +203,7 @@ class Split extends MY_Controller {
     private function count_split($nosplitorders,$bank_infos,$stype){
         $iresult = array();
         //查出不计算分销的号
-        $this->load->model('IwidePay/IwidePay_configs_model');
+        $this->load->model('iwidepay/IwidePay_configs_model');
         $unsplit_ids = $this->IwidePay_configs_model->get_unsplit_configs_by_iwidepay();
         MYLOG::w('info:unsplit_ids-'.json_encode($unsplit_ids),'iwidepay_split');
         //查出不计算分销的号和模块

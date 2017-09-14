@@ -297,7 +297,7 @@ class Membertask_logic extends MY_Model_Member {
         if(!empty($receive_res['msg']) && $receive_res['msg'] != 'ok'){
             $msg = $receive_res['msg'];
         } elseif (!empty($receive_res['data'])){
-            $msg = 'ok';
+            $msg = '';
         }elseif ($state == 2){
             $msg = '未知错误';
         }
@@ -635,50 +635,33 @@ class Membertask_logic extends MY_Model_Member {
                 $this->update_task_send_user_count($param['inter_id'],$param['task_id'],$param['task_execute_id'],$send_user_count); //更新发送人数
 
                 $vfield = '';
-                switch ($send_target_field){
-                    case 1:
-                        $member_mode = $this->member_model->get_member_mode($param['inter_id']);
-                        if($member_mode == 'login'){
-                            $vfield = 'telephone';
-                            $where = array(
-                                'inter_id'=>$param['inter_id'],
-                                'telephone'=>$send_target_value_arr
-                            );
-                        }else{
-                            $vfield = 'cellphone';
-                            $where = array(
-                                'inter_id'=>$param['inter_id'],
-                                'cellphone'=>$send_target_value_arr,
-                                'member_mode'=>1
-                            );
+
+                if($send_target_field == 1){
+                    $member_mode = $this->member_model->get_member_mode($param['inter_id']);
+                    $field = 'inter_id,open_id,member_info_id,name,membership_number,telephone,cellphone';
+                    if($member_mode == 'login'){
+                        $vfield = 'telephone';
+                        $where = array(
+                            'inter_id'=>$param['inter_id'],
+                            'telephone'=>$send_target_value_arr,
+                            'is_login' => 't'
+                        );
+
+                        $user_info = $this->member_model->get_member_info_list($where,$field);
+                        if(empty($user_info)){
+                            unset($where['is_login']);
                         }
-                        break;
-                    case 2:
-                        $vfield = 'member_info_id';
+                        $user_info = $this->member_model->get_member_info_list($where,$field);
+                    }else{
+                        $vfield = 'cellphone';
                         $where = array(
                             'inter_id'=>$param['inter_id'],
-                            'member_info_id'=>$send_target_value_arr
-                        );
-                        break;
-                    case 3:
-                        $vfield = 'membership_number';
-                        $where = array(
-                            'inter_id'=>$param['inter_id'],
-                            'membership_number'=>$send_target_value_arr
-                        );
-                        break;
-                    case 4:
-                        $vfield = 'open_id';
-                        $where = array(
-                            'inter_id'=>$param['inter_id'],
-                            'open_id'=>$send_target_value_arr,
+                            'cellphone'=>$send_target_value_arr,
                             'member_mode'=>1
                         );
-                        break;
-                }
-                if(!empty($where)){
-                    $field = 'inter_id,open_id,member_info_id,name,membership_number,telephone,cellphone';
-                    $user_info = $this->member_model->get_member_info_list($where,$field);
+                        $user_info = $this->member_model->get_member_info_list($where,$field);
+                    }
+
                     $this->check_task_event($param,$send_target_value_arr,$user_info,$vfield,$send_target_field);
                     if(empty($user_info)){
                         $this->__set_err('408');
@@ -688,9 +671,46 @@ class Membertask_logic extends MY_Model_Member {
                     $json_data = @json_encode($user_info);
                     $this->redis->setex($__key,1800,$json_data);
                 }else{
-                    $this->__set_err('998');
-                    $this->__set_msg('查询参数错误');
-                    return false;
+                    switch ($send_target_field){
+                        case 2:
+                            $vfield = 'member_info_id';
+                            $where = array(
+                                'inter_id'=>$param['inter_id'],
+                                'member_info_id'=>$send_target_value_arr
+                            );
+                            break;
+                        case 3:
+                            $vfield = 'membership_number';
+                            $where = array(
+                                'inter_id'=>$param['inter_id'],
+                                'membership_number'=>$send_target_value_arr
+                            );
+                            break;
+                        case 4:
+                            $vfield = 'open_id';
+                            $where = array(
+                                'inter_id'=>$param['inter_id'],
+                                'open_id'=>$send_target_value_arr,
+                                'member_mode'=>1
+                            );
+                            break;
+                    }
+                    if(!empty($where)){
+                        $field = 'inter_id,open_id,member_info_id,name,membership_number,telephone,cellphone';
+                        $user_info = $this->member_model->get_member_info_list($where,$field);
+                        $this->check_task_event($param,$send_target_value_arr,$user_info,$vfield,$send_target_field);
+                        if(empty($user_info)){
+                            $this->__set_err('408');
+                            $this->__set_msg("该公众号{$param['inter_id']}通过{$vfield}无法找到会员信息");
+                            return false;
+                        }
+                        $json_data = @json_encode($user_info);
+                        $this->redis->setex($__key,1800,$json_data);
+                    }else{
+                        $this->__set_err('998');
+                        $this->__set_msg('查询参数错误');
+                        return false;
+                    }
                 }
                 break;
         }
@@ -708,11 +728,6 @@ class Membertask_logic extends MY_Model_Member {
      */
     protected function check_task_event($param = array(),$send_arr = array(),$user_info = array(), $key = '',$entry_method = 0){
         if(!empty($param) && !empty($send_arr)){
-            $_user_info = array();
-            foreach ($user_info as $item){
-                if(!empty($item[$key])) $_user_info[$item[$key]] = $item;
-            }
-
             $field = $key;
             if($key == 'open_id') $field = 'openid';
             if($key == 'cellphone') $field = 'telephone';
@@ -734,6 +749,14 @@ class Membertask_logic extends MY_Model_Member {
                     break;
             }
 
+            $_user_info = array();
+            foreach ($user_info as $item){
+                if(!empty($item[$key])) {
+                    $_user_info[$item[$key]] = $item;
+                }
+            }
+
+            $key_value_box = array();
             foreach ($send_arr as $v){
                 if(empty($_user_info[$v])){
                     $this->send_fail_num = $this->send_fail_num + 1;
@@ -747,6 +770,20 @@ class Membertask_logic extends MY_Model_Member {
                     );
                     $add_data[$field] = $v;
                     $this->_shard_db(true)->set($add_data)->insert('send_task_event');
+                }elseif(!empty($key_value_box[$v])){
+                    $this->send_fail_num = $this->send_fail_num + 1;
+                    $add_data = array(
+                        'inter_id'=>$param['inter_id'],
+                        'task_id'=>$param['task_id'],
+                        'state'=>2,
+                        'msg'=>$key_name.'重复，发送失败！',
+                        'send_time'=>date('Y-m-d H:i:s'),
+                        'entry_method'=>$entry_method
+                    );
+                    $add_data[$field] = $v;
+                    $this->_shard_db(true)->set($add_data)->insert('send_task_event');
+                }else{
+                    $key_value_box[$v] = $key_name;
                 }
             }
         }

@@ -166,7 +166,7 @@ class PMS_Adapter implements IPMS{
 		$condit['member_level']=(int)$condit['member_level'];
 		$countdays=get_room_night($condit ['startdate'],$condit ['enddate'],'round');
 
-		if(!empty($this->CI->input->get('recache'))){
+		if(!empty($this->CI->input->get('recache')) || $this->CI->session->userdata($idents['inter_id'].'_roomstate_recache') == 1){
 			$condit['recache']=1;
 		}
 		$result = $this->obj->get_rooms_change($rooms, $idents, $condit);

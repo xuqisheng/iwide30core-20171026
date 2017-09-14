@@ -965,7 +965,7 @@ class PackageService extends BaseService
 //                $qrcode_detail = $this->getQrcode($uploadUrl, $qrCodeImg, $qrCodeUrl);
 //                $productsList[$key]['qrcode_detail'] = $qrcode_detail;
                 $productsList[$key]['sales_cnt'] = (int)$val['sales_cnt'];
-                $productsList[$key]['detail'] = site_url('soma/package/package_detail').'?id='.$this->getCI()->inter_id.'&pid='.$val['product_id'].'&saler='.$saler;
+                $productsList[$key]['detail'] = site_url('soma/package/package_detail').'?id='.$this->getCI()->inter_id.'&pid='.$val['product_id'].'&saler='.$saler.'&fans_saler='.$fansler;
 
                 $reward_sort = 0;
                 foreach ($rewardRuleList as $item => $vale){

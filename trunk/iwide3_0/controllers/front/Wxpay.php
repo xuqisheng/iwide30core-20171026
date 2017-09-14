@@ -618,10 +618,17 @@ class Wxpay extends MY_Front {
 					$business_type= '月饼';
 
 				$settle_type= $this->Sales_order_model->get_settle_label();  //各种结算方式中文标识：普通购买|拼团购买
-				$order_desc= $public['name']. '_';
-				$order_desc.= array_key_exists($order_detail['business'], $business_type)? $business_type[$order_detail['business']]: '';
-				$order_desc.= array_key_exists($order_detail['settlement'], $settle_type)? $settle_type[$order_detail['settlement']]: '';
-				$order_desc.= '#'. $order_id;
+
+				/* edit by chencong <chencong@mofly.cn> 2017-09-13 修改支付商品名称为下单商品名称 start */
+//				$order_desc= $public['name']. '_';
+//				$order_desc.= array_key_exists($order_detail['business'], $business_type)? $business_type[$order_detail['business']]: '';
+//				$order_desc.= array_key_exists($order_detail['settlement'], $settle_type)? $settle_type[$order_detail['settlement']]: '';
+//				$order_desc.= '#'. $order_id;
+				// 获取商品名称
+				$this->load->model('soma/Sales_item_package_model');
+				$orderItems = $this->Sales_item_package_model->get_order_items_byIds($order_id, $order_detail['business'], $inter_id);
+				$order_desc = !empty($orderItems) ? $orderItems[0]['name'] : '';
+				/* edit by chencong <chencong@mofly.cn> 2017-09-13 修改支付商品名称为下单商品名称 end */
 
 				if( $order_detail['settlement']== Sales_order_model::SETTLE_KILLSEC ){
 					//对于秒杀限定其支付有效期

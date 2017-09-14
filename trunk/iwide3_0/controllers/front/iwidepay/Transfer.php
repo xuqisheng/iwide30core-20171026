@@ -107,10 +107,10 @@ class Transfer extends MY_Controller {
         $this->load->model ( 'iwidepay/iwidepay_transfer_model' );
         $configedata = array('saler_inter_id'=>'jinfangka','iwide'=>'jinfangka','iwide_tips'=>'jinfangka');
         //查出不计算分销的号
-        $this->load('IwidePay/IwidePay_configs_model');
-        $unsplit_ids = $this->IwidePay_configs_model->get_unsplit_configs_by_iwidepay();
+        $this->load->model('iwidepay/iwidepay_configs_model');
+        $unsplit_ids = $this->iwidepay_configs_model->get_unsplit_configs_by_iwidepay();
         //查出不计算分销的号和模块
-        $unsplit_configs = $this->IwidePay_configs_model->get_unsplit_configs_no_iwidepay();
+        $unsplit_configs = $this->iwidepay_configs_model->get_unsplit_configs_no_iwidepay();
         MYLOG::w('分账配置数据：unsplit_ids:'.json_encode($unsplit_ids) . '|unsplit_configs:' . json_encode($unsplit_configs), 'iwidepay/transfer');
         //取分账规则 根据inter_id拿
         foreach($orders as $k=>$v){

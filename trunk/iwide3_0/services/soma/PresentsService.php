@@ -167,7 +167,8 @@ class PresentsService extends BaseService
 //                'brandname' => $brandName,
 //            ) );
 
-            $url  =  sprintf(urldecode($links['package_booking']), $item['item_id']).'&code_id='.$code[0]['code_id'];
+            $url = sprintf(urldecode($links['package_booking']), $item['item_id']).'&code_id='.$code[0]['code_id'];
+            $url = urlSetValue($url, 'bsn', $business);
             $returnData[] = array(
                 'type'  => 'reserve',
                 'url'   =>   $url,
@@ -177,12 +178,8 @@ class PresentsService extends BaseService
 
         /*可邮寄*/
         if($item['can_mail']  == Soma_base::STATUS_TRUE){
-            $param = array();
-            $param['id'] = $inter_id;
-            $param['gid'] = $gift_id;
-            $param['bsn'] = $business;
-//            $mail_url = Soma_const_url::inst()->get_soma_shipping( $param );//邮寄
-            $mail_url  =  $links['show_shipping_info'];
+            $mail_url = urlSetValue($links['show_shipping_info'], 'gid', $gift_id);
+            $mail_url = urlSetValue($mail_url, 'bsn', $business);
             $returnData[] = array(
                 'type'  => 'mail',
                 'url'   =>   $mail_url,
@@ -202,6 +199,7 @@ class PresentsService extends BaseService
 //            )
 //        );
         $send_friend_url = sprintf(urldecode($links['package_send']),$item['item_id']);
+        $send_friend_url = urlSetValue($send_friend_url, 'bsn', $business);
         $returnData[] = array(
             'type'  => 'gift',
             'url'   =>   $send_friend_url,
@@ -224,6 +222,7 @@ class PresentsService extends BaseService
 //            $url = $links['package_detail'];
             //$url = Soma_const_url::inst()->get_url('soma/consumer/package_usage', array('aiid'=>$item['item_id'], 'aiidi'=>0, 'id'=>$inter_id,'bsn'=>$business ,'code_id'=>$code[0]['code_id']) );
             $url = sprintf(urldecode($links['package_usage']), $item['item_id']).'&code_id='.$code[0]['code_id'];
+            $url = urlSetValue($url, 'bsn', $business);
             $returnData[] = array(
                 'type'  => 'pickup',
                 'url'   =>   $url,
@@ -242,7 +241,7 @@ class PresentsService extends BaseService
 //                    'send_order_id' => $gift_id,
 //                )
 //            );
-            $url = $links['package_detail'];
+            $url = urlSetValue($links['package_detail'], 'bsn', $business);
             $returnData[] = array(
                 'type'  => 'cardpack',
                 'url'   =>   $url,

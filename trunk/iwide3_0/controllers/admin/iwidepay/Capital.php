@@ -103,10 +103,11 @@ class Capital extends MY_Admin
                     $commission = $this->Iwidepay_capital_model->commission($value_arr);
                     $distribution = $this->Iwidepay_capital_model->distribution($value_arr);
                     $arrears_amount = $this->Iwidepay_capital_model->arrears_amount($value_arr);
+                    $cost_amount = $this->Iwidepay_capital_model->cost_fee($value_arr);
                 }
                 else
                 {
-                    $total_amount = $pay_amount = $refund_amount = $commission = $distribution = $arrears_amount = 0;
+                    $total_amount = $pay_amount = $refund_amount = $commission = $distribution = $arrears_amount = $cost_amount = 0;
                 }
 
                 $withdraw_amount = $this->Iwidepay_capital_model->withdraw_amount($value_arr);
@@ -115,6 +116,7 @@ class Capital extends MY_Admin
                 $item['pay_amount'] = formatMoney($pay_amount/100);
                 $item['refund_amount'] = formatMoney($refund_amount/100);
                 $item['withdraw_amount'] = formatMoney($withdraw_amount/100);
+                $item['cost'] = formatMoney($cost_amount/100);
                 $item['commission'] = formatMoney($commission/100);
                 $item['distribution'] = formatMoney($distribution/100);
                 $item['arrears_amount'] = formatMoney($arrears_amount/100);
@@ -123,7 +125,7 @@ class Capital extends MY_Admin
         }
 
 
-        $headArr = array('所属公众号','所属门店','监管账户余额','用户支付金额','退款金额','提现金额','金房卡佣金','分销佣金','欠款金额');
+        $headArr = array('所属公众号','所属门店','监管账户余额','用户支付金额','退款金额','提现金额','手续费','金房卡佣金','分销佣金','欠款金额');
         $widthArr = array(20,20,20,20,20,20,12,12,12);
         getExcel('资金概览',$headArr,$list,$widthArr);
     }

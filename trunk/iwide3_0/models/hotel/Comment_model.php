@@ -883,7 +883,6 @@ class Comment_model extends CI_Model {
                     $data['service_score']=0;
                 }
 
-
                 $data = json_encode($data);
 
                 $res = $redis->hSet($key, $hotel_id, $data);
@@ -898,14 +897,7 @@ class Comment_model extends CI_Model {
 
         }
 
-
-        if($res){
-
-           return  $redis->hGetAll($key);
-
-        }
-
-        return false;
+        return  $redis->hGetAll($key);
 
     }
 

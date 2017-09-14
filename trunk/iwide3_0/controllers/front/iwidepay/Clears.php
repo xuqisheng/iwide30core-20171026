@@ -108,7 +108,7 @@ class Clears extends MY_Controller {
         	$hotel_advances[$kh]['debt_records'] = $return['debted_records'];
 
         	//没有欠款跳过该条汇总
-        	if(empty($debt_records)){
+        	if(empty($return['debted_records'])){
         		continue;
         	}
 

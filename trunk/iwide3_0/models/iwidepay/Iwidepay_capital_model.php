@@ -163,12 +163,12 @@ class Iwidepay_capital_model extends MY_Model
 
         if (!empty($where_arr['start_time']))
         {
-            $sql .= " AND update_time >= '{$where_arr['start_time']}'";
+            $sql .= " AND add_time >= '{$where_arr['start_time']}'";
         }
 
         if (!empty($where_arr['end_time']))
         {
-            $sql .= " AND update_time <= '{$where_arr['end_time']} 23:59:60'";
+            $sql .= " AND add_time <= '{$where_arr['end_time']} 23:59:60'";
         }
 
         $data = $this->db_read()->query($sql)->row_array();
@@ -194,12 +194,43 @@ class Iwidepay_capital_model extends MY_Model
 
         if (!empty($where_arr['start_time']))
         {
-            $sql .= " AND update_time >= '{$where_arr['start_time']}'";
+            $sql .= " AND add_time >= '{$where_arr['start_time']}'";
         }
 
         if (!empty($where_arr['end_time']))
         {
-            $sql .= " AND update_time <= '{$where_arr['end_time']} 23:59:60'";
+            $sql .= " AND add_time <= '{$where_arr['end_time']} 23:59:60'";
+        }
+
+        $data = $this->db_read()->query($sql)->row_array();
+        return !empty($data['amount']) ? $data['amount'] : 0;
+    }
+
+    /**
+     * 获取 手续费(分账给分销员且已转账成功的总金额)  分账结算记录表 => 状态 1成功 ，3异常
+     * @param $where_arr
+     * @return int
+     */
+    public function cost_fee($where_arr)
+    {
+        $sql = "SELECT SUM(amount) AS amount FROM ".self::TAB_IWIDEPAY_TRANSFER." WHERE `type` = 'cost' AND send_status = 1 AND record_id > 0";
+        if (!empty($where_arr['inter_id']) && $where_arr['inter_id'] != 'ALL_PRIVILEGES')
+        {
+            $sql .= " AND  inter_id = '{$where_arr['inter_id']}'";
+        }
+        if (!empty($where_arr['hotel_id']))
+        {
+            $sql .= " AND hotel_id IN ({$where_arr['hotel_id']})";
+        }
+
+        if (!empty($where_arr['start_time']))
+        {
+            $sql .= " AND add_time >= '{$where_arr['start_time']}'";
+        }
+
+        if (!empty($where_arr['end_time']))
+        {
+            $sql .= " AND add_time <= '{$where_arr['end_time']} 23:59:60'";
         }
 
         $data = $this->db_read()->query($sql)->row_array();

@@ -253,6 +253,11 @@ class Check extends MY_Controller {
 				$res = $this->Iwidepay_model->get_hotel_order_items($params['order_no']);
 				if(!empty($res)){
 					foreach ($res as $kr => $vr) {
+						//今天完结的不同步
+						if(strtotime($vr['leavetime'])>=strtotime(date('Y-m-d 00:00:00'))){
+							return true;
+						}
+
 						if($vr['istatus']==3){
 							//记录订单最终金额
 							$s_status = 1;
@@ -269,17 +274,17 @@ class Check extends MY_Controller {
 				return false;
 			}
 			//判断是否开启了现付结算
-			$this->load->model('iwidepay/Iwidepay_clears_model');
-    		$open_offline = $this->Iwidepay_clears_model->get_configs($params['inter_id'],'synchro_hotel_order');
-    		MYLOG::w('info:synchro_hotel_order config_'.$params['inter_id'].'-'.json_encode($open_offline),'iwidepay_check');
-    		if(!empty($open_offline['value'])&&$open_offline['value']==1){
+			// $this->load->model('iwidepay/Iwidepay_clears_model');
+   //  		$open_offline = $this->Iwidepay_clears_model->get_configs($params['inter_id'],'synchro_hotel_order');
+   //  		MYLOG::w('info:synchro_hotel_order config_'.$params['inter_id'].'-'.json_encode($open_offline),'iwidepay_check');
+   //  		if(!empty($open_offline['value'])&&$open_offline['value']==1){
 				//更新同步订单最终金额
 				$res = $this->Iwidepay_model->edit_order_amt($params['inter_id'],$params['module'],$params['order_no'],$f_price);
 				if(!$res){
 					MYLOG::w('info:'.$params['inter_id'].'-'.$params['order_no'].':'.$f_price.' order_amt update fail','iwidepay_check');
 					return false;
 				}
-			}
+			// }
 		}
 		if($order['handled']==1){
 			//完结，更新分账状态为2待分,订单完结状态为1已完结
@@ -316,6 +321,11 @@ class Check extends MY_Controller {
 		MYLOG::w('info:soma_bill-'.$params['inter_id'].'-'.$params['order_no'].'|'.json_encode($data),'iwidepay_check');
 		if(!empty($data)){
 			foreach ($data as $key => $value) {
+				//今天核销的不同步
+				if(strtotime($value['bill_time'])>=strtotime(date('Y-m-d 00:00:00'))){
+					continue;
+				}
+
 				$data[$key]['handle_status'] = 1;
 				$data[$key]['add_time'] = date('Y-m-d H:i:s');
 			}

@@ -214,6 +214,15 @@ class MY_Front_Soma_Iapi extends MY_Front_Iapi
             'gift_list'=>site_url('soma/GiftDelivery/gift_list') . "?id=" . $this->inter_id .'&bsn=package'.'&layout='.$layout."&tkid=".$tkId.'&brandname='.$brandName,
             //确认领取礼包详情页
             'receive_gift_detail'=>site_url('soma/GiftDelivery/receive_gift_detail') . "?id=" . $this->inter_id .'&bsn=package'.'&layout='.$layout."&tkid=".$tkId.'&brandname='.$brandName,
+            'received_gift_empty' => site_url('soma/gift/received_gift_empty').'?'. http_build_query([
+                    'id' => $this->inter_id,
+                    'tkid' => $tkId,
+                    'brandname' => $brandName,
+                    'layout' => $layout,
+                    'bsn' => '%s',
+                    'gid' => '%s'
+
+                ])
         );
     }
 

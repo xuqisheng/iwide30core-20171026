@@ -138,7 +138,7 @@ class MY_Controller extends CI_Controller
     /**
      * @author libinyan@mofly.cn
      */
-    protected function _ftp_server($env = 'prod')
+    public function _ftp_server($env = 'prod')
     {
         $this->load->library('ftp');
         if ($env == 'test') {

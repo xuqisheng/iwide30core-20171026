@@ -105,6 +105,8 @@ class Gift_delivery extends MY_Admin_Iapi{
                 'size'=> $resultInfo['page_size'],
             ],
             'csrf' => $this->common_data,
+            'start_time'=>$resultInfo['start_time'],
+            'end_time'=>$resultInfo['end_time'],
         ];
 
         //结果返回
@@ -254,10 +256,7 @@ class Gift_delivery extends MY_Admin_Iapi{
         $productIdArr = explode(',',$paramsJson['product_id']);
         $params['start_time'] = $paramsJson['start_time'];
         $params['end_time'] = $paramsJson['end_time'];
-//        $productIdArr = ['12538','13420','10023','10271'];
-//        $productIdArr = [];
-//        $params['start_time'] = '2017-09-06 00:00:00';
-//        $params['end_time'] = '2017-09-20 23:59:59';
+
         if(empty($params['start_time']) || empty($params['end_time'])){
             $this->out_put_msg(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包有限时间不能为空!','');
         }
@@ -333,8 +332,7 @@ class Gift_delivery extends MY_Admin_Iapi{
         $paramsJson = $this->input->input_json();
         $params['product_id'] = $paramsJson['product_id'];
         $params['inter_id'] = $this->session->get_admin_inter_id();
-//        $params['product_id'] = 14211;
-//        $params['inter_id'] = 'a450089706';
+
         $this->db->db_select('iwide30soma');
         $productIdRes = $this->db->select(['product_id','inter_id'])->where($params)
             ->get('soma_catalog_product_package')->row_array();
@@ -348,6 +346,45 @@ class Gift_delivery extends MY_Admin_Iapi{
         $resultInfo = $this->gift_delivery_model->deleteProductGiftData($params);
         $this->out_put_msg($resultInfo['status'],$resultInfo['message'],'');
     }
+
+
+    /***
+     * 礼包领取信息详情
+     */
+    public function giftReceiveDetail(){
+
+        //接受筛选参数
+        $params = array();
+        $params['start_time'] = $this->input->get('start_time');
+        $params['end_time'] = $this->input->get('end_time');
+        $params['order_id'] = intval($this->input->get('order_id'));
+        $params['saler_name'] = $this->input->get('saler_name');
+        $params['record_info'] = $this->input->get('record_info');
+        $params['page'] = intval($this->input->get('page'));
+        $params['page'] = empty($params['page']) ? 0 : $params['page'] - 1;
+
+        $params['inter_id'] = $this->session->get_admin_inter_id();
+        $this->db->db_select('iwide30soma');
+        //加载gift_delivery_model
+        $this->load->model('soma/gift_delivery_model');
+
+        //获取礼包领取详情
+        $resultInfo = $this->gift_delivery_model->getGiftReceiveDetail($params);
+
+        $data = [
+            'items' => $resultInfo['message'],
+            'page_resource' => [
+                'page' => $resultInfo['pageCount'],
+                'count' => $resultInfo['count'],
+                'size'=> $resultInfo['page_size'],
+            ],
+            'csrf' => $this->common_data,
+        ];
+
+        $this->out_put_msg($resultInfo['status'],'',$data);
+    }
+
+
 
 
 

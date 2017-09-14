@@ -42,6 +42,10 @@ class Hotel extends MY_Front_Hotel {
         if(!$this->is_restful($module_view['module_view']['skin_name'])){
             $data = array_merge(HotelService::getInstance()->search(),$data);
         }
+        $recache = intval($this->input->get('freshcache'));
+        if ($recache){
+            $recache == 1 ? $this->session->set_userdata ( $this->inter_id . '_roomstate_recache', 1 ) : $this->session->set_userdata ( $this->inter_id . '_roomstate_recache', 0 );
+        }
 		$type = $this->input->get ( 'type', TRUE );
 		if($type == 'athour'){
 			$this->display ( 'hotel/search_athour', $data,'',$module_view );

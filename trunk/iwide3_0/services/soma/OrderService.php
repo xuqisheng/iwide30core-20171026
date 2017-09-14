@@ -1363,6 +1363,12 @@ class OrderService extends BaseService
         ], ['limit' => null]);
 
 
+        //退款进度
+        /** @var \Sales_refund_model  $sales_refund_model */
+        $this->getCI()->load->model('soma/Sales_refund_model', 'Sales_refund_model');
+        $sales_refund_model = $this->getCI()->Sales_refund_model;
+        $sales_refund_list = $sales_refund_model->get(['order_id', 'inter_id'], [$orderIDMap, $this->getCI()->inter_id]);
+
         // 资产
         $asset_item_table_name = $this->getCI()->soma_db_conn_read->dbprefix($Sales_item_package_model->asset_item_table_name('package'));
         $code_condition = [
@@ -1391,6 +1397,15 @@ class OrderService extends BaseService
             foreach ($code_map as $code_key => $code_val) {
                 if ($code_val['order_id'] == $value['order_id']) {
                     $order[$key]['code'] = $code_val;
+                }
+            }
+            $order[$key]['refund_info_status'] = 0;
+            if(!empty($sales_refund_list)){
+                foreach ($sales_refund_list as $vale){
+                   if($vale['order_id'] == $value['order_id']){
+                       $order[$key]['refund_info_status'] = $vale['status'];
+                       break;
+                   }
                 }
             }
         }
@@ -1513,6 +1528,7 @@ class OrderService extends BaseService
             'create_time',
             'item_name',
             'real_grand_total',
+            'grand_total',
             'row_qty',
             'status',
             'refund_status',
@@ -1576,8 +1592,8 @@ class OrderService extends BaseService
             if(!empty($product)){
                if(in_array($product[0]['type'], [$product_package_model::PRODUCT_TYPE_BALANCE, $product_package_model::PRODUCT_TYPE_POINT])){
                    $item_map[$key]['can_refund'] = (string)$product_package_model::CAN_F;
-                   $item_map[$key]['type'] = $product[0]['type'];
                }
+               $item_map[$key]['type'] = $product[0]['type'];
             }
 
         }
@@ -1647,7 +1663,7 @@ class OrderService extends BaseService
         if(!empty($sales_refund_info)){
             $refund_info_status = $sales_refund_info[0]['status'];
         }
-        $order['refund_info_status'] = $refund_info_status;
+        $order['refund_info_status'] = (string)$refund_info_status;
 
         $result['code'] = $consumer_order;
         $result['product'] = $order;

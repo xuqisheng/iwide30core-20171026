@@ -250,7 +250,7 @@ $(function(){
     	<div class="title2 h22">历史城市</div>
             <ul class="address_list list_style">
                 <?php foreach($last_orders as $lo){?>
-                    <li><?php echo str_replace(array('市','区','县'),'',$lo['hcity']);?></li>
+                    <li><?php echo $lo['hcity'];?></li>
                 <?php }?>
             </ul>
         <?php }?>
@@ -258,7 +258,7 @@ $(function(){
     	<div class="title2 h22">热门城市</div>
         <ul class="address_list list_style hotcity">
                 <?php foreach($hot_city as $hc){?>
-                    <li><?php echo str_replace(array('市','区','县'),'',$hc);?></li>
+                    <li><?php echo $hc;?></li>
                 <?php }?>
             </ul>
         <?php }?>
@@ -269,15 +269,11 @@ $(function(){
                     <?php if(isset($c['area'])){ ?>
                         <li city="<?php echo $c['city'];?>" area="<?php echo $c['area'];?>">
                             <?php
-                            if(strlen($c['area'])>6){
-                                echo str_replace(array('市','区','县'),'',$c['area']).'('.str_replace(array('市','区','县'),'',$c['city']).')';
-                            }else{
-                                echo $c['area'].'('.str_replace(array('市','区','县'),'',$c['city']).')';
-                            }
+                                echo $c['area'].'('.$c['city'].')';
                             ?>
                         </li>
                     <?php }else{  ?>
-                        <li><?php echo str_replace(array('市','区','县'),'',$c['city']); ?></li>
+                        <li><?php echo $c['city']; ?></li>
                     <?php }}?>
             </ul>
         <?php }?>

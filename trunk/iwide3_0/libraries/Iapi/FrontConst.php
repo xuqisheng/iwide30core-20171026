@@ -171,6 +171,7 @@ class FrontConst extends BaseConst
                 'first_city',
                 'hot_city',
                 'citys',
+                'area',
                 'homepage_set',
             ),
             'mul_arr' => array(
@@ -226,7 +227,6 @@ class FrontConst extends BaseConst
                 'inter_id',
                 'csrf_token',
                 'csrf_value',
-                'hotel',
                 'startdate',
                 'enddate',
                 'gallery_count',
@@ -238,19 +238,63 @@ class FrontConst extends BaseConst
                 'minSelect',
                 'foot_ads',
                 'icons_set',
-                't_t',
                 'packages',
             ),
             'mul_arr' => array(
                 'rooms' => array(
                     'keys' => array(
-                        'room_info',
-                        'state_info',
                         'show_info',
                         'lowest',
-                        'highest',
-                        'all_full',
                         'top_price',
+                        'state_info'
+                    ),
+                    'arr' => array(
+                        'room_info' =>array(
+                            'keys' => array(
+                                'room_id',
+                                'room_img',
+                                'name',
+                                'area',
+                                'sub_des',
+                                'oprice',
+                            ),
+                        ),
+                    ),
+                    'mul_arr' => array(
+                        'state_info' =>array(
+                            'keys' => array(
+                                'price_name',
+                                'des',
+                                'price_tags',
+                                'useable_coupon_favour',
+                                'wxpay_favour_sign',
+                                'bookpolicy_condition',
+                                'avg_price',
+                                'avg_oprice',
+                                'allprice',
+                                'condition',
+                                'price_code',
+                                'price_type',
+                                'book_status',
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            'arr' => array(
+                'hotel'      => array(
+                    'keys' => array(
+                        'hotel_id',
+                        'imgs',
+                        'name',
+                        'address',
+                        'book_policy',
+                    ),
+                ),
+                't_t'      => array(
+                    'keys' => array(
+                        'comment_score',
+                        'comment_count',
                     ),
                 ),
             ),
@@ -295,26 +339,66 @@ class FrontConst extends BaseConst
             ),
         ),
         'hotel/hotel/orderdetail'          => array(
-            'common' => array(
-                'member',
-            ),
             'keys'   => array(
                 'inter_id',
-                'status_des',
-                'pay_ways',
                 'not_same',
-                'can_cancel',
-                'can_comment',
                 're_pay',
                 'states',
-                'order_sequence',
                 'order',
-                'first_room',
                 'hotel',
                 'timeout',
                 'invoice_info',
                 'startdate_weekday',
                 'enddate_weekday',
+            ),
+            'arr' => array(
+                'hotel'      => array(
+                    'keys' => array(
+                        'book_policy',
+                        'name',
+                        'address',
+                        'latitude',
+                        'longitude',
+                    ),
+                ),
+                'order'      => array(
+                    'keys' => array(
+                        'status',
+                        'status_des',
+                        'paytype',
+                        'price',
+                        'orderid',
+                        'id',
+                        'hotel_id',
+                        'price_type',
+                        'hname',
+                        'latitude',
+                        'longitude',
+                        'haddress',
+                        'roomnums',
+                        'startdate',
+                        'enddate',
+                        'name',
+                        'tel',
+                        'goods_details',
+                        'show_orderid',
+                        'order_time',
+                        'coupon_favour',
+                        'point_used_amount',
+                        'point_favour',
+                        'wxpay_favour',
+                        'customer_remark',
+                        'paytype_des',
+                    ),
+                    'arr' => array(
+                        'first_detail' =>array(
+                            'keys' => array(
+                                'roomname',
+                                'price_code_name',
+                            ),
+                        ),
+                    ),
+                ),
             ),
         ),
         'hotel/hotel/myorder'              => array(
@@ -322,7 +406,41 @@ class FrontConst extends BaseConst
                 'handled',
             ),
             'mul_arr' => array(
-                'orders' => array(),
+                'orders' => array(
+                    'keys' => array(
+                        'INDEX',
+                        'ORDERDETAIL',
+                        'TO_COMMENT',
+                        'CHECK_OUT',
+                        'id',
+                        'status',
+                        'status_des',
+                        'hname',
+                        'roomnums',
+                        'startdate',
+                        'enddate',
+                        'price',
+                        're_pay',
+                        'can_comment',
+                        'hotel_id',
+                        'price_type',
+                    ),
+                    'arr' => array(
+                        'first_detail' =>array(
+                            'keys' => array(
+                                'roomname',
+                            ),
+                        ),
+                        'orderstate' => array(
+                            'keys' => array(
+                                'last_repay_time',
+                                'repay_url',
+                                'self_checkout',
+                                'self_checkout_des',
+                            ),
+                        ),
+                    ),
+                ),
             ),
         ),
         'hotel/check/ajax_hotel_search'    => array(
@@ -380,6 +498,7 @@ class FrontConst extends BaseConst
                 'room_list',
                 'first_room',
                 'first_state',
+                'first_pay_favour',
                 'bookpolicy_condition',
                 'customer_condition',
                 'extra_info',
@@ -422,6 +541,38 @@ class FrontConst extends BaseConst
                         'highest',
                         'all_full',
                         'top_price',
+                    ),
+                ),
+            ),
+        ),
+        'hotel/hotel/to_comment'     => array(
+            'keys'    => array(
+                'comment',
+                'comment_config',
+                'comment_info',
+                'index_url',
+            ),
+            'arr' => array(
+                'first_room'      => array(
+                    'keys' => array(
+                        'room_id',
+                    ),
+                ),
+                'order'      => array(
+                    'keys' => array(
+                        'hotel_id',
+                        'hname',
+                        'startdate',
+                        'enddate',
+                        'orderid',
+                        'roomnight'
+                    ),
+                    'arr' => array(
+                        'first_detail'=>array(
+                            'keys' => array(
+                                'roomname',
+                            ),
+                        ),
                     ),
                 ),
             ),

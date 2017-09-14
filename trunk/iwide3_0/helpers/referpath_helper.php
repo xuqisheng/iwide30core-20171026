@@ -114,6 +114,23 @@ function get_cdn_url($url){
 		$CI=& get_instance();
 		return $CI->config->base_url( $url );
 	}
-	
 }
 
+
+/**
+ * 替换http参数
+ * @param $url
+ * @param $key
+ * @param $value
+ * @return string
+ * @author liguanglong  <liguanglong@mofly.cn>
+ */
+function urlSetValue($url, $key, $value)
+{
+    $a=explode('?',$url);
+    $url_f=$a[0];
+    $query=$a[1];
+    parse_str($query,$arr);
+    $arr[$key]=$value;
+    return $url_f.'?'.http_build_query($arr);
+}

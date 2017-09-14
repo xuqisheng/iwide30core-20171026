@@ -1819,9 +1819,11 @@ class Sales_order_model extends MY_Model_Soma {
             if(isset($item[0]) && isset($item[0]['type']) && $item[0]['type'] == Sales_order_model::PRODUCT_TYPE_SHIPPING) {
                 $send_flag = false;
             }
+//            SETTLE_HOTEL_GIFT
+            $giftType = MY_Model_Soma::SETTLE_HOTEL_GIFT;
             //购买成功
             /***********************发送模版消息****************************/
-            if($send_flag) {
+            if($send_flag && $settlement != $giftType) { //注:礼包派送不发送模板消息
                 $this->load->model('soma/Message_wxtemp_template_model','MessageWxtempTemplateModel');
                 /**
                  * @var Message_wxtemp_template_model $messageWxtempTemplateModel

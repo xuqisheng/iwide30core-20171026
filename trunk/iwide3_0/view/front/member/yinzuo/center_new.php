@@ -48,21 +48,24 @@
         .user_lv{
     position: absolute;
     right: 7.5%;
-    bottom: 10%;
-    font-size: 0.5rem;
+    bottom: 9.5%;
+    font-size: 0.8rem;
     text-align: right;
+    color: black;
         }
         .card_type{
             position: absolute;
             left: 7.5%;
-            bottom: 8.2%;
+            bottom: 11.5%;
             font-size: 1rem;
-            text-align: right
+            text-align: right;
+            color: black;
         }
         .user_lv>div{
+            color: black
             line-height: 1.1 !important;
         }
-        .user_lv[card="9"]>div, .card_type[card="9"]>div{
+/*        .user_lv[card="9"]>div, .card_type[card="9"]>div{
             color:#c8b175;
         }
         .user_lv[card="1"]>div, .card_type[card="1"]>div{
@@ -76,7 +79,7 @@
         }
         .user_lv[card="3"]>div, .card_type[card="3"]>div{
             color:#9da3ad;
-        }
+        }*/
     </style>
 </head>
 <body>
@@ -113,7 +116,7 @@
             <img class="w100" src="<?php echo base_url("public/member/phase2/images/yinzuo").'/'.$lvl_pms_code.'.png';?>">
             <ib class="user_lv" card="<?php echo $lvl_pms_code?>">
                 <div>NO.<?php echo $centerinfo['membership_number']?></div>
-                <div><?php echo $centerinfo['name']?> </div>
+                <div style="margin-top: -4px;"><?php echo $centerinfo['name']?> </div>
               </ib>
             <ib class="card_type" card="<?php echo $lvl_pms_code?>">
                 <div><?php echo $centerinfo['lvl_name']?></div>

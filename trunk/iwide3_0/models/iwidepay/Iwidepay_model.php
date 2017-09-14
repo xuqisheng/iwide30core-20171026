@@ -821,7 +821,7 @@ class Iwidepay_model extends MY_Model{
 	 */
 	public function get_hotel_order_items($orderid){
 		$this->db->where('orderid',$orderid);
-		$itemids = $this->db->select('id,istatus,iprice')->get(self::TAB_HOI)->result_array();
+		$itemids = $this->db->select('id,istatus,iprice,leavetime')->get(self::TAB_HOI)->result_array();
 		return empty($itemids)?array():$itemids;
 	}
 
