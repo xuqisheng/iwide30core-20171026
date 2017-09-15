@@ -996,6 +996,20 @@ class Iwidepay_model extends MY_Model{
 		return $this->db->query($sql)->result_array();
 	}
 
+	//time
+	/*public function get_offline_hotel_order_nobiguiyuan(){
+		$s_time = '2017-09-01 00:00:00';//date('Y-m-d 00:00:00');
+		$e_time = '2017-09-14 00:00:00';
+		$sql = "SELECT a.orderid,a.paytype,a.inter_id,a.hotel_id,a.openid,a.price,a.handled,b.istatus,b.iprice
+				FROM iwide_hotel_orders a LEFT JOIN iwide_hotel_order_items b 
+				ON a.inter_id = b.inter_id AND a.orderid = b.orderid 
+				WHERE a.paytype = 'daofu'  AND a.channel = 'weixin' AND b.istatus = 3 AND b.leavetime >= '{$s_time}' AND b.leavetime < '{$e_time}' AND a.inter_id not in('a421641095','a452233816') ";
+		$sql .= " AND a.inter_id in (SELECT inter_id FROM iwide_publics WHERE split_status = 1) ";
+		$sql .= " AND a.inter_id in (SELECT inter_id FROM iwide_iwidepay_configs WHERE module='hotel' AND type= 'synchro_hotel_order' AND value = 1) ";
+		$sql .= " GROUP BY a.orderid";
+		return $this->db->query($sql)->result_array();
+	}*/
+
 	//保存线下同步的订单
 	public function save_sync_offline_order($order){
 		$res = $this->db->where('order_no',$order['order_no'])->get('iwidepay_offline_order')->row_array();
@@ -1032,6 +1046,22 @@ class Iwidepay_model extends MY_Model{
 		$this->db->where($where);
 		$this->db->update('iwidepay_offline_order',$update);
 		return $this->db->affected_rows();
+	}
+
+	//获取分销的关注奖励奖励的数据
+	public function get_sync_dis_fans_subs($inter_id = array()){
+		$s_time = date('Y-m-d 00:00:00',strtotime('-1 days'));
+		$e_time = date('Y-m-d 00:00:00');
+		$sql = "SELECT inter_id,hotel_id,sum(grade_total) as sum_total FROM `iwide_distribute_grade_all` WHERE inter_id = '{$inter_id}' saler >0 AND saler <=100000 AND saler in (SELECT qrcode_id FROM iwide_hotel_staff WHERE inter_id = '{$inter_id}' AND openid != '' AND status = 2) AND status in (1,2) AND grade_total >0 AND grade_table = 'iwide_fans_sub_log' AND grade_time >= '{$s_time}' AND grade_time <'{$e_time}' GROUP BY inter_id,hotel_id";
+		return $this->db->query($sql)->result_array();
+	}
+
+	//获取分销的除了关注奖励的数据
+	public function get_sync_dis_record($inter_ids = array()){
+		$s_time = date('Y-m-d 00:00:00',strtotime('-1 days'));
+		$e_time = date('Y-m-d 00:00:00');
+		$sql = "SELECT inter_id,hotel_id,saler,grade_table,grade_total,grade_id FROM iwide_distribute_grade_all WHERE inter_id in ('".explode("','",$inter_ids)."') AND status in (1,2) AND saler >0 AND saler <= 100000 AND grade_total >0 AND grade_table in ('iwide_distribute_group_member','iwide_firstorder_reward')  AND grade_time >= '{$s_time}' AND grade_time <'{$e_time}' ";
+		return $this->db->query($sql)->result_array();
 	}
 
 }

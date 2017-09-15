@@ -465,14 +465,16 @@ class PMS_Adapter implements IPMS{
 			if(empty($result[$k]['state_info'])){
 				continue;
 			}
-			uasort($result[$k]['show_info'], function ($a, $b){
-				if($a['sort'] != $b['sort']){
-					return $b['sort'] > $a['sort']?1:-1;
-				}
-				$a_price = str_replace(',', '', $a['avg_price']);
-				$b_price = str_replace(',', '', $b['avg_price']);
-				return bcsub($b_price, $a_price, 2) > 0 ? 1 : -1;
-			});
+            if(!empty($result[$k]['show_info'])) {
+                uasort($result[$k]['show_info'], function ($a, $b) {
+                    if ($a['sort'] != $b['sort']) {
+                        return $b['sort'] > $a['sort'] ? 1 : -1;
+                    }
+                    $a_price = str_replace(',', '', $a['avg_price']);
+                    $b_price = str_replace(',', '', $b['avg_price']);
+                    return bcsub($b_price, $a_price, 2) > 0 ? 1 : -1;
+                });
+            }
 		}
 		
 		if(!empty($result)){

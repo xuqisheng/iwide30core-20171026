@@ -175,7 +175,7 @@
     </div>
 
     <div class="gift_process" style="display:<?= ($gift || ($package['can_gift'] == $packageModel::CAN_T && $package['can_mail'] != $packageModel::CAN_T) ) ? 'block': 'none';?>">
-       支付成功后，选择转赠奖礼包转发给微信好友，好友收礼即可领取礼物消费
+       支付成功后，选择转赠将礼包转发给微信好友，好友收礼即可领取礼物消费
     </div>
     <div class="mail_addr_area" style="display:<?= $gift ? 'none': 'block'?>">
 

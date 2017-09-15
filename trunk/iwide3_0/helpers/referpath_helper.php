@@ -64,13 +64,14 @@ function refer_res($name, $path = 'ADMIN', $filename = 'manifest.json') {
             'ADMIN' => 'public/admin/',
 			'SOMA' => 'public/soma/vue/',
             'SOMAOLD' => 'public/soma/vueold/',
-            'SOMAACCOR' => 'public/soma/vue_accor/'
+            'SOMAACCOR' => 'public/soma/vue_accor/',
+            'SOMAGIFT' => 'public/soma/vue_gift/',
     );
 
     $config = & get_config ();
     $res_domain = '';
     if (WEB_AREA == 'front') {
-        if (isset ( $config ['cdn_host1'] ) && $config ['cdn_host1'] != "") {
+        if (isset ( $config ['cdn_host'] ) && $config ['cdn_host'] != "") {
             $res_domain = $config ['cdn_host'] . '/public/';
             $filename = 'manifest-cdn.json';
         } else {

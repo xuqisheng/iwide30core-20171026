@@ -30,13 +30,13 @@ class Iwidepay_capital_model extends MY_Model
     }
 
     /**
-     * 获取 监管账户余额 订单表 => 分账状态:1待定、2待分 不限制筛选时间
+     * 获取 监管账户余额 订单表 => 分账状态:1待定、2待分,5部分分账,8部分正常退款 不限制筛选时间
      * @param $where_arr
      * @return int
      */
     public function total_amount($where_arr)
     {
-        $sql = "SELECT SUM(trans_amt) AS amount FROM ".self::TAB_IWIDEPAY_ORDER." WHERE transfer_status IN(1,2,6,8)";
+        $sql = "SELECT SUM(trans_amt) AS amount FROM ".self::TAB_IWIDEPAY_ORDER." WHERE transfer_status IN(1,2,4,5,8)";
         if (!empty($where_arr['inter_id']) && $where_arr['inter_id'] != 'ALL_PRIVILEGES')
         {
             $sql .= " AND  inter_id = '{$where_arr['inter_id']}'";
@@ -44,6 +44,31 @@ class Iwidepay_capital_model extends MY_Model
         if (!empty($where_arr['hotel_id']))
         {
             $sql .= " AND hotel_id IN ({$where_arr['hotel_id']})";
+        }
+
+        $data = $this->db_read()->query($sql)->row_array();
+
+        return !empty($data['amount']) ? $data['amount'] : 0;
+    }
+
+
+    /**
+     * 获取 监管账户余额 订单表 => 5部分分账减去已分账的金额
+     * @param $where_arr
+     * @return int
+     */
+    public function total_amount_send($where_arr)
+    {
+        $sql = "SELECT SUM(it.amount) AS amount FROM iwide_iwidepay_transfer AS it
+                LEFT JOIN iwide_iwidepay_order io ON io.order_no = it.order_no AND io.module = it.module
+                WHERE io.transfer_status = 5 AND it.`status` = 2 AND send_status = 1";
+        if (!empty($where_arr['inter_id']) && $where_arr['inter_id'] != 'ALL_PRIVILEGES')
+        {
+            $sql .= " AND it.inter_id = '{$where_arr['inter_id']}'";
+        }
+        if (!empty($where_arr['hotel_id']))
+        {
+            $sql .= " AND it.hotel_id IN ({$where_arr['hotel_id']})";
         }
 
         $data = $this->db_read()->query($sql)->row_array();

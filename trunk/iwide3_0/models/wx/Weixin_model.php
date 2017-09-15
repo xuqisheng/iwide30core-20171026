@@ -52,6 +52,7 @@ class Weixin_model extends CI_Model {
 		$this->data = json_decode(json_encode($data),TRUE);
 		$msg_types = ['text','image','voice','video','shortvideo'];
 		$is_cus_click = FALSE;
+		if(isset($this->data['MsgType']) && $this->data['MsgType'] == 'event' && isset($this->data['Event']) && strtoupper($this->data['Event']) == 'CLICK' && $this->data['EventKey'] == '人工客服')
 			$is_cus_click = TRUE;
 // 		if($this->get_redis_val('custom_service_gh_edf5ea3f64a3') == 'on' && isset($this->data['ToUserName']) && $this->data['ToUserName'] == 'gh_edf5ea3f64a3' && isset($this->data['MsgType']) && in_array($this->data['MsgType'], $msg_types) && ($this->getCusMsgStatus() || (isset($this->data['Content']) && ($this->data['Content'] == '人工客服' || $this->data['Content'] == 'kf')))){
 		if($this->get_redis_val('custom_service_gh_cd271da358a9') == 'on' && isset($this->data['ToUserName']) && $this->data['ToUserName'] == 'gh_cd271da358a9' && isset($this->data['MsgType']) && (in_array($this->data['MsgType'], $msg_types) || $is_cus_click) && ($this->getCusMsgStatus() || (isset($this->data['Content']) && ($this->data['Content'] == '人工客服' || $this->data['Content'] == 'kf')) || $is_cus_click)){
@@ -116,16 +117,20 @@ class Weixin_model extends CI_Model {
             	exit;
             }
 			if(in_array($interid, $interIds)){
-				$msg ['ToUserName']   = $to_user_name;
-				$msg ['FromUserName'] = $from_user_name;
-				$msg ['CreateTime']   = time();
-				$msg ['MsgType']      = 'transfer_customer_service';
-				$msg ['FuncFlag']      = 0;
-				$xml = new \SimpleXMLElement ( '<xml></xml>' );
-				$this->_data2xml ( $xml, $msg );
-				$str = $xml->asXML ();
-				$this->write_log(date('Y-m-d H:i:s').' | '.$_SERVER['REQUEST_URI'].' | '.$str,APPPATH.'logs/wxapi/');
-				echo $str;
+// 				$msg ['ToUserName']   = $to_user_name;
+// 				$msg ['FromUserName'] = $from_user_name;
+// 				$msg ['CreateTime']   = time();
+// 				$msg ['MsgType']      = 'transfer_customer_service';
+// 				$msg ['FuncFlag']      = 0;
+// 				$xml = new \SimpleXMLElement ( '<xml></xml>' );
+// 				$this->_data2xml ( $xml, $msg );
+// 				$str = $xml->asXML ();
+				
+// 				$this->write_log(date('Y-m-d H:i:s').' | '.$_SERVER['REQUEST_URI'].' | '.$str,APPPATH.'logs/wxapi/');
+				
+				$this->_replyData([], 'transfer_customer_service');
+				
+// 				echo $str;
 				
 // 				if($interid == 'a450089706' && $to_user_name == 'o9Vbtw9PgJbfM8ia-GJuzq0TTn2k'){
 // 					$this->load->model('wx/Access_token_model');

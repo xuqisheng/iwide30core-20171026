@@ -288,7 +288,7 @@ if (! defined ( 'BASEPATH' ))
 			if (! $url)
 				$url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 				$timestamp = time ();
-				$nonceStr = createNonceStr ();
+				$nonceStr = $this->createNonceStr();
 				$public = $this->Publics_model->get_public_by_id ( $inter_id );
 				// 这里参数的顺序要按照 key 值 ASCII 码升序排序
 				$string = "jsapi_ticket=$jsapiTicket&noncestr=$nonceStr&timestamp=$timestamp&url=$url";
@@ -504,4 +504,13 @@ if (! defined ( 'BASEPATH' ))
 				fwrite($fp, $content);
 				fclose($fp);
 		}
+
+		public function createNoncestr($length = 32){
+            $chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            $str = "";
+            for($i = 0; $i < $length; $i++){
+                $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+            }
+            return $str;
+        }
 	}

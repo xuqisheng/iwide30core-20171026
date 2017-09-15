@@ -42,10 +42,10 @@ class Gift_delivery_model extends MY_Model_Soma{
         //数组结果转换
         $catInfoFieldRes = arrayField($catInfoRes,'cat_id');
         foreach($giftListRes as $key=>$val){
-            $giftListRes[$key]['name'] = $productInfoFieldRes[$val['product_id']]['name'];
-            $giftListRes[$key]['stock'] = $productInfoFieldRes[$val['product_id']]['stock'];
-            $giftListRes[$key]['cat_name'] = $catInfoFieldRes[$productInfoFieldRes[$val['product_id']]['cat_id']]['cat_name'];
-            $giftListRes[$key]['status'] = $productInfoFieldRes[$val['product_id']]['status'];
+            $giftListRes[$key]['name'] = empty($productInfoFieldRes[$val['product_id']]['name']) ? '' : $productInfoFieldRes[$val['product_id']]['name'];
+            $giftListRes[$key]['stock'] = empty($productInfoFieldRes[$val['product_id']]['stock']) ? '' : $productInfoFieldRes[$val['product_id']]['stock'];
+            $giftListRes[$key]['cat_name'] = empty($catInfoFieldRes[$productInfoFieldRes[$val['product_id']]['cat_id']]['cat_name']) ? '' : $catInfoFieldRes[$productInfoFieldRes[$val['product_id']]['cat_id']]['cat_name'];
+            $giftListRes[$key]['status'] = empty($productInfoFieldRes[$val['product_id']]['status']) ? '' : $productInfoFieldRes[$val['product_id']]['status'];
         }
 
         //查询礼包有效时间
@@ -104,7 +104,7 @@ class Gift_delivery_model extends MY_Model_Soma{
         //数组整合
         foreach($productListRes as $key=>$val){
             //分类名称
-            $productListRes[$key]['cat_name'] = $catNameFieldRes[$val['cat_id']]['cat_name'];
+            $productListRes[$key]['cat_name'] = empty($catNameFieldRes[$val['cat_id']]['cat_name']) ? '' : $catNameFieldRes[$val['cat_id']]['cat_name'];
             //商品是否已添加至礼包
             $productListRes[$key]['is_exist'] = in_array($val['product_id'],$productIdArr) ? 1 : 0;
         }
@@ -212,12 +212,12 @@ class Gift_delivery_model extends MY_Model_Soma{
     }
 
 
-
     /***
      * 获取已领取的礼包详情
      */
-    public function getGiftReceiveDetail($params){
+    public function getGiftReceiveDetail($params,$Gift_detail_model){
 
+        $this->inter_id = $params['inter_id'];
         $orderWhere = array();
         //条件筛选
         if(!empty($params['start_time']) && !empty($params['end_time'])){
@@ -230,37 +230,58 @@ class Gift_delivery_model extends MY_Model_Soma{
 
         if(!empty($orderWhere)){
             $orderWhere['status'] = 12;
-            $orderIdInfo = $this->db->select(['order_id'])->where($orderWhere)->get('iwide_soma_sales_order_1001')->result_array();
+            $orderIdInfo = $Gift_detail_model->_shard_db_r($this->inter_id)->select(['order_id'])->where($orderWhere)->get('iwide_soma_sales_order_1001')->result_array();
             $orderIdArr = arrayColumn($orderIdInfo,'order_id');
         }
 
         $giftDetailWhere = ['inter_id'=>$params['inter_id'],'is_receive'=>2];
-        $this->db->select(['inter_id','gift_id','record_info','gift_num','orther_remark','saler_name','add_time','openid','order_id'])->where($giftDetailWhere);
+        $Gift_detail_model->_shard_db_r($this->inter_id)->select(['inter_id','gift_id','record_info','gift_num','orther_remark','saler_name','add_time','openid','order_id'])->where($giftDetailWhere);
         if(!empty($orderIdArr)){
-            $this->db->where_in('order_id',$orderIdArr);
+            $Gift_detail_model->_shard_db_r($this->inter_id)->where_in('order_id',$orderIdArr);
         }
 
         //订单筛选
         if(!empty($params['order_id'])){
-            $this->db->like('order_id',$params['order_id']);
+            $Gift_detail_model->_shard_db_r($this->inter_id)->like('order_id',$params['order_id']);
         }
 
         //创建人
         if(!empty($params['saler_name'])){
-            $this->db->like('saler_name',$params['saler_name']);
+            $Gift_detail_model->_shard_db_r($this->inter_id)->like('saler_name',$params['saler_name']);
         }
 
         //登记信息
         if(!empty($params['record_info'])){
-            $this->db->like('record_info',$params['record_info']);
+            $Gift_detail_model->_shard_db_r($this->inter_id)->like('record_info',$params['record_info']);
         }
 
         $pageSize = 20;
         $pageStart = $params['page'] * $pageSize;
+        $giftDetail = $Gift_detail_model->_shard_db_r($this->inter_id)->limit($pageSize,$pageStart)->get('iwide_soma_gift_detail')->result_array();
 
-        $count = $this->db->count_all_results('iwide_soma_gift_detail');
+
+
+        $Gift_detail_model->_shard_db_r($this->inter_id)->select(['inter_id','gift_id','record_info','gift_num','orther_remark','saler_name','add_time','openid','order_id'])->where($giftDetailWhere);
+        if(!empty($orderIdArr)){
+            $Gift_detail_model->_shard_db_r($this->inter_id)->where_in('order_id',$orderIdArr);
+        }
+
+        //订单筛选
+        if(!empty($params['order_id'])){
+            $Gift_detail_model->_shard_db_r($this->inter_id)->like('order_id',$params['order_id']);
+        }
+
+        //创建人
+        if(!empty($params['saler_name'])){
+            $Gift_detail_model->_shard_db_r($this->inter_id)->like('saler_name',$params['saler_name']);
+        }
+
+        //登记信息
+        if(!empty($params['record_info'])){
+            $Gift_detail_model->_shard_db_r($this->inter_id)->like('record_info',$params['record_info']);
+        }
+        $count = $Gift_detail_model->_shard_db_r($this->inter_id)->count_all_results('iwide_soma_gift_detail');
         $pageCount = ceil($count/$pageSize);
-        $giftDetail = $this->db->limit($pageSize,$pageStart)->get('iwide_soma_gift_detail')->result_array();
 
         foreach($giftDetail as $key=>$val){
             $giftDetail[$key]['add_time'] = date('Y-m-d H:i:s',$val['add_time']);
@@ -269,27 +290,35 @@ class Gift_delivery_model extends MY_Model_Soma{
         $openIdArr = arrayColumn($giftDetail,'openid');
         $giftIdArr = arrayColumn($giftDetail,'gift_id');
 
-        $productIdInfo = $this->db->select(['id','product_id'])->where(['inter_id'=>$params['inter_id']])->where_in('id',$giftIdArr)->get('soma_gift')->result_array();
+        $productIdInfo = $Gift_detail_model->_shard_db_r($this->inter_id)->select(['id','product_id'])->where(['inter_id'=>$params['inter_id']])->where_in('id',$giftIdArr)->get('soma_gift')->result_array();
 
         $giftFieldInfo = arrayField($productIdInfo,'id');
         $productIdArr = arrayColumn($productIdInfo,'product_id');
 
         //获取商品名称
-        $productListRes = $this->db->select(['product_id','name'])->where(['inter_id'=>$params['inter_id']])
+        $productListRes = $Gift_detail_model->_shard_db_r($this->inter_id)->select(['product_id','name'])->where(['inter_id'=>$params['inter_id']])
             ->where_in('product_id',$productIdArr)->get('soma_catalog_product_package')->result_array();
 
         $productFieldInfo = arrayField($productListRes,'product_id');
 
+        //获取订单
+        $orderIdArr = arrayColumn($giftDetail,'order_id');
+        $consumerCodeInfo = $Gift_detail_model->_shard_db_r($this->inter_id)->select(['count(order_id) as consume_num','order_id','status'])->where(['inter_id'=>$params['inter_id'],'status'=>3])->where_in('order_id',$orderIdArr)
+            ->group_by('order_id')
+            ->get('soma_consumer_code')->result_array();
+
+        $consumerFieldInfo = arrayField($consumerCodeInfo,'order_id');
         //获取领取人姓名
-        $this->db->db_select('iwide30dev_2016011813');
+//        $this->db->db_select('iwide30dev');
         $openIdInfo = $this->db->select(['openid','nickname'])->where(['inter_id'=>$params['inter_id']])->where_in('openid',$openIdArr)->get('fans')->result_array();
 
         //获取openid名称
         $openFiellInfo = arrayField($openIdInfo,'openid');
 
         foreach($giftDetail as $key=>$val){
-            $giftDetail[$key]['name'] = $productFieldInfo[$giftFieldInfo[$val['gift_id']]['product_id']]['name'];
-            $giftDetail[$key]['nickname'] = $openFiellInfo[$val['openid']]['nickname'];
+            $giftDetail[$key]['name'] = empty($productFieldInfo[$giftFieldInfo[$val['gift_id']]['product_id']]['name']) ? '' : $productFieldInfo[$giftFieldInfo[$val['gift_id']]['product_id']]['name'];
+            $giftDetail[$key]['nickname'] = empty($openFiellInfo[$val['openid']]['nickname']) ? '' : $openFiellInfo[$val['openid']]['nickname'];
+            $giftDetail[$key]['consume_num'] = empty($consumerFieldInfo[$val['order_id']]['consume_num']) ? 0 : $consumerFieldInfo[$val['order_id']]['consume_num'];
         }
 
         return ['status'=>BaseConst::OPER_STATUS_SUCCESS,'message'=>$giftDetail,'page_size'=>$pageSize,'count'=>$count,'pageCount'=>$pageCount];
@@ -353,8 +382,8 @@ class Gift_delivery_model extends MY_Model_Soma{
             //数组转换
             $childProductInfo = arrayField($childProductInfo,'product_id');
             foreach($groupProductInfo as $key=>$val){
-                $groupProductInfo[$key]['name'] = $childProductInfo[$val['child_pid']]['name'];
-                $groupProductInfo[$key]['gift_num'] = $giftInfo['gift_num'];
+                $groupProductInfo[$key]['name'] = empty($childProductInfo[$val['child_pid']]['name']) ? '' : $childProductInfo[$val['child_pid']]['name'];
+                $groupProductInfo[$key]['gift_num'] = empty($giftInfo['gift_num']) ? '' : $giftInfo['gift_num'];
                 unset($groupProductInfo[$key]['parent_pid']);
                 unset($groupProductInfo[$key]['child_pid']);
             }
@@ -408,7 +437,7 @@ class Gift_delivery_model extends MY_Model_Soma{
             //数组转换
             $childProductInfo = arrayField($childProductInfo,'product_id');
             foreach($groupProductInfo as $key=>$val){
-                $groupProductInfo[$key]['name'] = $childProductInfo[$val['child_pid']]['name'];
+                $groupProductInfo[$key]['name'] = empty($childProductInfo[$val['child_pid']]['name']) ? '' : $childProductInfo[$val['child_pid']]['name'];
                 unset($groupProductInfo[$key]['parent_pid']);
                 unset($groupProductInfo[$key]['child_pid']);
             }
@@ -427,13 +456,16 @@ class Gift_delivery_model extends MY_Model_Soma{
      */
     public function giftOrderCreate($params){
 
+
+        $this->load->model('soma/Gift_detail_model', 'Gift_detail_model');
+        $Gift_detail_model = $this->Gift_detail_model;
+
         //获取礼包信息
-        $giftDetailRes = $this->db->select(['sf.product_id','sfd.gift_num','sfd.saler_id','sfd.inter_id'])->from('soma_gift sf')
+        $giftDetailRes = $Gift_detail_model->_shard_db_r($this->inter_id)->select(['sf.product_id','sfd.gift_num','sfd.saler_id','sfd.inter_id'])->from('soma_gift sf')
             ->join('soma_gift_detail sfd','sfd.gift_id = sf.id','left')
             ->where(['sfd.inter_id'=>$params['inter_id'],'sfd.id'=>$params['id'],'sfd.request_token'=>$params['request_token']])
             ->get()->row_array();
 
-        $this->db->db_select('iwide30dev_2016011813');
         //根据saler_id获取hotel_id
         $hotelIdInfo = $this->db->select(['hotel_id','qrcode_id'])->where(['inter_id'=>$giftDetailRes['inter_id'],'qrcode_id'=>$giftDetailRes['saler_id']])->get('hotel_staff')->row_array();
 

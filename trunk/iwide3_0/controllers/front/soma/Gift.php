@@ -176,10 +176,10 @@ class Gift extends MY_Front_Soma {
         }
         // $share_config = array(
         $share_config = array(
-            'title'=> isset( $share_config_detail['share_title'] ) && !empty( $share_config_detail['share_title'] ) ? $share_config_detail['share_title'] : "亲，{$nickname}送您一份小礼物",
-            'desc'=> isset( $share_config_detail['share_desc'] ) && !empty( $share_config_detail['share_desc'] ) ? $share_config_detail['share_desc'] : '小声告诉你，嘘！已经付过钱了，快快领取吧',
+            'title'=> "亲，{$nickname}送您一份小礼物",
+            'desc'=> '小声告诉你，嘘！已经付过钱了，快快领取吧',
             'link'=> $send_link,
-            'imgUrl'=> isset( $share_config_detail['share_img'] ) && !empty( $share_config_detail['share_img'] ) ? $share_config_detail['share_img'] : $share_img,
+            'imgUrl'=> $share_img,
         );
 
         //     'title'=> "亲，{$nickname}送您一份小礼物",
@@ -190,8 +190,6 @@ class Gift extends MY_Front_Soma {
         if(!$this->isNewTheme()){
             $this->datas = array( 'orders'=> $orders, 'receiveOrders'=>$receiveOrders, 'gift_model'=> $giftOrderModel );
             $this->datas['gift_model']= $giftOrderModel;
-            $this->datas['js_menu_show']= $js_menu_show;
-            $this->datas['js_share_config']= $share_config;
             $this->datas['send_pertime']= $giftOrderModel->m_get('per_give');
             $this->datas['can_receive_repeat']= $can_receive_repeat;
             $this->datas['gid']= $gift_id;
@@ -209,83 +207,76 @@ class Gift extends MY_Front_Soma {
                 }
             }
 
-        }else{     //新皮肤
-            $js_menu_show = array( "'menuItem:share:appMessage'", "'menuItem:share:timeline'" );
-            $this->footerDatas['js_menu_show']= implode(",",$js_menu_show);
-            $this->footerDatas['js_share_config']= $share_config;
-//            $redirect= urlencode( Soma_const_url::inst()->get_url('*/*/package_list_send', array('id'=> $this->inter_id) ) );
-//            $redirectUrl = Soma_const_url::inst()->get_url('*/*/package_sending', array('id'=> $this->inter_id, 'redirect'=> $redirect ) );
-//            $this->footerDatas['js_share_success_function'] = $this->headerDatas['js_share_app_success_function'] = "location.href = '".$redirectUrl."&gid=".$gift_id."&sign=".$gift_sign."';";
-
-
+        }
+        else{     //新皮肤
+            //$this->footerDatas['js_menu_show']= implode(",",$js_menu_show);
+            //$this->footerDatas['js_share_config']= $share_config;
         }
 
 
-
-
-        $header = array( 
-            'title' => $this->lang->line('sent_list'),
-        );
+        $this->datas['js_menu_show']= $js_menu_show;
+        $this->datas['js_share_config']= $share_config;
+        $header = array('title' => $this->lang->line('sent_list'),);
         $this->_view("header", $header);
         $this->_view("receive_list", $this->datas);
     }
 
-                /**
-                 * 礼物中心（发送的/接收的）
-                 * @deprecated   旧版已弃用
-                 * @param unknown $header
-                 * @param unknown $filter
-                 */
-            	public function _package_list_($header, $filter=array())
-            	{
-            	    //print_R($filter);die;
-            	    $this->load->model('soma/Gift_order_model', 'giftOrderModel');
-            	    $orders= $this->giftOrderModel->get_order_list(
-            	        'package',
-            	        $this->inter_id,
-            	        $filter,
-            	        'gift_id desc'
-            	        //'20,150', //pagesize, offset
-            	    );
-            	    // print_R($orders);die;
-            	    $status= $this->giftOrderModel->get_status_label(); 
-            	    foreach ($orders as $k=>$v) {
-            	        if( array_key_exists($v['status'], $status)) $orders[$k]['status_label']= $status[$v['status']];
-                    }
-                    // print_r($orders);die;
-            
-                    //取出群发收到的列表
-                    $receive_list= $this->giftOrderModel->get_receiver_list_byOpenId( $this->inter_id, $this->openid );
-                    //根据gift_id获取的资产有其他人的，进一步过滤
-                    //$receive_list= $this->giftOrderModel->filter_items_by_openid( $receive_list, $this->openid );
-            
-                    $this->datas = array( 'orders'=> $orders, 'gift_model'=> $this->giftOrderModel, 'receive_list'=> $receive_list );
-            
-                    $this->load->model('wx/publics_model');
-                    $publicsModel = $this->publics_model;
-                    $this->datas['publicsModel'] = $publicsModel;
-            
-                    $this->load->model('soma/Asset_item_package_model');
-                    $AssetItemModel = $this->Asset_item_package_model;
-                    $this->datas['AssetItemModel'] = $AssetItemModel;
-            
-                    $t = $this->input->get('t');
-                    $this->datas['type'] = $t ? $t : 1;
-                    
-                    //购买商品
-                    $myOrdersUrl = Soma_const_url::inst()->get_soma_order_list(array('id'=>$this->inter_id));
-                    $this->datas['my_orders_url'] = $myOrdersUrl;
-                    //我的礼物
-                    $myGiftsUrl = Soma_const_url::inst()->get_my_gift_list(array('id'=>$this->inter_id));
-                    $this->datas['my_gifts_url'] = $myGiftsUrl;
-                    //邮寄商品
-                    $myMailsUrl = Soma_const_url::inst()->get_my_mail_list(array('id'=>$this->inter_id));
-                    $this->datas['my_mails_url'] = $myMailsUrl;
-            
-            	    $this->_view("header", $header);
-                    // $this->_view("package_list", $this->datas);
-            	    $this->_view("my_package_list", $this->datas);
-            	}
+    /**
+     * 礼物中心（发送的/接收的）
+     * @deprecated   旧版已弃用
+     * @param unknown $header
+     * @param unknown $filter
+     */
+    public function _package_list_($header, $filter=array())
+    {
+        //print_R($filter);die;
+        $this->load->model('soma/Gift_order_model', 'giftOrderModel');
+        $orders= $this->giftOrderModel->get_order_list(
+            'package',
+            $this->inter_id,
+            $filter,
+            'gift_id desc'
+            //'20,150', //pagesize, offset
+        );
+        // print_R($orders);die;
+        $status= $this->giftOrderModel->get_status_label();
+        foreach ($orders as $k=>$v) {
+            if( array_key_exists($v['status'], $status)) $orders[$k]['status_label']= $status[$v['status']];
+        }
+        // print_r($orders);die;
+
+        //取出群发收到的列表
+        $receive_list= $this->giftOrderModel->get_receiver_list_byOpenId( $this->inter_id, $this->openid );
+        //根据gift_id获取的资产有其他人的，进一步过滤
+        //$receive_list= $this->giftOrderModel->filter_items_by_openid( $receive_list, $this->openid );
+
+        $this->datas = array( 'orders'=> $orders, 'gift_model'=> $this->giftOrderModel, 'receive_list'=> $receive_list );
+
+        $this->load->model('wx/publics_model');
+        $publicsModel = $this->publics_model;
+        $this->datas['publicsModel'] = $publicsModel;
+
+        $this->load->model('soma/Asset_item_package_model');
+        $AssetItemModel = $this->Asset_item_package_model;
+        $this->datas['AssetItemModel'] = $AssetItemModel;
+
+        $t = $this->input->get('t');
+        $this->datas['type'] = $t ? $t : 1;
+
+        //购买商品
+        $myOrdersUrl = Soma_const_url::inst()->get_soma_order_list(array('id'=>$this->inter_id));
+        $this->datas['my_orders_url'] = $myOrdersUrl;
+        //我的礼物
+        $myGiftsUrl = Soma_const_url::inst()->get_my_gift_list(array('id'=>$this->inter_id));
+        $this->datas['my_gifts_url'] = $myGiftsUrl;
+        //邮寄商品
+        $myMailsUrl = Soma_const_url::inst()->get_my_mail_list(array('id'=>$this->inter_id));
+        $this->datas['my_mails_url'] = $myMailsUrl;
+
+        $this->_view("header", $header);
+        // $this->_view("package_list", $this->datas);
+        $this->_view("my_package_list", $this->datas);
+    }
 	
 	
 	/**
@@ -412,10 +403,10 @@ class Gift extends MY_Front_Soma {
             $js_menu_show = array( "'menuItem:share:appMessage'", "'menuItem:share:timeline'" );
             $share_img = base_url('public/soma/images/gift_box.png');
             $share_config = array(
-                'title'=> isset( $share_config_detail['share_title'] ) && !empty( $share_config_detail['share_title'] ) ? $share_config_detail['share_title'] : "亲，{$nickname}送您一份小礼物",
-                'desc'=> isset( $share_config_detail['share_desc'] ) && !empty( $share_config_detail['share_desc'] ) ? $share_config_detail['share_desc'] : '小声告诉你，嘘！已经付过钱了，快快领取吧',
+                'title'=> "亲，{$nickname}送您一份小礼物",
+                'desc'=> '小声告诉你，嘘！已经付过钱了，快快领取吧',
                 'link'=> $send_link,
-                'imgUrl'=> isset( $share_config_detail['share_img'] ) && !empty( $share_config_detail['share_img'] ) ? $share_config_detail['share_img'] : $share_img,
+                'imgUrl'=> $share_img,
             );
 
             $this->footerDatas['js_menu_show']= implode(",",$js_menu_show);
@@ -2067,10 +2058,9 @@ class Gift extends MY_Front_Soma {
      */
     public function gift_new_router(){
 
-        $redis = $this->get_redis_instance();
-        $layout = $redis->get('layout');
-        $tkId = $redis->get('tkid');
-        $brandName = $redis->get('brandname');
+        $layout = \App\services\soma\PackageService::getInstance()->getParams()['layout'];
+        $tkId = \App\services\soma\PackageService::getInstance()->getParams()['tkid'];
+        $brandName = \App\services\soma\PackageService::getInstance()->getParams()['brandname'];
 
         //初始化数据库分片配置
         $this->load->model('soma/shard_config_model', 'model_shard_config');

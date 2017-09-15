@@ -98,6 +98,7 @@ class Capital extends MY_Admin
                 if ($value['type'] == 'hotel')
                 {
                     $total_amount = $this->Iwidepay_capital_model->total_amount($value_arr);
+                    $total_amount_send = $this->Iwidepay_capital_model->total_amount_send($value_arr);
                     $pay_amount = $this->Iwidepay_capital_model->pay_amount($value_arr);
                     $refund_amount = $this->Iwidepay_capital_model->refund_amount($value_arr);
                     $commission = $this->Iwidepay_capital_model->commission($value_arr);
@@ -107,12 +108,12 @@ class Capital extends MY_Admin
                 }
                 else
                 {
-                    $total_amount = $pay_amount = $refund_amount = $commission = $distribution = $arrears_amount = $cost_amount = 0;
+                    $total_amount = $pay_amount = $refund_amount = $commission = $distribution = $arrears_amount = $cost_amount = $total_amount_send = 0;
                 }
 
                 $withdraw_amount = $this->Iwidepay_capital_model->withdraw_amount($value_arr);
 
-                $item['total_amount'] = formatMoney($total_amount/100);
+                $item['total_amount'] = formatMoney(($total_amount - $total_amount_send)/100);
                 $item['pay_amount'] = formatMoney($pay_amount/100);
                 $item['refund_amount'] = formatMoney($refund_amount/100);
                 $item['withdraw_amount'] = formatMoney($withdraw_amount/100);

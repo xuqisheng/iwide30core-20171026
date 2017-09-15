@@ -198,7 +198,7 @@ class Financial extends MY_Admin
         $this->load->model('iwidepay/Iwidepay_financial_model');
         $list = $this->Iwidepay_financial_model->get_financial('fc.*',$filter);
         $module = array('hotel'=>'订房','soma'=>'商城','vip'=>'会员','okpay'=>'快乐付','dc'=>'在线点餐','ticket' => '预约核销','base_pay' => '基础月费','dist' => '分销');
-        $trade_type = array(1 => '交易', 2 => '垫付退款', 3 => '原款退款', 4 => '首单奖励', 5 => '额外奖励', 6 => '月费基础', 7 => '交易');
+        $trade_type = array(1 => '交易', 2 => '垫付退款', 3 => '原款退款', 4 => '分销奖励', 5 => '分销奖励', 6 => '月费基础', 7 => '交易');
         $transfer_status = array(1 => '部分分账', 2 => '已分账', 3 => '已结清');
         if (!empty($list))
         {
@@ -504,8 +504,8 @@ class Financial extends MY_Admin
             case 'orderReward':
                 $trade_type = 4;
                 break;
-            case 'extraReward':
-                $trade_type = 5;
+            case 'extra_dist':
+                $trade_type = 5;//分销奖励
                 break;
             default :
                 $trade_type = 0;

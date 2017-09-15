@@ -76,81 +76,112 @@ class Package extends MY_Front_Soma
 
         //$this->getTicketTheme();
 
+        $header = $this->page_basic_config();
+        $url = \App\libraries\Support\Url::current();
+
+        //点击分享之后开启这些按钮
+        $js_menu_show = array('menuItem:share:appMessage', 'menuItem:share:timeline');
+        $uparams = $this->input->get() + array('id' => $this->inter_id);
+
+        //取出分享配置
+        $this->load->model('soma/Share_config_model', 'ShareConfigModel');
+        $ShareConfigModel = $this->ShareConfigModel;
+        $position = $ShareConfigModel::POSITION_DEFAULT;//分享类型
+        $share_config_detail = $ShareConfigModel->get_share_config_list($position, $this->inter_id);
+
+        // 分享标题双语翻译
+        if ($this->langDir == self::LANG_DIR_EN) {
+            if (!empty($share_config_detail['share_title_en']) && !empty($share_config_detail['share_desc_en'])) {
+                $share_config_detail['share_title'] = $share_config_detail['share_title_en'];
+                $share_config_detail['share_desc'] = $share_config_detail['share_desc_en'];
+            }
+        }
+
+        $default_share_config = $this->get_default_sharing();
+
+        $share_config = array(
+            'title'  => isset($share_config_detail['share_title']) && !empty($share_config_detail['share_title']) ? $share_config_detail['share_title'] : $default_share_config['default_title'],
+            'desc'   => isset($share_config_detail['share_desc']) && !empty($share_config_detail['share_desc']) ? $share_config_detail['share_desc'] : $default_share_config['default_desc'],
+            'link'   => Soma_const_url::inst()->get_share_url($this->openid, '*/*/*', $uparams),
+            'imgUrl' => isset($share_config_detail['share_img']) && !empty($share_config_detail['share_img']) ? $share_config_detail['share_img'] : $default_share_config['share_img'],
+        );
+
+
         $this->getTicketTheme();
 
-        $is_show_navigation = isset($this->themeConfig['is_show_navigation']) ? $this->themeConfig['is_show_navigation'] : Soma_base::STATUS_FALSE;
-        $is_show_lang_btn = isset($this->themeConfig['is_show_lang_btn']) ? $this->themeConfig['is_show_lang_btn'] : Soma_base::STATUS_FALSE;
+        if (!$this->isNewTheme()) {
+
+            $is_show_navigation = isset($this->themeConfig['is_show_navigation']) ? $this->themeConfig['is_show_navigation'] : Soma_base::STATUS_FALSE;
+            $is_show_lang_btn = isset($this->themeConfig['is_show_lang_btn']) ? $this->themeConfig['is_show_lang_btn'] : Soma_base::STATUS_FALSE;
 
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
             || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
         $url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 
 
-        $this->load->model('soma/Product_package_model', 'productModel');
-        $productModel = $this->productModel;
+            $this->load->model('soma/Product_package_model', 'productModel');
+            $productModel = $this->productModel;
 
-        //advs
-        $this->load->model('soma/Adv_model', 'ads_model');
-        //首页广告图 cate:0
-        $this->datas['advs'] = $this->ads_model->get_ads_by_category($this->inter_id);
+            //advs
+            $this->load->model('soma/Adv_model', 'ads_model');
+            //首页广告图 cate:0
+            $this->datas['advs'] = $this->ads_model->get_ads_by_category($this->inter_id);
 
-        //       $pageTitle = '套票'; //月饼说把标题换掉
-        $header = $this->page_basic_config();
-
-        //获取酒店城市列表
-        $this->load->model('hotel/hotel_model', 'HotelModel');
-        $params = array(
-            'inter_id' => $this->inter_id
-        );
-        $HotelModel = $this->HotelModel;
-        $hotelCites = $HotelModel->get_hotel_hash($params, array('city', 'hotel_id'), 'array');
-        $citesArr = $hotelsIds = array();
-
-        foreach ($hotelCites as $v) {
-            if (empty($v['city'])) {
-                continue;  //城市为空
-            }
-
-            if (in_array($v['city'], $citesArr)) {
-                continue;
-            } else {
-                array_push($citesArr, $v['city']);
-            }
-
-            $hotelsIds[$v['hotel_id']] = $v['city'];
-        }
-        $filter_cat = $this->input->get('fcid');
-
-        $this->load->model('soma/Category_package_model', 'categoryModel');
-        $this->datas['categories'] = $this->categoryModel->get_package_category_list($this->inter_id, null, 5, $filter_cat);
-
-        $ticketList = array();
-        $ticketId = $this->input->get('tkid');
-        if ($ticketId) {
-            $this->session->set_userdata('tkid', $ticketId);
-
-            //获取产品id列表
-            $serviceName = $this->serviceName(Product_Service::class);
-            $serviceAlias = $this->serviceAlias(Product_Service::class);
-            $this->load->service($serviceName, null, $serviceAlias);
-            $catId = $this->input->get('catid');
-            $info = $this->soma_product_service->getProductPackageTicketProductIds($ticketId, $catId);
-            if (!$info) {
-                die('没有找到该门店内容！');
-            }
-
-            $products = $info['products'];
-            $ticketList = $info['ticketList'];
-
-            //门店设置了皮肤
-            $ticketDetail = current($ticketList);
-            if (isset($ticketDetail['theme_path']) && $ticketDetail['theme_path']) {
-                $this->theme = $ticketDetail['theme_path'];
-            }
-
-            $header = array(
-                'title' => isset($ticketDetail['name']) ? $ticketDetail['name'] : '门店商品列表',
+            //获取酒店城市列表
+            $this->load->model('hotel/hotel_model', 'HotelModel');
+            $params = array(
+                'inter_id' => $this->inter_id
             );
+            $HotelModel = $this->HotelModel;
+            $hotelCites = $HotelModel->get_hotel_hash($params, array('city', 'hotel_id'), 'array');
+            $citesArr = $hotelsIds = array();
+
+            foreach ($hotelCites as $v) {
+                if (empty($v['city'])) {
+                    continue;  //城市为空
+                }
+
+                if (in_array($v['city'], $citesArr)) {
+                    continue;
+                } else {
+                    array_push($citesArr, $v['city']);
+                }
+
+                $hotelsIds[$v['hotel_id']] = $v['city'];
+            }
+            $filter_cat = $this->input->get('fcid');
+
+            $this->load->model('soma/Category_package_model', 'categoryModel');
+            $this->datas['categories'] = $this->categoryModel->get_package_category_list($this->inter_id, null, 5, $filter_cat);
+
+            $ticketList = array();
+            $ticketId = $this->input->get('tkid');
+            if ($ticketId) {
+                $this->session->set_userdata('tkid', $ticketId);
+
+                //获取产品id列表
+                $serviceName = $this->serviceName(Product_Service::class);
+                $serviceAlias = $this->serviceAlias(Product_Service::class);
+                $this->load->service($serviceName, null, $serviceAlias);
+                $catId = $this->input->get('catid');
+
+                $info = $this->soma_product_service->getProductPackageTicketProductIds($ticketId, $catId);
+                if (!$info) {
+                    die('没有找到该门店内容！');
+                }
+
+                $products = $info['products'];
+                $ticketList = $info['ticketList'];
+
+                //门店设置了皮肤
+                $ticketDetail = current($ticketList);
+                if (isset($ticketDetail['theme_path']) && $ticketDetail['theme_path']) {
+                    $this->theme = $ticketDetail['theme_path'];
+                }
+
+                $header = array(
+                    'title' => isset($ticketDetail['name']) ? $ticketDetail['name'] : '门店商品列表',
+                );
 
             } else {
                 $this->session->set_userdata('tkid', '');
@@ -161,60 +192,60 @@ class Package extends MY_Front_Soma
             //$this->theme = 'v1';
             //$this->theme = 'mooncake4';
 
-        $result = $productIds = $hotelsArr = $pointProductIds = array();
-        foreach ($products as $k => $p) {
-            //做过期处理过滤
-            if ($p['goods_type'] != $productModel::SPEC_TYPE_TICKET && $p['date_type'] == $productModel::DATE_TYPE_STATIC) {
-                //固定有效期
-                $time = time();
-                $expireTime = isset($p['expiration_date']) ? strtotime($p['expiration_date']) : null;
-                if ($expireTime && $expireTime < $time) {
-                    //如果已经过了有效期，停止本次循环，并在此列表删除该商品
-                    // var_dump( $products[$k] );die;
-                    unset($products[$k]);
-                    continue;
+            $result = $productIds = $hotelsArr = $pointProductIds = array();
+            foreach ($products as $k => $p) {
+                //做过期处理过滤
+                if ($p['goods_type'] != $productModel::SPEC_TYPE_TICKET && $p['date_type'] == $productModel::DATE_TYPE_STATIC) {
+                    //固定有效期
+                    $time = time();
+                    $expireTime = isset($p['expiration_date']) ? strtotime($p['expiration_date']) : null;
+                    if ($expireTime && $expireTime < $time) {
+                        //如果已经过了有效期，停止本次循环，并在此列表删除该商品
+                        // var_dump( $products[$k] );die;
+                        unset($products[$k]);
+                        continue;
+                    }
+                }
+
+                if (isset($hotelsArr[$p['hotel_id']])) {
+                    $hotelsArr[$p['hotel_id']]++;
+                } else {
+                    $hotelsArr[$p['hotel_id']] = 1;
+                }
+
+                //首页是否显示
+                if ($p['is_hide'] == Soma_base::STATUS_TRUE) {
+                    $productIds[] = $p['product_id'];
+                    $result[$p['product_id']] = $p;
+                    // $productCites = $HotelModel->get_hotel_hash(array('inter_id'=>$this->inter_id,'hotel_id'=> $p['hotel_id']),array('city'),'array');
+                    // $result[$p['product_id']]['city'] = isset( $productCites[0]['city'] ) ? $productCites[0]['city'] : NULL;
+                    $result[$p['product_id']]['city'] = isset($hotelsIds[$p['hotel_id']]) ? $hotelsIds[$p['hotel_id']] : '';
+
+
+                    //如果是积分商品，去掉小数点，向上取整
+                    if ($p['type'] == $productModel::PRODUCT_TYPE_POINT) {
+                        $result[$p['product_id']]['price_package'] = ceil($p['price_package']);
+                        $result[$p['product_id']]['price_market'] = ceil($p['price_market']);
+                        $pointProductIds[] = $p['product_id'];
+                        // var_dump( $result[$p['product_id']] );
+                    }
                 }
             }
 
-            if (isset($hotelsArr[$p['hotel_id']])) {
-                $hotelsArr[$p['hotel_id']]++;
-            } else {
-                $hotelsArr[$p['hotel_id']] = 1;
-            }
-
-            //首页是否显示
-            if ($p['is_hide'] == Soma_base::STATUS_TRUE) {
-                $productIds[] = $p['product_id'];
-                $result[$p['product_id']] = $p;
-                // $productCites = $HotelModel->get_hotel_hash(array('inter_id'=>$this->inter_id,'hotel_id'=> $p['hotel_id']),array('city'),'array');
-                // $result[$p['product_id']]['city'] = isset( $productCites[0]['city'] ) ? $productCites[0]['city'] : NULL;
-                $result[$p['product_id']]['city'] = isset($hotelsIds[$p['hotel_id']]) ? $hotelsIds[$p['hotel_id']] : '';
-
-
-                //如果是积分商品，去掉小数点，向上取整
-                if ($p['type'] == $productModel::PRODUCT_TYPE_POINT) {
-                    $result[$p['product_id']]['price_package'] = ceil($p['price_package']);
-                    $result[$p['product_id']]['price_market'] = ceil($p['price_market']);
-                    $pointProductIds[] = $p['product_id'];
-                    // var_dump( $result[$p['product_id']] );
+            //拼团列表
+            $this->load->model('soma/Activity_groupon_model', 'activityGrouponModel');
+            $groupons = $this->activityGrouponModel->groupon_list_by_productIds($productIds, $this->inter_id);
+            foreach ($groupons as $groupon) {
+                if (in_array($groupon['product_id'], $pointProductIds)) {
+                    $groupon['group_price'] = ceil($groupon['group_price']);
                 }
+                $result[$groupon['product_id']]['groupon'] = $groupon;
+
             }
-        }
 
-        //拼团列表
-        $this->load->model('soma/Activity_groupon_model', 'activityGrouponModel');
-        $groupons = $this->activityGrouponModel->groupon_list_by_productIds($productIds, $this->inter_id);
-        foreach ($groupons as $groupon) {
-            if (in_array($groupon['product_id'], $pointProductIds)) {
-                $groupon['group_price'] = ceil($groupon['group_price']);
-            }
-            $result[$groupon['product_id']]['groupon'] = $groupon;
-
-        }
-
-        //秒杀列表
-        $this->load->model('soma/Activity_killsec_model', 'activityKillsecModel');
-        $killsecs = $this->activityKillsecModel->killsec_list_by_productIds($productIds, $this->inter_id);
+            //秒杀列表
+            $this->load->model('soma/Activity_killsec_model', 'activityKillsecModel');
+            $killsecs = $this->activityKillsecModel->killsec_list_by_productIds($productIds, $this->inter_id);
 
             foreach ($killsecs as $killsec) {
                 if (in_array($killsec['product_id'], $pointProductIds)) {
@@ -247,115 +278,87 @@ class Package extends MY_Front_Soma
                 }
             }
 
-        //满减活动
-        $this->load->model('soma/Sales_rule_model', 'salesRuleModel');
-        $rules = $this->salesRuleModel->get_product_rule($productIds, $this->inter_id);
-        if ($rules) {
-            foreach ($rules as $rule) {
-                if ($rule['scope'] == Soma_base::STATUS_TRUE) {
-                    //全部适用
-                    // 非满减规则过滤
-                    $not_auto_rule_arr = array(Sales_rule_model::RULE_TYPE_POINT, Sales_rule_model::RULE_TYPE_BALENCE);
-                    if (!in_array($rule['rule_type'], $not_auto_rule_arr)) {
-                        foreach ($productIds as $v) {
-                            if (!isset($result[$v]['auto_rule'])) {
-                                $result[$v]['auto_rule'] = $rule;
+            //满减活动
+            $this->load->model('soma/Sales_rule_model', 'salesRuleModel');
+            $rules = $this->salesRuleModel->get_product_rule($productIds, $this->inter_id);
+            if ($rules) {
+                foreach ($rules as $rule) {
+                    if ($rule['scope'] == Soma_base::STATUS_TRUE) {
+                        //全部适用
+                        // 非满减规则过滤
+                        $not_auto_rule_arr = array(Sales_rule_model::RULE_TYPE_POINT, Sales_rule_model::RULE_TYPE_BALENCE);
+                        if (!in_array($rule['rule_type'], $not_auto_rule_arr)) {
+                            foreach ($productIds as $v) {
+                                if (!isset($result[$v]['auto_rule'])) {
+                                    $result[$v]['auto_rule'] = $rule;
+                                }
                             }
                         }
+                    } else {
+                        foreach ($rule['product_id'] as $rule_pid) {
+                            $result[$rule_pid]['auto_rule'] = $rule;
+                        }
                     }
-                } else {
-                    foreach ($rule['product_id'] as $rule_pid) {
-                        $result[$rule_pid]['auto_rule'] = $rule;
+                }
+            }
+
+            // 商品多规格,多规格商品显示最低的规格价格
+            $this->load->model('soma/Product_specification_setting_model', 'psp_model');
+            if ($productIds) {
+                $psp_setting = $this->psp_model->get_inter_product_spec_setting($this->inter_id, $productIds);
+
+                // var_dump($psp_setting);exit;
+                if (!empty($psp_setting)) {
+
+                    $tmp_setting = array();
+                    foreach ($psp_setting as $row) {
+                        $tmp_setting[$row['product_id']][] = $row;
+                    }
+
+                    foreach ($tmp_setting as $pid => $setting) {
+                        $result[$pid]['psp_setting'] = $setting;
+                        $result[$pid]['price_package'] = $setting[0]['spec_price'];
                     }
                 }
             }
-        }
 
-        // 商品多规格,多规格商品显示最低的规格价格
-        $this->load->model('soma/Product_specification_setting_model', 'psp_model');
-        if ($productIds) {
-            $psp_setting = $this->psp_model->get_inter_product_spec_setting($this->inter_id, $productIds);
+            $this->datas['products'] = $result;
+            $this->datas['packageModel'] = $this->productModel;
+            $this->datas['advs_url'] = Soma_const_url::inst()->get_package_detail() . '&pid=';
 
-            // var_dump($psp_setting);exit;
-            if (!empty($psp_setting)) {
 
-                $tmp_setting = array();
-                foreach ($psp_setting as $row) {
-                    $tmp_setting[$row['product_id']][] = $row;
-                }
 
-                foreach ($tmp_setting as $pid => $setting) {
-                    $result[$pid]['psp_setting'] = $setting;
-                    $result[$pid]['price_package'] = $setting[0]['spec_price'];
-                }
+            $this->load->helper('soma/package');
+            // write_log(json_encode( $share_config_detail ), 'share_config_detail.txt' );
+
+
+            $my_order_url = Soma_const_url::inst()->get_url('soma/order/my_order_list/', array('id' => $this->inter_id, 'bsn' => 'package'));
+            if ($this->theme == 'junting') {
+                $this->load->library('Soma/Api_member');
+                $api = new Api_member($this->inter_id);
+                $result = $api->get_token();
+                $result['data'] = isset($result['data']) ? $result['data'] : array();
+                $api->set_token($result['data']);
+                $result = $api->point_info($this->openid);
+                $result['data'] = isset($result['data']) ? $result['data'] : '';
+                $this->datas['point'] = $result['data'];
+                // var_dump( $result['data'] );die;
             }
-        }
 
-        $this->datas['products'] = $result;
-        $this->datas['packageModel'] = $this->productModel;
-        $this->datas['advs_url'] = Soma_const_url::inst()->get_package_detail() . '&pid=';
+            //是否显示“附近”导航栏功能
+            $this->datas['multi_hotel'] = count($hotelsArr) > 1 ? true : false;
+            $this->datas['multi_city'] = count($citesArr) > 1 ? true : false;
+            $this->datas['filter_cat'] = $filter_cat;
 
-        //点击分享之后开启这些按钮
-        $js_menu_show = array('menuItem:share:appMessage', 'menuItem:share:timeline');
-        $uparams = $this->input->get() + array('id' => $this->inter_id);
-
-        //取出分享配置
-        $this->load->model('soma/Share_config_model', 'ShareConfigModel');
-        $ShareConfigModel = $this->ShareConfigModel;
-        $position = $ShareConfigModel::POSITION_DEFAULT;//分享类型
-        $share_config_detail = $ShareConfigModel->get_share_config_list($position, $this->inter_id);
-
-        // 分享标题双语翻译
-        if ($this->langDir == self::LANG_DIR_EN) {
-            if (!empty($share_config_detail['share_title_en'])
-                && !empty($share_config_detail['share_desc_en'])
-            ) {
-                $share_config_detail['share_title'] = $share_config_detail['share_title_en'];
-                $share_config_detail['share_desc'] = $share_config_detail['share_desc_en'];
-            }
-        }
-
-        $this->load->helper('soma/package');
-        // write_log(json_encode( $share_config_detail ), 'share_config_detail.txt' );
-        $default_share_config = $this->get_default_sharing();
-
-        $share_config = array(
-            'title'  => isset($share_config_detail['share_title']) && !empty($share_config_detail['share_title']) ? $share_config_detail['share_title'] : $default_share_config['default_title'],
-            'desc'   => isset($share_config_detail['share_desc']) && !empty($share_config_detail['share_desc']) ? $share_config_detail['share_desc'] : $default_share_config['default_desc'],
-            'link'   => Soma_const_url::inst()->get_share_url($this->openid, '*/*/*', $uparams),//$share_config_detail['share_link'],
-            'imgUrl' => isset($share_config_detail['share_img']) && !empty($share_config_detail['share_img']) ? $share_config_detail['share_img'] : $default_share_config['share_img'],
-        );
-
-        $my_order_url = Soma_const_url::inst()->get_url('soma/order/my_order_list/', array('id' => $this->inter_id, 'bsn' => 'package'));
-        if ($this->theme == 'junting') {
-            $this->load->library('Soma/Api_member');
-            $api = new Api_member($this->inter_id);
-            $result = $api->get_token();
-            $result['data'] = isset($result['data']) ? $result['data'] : array();
-            $api->set_token($result['data']);
-            $result = $api->point_info($this->openid);
-            $result['data'] = isset($result['data']) ? $result['data'] : '';
-            $this->datas['point'] = $result['data'];
-            // var_dump( $result['data'] );die;
-        }
-
-        //是否显示“附近”导航栏功能
-        $this->datas['multi_hotel'] = count($hotelsArr) > 1 ? true : false;
-        $this->datas['multi_city'] = count($citesArr) > 1 ? true : false;
-        $this->datas['filter_cat'] = $filter_cat;
-
-        $this->datas['cities'] = $citesArr;
-        $this->datas['js_menu_show'] = $js_menu_show;
-        $this->datas['js_share_config'] = $share_config;
-        $this->datas['themeConfig'] = $this->themeConfig;
-        $this->datas['url'] = $url;
-        $this->datas['my_order_url'] = $my_order_url;
-        $this->datas['is_show_navigation'] = $is_show_navigation;//是否显示首页导航栏
-        $this->datas['is_show_lang_btn'] = $is_show_lang_btn;//是否显示语言切换按钮
-        $this->datas['ticketList'] = $ticketList;//门店列表信息
-        $this->datas['ticketId'] = $ticketId;//门店列表信息
-        $this->datas['zongzi_bg'] = $this->themeConfig['index_bg'];
-        $this->datas['catId'] = $this->input->get('catid');
+            $this->datas['cities'] = $citesArr;
+            $this->datas['themeConfig'] = $this->themeConfig;
+            $this->datas['my_order_url'] = $my_order_url;
+            $this->datas['is_show_navigation'] = $is_show_navigation;//是否显示首页导航栏
+            $this->datas['is_show_lang_btn'] = $is_show_lang_btn;//是否显示语言切换按钮
+            $this->datas['ticketList'] = $ticketList;//门店列表信息
+            $this->datas['ticketId'] = $ticketId;//门店列表信息
+            $this->datas['zongzi_bg'] = $this->themeConfig['index_bg'];
+            $this->datas['catId'] = $this->input->get('catid');
             $this->datas['theme'] = $this->themeConfig;
 
             // 双语翻译
@@ -369,54 +372,54 @@ class Package extends MY_Front_Soma
                 }
                 $this->datas['advs'] = $en_advs;
 
-            $en_categories = $this->datas['categories'];
-            foreach ($this->datas['categories'] as $key => $category) {
-                if (!empty($category['cat_name_en'])) {
-                    $en_categories[$key]['cat_name'] = $category['cat_name_en'];
+                $en_categories = $this->datas['categories'];
+                foreach ($this->datas['categories'] as $key => $category) {
+                    if (!empty($category['cat_name_en'])) {
+                        $en_categories[$key]['cat_name'] = $category['cat_name_en'];
+                    }
                 }
-            }
-            $this->datas['categories'] = $en_categories;
-            // var_dump($this->datas['categories']);exit;
+                $this->datas['categories'] = $en_categories;
+                // var_dump($this->datas['categories']);exit;
 
-            $en_fields = $this->productModel->en_fields();
-            $en_product_info = $this->productModel->getProductEnInfoList($productIds, $this->inter_id);
-            $en_products = $this->datas['products'];
-            foreach ($this->datas['products'] as $key => $product) {
-                if (isset($en_product_info[$product['product_id']])) {
-                    foreach ($en_fields as $field) {
-                        if (!empty($en_product_info[$product['product_id']][$field])) {
-                            $en_products[$key][$field] = $en_product_info[$product['product_id']][$field];
+                $en_fields = $this->productModel->en_fields();
+                $en_product_info = $this->productModel->getProductEnInfoList($productIds, $this->inter_id);
+                $en_products = $this->datas['products'];
+                foreach ($this->datas['products'] as $key => $product) {
+                    if (isset($en_product_info[$product['product_id']])) {
+                        foreach ($en_fields as $field) {
+                            if (!empty($en_product_info[$product['product_id']][$field])) {
+                                $en_products[$key][$field] = $en_product_info[$product['product_id']][$field];
+                            }
                         }
                     }
                 }
-            }
-            $this->datas['products'] = $en_products;
-        }
-
-        if ($this->theme == 'zongzi' || $this->theme == 'mooncake4') {
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
-                || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-            $member_url = "$protocol$_SERVER[HTTP_HOST]/index.php/membervip/center?id=" . $this->inter_id;
-            $this->datas['member_url'] = $member_url;
-
-            //是否是分销员，页面上显示分销员标志，只做zongzi皮肤
-            $jsonStaff = $this->session->userdata('isSaler' . $this->inter_id . $this->openid);
-            if (!$jsonStaff) {
-                //如果没有记录，就要发起一次分销员查询
-                $staff = $this->get_user_saler_or_fans_id();
-            } else {
-                $staff = json_decode($jsonStaff, true);
+                $this->datas['products'] = $en_products;
             }
 
-            //如果是泛分销员的去掉，不显示标示
-            if (!isset($staff['saler_type']) || $staff['saler_type'] != 'STAFF') {
-                $staff = array();
-                $this->session->set_userdata('isSaler' . $this->inter_id . $this->openid, '');
-            } else {
-                $this->session->set_userdata('isSaler' . $this->inter_id . $this->openid, json_encode($staff));
+            if ($this->theme == 'zongzi' || $this->theme == 'mooncake4') {
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+                    || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+                $member_url = "$protocol$_SERVER[HTTP_HOST]/index.php/membervip/center?id=" . $this->inter_id;
+                $this->datas['member_url'] = $member_url;
+
+                //是否是分销员，页面上显示分销员标志，只做zongzi皮肤
+                $jsonStaff = $this->session->userdata('isSaler' . $this->inter_id . $this->openid);
+                if (!$jsonStaff) {
+                    //如果没有记录，就要发起一次分销员查询
+                    $staff = $this->get_user_saler_or_fans_id();
+                } else {
+                    $staff = json_decode($jsonStaff, true);
+                }
+
+                //如果是泛分销员的去掉，不显示标示
+                if (!isset($staff['saler_type']) || $staff['saler_type'] != 'STAFF') {
+                    $staff = array();
+                    $this->session->set_userdata('isSaler' . $this->inter_id . $this->openid, '');
+                } else {
+                    $this->session->set_userdata('isSaler' . $this->inter_id . $this->openid, json_encode($staff));
+                }
+                $this->datas['staff'] = $staff;
             }
-            $this->datas['staff'] = $staff;
-        }
 
 
             //获取用户头像
@@ -430,15 +433,21 @@ class Package extends MY_Front_Soma
             //给商品追加价格配置的东西
             ScopeDiscountService::getInstance()->appendScopeDiscount($this->datas['products'], $this->current_inter_id, $this->openid);
 
-        $url = \App\libraries\Support\Url::current();
+        }
+
+        $this->datas['js_menu_show'] = $js_menu_show;
+        $this->datas['js_share_config'] = $share_config;
+        $this->datas['url'] = $url;
+
         $act_params = [
             'id' => $this->inter_id,
-            'origin_url' => urlencode($url . '&fans_act=1'),
+            'origin_url' => $url . '&fans_act=1',
         ];
         $this->datas['act_url'] = Soma_const_url::inst()->get_url('*/*/fans_saler_active', $act_params);
 
         $this->_view("header", $header);
         $this->_view('index', $this->datas);
+
     }
 
     /**
@@ -872,7 +881,7 @@ class Package extends MY_Front_Soma
 
 
             //$this->theme = 'v1';
-            //$this->theme = 'mooncake4';
+           // $this->theme = 'mooncake4';
 
             $result = $productIds = $hotelsArr = $pointProductIds = array();
             foreach ($products as $k => $p) {
@@ -2693,11 +2702,10 @@ class Package extends MY_Front_Soma
     public function pay_success_stay()
     {
 
-
-        $redis = $this->get_redis_instance();
-        $layout = $redis->get('layout');
-        $tkId = $redis->get('tkid');
-        $brandName = $redis->get('brandname');
+        $packageService = \App\services\soma\PackageService::getInstance();
+        $layout = $packageService->getParams()['layout'];
+        $tkId = $packageService->getParams()['tkid'];
+        $brandName = $packageService->getParams()['brandname'];
 
         $this->datas = [];
         if (!$this->isNewTheme()) {
@@ -2795,10 +2803,10 @@ class Package extends MY_Front_Soma
             'title' => '支付成功'
         );
 
-        $redis = $this->get_redis_instance();
-        $layout = $redis->get('layout');
-        $tkId = $redis->get('tkid');
-        $brandName = $redis->get('brandname');
+        $packageService = \App\services\soma\PackageService::getInstance();
+        $layout = $packageService->getParams()['layout'];
+        $tkId = $packageService->getParams()['tkid'];
+        $brandName = $packageService->getParams()['brandname'];
 
         $params = array(
             'id' => $this->inter_id,

@@ -1502,9 +1502,11 @@ class OrderService extends BaseService
         $this->getCI()->load->model('soma/Consumer_code_model', 'consumer_code_model');
         $this->getCI()->load->model('soma/Consumer_shipping_model', 'consumer_shipping_model');
         $this->getCI()->load->model('soma/Gift_order_model', 'soma_gift_order');
+        $this->getCI()->load->model('soma/Gift_item_package_model','Gift_item_package_model');
         $this->getCI()->load->model('soma/Sales_order_product_record_model', 'Sales_order_product_record_model');
         $this->getCI()->load->model('soma/Product_package_model', 'Product_package_model');
         $this->getCI()->load->model('soma/Sales_refund_model', 'Sales_refund_model');
+        $this->getCI()->load->model('soma/Asset_item_package_model', 'Asset_item_package_model');
 
         $somaSalesOrderModel = $this->getCI()->somaSalesOrderModel;
         $salesItemPackageModel = $this->getCI()->salesItemPackageModel;
@@ -1513,10 +1515,14 @@ class OrderService extends BaseService
         $consumer_shipping_model = $this->getCI()->consumer_shipping_model;
         /** @var \Gift_order_model $soma_gift_order */
         $soma_gift_order = $this->getCI()->soma_gift_order;
+        /** @var \Gift_item_package_model $gift_item_package_model */
+        $gift_item_package_model = $this->getCI()->Gift_item_package_model;
         /** @var \Product_package_model $product_package_model */
         $product_package_model = $this->getCI()->Product_package_model;
         /** @var \Sales_refund_model  $sales_refund_model */
         $sales_refund_model = $this->getCI()->Sales_refund_model;
+        /** @var \Asset_item_package_model $asset_item_package_model */
+        $asset_item_package_model = $this->getCI()->Asset_item_package_model;
 
 
         $Sales_order_product_record_model = $this->getCI()->Sales_order_product_record_model;
@@ -1616,22 +1622,90 @@ class OrderService extends BaseService
 
         $name = $order['item_name'];
 
-        $consumer_order = $consumer_code_model->get(array_keys($code_condition), array_values($code_condition), [
-            str_replace(
-                ['%shipping%', '%code%'],
-                [$shipping_table_name, $code_table_name],
-                'if(status=3,IFNULL((select shipping_id from %shipping% as s where s.order_id =  %code%.order_id and s.inter_id = %code%.inter_id and s.consumer_id = %code%.consumer_id) , 0), 0) as shipping_id'
-            ),
-            'if(status=4,(select gift_id from ' . $gift_item_table_name . ' as s1 where s1.asset_item_id = ' . $code_table_name . '.asset_item_id and name = "' . $name . '" and qty > 0 limit 1),0) as gid',
-            'if(status=4,(select send_from from ' . $gift_table_name . ' as s2 where s2.gift_id =  gid),0) as send_from',
-            'order_id',
-            'code',
-            'status',
-            'asset_item_id',
-            'code_id',
-            'consumer_item_id',
-            'code_id',
-        ], ['limit' => null, 'orderBy' => 'status asc']);
+//        $consumer_order = $consumer_code_model->get(array_keys($code_condition), array_values($code_condition), [
+//            str_replace(
+//                ['%shipping%', '%code%'],
+//                [$shipping_table_name, $code_table_name],
+//                'if(status=3,IFNULL((select shipping_id from %shipping% as s where s.order_id =  %code%.order_id and s.inter_id = %code%.inter_id and s.consumer_id = %code%.consumer_id) , 0), 0) as shipping_id'
+//            ),
+//            'if(status=4,(select gift_id from ' . $gift_item_table_name . ' as s1 where s1.asset_item_id = ' . $code_table_name . '.asset_item_id and name = "' . $name . '" and qty > 0 limit 1),0) as gid',
+//            'if(status=4,(select send_from from ' . $gift_table_name . ' as s2 where s2.gift_id =  gid),0) as send_from',
+//            'order_id',
+//            'code',
+//            'status',
+//            'asset_item_id',
+//            'code_id',
+//            'consumer_item_id',
+//            'code_id',
+//        ], ['limit' => null, 'orderBy' => 'status asc']);
+
+
+
+        //券码
+        $consumer_order = [];
+        $asset_item_id = [0];
+        $asset_item_package_list = $asset_item_package_model->get(['openid', 'order_id'], [$openid, $oid], ['item_id'], ['limit' => null]);
+        if(!empty($asset_item_package_list)){
+            $asset_item_id = array_column($asset_item_package_list, 'item_id');
+        }
+        $consumer_code_list = $consumer_code_model->get(
+            ['order_id', 'status', 'asset_item_id'],
+            [$oid, [2, 3, 4], $asset_item_id],
+            ['order_id', 'code', 'status', 'asset_item_id', 'code_id', 'consumer_item_id', 'consumer_id'],
+            ['limit' => null, 'orderBy' => 'status asc']
+        );
+        if(!empty($consumer_code_list)){
+            foreach ($consumer_code_list as $key => $val){
+                $consumer_order[$key]['shipping_id'] = 0;
+                $consumer_order[$key]['gid'] = 0;
+                $consumer_order[$key]['send_from'] = 0;
+                $consumer_order[$key]['order_id'] = $val['order_id'];
+                $consumer_order[$key]['code'] = $val['code'];
+                $consumer_order[$key]['status'] = $val['status'];
+                $consumer_order[$key]['asset_item_id'] = $val['asset_item_id'];
+                $consumer_order[$key]['code_id'] = $val['code_id'];
+                $consumer_order[$key]['consumer_item_id'] = $val['consumer_item_id'];
+                if($val['status'] == 3){
+                    //shipping_id
+                    $consumer_shipping_list = $consumer_shipping_model->get(
+                        ['order_id', 'inter_id', 'consumer_id'],
+                        [$oid, $this->getCI()->inter_id, $val['consumer_id']],
+                        ['shipping_id']
+                    );
+                    if(!empty($consumer_shipping_list)){
+                        $consumer_order[$key]['shipping_id'] = $consumer_shipping_list[0]['shipping_id'];
+                    }
+                }
+                if($val['status'] == 4){
+                    //gid
+                    $gift_item_package_list = $gift_item_package_model->get(
+                        ['asset_item_id', 'name', 'qty > '],
+                        [$val['asset_item_id'], $name, 0],
+                        '*',
+                        ['limit' => null]
+                    );
+                    if(!empty($gift_item_package_list)){
+                        $gift_id = isset($consumer_order[$key - 1]['gid']) ? $consumer_order[$key - 1]['gid'] : 0;
+                        foreach ($gift_item_package_list as $items => $values){
+                            if($values['gift_id'] != $gift_id){
+                                $gift_id = $values['gift_id'];
+                                break;
+                            }
+                        }
+                        $consumer_order[$key]['gid'] = $gift_id;
+                    }
+                    //send_from
+                    $gift_order_list = $soma_gift_order->get(
+                        ['gift_id'],
+                        [$consumer_order[$key]['gid']]
+                    );
+                    if(!empty($gift_order_list)){
+                        $consumer_order[$key]['send_from'] = $gift_order_list[0]['send_from'];
+                    }
+                }
+            }
+        }
+
 
         // 卷码相关
         $this->getCI()->load->helper('encrypt');

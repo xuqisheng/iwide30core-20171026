@@ -21,6 +21,13 @@ class Gift_delivery extends MY_Admin_Soma{
     }
 
 
+    /***
+     * 领取礼包的详情
+     */
+    public function gift_detail_index(){
+
+        $this->_render_content($this->_load_view_file('gift_detail_index'), [], false);
+    }
 
 
 }

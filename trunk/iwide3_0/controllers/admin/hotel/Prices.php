@@ -573,7 +573,7 @@ class Prices extends MY_Admin {
 
 		$this->load->model ( 'common/Skins_model' );
 		$cur_skin = $this->Skins_model->get_skin_set($this->inter_id,'hotel');
-		if (!empty($cur_skin)&& $cur_skin['skin_name'] == 'bigger'){
+		if (!empty($cur_skin)&& ($cur_skin['skin_name'] == 'bigger' || $cur_skin['skin_name'] == 'highclass')){
 			$view = 'code_edit_new';
 		}else{
 			$view = 'code_edit';

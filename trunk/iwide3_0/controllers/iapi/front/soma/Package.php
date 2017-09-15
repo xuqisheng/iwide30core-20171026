@@ -435,8 +435,7 @@ class Package extends MY_Front_Soma_Iapi
 
 
         //多店铺
-        $redis = $this->get_redis_instance();
-        $ticketId = $redis->get('tkid');
+        $ticketId = PackageService::getInstance()->getParams()['tkid'];
         $pIds = [];
         if ($ticketId) {
 

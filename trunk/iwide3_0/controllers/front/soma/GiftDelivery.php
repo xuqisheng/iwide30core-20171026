@@ -15,13 +15,13 @@ class GiftDelivery extends MY_Front_Soma {
         $params['request_token'] = $this->input->get('request_token');
 
         //请求校验
-        $this->db->db_select('iwide30soma');
-        $giftInfo = $this->db->select(['gift_id'])->where(['id'=>$params['id'],'inter_id'=>$params['inter_id'],'request_token'=>$params['request_token']])
-            ->get('soma_gift_detail')->row_array();
-
-        if(empty($giftInfo)){
-            return false;
-        }
+//        $this->db->db_select('iwide30soma');
+//        $giftInfo = $this->db->select(['gift_id'])->where(['id'=>$params['id'],'inter_id'=>$params['inter_id'],'request_token'=>$params['request_token']])
+//            ->get('soma_gift_detail')->row_array();
+//
+//        if(empty($giftInfo)){
+//            return false;
+//        }
 
         $this->_view('gift_delivery/qrcode_gift_detail',$params);
 

@@ -136,7 +136,6 @@ class Clears extends MY_Controller {
     	$refund_records = array();
     	$order_records = array();
     	$base_records = array();
-    	$orderReward_records = array();
     	$extraReward_records = array();
     	foreach ($debt_records as $kd => $vd) {
     		switch ($vd['order_type']) {
@@ -149,10 +148,7 @@ class Clears extends MY_Controller {
     			case 'base_pay':
     				$base_records[] = $vd;
     				break;
-    			case 'orderReward':
-    				$orderReward_records[] = $vd;
-    				break;
-    			case 'extraReward':
+    			case 'extra_dist':
     				$extraReward_records[] = $vd;
     				break;
     			default:
@@ -172,38 +168,29 @@ class Clears extends MY_Controller {
     	$debted_records = array_merge($debted_records,$return['debted_records']);
 
     	if($return['amount']>0){
-    		//首单奖励抵扣逻辑
-    		$return = $this->deductible_handle($return['amount'],$orderReward_records);
-    		if($return['is_settle']==1){
-    			$is_settle = 1;
-    		}
-    		$debted_records = array_merge($debted_records,$return['debted_records']);
+			//额外奖励抵扣逻辑
+			$return = $this->deductible_handle($return['amount'],$extraReward_records);
+			if($return['is_settle']==1){
+				$is_settle = 1;
+			}
+			$debted_records = array_merge($debted_records,$return['debted_records']);
 
     		if($return['amount']>0){
-    			//额外奖励抵扣逻辑
-    			$return = $this->deductible_handle($return['amount'],$extraReward_records);
+    			//订单分成抵扣逻辑
+    			$return = $this->deductible_handle($return['amount'],$order_records);
     			if($return['is_settle']==1){
-    				$is_settle = 1;
+					$is_settle = 1;
+				}
+				$debted_records = array_merge($debted_records,$return['debted_records']);
+
+    			if($return['amount']>0){
+    				//基础月费抵扣逻辑
+    				$return = $this->deductible_handle($return['amount'],$base_records);
+    				if($return['is_settle']==1){
+						$is_settle = 1;
+					}
+					$debted_records = array_merge($debted_records,$return['debted_records']);
     			}
-    			$debted_records = array_merge($debted_records,$return['debted_records']);
-
-	    		if($return['amount']>0){
-	    			//订单分成抵扣逻辑
-	    			$return = $this->deductible_handle($return['amount'],$order_records);
-	    			if($return['is_settle']==1){
-    					$is_settle = 1;
-    				}
-    				$debted_records = array_merge($debted_records,$return['debted_records']);
-
-	    			if($return['amount']>0){
-	    				//基础月费抵扣逻辑
-	    				$return = $this->deductible_handle($return['amount'],$base_records);
-	    				if($return['is_settle']==1){
-    						$is_settle = 1;
-    					}
-    					$debted_records = array_merge($debted_records,$return['debted_records']);
-	    			}
-	    		}
     		}
     	}
     	return array('amount'=>$return['amount'],'is_settle'=>$is_settle,'debted_records'=>$debted_records);
@@ -262,12 +249,7 @@ class Clears extends MY_Controller {
 	    			//关联id汇总
     				$debt_ids[] = $vd['id'];
     				$debt_ids_va[] = $vd['id'];
-    			}elseif ($vd['order_type']=='orderReward') {
-    				$jfk_total_amount += $vd['amount'];
-    				//关联id汇总
-    				$debt_ids[] = $vd['id'];
-    				$debt_ids_va[] = $vd['id'];
-    			}elseif ($vd['order_type']=='extraReward') {
+    			}elseif ($vd['order_type']=='extra_dist') {
     				$jfk_total_amount += $vd['amount'];
     				//关联id汇总
     				$debt_ids[] = $vd['id'];

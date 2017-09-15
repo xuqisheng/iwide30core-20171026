@@ -68,6 +68,12 @@ $(function(){
 				return;
 			}
 		}
+        if(point_pay_code==1&&$('#pay_type').val()=='point'){
+            if($('#consume_pwd').val()==''){
+                $.MsgBox.Alert('请输入消费密码');
+                return;
+            }
+        }
 		data={
 				name:name,
 				tel:tel,

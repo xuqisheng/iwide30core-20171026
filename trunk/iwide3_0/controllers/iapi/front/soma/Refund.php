@@ -382,6 +382,11 @@ class Refund extends MY_Front_Soma_Iapi
      *                      type="integer 1:已申请 2：已审核 3：已退款 4：取消 5：挂起 6：微信退款中",
      *                  ),
      *                  @SWG\Property(
+     *                      property="create_time",
+     *                      description="下单日期",
+     *                      type="string",
+     *                  ),
+     *                  @SWG\Property(
      *                      property="refund_type",
      *                      description="退款类型",
      *                      type="string 1:微信支付退款 2：储值支付退款 3：积分支付退款",

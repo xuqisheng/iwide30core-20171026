@@ -300,10 +300,10 @@ class Presents extends MY_Front_Soma_Iapi
         $request_param = $this->input->input_json();
         $request_array = $request_param->toArray();
 
-        $redis = $this->get_redis_instance();
-        $layout = $redis->get('layout');
-        $tkId = $redis->get('tkid');
-        $brandName = $redis->get('brandname');
+        $packageService = \App\services\soma\PackageService::getInstance();
+        $layout = $packageService->getParams()['layout'];
+        $tkId = $packageService->getParams()['tkid'];
+        $brandName = $packageService->getParams()['brandname'];
 
         $inter_id = $this->inter_id;
         $business = 'package';

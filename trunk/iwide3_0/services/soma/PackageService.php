@@ -4,6 +4,9 @@ namespace App\services\soma;
 
 use App\models\soma\Activity_killsec;
 use App\services\BaseService;
+use Api_member;
+use EasyWeChat\QRCode\QRCode;
+use Illuminate\Support\Facades\URL;
 
 /**
  * Class PackageService
@@ -1184,5 +1187,20 @@ class PackageService extends BaseService
         return $file_domain.$file_system_path.$uploadName;
     }
 
+
+    /**
+     * 放置一些全局参数
+     * @return array
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
+    public function getParams(){
+
+        return [
+            'tkid' => $this->getCI()->session->tempdata('theme_tkid'),
+            'layout' => $this->getCI()->session->tempdata('theme_layout'),
+            'brandname' => $this->getCI()->session->tempdata('theme_brandname'),
+        ];
+
+    }
 
 }

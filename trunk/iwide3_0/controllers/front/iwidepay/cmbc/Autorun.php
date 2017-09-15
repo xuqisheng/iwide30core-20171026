@@ -808,8 +808,8 @@ class Autorun extends MY_Controller {
             case 'orderReward':
                 $trade_type = 4;
                 break;
-            case 'extraReward':
-                $trade_type = 5;
+            case 'extra_dist':
+                $trade_type = 5;//分销奖励
                 break;
             default :
                 $trade_type = 0;

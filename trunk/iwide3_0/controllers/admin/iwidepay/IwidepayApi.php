@@ -29,8 +29,6 @@ class IwidepayApi extends MY_Controller
 
         $this->load->helper('appointment');
 
-        //设置开发用户信息
-        //$this->set_user();
         $this->admin_profile = $this->session->userdata('admin_profile');
 
         if (empty($this->admin_profile))
@@ -2145,6 +2143,7 @@ class IwidepayApi extends MY_Controller
         }
 
         $total_amount = $this->Iwidepay_capital_model->total_amount($filter);
+        $total_amount_send = $this->Iwidepay_capital_model->total_amount_send($filter);
         $pay_amount = $this->Iwidepay_capital_model->pay_amount($filter);
         $refund_amount = $this->Iwidepay_capital_model->refund_amount($filter);
         $withdraw_amount = $this->Iwidepay_capital_model->withdraw_amount($filter);
@@ -2153,7 +2152,7 @@ class IwidepayApi extends MY_Controller
         $arrears_amount = $this->Iwidepay_capital_model->arrears_amount($filter);
 
         $ajaxData = array(
-            'total_amount' => formatMoney($total_amount/100),//监管账户
+            'total_amount' => formatMoney(($total_amount - $total_amount_send)/100),//监管账户
             'pay_amount' => formatMoney($pay_amount/100),//支付
             'refund_amount' => formatMoney($refund_amount/100),//退款
             'withdraw_amount' => formatMoney($withdraw_amount/100),//提现
@@ -2232,6 +2231,7 @@ class IwidepayApi extends MY_Controller
                     if ($value['type'] == 'hotel')
                     {
                         $total_amount = $this->Iwidepay_capital_model->total_amount($value_arr);
+                        $total_amount_send = $this->Iwidepay_capital_model->total_amount_send($value_arr);
                         $pay_amount = $this->Iwidepay_capital_model->pay_amount($value_arr);
                         $refund_amount = $this->Iwidepay_capital_model->refund_amount($value_arr);
                         $commission = $this->Iwidepay_capital_model->commission($value_arr);
@@ -2240,12 +2240,12 @@ class IwidepayApi extends MY_Controller
                     }
                     else
                     {
-                        $total_amount = $pay_amount = $refund_amount = $commission = $distribution = $arrears_amount = 0;
+                        $total_amount = $pay_amount = $refund_amount = $commission = $distribution = $arrears_amount = $total_amount_send = 0;
                     }
 
                     $withdraw_amount = $this->Iwidepay_capital_model->withdraw_amount($value_arr);
 
-                    $value['total_amount'] = !empty($total_amount) ? formatMoney($total_amount/100) : '0';
+                    $value['total_amount'] = !empty($total_amount) ? formatMoney(($total_amount - $total_amount_send)/100) : '0';
                     $value['pay_amount'] = !empty($pay_amount) ? formatMoney($pay_amount/100) : '0';
                     $value['refund_amount'] = !empty($refund_amount) ? formatMoney($refund_amount/100) : '0';
                     $value['withdraw_amount'] = !empty($withdraw_amount) ? formatMoney($withdraw_amount/100) : '0';
@@ -2375,7 +2375,7 @@ class IwidepayApi extends MY_Controller
         //判断可操作时间
         $enabled_op_time = date('H:i:s',time());
         $op_status = false;
-        if ($enabled_op_time >= '16:00:00' && $enabled_op_time < '20:00:00')
+        if ($enabled_op_time >= '16:00:00' && $enabled_op_time < '17:00:00')
         {
             $op_status = true;
         }

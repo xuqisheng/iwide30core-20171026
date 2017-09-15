@@ -154,4 +154,21 @@ class MY_Admin_Iapi extends MY_Controller {
         $this->action = isset ( $segments [5] ) ? $segments [5] : 'index';
         return;
     }
+
+    public function initReturnData( $data ,$err = 0,$status = 1000, $msg = 'OK', $msg_type =''){
+        $tag_data = array(
+            'status'=>$status,
+            'err'=> $err,
+            'msg'=> $msg,
+            'msg_type'=> $msg_type,
+        );
+        $tag_data_group = array(
+            'csrf_token'=>$this->security->get_csrf_token_name(),
+            'csrf_value'=>$this->security->get_csrf_hash()
+        );
+        $tag_data_group['data']  = $data;
+        $tag_data['web_data'] = $tag_data_group;
+        return $tag_data;
+
+    }
 }

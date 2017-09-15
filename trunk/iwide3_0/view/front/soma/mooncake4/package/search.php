@@ -130,7 +130,13 @@
                                 <span class="f24"><?= $product_type ?></span>
                             </div>
                         <?php endif;?>
-                        <a href="<?php echo Soma_const_url::inst()->get_package_detail(array('pid'=>$v['product_id'],'id'=>$inter_id, 'tkid' => $ticketId, 'catid' => $catId) );?>">
+                        <a href="<?php 
+                        if( isset($_GET['fans_act']) && $_GET['fans_act'] == 1  ){
+                            echo Soma_const_url::inst()->get_package_detail(array('pid'=>$v['product_id'],'id'=>$inter_id, 'tkid' => $ticketId, 'catid' => $catId) )."&fans_act=1";
+                        }else{
+                            echo Soma_const_url::inst()->get_package_detail(array('pid'=>$v['product_id'],'id'=>$inter_id, 'tkid' => $ticketId, 'catid' => $catId) );
+                        }
+                        ?>">
                             <p class="img"><img src="<?php echo $v['face_img'];?>"/></p>
                             <p class="title f30"><?= $v['name'] ?></p>
                             <div class="price">

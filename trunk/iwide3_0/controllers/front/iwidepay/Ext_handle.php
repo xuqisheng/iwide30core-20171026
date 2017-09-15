@@ -114,6 +114,43 @@ class Ext_handle extends MY_Controller {
 	    }
     }
 
+    /*public function sync_offline_order_nobiguiyuan(){
+        $this->load->model('iwidepay/Iwidepay_model');
+        $orders = $this->Iwidepay_model->get_offline_hotel_order_nobiguiyuan();
+        if(empty($orders)){
+            MYLOG::w('订房表data is empty', 'iwidepay/sync_offline');
+            return false;
+        }
+        foreach ($orders as $k => $order) {
+            $arr = array();
+            $arr['inter_id'] = $order['inter_id'];
+            $arr['hotel_id'] = $order['hotel_id'];
+            $arr['module'] = 'hotel';
+            $arr['openid'] = $order['openid'];
+            //$arr['order_no_main'] = $order['orderid'];
+            $arr['order_no'] = $order['orderid'];
+            $arr['orig_amt'] = $order['price'] * 100;//单位是分
+            //先判断订单是否是完结状态，完结了直接计算子单金额 分销金额
+            if($order['handled'] == 1){
+                $arr['transfer_status'] = 2;//待分
+                //查询主单每个orderid的子单金额
+                $trans_amt = $this->sync_sub_hotel_order($order['orderid']);
+                $arr['trans_amt'] = $trans_amt;
+                //查询分销
+                $dist_amt = $this->sync_dist($order['inter_id'],$order['orderid'],'hotel');
+                $arr['dist_amt'] = $dist_amt;
+                $arr['handled'] = 1;
+            }else{
+                $arr['trans_amt'] = 0;
+                $arr['dist_amt'] = 0;
+                $arr['transfer_status'] = 1;//待定
+                $arr['handled'] = 0;
+            }
+            $arr['add_time'] = date('Y-m-d H:i:s');//var_dump($arr);die;
+            $this->Iwidepay_model->save_sync_offline_order($arr);// 需要加唯一索引
+        }
+    }*/
+
     //线下订单更新同步状态
     protected function sync_update_offline_order(){
     	$this->load->model('iwidepay/Iwidepay_model');
@@ -141,6 +178,120 @@ class Ext_handle extends MY_Controller {
                     MYLOG::w('线下同步脚本返回影响行数为0|order_no'.$uv['order_no'], 'iwidepay/sync_offline');
                 }
             }
+        }
+    }
+
+    //同步分销杂七杂八的奖励：粉丝关注 首单奖励 额外奖励（查询绩效表）
+    protected function sycn_distribute_record(){
+        $this->load('iwidepay/IwidePay_configs_model');
+        $this->load->model('iwidepay/Iwidepay_model');
+        $this->load->model('iwidepay/Iwidepay_debt_model');
+        //查询分销配置信息 
+        $res = $this->IwidePay_configs_model->get_iwidepay_dis_config('inter_id,type');
+        if(empty($res)){
+            return false;
+        }
+        $result = $inter_ids = $subs_inter_ids = array();
+        foreach($res as $k=>$v){
+            if($v['type'] == 'fans_subs_reward'){//粉丝关注inter_id
+                if(!in_array($v['inter_id'],$subs_inter_ids)){
+                    $subs_inter_ids[] = $v['inter_id'];
+                }
+            }else{
+                $result[$v['inter_id']][] = $v['type'];
+                if(!in_array($v['inter_id'],$inter_ids)){
+                    $inter_ids[] = $v['inter_id'];
+                }
+            }
+        }
+        unset($res);
+        
+        //查询绩效表 粉丝关注 首单奖励 额外奖励(分组奖励)
+        foreach($subs_inter_ids as $sk=>$sv){//粉丝关注 按酒店进行汇总
+            $subs_res = $this->Iwidepay_model->get_sync_dis_fans_subs($sv);
+            if(!empty($subs_res)){
+                $data = array();
+                $data['inter_id'] = $sv;//inter_id
+                $data['hotel_id'] = $subs_res['hotel_id'];
+                $data['module'] = 'dis';
+                $data['openid'] = '';
+                $data['order_no'] = 'subs_' . date('Ymd');
+                $data['order_status'] = 0;
+                $data['transfer_status'] = 3;//直接设为已分账
+                $data['orig_amt'] = $subs_res['sum_total'];
+                $data['trans_amt'] = $subs_res['sum_total'];
+                $data['dist_amts'] = 0;
+                $data['add_time'] = date('Y-m-d H:i:s');
+                $data['handled'] = 1;
+                if($this->Iwidepay_model->save_sync_offline_order($data)){//保存在offline_order表后 再保存在debt_record表
+                    $debt_data = array();
+                    $debt_data['inter_id'] = $data['inter_id'];//inter_id
+                    $debt_data['hotel_id'] = $data['hotel_id'];
+                    $debt_data['module'] = $data['module'];
+                    $debt_data['order_no'] = $data['order_no'];
+                    $debt_data['amount'] = $data['trans_amt'];
+                    $debt_data['status'] = 0;
+                    $debt_data['order_type'] = 'fans_subs';
+                    $debt_data['debt_type'] = 1;
+                    $debt_data['add_time'] = date('Y-m-d H:i:s');
+                    $debt_data['up_time'] = date('Y-m-d H:i:s');
+                    $ins_res = $this->Iwidepay_debt_model->save_debt_record($debt_data);
+                    if(is_array($ins_res)){
+                        MYLOG::w('记录保存到debt表失败：order:'.$data['order_no'], 'iwidepay/sync_offline');
+                    }
+                }else{
+                    MYLOG::w('同步分销关注奖励记录保存到offline_order表失败：order:'.$data['order_no'], 'iwidepay/sync_offline');
+                }
+            }
+        }
+        //查询首单奖励 分组奖励什么的 这些奖励目前是都是有分销员的，不用做saler身份判断
+        $dis_order = $this->Iwidepay_model->get_sync_dis_record($inter_ids);
+        if(!empty($dis_order)){            
+            foreach($dis_order as $dk=>$dv){
+                if(isset($result[$dv['inter_id']]) && in_array($dv['grade_table'],$result[$dv['inter_id']])){
+                    $data = array();
+                    $order_no = '';
+                    $order_type = '';
+                    if($dv['grade_table'] == 'iwide_distribute_group_member'){
+                        $order_no = 'dis_group_' . $dv['grade_id'];
+                        $order_type = 'dis_group';
+                    }elseif($dv['grade_table'] == 'iwide_firstorder_reward'){
+                        $order_no = 'dis_first_o_' . $dv['grade_id'];
+                        $order_type = 'first_order';
+                    }
+                    $data['inter_id'] = $dv['inter_id'];//inter_id
+                    $data['hotel_id'] = $dv['hotel_id'];
+                    $data['module'] = 'dis';
+                    $data['openid'] = '';
+                    $data['order_no'] = $order_no;
+                    $data['order_status'] = 0;
+                    $data['transfer_status'] = 3;//直接设为已分账
+                    $data['orig_amt'] = $dv['grade_total'];
+                    $data['trans_amt'] = $dv['grade_total'];
+                    $data['dist_amts'] = 0;
+                    $data['add_time'] = date('Y-m-d H:i:s');
+                    $data['handled'] = 1;
+                    if($this->Iwidepay_model->save_sync_offline_order($data)){
+                        $debt_data = array();
+                        $debt_data['inter_id'] = $data['inter_id'];//inter_id
+                        $debt_data['hotel_id'] = $data['hotel_id'];
+                        $debt_data['module'] = $data['module'];
+                        $debt_data['order_no'] = $data['order_no'];
+                        $debt_data['amount'] = $data['trans_amt'];
+                        $debt_data['status'] = 0;
+                        $debt_data['order_type'] = $order_type;
+                        $debt_data['debt_type'] = 1;
+                        $debt_data['add_time'] = date('Y-m-d H:i:s');
+                        $debt_data['up_time'] = date('Y-m-d H:i:s');
+                        $ins_res = $this->Iwidepay_debt_model->save_debt_record($debt_data);
+                        if(is_array($ins_res)){
+                            MYLOG::w('记录保存到debt表失败：order:'.$data['order_no'], 'iwidepay/sync_offline');
+                        }
+                    }else{
+                        MYLOG::w('同步分销奇葩奖励记录保存到offline_order表失败：order:'.$data['order_no'], 'iwidepay/sync_offline');
+                    }
+                }
+            }   
         }
     }
 

@@ -50,7 +50,7 @@ class MY_Front_Soma extends MY_Front
         'a489326393',//都江堰紫坪铺滑翔伞飞行营地
         'a494820079',//成都群光君悦酒店
         'a496652649',//株洲万豪
-        'a497580480',// 苏州吴宫泛太平洋酒店
+        //'a497580480',// 苏州吴宫泛太平洋酒店
         'a499046681',
         'a492763532',
         //'a498545803',
@@ -139,6 +139,11 @@ class MY_Front_Soma extends MY_Front
     public $public_info = [];
 
     /**
+     * @var array 新版皮肤控制器列表
+     */
+    protected $idefaultControllers = ['gift_pack','GiftDelivery'];
+
+    /**
      * MY_Front_Soma constructor.
      *
      */
@@ -154,21 +159,27 @@ class MY_Front_Soma extends MY_Front
         unset($this->public);
 
         //theme
-       $this->load->model('soma/Theme_config_model');
+        if(in_array($this->controller, $this->idefaultControllers)){
+            // 专用idefault新版皮肤
+            $this->theme = 'default';
+        }else{
+            $this->load->model('soma/Theme_config_model');
             $themeConfig = $this->Theme_config_model->get_using_theme($this->inter_id);
             if ($themeConfig) {
                 $this->themeConfig = $themeConfig;
                 $this->theme = $themeConfig['theme_path'];
                 if(isset($themeConfig['theme_id'])){
                     $themeConfigInfo = $this->Theme_config_model->get(['theme_id'], [$themeConfig['theme_id']]);
-                    if($themeConfigInfo[0]['version']){
-                        $this->version = $themeConfigInfo[0]['version'];
+                    if($themeConfigInfo){
+                        if($themeConfigInfo[0]['version']){
+                            $this->version = $themeConfigInfo[0]['version'];
+                        }
                     }
                 }
+                //把公众号配置的特殊信息放入配置
+                $this->statis_code = $this->_get_statis_code($this->inter_id, $themeConfig);
+            }
 
-
-            //把公众号配置的特殊信息放入配置
-            $this->statis_code = $this->_get_statis_code($this->inter_id, $themeConfig);
             $this->getTicketTheme();
         }
 
@@ -413,23 +424,26 @@ EOF;
         //tkid
         $tkid = $this->input->get('tkid', null, '');
         //if($tkid){
-            $redis->set('tkid', $tkid, $ttl);
+            //$redis->set($this->inter_id.'_is_', $tkid, $ttl);
+        $this->session->set_tempdata('theme_tkid_', $tkid, $ttl);
         //}
 
         //brandname
         $brandname = $this->input->get('brandname', null, '');
         //if($brandname){
-            $redis->set('brandname', $brandname, $ttl);
-            //$this->session->set_tempdata('brandname', $brandname, $ttl);
+            //$redis->set('brandname', $brandname, $ttl);
+            //$redis->set($this->inter_id.'_is_'.$brandname, $brandname, $ttl);
+            $this->session->set_tempdata('theme_brandname', $brandname, $ttl);
         //}
 
         //layout
         $layout = $this->input->get('layout', null, '');
         if($layout){
-            $redis->set('layout', $layout, $ttl);
-            //$this->session->set_tempdata('layout', $layout, $ttl);
-        }
+            //$redis->set('layout', $layout, $ttl);
+            //$redis->set($this->inter_id.'_is_'.$layout, $layout, $ttl);
+            $this->session->set_tempdata('theme_layout', $layout, $ttl);
 
+        }
 
     }
 
@@ -534,7 +548,7 @@ var _hmt = _hmt || [];
             if (isset($themeConfig['statis_code'])) {
                 return $themeConfig['statis_code'];
             } else {
-                $public_info = $this->Publics_model->get_public_by_id($inter_id);
+                $public_info = $this->public_info;
                 if (!empty($public_info['statis_code'])) {
                     return $public_info['statis_code'];
                 }
@@ -1471,26 +1485,31 @@ var _hmt = _hmt || [];
         else {
             $datas['js_api_list'] = $datas['base_api_list'];
         }
-        foreach ($datas['js_api_list'] as $v) {
-            $js_api_list .= "'{$v}',";
-        }
-        $datas['js_api_list'] = substr($js_api_list, 0, -1);
+        $datas['js_api_list'] = "'" . implode("','", $datas['js_api_list']) . "'";
+
         //主动显示某些菜单
         if (!isset($datas['js_menu_show'])) {
-            $datas['js_menu_show'] = array('menuItem:setFont', 'menuItem:share:appMessage', 'menuItem:share:timeline', 'menuItem:favorite', 'menuItem:copyUrl');
+            //$datas['js_menu_show'] = array('menuItem:setFont', 'menuItem:share:appMessage', 'menuItem:share:timeline', 'menuItem:favorite', 'menuItem:copyUrl');
+            $datas['js_menu_show'] = array(
+                'menuItem:setFont',
+                'menuItem:favorite',
+            );
         }
-        foreach ($datas['js_menu_show'] as $v) {
-            $menu_show_list .= "'{$v}',";
-        }
-        $datas['js_menu_show'] = substr($menu_show_list, 0, -1);
+        $datas['js_menu_show'] = "'" . implode("','", $datas['js_menu_show']) . "'";
+
         //主动隐藏某些菜单
         if (!isset($datas['js_menu_hide'])) {
-            $datas['js_menu_hide'] = array('menuItem:share:appMessage', 'menuItem:share:timeline', 'menuItem:copyUrl', 'menuItem:share:email', 'menuItem:originPage');
+            $datas['js_menu_hide'] = array(
+                'menuItem:share:appMessage',
+                'menuItem:share:timeline',
+                'menuItem:share:email',
+                'menuItem:copyUrl',
+                'menuItem:originPage'
+            );
         }
-        foreach ($datas['js_menu_hide'] as $v) {
-            $menu_hide_list .= "'{$v}',";
-        }
-        $datas['js_menu_hide'] = substr($menu_hide_list, 0, -1);
+        $datas['js_menu_hide'] = "'" . implode("','", $datas['js_menu_hide']) . "'";
+
+
         if (!isset($datas['js_share_config'])) {
             $datas['js_share_config'] = false;
         }

@@ -488,8 +488,8 @@ class Iwidepayreturn extends MY_Controller {
                         $this->load->model('pay/Company_pay_model','pay_model');
                         $reward = 0;
                         switch ($order_info['data']['deposit_card_id']){
-                            case 138:$reward = 100;break;
-                            case 139:$reward = 60;break;
+                            case 138:$reward = 80;break;
+                            case 139:$reward = 48;break;
                             case 173:$reward = 10;break;
                         }
 //                        $reward = 0.01;

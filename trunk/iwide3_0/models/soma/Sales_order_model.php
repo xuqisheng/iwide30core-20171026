@@ -1191,7 +1191,7 @@ class Sales_order_model extends MY_Model_Soma {
         //库存检测
         $stock_enough= $this->check_item_stock();
         if( !$stock_enough ){
-            Soma_base::inst()->show_exception($this->lang->line('inventory_shortage_tip'));
+            Soma_base::inst()->show_exception('库存不足');
         }
 
         if ($this->scope_product_link_id) {
@@ -1873,7 +1873,7 @@ class Sales_order_model extends MY_Model_Soma {
                         'note' => !empty($mailInfo['note']) ? $mailInfo['note'] :'',                //备注
                     );
                     $result = $ConsumerOrderModel->mail_consumer( $mailPost, $openid, $inter_id, $business );
-                    \App\libraries\Support\Log::debug('邮寄：' . $order_id. ' | aiid : '.$mailItem['item_id'], $result);
+                    \App\libraries\Support\Log::error('邮寄：' . $order_id. ' | aiid : '.$mailItem['item_id'], $result);
 
                     if( isset( $result['status'] ) && $result['status'] == Soma_base::STATUS_TRUE ){
 
@@ -4268,41 +4268,5 @@ class Sales_order_model extends MY_Model_Soma {
         }
 
         return array('res' => true, 'msg' => '编辑成功');
-    }
-
-    /**
-     * 获取某个日期或者某个时间段的订单数、支付金额
-     * @param      string  $inter_id       公众号
-     * @param      string  $start_date     开始时间 xxxx-xx-xx
-     * @param      string  $end_date       结束时间 xxxx-xx-xx
-     * @return     array                [订单数、支付金额]
-     * @author     xuxianjia
-     */
-    public function getOrderTotal($inter_id, $start_date = null, $end_date = null)
-    {
-        $this->load->model('soma/shard_config_model', 'model_shard_config');
-        $CI = &get_instance();
-        $CI->db_shard_config = $this->model_shard_config->build_shard_config($inter_id);
-        $CI->current_inter_id = $inter_id;
-
-        if (!empty($start_date) && !empty($end_date)) {
-            $start_time = date('Y-m-d 00:00:00', strtotime($start_date));
-            $end_time = date('Y-m-d 23:59:59', strtotime($end_date));
-        }else if (!empty($start_date)) {
-            $start_time = date('Y-m-d 00:00:00', strtotime($start_date));
-            $end_time = date('Y-m-d 23:59:59', strtotime($start_date));
-        }else {
-            return [];
-        }
-
-        $this->soma_db_conn_read->select('count(*) as num,sum(real_grand_total) as money');
-        $this->soma_db_conn_read->from($this->table_name($inter_id));
-        $this->soma_db_conn_read->where('inter_id', $inter_id);
-        $this->soma_db_conn_read->where('payment_time >=', $start_time);
-        $this->soma_db_conn_read->where('payment_time <=', $end_time);
-        $this->soma_db_conn_read->where('is_payment', self::IS_PAYMENT_YES);
-        $this->soma_db_conn_read->where('status', self::STATUS_PAYMENT);
-        $result = $this->soma_db_conn_read->get()->result_array();
-        return current($result);
     }
 }

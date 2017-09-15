@@ -290,6 +290,9 @@ class Zhongruan_hotel_model extends CI_Model {
 			$web_left = $this->get_web_nums($pms_set, date('Y-m-d', strtotime($startdate)), date('Y-m-d', strtotime($enddate)), $rm_cds);
 			$params ['web_left'] = $web_left;
 		}*/
+//		if ($enddate>$startdate){
+//		    $enddate=date('Ymd',strtotime('- 1 day ',strtotime($enddate)));
+//		}
 		if(!empty ($pms_set ['pms_auth'] ['get_hotels_way'])){
 			if($pms_set ['pms_auth'] ['get_hotels_way'] == 'multi'){ // 同时获取多个价格代码房态
 				$result = $this->get_web_roomtype_multi($pms_set, $web_price_code, $startdate, $enddate, $params);
@@ -440,7 +443,7 @@ class Zhongruan_hotel_model extends CI_Model {
 		    $sh_hotels->T_channel = $pms_set ['pms_auth'] ['channel'];
 		    $sh_hotels->htlcd = $pms_set ['hotel_web_id'];
 		    $sh_hotels->rm_list [0] = '';
-		
+
 		    $sh_hotels->rp_cd = implode ( ',', $web_price_code );
 		
 		    $web_result = $this->Get_HotelsByBGY ( $pms_set, $sh_hotels );
@@ -1162,14 +1165,31 @@ class Zhongruan_hotel_model extends CI_Model {
                     }
                     $web_start = date ( 'Ymd', strtotime ( $web_order [$webs_orderid]->arr_dt ) );
                     $web_end = date ( 'Ymd', strtotime ( $web_order [$webs_orderid]->dpt_dt ) );
-                    $web_end = $web_end == $web_start ? date ( 'Ymd', strtotime ( '+ 1 day', strtotime ( $web_start ) ) ) : $web_end;
+//                    $web_end = $web_end == $web_start ? date ( 'Ymd', strtotime ( '+ 1 day', strtotime ( $web_start ) ) ) : $web_end;
+                    $web_end < $web_start and $web_end == $web_start;
                     $ori_day_diff = get_room_night ( $od ['startdate'], $od ['enddate'], 'ceil', $od ); // 至少有一个间夜
                     $web_day_diff = get_room_night ( $web_start, $web_end, 'ceil' ); // 至少有一个间夜
                     $day_diff = $web_day_diff - $ori_day_diff;
+                    $everyday_amt = explode ( ',', $web_order [$webs_orderid]->everyday_amt );
+                    if(count($everyday_amt)==1){
+                        $web_price = array_sum ( $everyday_amt );
+                    }else{
+                        $web_price = array_sum ( $everyday_amt ) - array_pop ( $everyday_amt );
+                    }
                     
                     $updata = array ();
                     if ($istatus != $od ['istatus']) {
                         $updata ['istatus'] = $istatus;
+                    }
+                    if(!empty($updata ['istatus']) && $updata ['istatus'] == 3 && $web_price <= 0){
+                        $this->db->where(array(
+                            'inter_id' => $order ['inter_id'],
+                            'orderid'  => $order ['orderid']
+                        ));
+                        $this->db->update('hotel_order_items', array(
+                            'istatus' => 1
+                        ));
+                        $updata ['istatus'] = 5;
                     }
                     // 积分支付单不进行金额更新
                     if ($order ['paytype'] != 'point' ) {
@@ -1178,8 +1198,6 @@ class Zhongruan_hotel_model extends CI_Model {
                             $updata ['startdate'] = $web_start;
                             $updata ['enddate'] = $web_end;
                         }
-                        $everyday_amt = explode ( ',', $web_order [$webs_orderid]->everyday_amt );
-                        $web_price = array_sum ( $everyday_amt ) - array_pop ( $everyday_amt );
                         // $web_price = 0;
                         if ($web_price != $od['iprice']) {
                             $updata ['new_price'] = $web_price;
