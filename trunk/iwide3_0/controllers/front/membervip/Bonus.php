@@ -14,10 +14,13 @@ class Bonus extends MY_Front_Member
 	//会员积分列表
 	public function index(){
 		$data = array();
+        $data['page_title'] = '积分记录';
+        if( !empty($this->_template_filed_names['credit_name'])){
+            $data['page_title'] = $this->_template_filed_names['credit_name'].'记录';
+        }
         if(!$this->is_restful()){
             $data = BonusService::getInstance()->index($this->inter_id,$this->openid,$this->_token,$this->_template,$this->_template_filed_names);
         }
-        $data['page_title'] = '积分记录';
         $this->template_show('member',$this->_template,'bonus',$data);
     }
 

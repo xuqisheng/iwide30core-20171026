@@ -46,7 +46,7 @@ wx.ready(function(){
 <a class="goods webkitbox bd whiteblock">
 	<div class="goodsimg">
         <div class="squareimg">
-            <!-- <img src="<?php echo base_url('public/soma/images');?>/eg4.jpg" /> -->
+            <!-- <img src="<?php echo get_cdn_url('public/soma/images');?>/eg4.jpg" /> -->
             <img src="<?php echo $product['face_img']; ?>" />
         </div>
     </div>

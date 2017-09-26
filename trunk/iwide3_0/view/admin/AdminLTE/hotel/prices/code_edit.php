@@ -378,6 +378,19 @@ echo $block_left;
 									</div>
 								</div>
 							</div>
+							<?php if (isset($external_way_valid)){?>
+							<div class="hotel_star">
+								<div class="">与PMS关联方式</div>
+								<div>
+									<select name="external_way" id="external_way" style='width: 10em'>
+										<option value='0' <?php if($external_way_valid==0)echo 'selected';?>>默认</option>
+										<option value='1' <?php if($external_way_valid==1)echo 'selected';?>>仅数量</option>
+										<option value='2' <?php if($external_way_valid==2)echo 'selected';?>>数量及价格</option>
+									</select>
+									<label for="interval_1">(修改此项会马上影响到线上价格，若不确定请咨询相关工作人员)</label>
+								</div>
+							</div>
+							<?php }?>
 						<?php }?>
 					</div>
 				</div>

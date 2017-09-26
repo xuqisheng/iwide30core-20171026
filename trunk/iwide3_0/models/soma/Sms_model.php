@@ -457,5 +457,37 @@ class Sms_model extends MY_Model_Soma {
             ),
         );
     }
+
+    /**
+     * 恒大短信接口
+     * @param $mobile
+     * @param $content
+     * @return bool
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
+    public function everGrandSms($mobile, $content)
+    {
+        $data = [
+            'userId' => 'H11202',
+            'password' => '220692',
+            'pszMobis' => $mobile,
+            'pszMsg' => $content,
+            'iMobiCount' => 1,
+            'pszSubPort' => '*'
+        ];
+        $data = http_build_query($data);
+        $url = 'http://61.145.229.29:7791/MWGate/wmgw.asmx/MongateCsSpSendSmsNew?' . $data;
+        $start = microtime(true);
+        $res = file_get_contents($url);
+        $end = microtime(true);
+        //$time = round($end - $start, 6);
+        //MYLOG::pms_access_record('a468919145', $time, $url, '', json_encode($data), $res, "恒大");
+        $xml_parser = xml_parser_create();
+        $res = xml_parse($xml_parser, $res, true);
+        if ($res) {
+            return true;
+        }
+        return false;
+    }
 	
 }

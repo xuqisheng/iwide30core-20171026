@@ -53,10 +53,14 @@ class Iwidepayreturn extends MY_Controller {
             exit;
         }
 
-        $add_time = $idata['add_time'];
-        //支付成功时间超过下单时间10分钟以上，写入日志
-        if(!empty($add_time)&&(time()-strtotime($add_time))>600){
-            MYLOG::w(json_encode($idata),'iwidepayreturn_ot');
+        if((time()-strtotime($idata['add_time']))>600){
+            //调订单支付状态查询接口
+            $qdata = $this->Iwidepay_model->order_query($parse_arr['orderNo']);
+            $add_time = $qdata['payTime'];
+            //支付回调时间超过支付成功时间10分钟以上，写入日志
+            if(!empty($add_time)&&(time()-strtotime($add_time))>600){
+                MYLOG::w(json_encode($qdata),'iwidepayreturn_ot');
+            }
         }
 
         if(!$idata){
@@ -88,18 +92,33 @@ class Iwidepayreturn extends MY_Controller {
         switch ($idata['module']) {
             case 'hotel':
                 $pay_log_type = 'ip_hotel';
+                $order_status = 1;
+                $transfer_status = 1;
                 break;
             case 'soma':
                 $pay_log_type = 'ip_soma';
+                $order_status = 12;
+                $transfer_status = 1;
                 break;
             case 'vip':
                 $pay_log_type = 'ip_vip';
+                $order_status = 't';
+                $transfer_status = 2;
                 break;
             case 'okpay':
                 $pay_log_type = 'ip_okpay';
+                $order_status = 3;
+                $transfer_status = 2;
+                break;
+            case 'dc':
+                $pay_log_type = 'ip_dc';
+                $order_status = 1;//支付状态
+                $transfer_status = 1;
                 break;
             default:
                 $pay_log_type = 'ip';
+                $order_status = 1;
+                $transfer_status = 1;
                 break;
         }
 
@@ -110,62 +129,52 @@ class Iwidepayreturn extends MY_Controller {
             'out_trade_no' => $parse_arr['orderNo'],
             'transaction_id' => $parse_arr['payId'],
             'pay_time' => time(),
+            'pay_result' => 1,
             'rtn_content' => $body,
+            'total_fee' => $parse_arr['transAmt'],
             'type' => $pay_log_type,
             );
         $this->db->insert ( 'pay_log', $in_arr );
+
+        // 更新分账订单信息
+        parse_str($body, $params);
+        $split_order = array(
+            'productid' => $params['productId'],
+            'transid' => $params['transId'],
+            'merno' => $params['merNo'],
+            'order_status' => $order_status,
+            'pay_time' => $params['payTime'],
+            'pay_id' => $params['payId'],
+            'transfer_status' => $transfer_status,
+            'update_time' => date('Y-m-d H:i:s'),
+            );
+        MYLOG::w('分账订单更新数据：'.json_encode($split_order),'iwidepayreturn');
+        $res = $this->Iwidepay_model->update_iwidepay_order($idata['order_no'],$idata['module'],$split_order);
+        if(!$res){
+            MYLOG::w('分账订单更新失败：'.json_encode($res),'iwidepayreturn');
+            exit('ERROR');
+        }
 
         //各模块回调逻辑
         switch ($idata['module']) {
             case 'hotel':
                 $this->hotel_handle($idata,$parse_arr);
-                $order_status = 1;
-                $transfer_status = 1;
                 break;
             case 'soma':
                 $this->soma_handle($idata,$parse_arr);
-                $order_status = 12;
-                $transfer_status = 1;
                 break;
             case 'vip':
                 $this->vip_handle($idata,$parse_arr);
-                $order_status = 't';
-                $transfer_status = 2;
                 break;
             case 'okpay':
                 $this->okpay_handle($idata,$parse_arr);
-                $order_status = 3;
-                $transfer_status = 2;
                 break;
             case 'dc':
                 $this->dc_handle($idata,$parse_arr);
-                $order_status = 1;//支付状态
-                $transfer_status = 1;
                 break;
             default:
-                $order_status = 1;
-                $transfer_status = 1;
                 break;
         }
-
-		// 更新分账订单信息
-		parse_str($body, $params);
-		$split_order = array(
-			'productid' => $params['productId'],
-			'transid' => $params['transId'],
-			'merno' => $params['merNo'],
-			'order_status' => $order_status,
-			'pay_time' => $params['payTime'],
-			'pay_id' => $params['payId'],
-			'transfer_status' => $transfer_status,
-			'update_time' => date('Y-m-d H:i:s'),
-			);
-		MYLOG::w('分账订单更新数据：'.json_encode($split_order),'iwidepayreturn');
-		$res = $this->Iwidepay_model->update_iwidepay_order($idata['order_no'],$idata['module'],$split_order);
-		if(!$res){
-			MYLOG::w('分账订单更新失败：'.json_encode($res),'iwidepayreturn');
-			exit('SUCCESS');
-		}
 		// 成功响应
 		exit('SUCCESS');
 	}
@@ -946,10 +955,14 @@ class Iwidepayreturn extends MY_Controller {
      */
     protected function multi_order($data,$parse_arr)
     {
-        $add_time = $data[0]['add_time'];
-        //支付成功时间超过下单时间10分钟以上，写入日志   
-        if(!empty($add_time)&&(time()-strtotime($add_time))>600){
-            MYLOG::w(json_encode($data),'iwidepayreturn_ot');
+        if((time()-strtotime($data[0]['add_time']))>600){
+            //调订单支付状态查询接口
+            $qdata = $this->Iwidepay_model->order_query($data[0]['order_no']);
+            $add_time = $qdata['payTime'];
+            //支付成功时间超过下单时间10分钟以上，写入日志   
+            if(!empty($add_time)&&(time()-strtotime($add_time))>600){
+                MYLOG::w(json_encode($qdata),'iwidepayreturn_ot');
+            }
         }
 
         if (empty($data))
@@ -988,16 +1001,16 @@ class Iwidepayreturn extends MY_Controller {
             'out_trade_no' => $parse_arr['orderNo'],
             'transaction_id' => $parse_arr['payId'],
             'pay_time' => time(),
+            'pay_result' => 1,
             'rtn_content' => json_encode($parse_arr),
+            'total_fee' => $parse_arr['transAmt'],
             'type' => 'ip_'.$idata['module'],
         );
         $this->db->insert('pay_log', $in_arr);
 
-        //各模块回调逻辑
         switch ($idata['module'])
         {
             case 'ticket':
-                $this->ticket_handle($idata,$parse_arr);
                 $order_status = 1;//支付状态
                 $transfer_status = 1;
                 break;
@@ -1027,8 +1040,17 @@ class Iwidepayreturn extends MY_Controller {
             if(!$res)
             {
                 MYLOG::w('分账订单更新失败：'.json_encode($res),'iwidepayreturn');
-                //exit('SUCCESS');
+                exit('ERROR');
             }
+        }
+        //各模块回调逻辑
+        switch ($idata['module'])
+        {
+            case 'ticket':
+                $this->ticket_handle($idata,$parse_arr);
+                break;
+            default:
+                break;
         }
         // 成功响应
         exit('SUCCESS');

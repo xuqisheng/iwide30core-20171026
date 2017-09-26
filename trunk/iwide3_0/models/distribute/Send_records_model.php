@@ -167,12 +167,8 @@ class Send_records_model extends MY_Model{
 	}
 	
 	public function get_batch_logs($inter_id, $batch_no = '', $begin_date = '', $end_date = '', $limit = null, $offset = 0, $source = 1) {
-		$sql = "SELECT gst.id,gst.batch_no,gst.inter_id,gst.send_time,COUNT(saler) saler_count,SUM(`status`=1) success_saler,SUM(send_amount) total_amount,
-				SUM(IF(`status`=1,send_amount,0)) success_amount,SUM(times) total_times,SUM(success_count) success_total_count 
-				FROM (SELECT dc.id,dc.batch_no,dc.inter_id,dc.saler,dc.send_time,dc.send_amount,dc.partner_trade_no,dc.`status`,dc.send_by,
-				COUNT(*) times,SUM(`status`=1) success_count FROM iwide_distribute_send_record dc 
-				LEFT JOIN iwide_distribute_send_grade_rel gr ON dc.id=gr.sr_id 
-				WHERE inter_id=?";
+		$sql = "SELECT dc.batch_no,dc.send_time,dc.inter_id,dc.id,COUNT(DISTINCT saler) saler_count,COUNT(DISTINCT saler,`status`=1) success_saler, SUM(send_amount) total_amount,SUM(IF(`status`=1,send_amount,0)) success_amount,count(dc.id) total_times,SUM(`status`=1) success_total_count FROM iwide_distribute_send_record dc
+LEFT JOIN iwide_distribute_send_grade_rel gr ON dc.id=gr.sr_id WHERE inter_id=? ";
 		$param [] = $inter_id;
 		if(!empty($batch_no)){
 			$sql .= ' AND dc.batch_no LIKE ?';
@@ -192,13 +188,42 @@ class Send_records_model extends MY_Model{
 			$sql .= ' AND dc.source = ?';
 			$param [] = $source;
 		}
-		$sql .= ' GROUP BY partner_trade_no) gst GROUP BY batch_no ORDER BY send_time DESC';
+		$sql .= ' GROUP BY batch_no ORDER BY send_time DESC';
 		if (! empty ( $limit )) {
 			$sql .= ' LIMIT ?,?';
 			$param [] = $offset;
 			$param [] = $limit;
 		}
 		return $this->_db('iwide_r1')->query ( $sql, $param );
+	}
+	public function get_batch_logs_count($inter_id, $batch_no = '', $begin_date = '', $end_date = '', $limit = null, $offset = 0, $source = 1) {
+		$sql = "SELECT COUNT(DISTINCT dc.batch_no) counts FROM iwide_distribute_send_record dc WHERE inter_id=? ";
+		$param [] = $inter_id;
+		if(!empty($batch_no)){
+			$sql .= ' AND dc.batch_no LIKE ?';
+			$param [] = '%'.$batch_no.'%';
+		}else{
+			$sql .= " AND batch_no<>''";
+		}
+		if(!empty($begin_date)){
+			$sql .= ' AND dc.send_time >= ?';
+			$param [] = $begin_date;
+		}
+		if(!empty($end_date)){
+			$sql .= ' AND dc.send_time <= ?';
+			$param [] = $end_date;
+		}
+		if(!empty($source)){
+			$sql .= ' AND dc.source = ?';
+			$param [] = $source;
+		}
+		if (! empty ( $limit )) {
+			$sql .= ' LIMIT ?,?';
+			$param [] = $offset;
+			$param [] = $limit;
+		}
+		$query = $this->_db('iwide_r1')->query ( $sql, $param )->row();
+		return $query->counts;
 	}
 	
 	public function get_salers_log($inter_id, $batch_no, $status = 0, $saler_no = '', $saler_name = '', $limit = NULL, $offset = 0,$source = 1) {

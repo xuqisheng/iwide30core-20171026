@@ -63,7 +63,7 @@ class Coupon_new_model extends CI_Model {
         $params['inter_id']=$inter_id;
         $params['module']='hotel';
 //        $params['next_id']=199;
-        $params['num']='100';//会员模块返回的数量写死在最多100，最少10
+        $params['num']='250';//会员模块返回的数量写死在最多100，最少10
         $params['type']='';
         $params['is_pms']=$pms;
         $params['uu_code']=time().rand(0,9999);

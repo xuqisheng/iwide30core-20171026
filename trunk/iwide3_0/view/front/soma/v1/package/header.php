@@ -13,10 +13,10 @@
     <link href="<?php echo get_cdn_url('public/soma/styles/global.css');?>" rel="stylesheet">
     <link href="<?php echo get_cdn_url('public/soma/styles/default.css');?>" rel="stylesheet">
     <link href="<?php echo get_cdn_url('public/soma/styles/theme.css');?>" rel="stylesheet">
-    <link href="<?php echo base_url('public/soma/v1/style.css'); ?>" rel="stylesheet">
+    <link href="<?php echo get_cdn_url('public/soma/v1/style.css'); ?>" rel="stylesheet">
     <script src="<?php echo get_cdn_url('public/soma/scripts/jquery.js');?>"></script>
     <script src="<?php echo get_cdn_url('public/soma/scripts/ui_control.js');?>"></script>
-	<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
+    <script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
     <script src="<?php echo get_cdn_url('public/soma/scripts/lazyload.js');?>"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
     <script src="<?php echo get_cdn_url('public/soma/scripts/alert.js');?>"></script>
@@ -24,6 +24,7 @@
     <?php if(isset($langDir) && $langDir == 'english' ): ?>
         <link href="<?php echo get_cdn_url('public/soma/styles/en_v1.css');?>" rel="stylesheet">
     <?php endif; ?>
+
     <title><?php echo $title;?></title>
       <?php echo $statistics_js;?>
 </head>

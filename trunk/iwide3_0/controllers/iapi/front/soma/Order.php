@@ -30,7 +30,7 @@ class Order extends MY_Front_Soma_Iapi
         'a489326393',//都江堰紫坪铺滑翔伞飞行营地
         'a494820079',//成都群光君悦酒店
         'a496652649',//株洲万豪
-        'a497580480',// 苏州吴宫泛太平洋酒店
+        //'a497580480',// 苏州吴宫泛太平洋酒店
         'a499046681',
         'a492763532',
         //'a498545803',
@@ -393,6 +393,11 @@ class Order extends MY_Front_Soma_Iapi
      *                                  description="申请退款，需要拼接order_id",
      *                                  type = "string",
      *                             ),
+     *                            @SWG\Property(
+     *                                  property="hotel_order_info",
+     *                                  description="订房详情",
+     *                                  type = "string",
+     *                             ),
      *                        ),
      *                   ),
      *              ),
@@ -437,7 +442,8 @@ class Order extends MY_Front_Soma_Iapi
                 'package_review' => $this->link['package_review'], //  卷码 - 已使用（消费）
                 'del_order' => $this->link['delete_order_link'], // 订单删除
                 'refund_index' => $this->link['refund_index'], // 退款首页
-                'refund_detail' => $this->link['refund_detail'].'&oid='.$oid //退款详情
+                'refund_detail' => $this->link['refund_detail'].'&oid='.$oid, //退款详情,
+                'hotel_order_info' => $this->link['hotel_order_info']  //订房订单列表
             ],
         ];
         if ($result->getStatus() !== Result::STATUS_OK) {
@@ -942,7 +948,7 @@ class Order extends MY_Front_Soma_Iapi
         if (empty($aiid)) {
             show_error('hotel_id or room_id or price_code not get', 400);
         }
-        $result = OrderService::getInstance()->getSelectHotelInfo($aiid, $codeId, $interId, $openid, $hotelId, $roomId, $priceCode);
+        $result = OrderService::getInstance()->getSelectHotelInfo($aiid, $codeId, $hotelId, $roomId, $priceCode);
         $data = $result->getData();
         if ($result->getStatus() !== Result::STATUS_OK) {
             $this->json(FrontConst::OPER_STATUS_FAIL_TOAST, $result->getMessage(), $data);
@@ -1277,10 +1283,12 @@ class Order extends MY_Front_Soma_Iapi
         if ($result->getStatus() !== Result::STATUS_OK) {
             $this->json(FrontConst::OPER_STATUS_FAIL_TOAST, $result->getMessage(), $data);
         } else {
+            $paySuccessUrl = urlSetValue($this->link['booking_success'], 'bsn', $business);
+            $paySuccessUrl = urlSetValue($paySuccessUrl, 'bid', $data['bid']);
             $data['page_resource'] = [
                 'link' => [
                     // 下单成功跳转的页面
-                    'pay_success_stay' => $this->link['pay_success_stay_link'] . $params['orderId']
+                    'pay_success_stay' => $this->link['pay_success_stay_link'] . $params['orderId'].'&order_detail_url='.$paySuccessUrl
                 ],
             ];
             $this->json(FrontConst::OPER_STATUS_SUCCESS, '', $data);

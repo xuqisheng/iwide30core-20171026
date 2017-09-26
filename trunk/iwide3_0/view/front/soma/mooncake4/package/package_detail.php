@@ -7,9 +7,9 @@ if($package['type'] == $packageModel::PRODUCT_TYPE_POINT)
 }
 ?>
 <body>
-<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
-<script src="<?php echo base_url('public/soma/scripts/imgscroll.js');?>"></script>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<link href="<?php echo get_cdn_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
 <script>
     wx.config({
         debug: false,
@@ -111,7 +111,7 @@ if($package['type'] == $packageModel::PRODUCT_TYPE_POINT)
                     <?php }?>
                 <?php else: ?>
                     <a>
-                        <img src="<?php echo base_url('public/soma/images/default.jpg'); ?>" />
+                        <img src="<?php echo get_cdn_url('public/soma/images/default.jpg'); ?>" />
                     </a>
                 <?php endif; ?>
             </div>
@@ -441,7 +441,7 @@ if($package['type'] == $packageModel::PRODUCT_TYPE_POINT)
 
                         <div class="goods-detail">
                             <div class="box">
-                                <div class="img"><img src="<?php if( $package['face_img'] )echo $package['face_img'];else echo base_url('public/soma/images/default2.jpg');?>" /></div>
+                                <div class="img"><img src="<?php if( $package['face_img'] )echo $package['face_img'];else echo get_cdn_url('public/soma/images/default2.jpg');?>" /></div>
                                 <div class="info flex1">
                                     <p class="name f30"><?php echo $package['name'];?></p>
                                     <p class="price">

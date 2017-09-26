@@ -1,7 +1,7 @@
 <body>
 <?php 
     require_once VIEWPATH. 'soma' . DS. $this->theme. DS. 'package'. DS.'header_var.php';
-    $bg_img = (isset($themeConfig['index_bg']) && !empty($themeConfig['index_bg'])) ? $themeConfig['index_bg'] : base_url("public/soma/mooncake_v1/{$theme_key}/bg.jpg");
+    $bg_img = (isset($themeConfig['index_bg']) && !empty($themeConfig['index_bg'])) ? $themeConfig['index_bg'] : get_cdn_url("public/soma/mooncake_v1/{$theme_key}/bg.jpg");
     $idx_color= (isset($themeConfig['idx_color']) && !empty($themeConfig['idx_color'])) ? $themeConfig['idx_color'] : '#000';
 ?>
 <script>
@@ -64,8 +64,8 @@
 
 <div class="pageloading"><p class="isload" style="margin-top:150px">正在加载</p></div>
 <!-- 以上为head -->
-<script src="<?php echo base_url('public/soma/scripts/imgscroll.js');?>"></script>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
 <script>var moonCakeArr ;</script>
 <div class="fixed_body theme_bg <?php echo $theme_key; ?> theme_bg_img">
     <div class="relative main_content_box">
@@ -95,10 +95,10 @@
         </div>
 
         <?php
-            $buyBtnImg = (isset($themeConfig['buy_btn']) && !empty($themeConfig['buy_btn'])) ? $themeConfig['buy_btn'] : base_url("public/soma/mooncake_v1/{$theme_key}/send_1.png");
-            $toFriendImg = (isset($themeConfig['to_friend_btn']) && !empty($themeConfig['to_friend_btn'])) ? $themeConfig['to_friend_btn'] : base_url("public/soma/mooncake_v1/{$theme_key}/send_2.png");
-            $toGroupImg = (isset($themeConfig['to_group_btn']) && !empty($themeConfig['to_group_btn'])) ? $themeConfig['to_group_btn'] : base_url("public/soma/mooncake_v1/{$theme_key}/send_3.png");
-            $more_btn_img = (isset($themeConfig['more_btn']) && !empty($themeConfig['more_btn'])) ? $themeConfig['more_btn'] : base_url("public/soma/mooncake_v1/{$theme_key}/more.png");
+            $buyBtnImg = (isset($themeConfig['buy_btn']) && !empty($themeConfig['buy_btn'])) ? $themeConfig['buy_btn'] : get_cdn_url("public/soma/mooncake_v1/{$theme_key}/send_1.png");
+            $toFriendImg = (isset($themeConfig['to_friend_btn']) && !empty($themeConfig['to_friend_btn'])) ? $themeConfig['to_friend_btn'] : get_cdn_url("public/soma/mooncake_v1/{$theme_key}/send_2.png");
+            $toGroupImg = (isset($themeConfig['to_group_btn']) && !empty($themeConfig['to_group_btn'])) ? $themeConfig['to_group_btn'] : get_cdn_url("public/soma/mooncake_v1/{$theme_key}/send_3.png");
+            $more_btn_img = (isset($themeConfig['more_btn']) && !empty($themeConfig['more_btn'])) ? $themeConfig['more_btn'] : get_cdn_url("public/soma/mooncake_v1/{$theme_key}/more.png");
         ?>
     </div>
 
@@ -141,12 +141,12 @@
     </a>
 <!-- 显示分销号start -->
     <div class="distribute_btn" style="display:none">
-        <span><img src="<?php echo base_url('public/soma/images/distributeimg.jpg');?>" /></span>
+        <span><img src="<?php echo get_cdn_url('public/soma/images/distributeimg.jpg');?>" /></span>
     </div>
     <div class="ui_pull distribute" style="display:none" >
         <div class="pullbox center bg_fff">
             <div class="pullclose bg_999" onClick="toclose()">&times;</div>
-            <div class="pullimg"><div class="squareimg"><img src="<?php echo base_url('public/soma/images/distributeimg.jpg');?>" /></div></div>
+            <div class="pullimg"><div class="squareimg"><img src="<?php echo get_cdn_url('public/soma/images/distributeimg.jpg');?>" /></div></div>
             <div>分销号:<span id="distribute_id"></span></div>
             <div>姓　名:<span id="distribute_name"></span></div>
             <div class="bg_999 pullbtn h26" onClick="toclose()">取消</div>

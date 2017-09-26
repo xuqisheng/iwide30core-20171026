@@ -25,7 +25,7 @@
     }  
 </style>  
 <body class="goods-list-bg ">
-<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
 <div class="pageloading"><p class="isload">正在加载</p></div>
 
 <script>
@@ -68,14 +68,14 @@
             <?php if(isset($theme) && !empty($theme) && $theme['cat_bg']): ?>
                 <img src="<?php echo $theme['cat_bg'];?>">
                 <?php else: ?>
-                <img src="<?php echo base_url('public/soma/mooncake4/images/goods_list_banner.png');?>">
+                <img src="<?php echo get_cdn_url('public/soma/mooncake4/images/goods_list_banner.png');?>">
             <?php endif;?>
         </div>
 
       <!--碧桂园-->
       <?php if(in_array($this->inter_id, ['a421641095', 'a450089706'])):?>
           <div class="mainContainer">
-              <video name="videoElement" class="centeredVideo"  poster="<?php echo base_url('public/soma/mooncake4/images/video.jpg');?>" controls></video>
+              <video name="videoElement" class="centeredVideo"  poster="<?php echo get_cdn_url('public/soma/mooncake4/images/video.jpg');?>" controls></video>
           </div>
       <?php endif;?>
 

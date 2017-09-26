@@ -24,29 +24,29 @@ class Level_model extends MY_Model {
 		}
 		return $result;
 	}
-	function check_roomnight_rule($inter_id, $order, $rule = array()) {
+	function check_roomnight_rule($inter_id, $item_order, $rule = array(),$main_order=array()) {
 		if (empty ( $rule ))
 			$rule = $this->get_upgrade_rule ( $inter_id, 'roomnight' );
 		if (! empty ( $rule )) {
-			$check = $this->level_rule_filter ( $rule, $order );
+			$check = $this->level_rule_filter ( $rule, $item_order, 'roomnight',$main_order);
 			if ($check) {
 				$this->load->helper ( 'date' );
-				return get_room_night ( $order ['sdate'], $order ['edate'] );
+				return get_room_night ( $item_order ['sdate'], $item_order ['edate'] );
 			}
 		}
 		return FALSE;
 	}
-	function level_rule_filter($rule, $order, $rule_type = 'roomnight') {
-		if (! empty ( $rule ['calculate_rules'] ['pay_code'] ) && ! in_array ( $order ['paytype'], $rule ['calculate_rules'] ['pay_code'] )) {
+	function level_rule_filter($rule, $item_order, $rule_type = 'roomnight',$main_order=array()) {
+		if (! empty ( $rule ['calculate_rules'] ['pay_code'] ) && ! in_array ( $item_order ['paytype'], $rule ['calculate_rules'] ['pay_code'] )) {
 			return FALSE;
 		}
-		if (! empty ( $rule ['calculate_rules'] ['price_code'] ) && ! in_array ( $order ['price_code'], $rule ['calculate_rules'] ['price_code'] )) {
+		if (! empty ( $rule ['calculate_rules'] ['price_code'] ) && ! in_array ( $item_order ['price_code'], $rule ['calculate_rules'] ['price_code'] )) {
 			return FALSE;
 		}
 		if ($rule ['calculate_rules'] ['calculation'] == 1) {
 			$this->load->model ( 'hotel/Hotel_check_model' );
-			$adapter = $this->Hotel_check_model->get_hotel_adapter ( $order ['inter_id'], $order ['hotel_id'], TRUE );
-			$checkin_type = $adapter->order_checkin_type ( $order ['inter_id'], $order );
+			$adapter = $this->Hotel_check_model->get_hotel_adapter ( $item_order ['inter_id'], $item_order ['hotel_id'], TRUE );
+			$checkin_type = $adapter->order_checkin_type ( $item_order ['inter_id'], $item_order,$main_order );
 			if ($checkin_type != 'self') {
 				return FALSE;
 			}
@@ -65,7 +65,8 @@ class Level_model extends MY_Model {
 					'price_code' => $order_item ['price_code'],
 					'paytype' => $order ['paytype'],
 					'member_no' => $order ['member_no'],
-					'openid' => $order ['openid'] 
+					'openid' => $order ['openid'] ,
+			        'item_id' => $order_item ['id']
 			);
 			empty ( $order ['web_orderid'] ) or $check_data ['web_orderid'] = $order ['web_orderid'];
 			$log_data = $check_data;
@@ -74,7 +75,7 @@ class Level_model extends MY_Model {
 			if ($inter_id == 'a441098524' && $order_item ['startdate'] < 20170301) { // 逸柏20170301前入住不计入
 				$result = FALSE;
 			} else {
-				$room_night = $this->check_roomnight_rule ( $inter_id, $check_data, $rule );
+				$room_night = $this->check_roomnight_rule ( $inter_id, $check_data, $rule ,$order);
 				$log_data ['rn'] = $room_night;
 				if ($room_night !== FALSE) {
 					unset ( $check_data ['price_code'] );
@@ -82,6 +83,7 @@ class Level_model extends MY_Model {
 					unset ( $check_data ['web_orderid'] );
 					unset ( $check_data ['inter_id'] );
 					unset ( $check_data ['hotel_id'] );
+					unset ( $check_data ['item_id'] );
 					$check_data ['rn'] = $room_night;
 					$this->load->model ( 'hotel/Order_queues_model' );
 					$result = $this->Order_queues_model->add_queue ( $inter_id, $order ['hotel_id'], $order ['orderid'], 'roomnight_levelup', $check_data, $order_item ['id'] );

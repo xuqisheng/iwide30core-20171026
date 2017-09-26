@@ -130,10 +130,17 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         }
 
         //验证分销员saler_id 是否属于inter_id
-        $countRes = $this->db->where(['inter_id'=>$params['inter_id'],'qrcode_id'=>$params['saler_id'],'distribute_hidden'=>0])
-            ->count_all_results('hotel_staff');
-        if($countRes == 0){
+        $countRes = $this->db->select(['exts'])->where(['inter_id'=>$params['inter_id'],'qrcode_id'=>$params['saler_id']])
+            ->get('hotel_staff')->row_array();
+
+        if(empty($countRes)){
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'分销员信息有误!','');
+        }
+
+        //验证是否有派送礼包权限
+        $extsArr = unserialize($countRes['exts']);
+        if(empty($extsArr) || $extsArr['join_gift'] == 1){
+            return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'无派送礼包权限,请向管理员申请!','');
         }
 
         //获取inter_id 当前是否有可用礼包
@@ -174,7 +181,6 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         foreach($groupProductInfo as $key=>$val){
             $groupProductInfo[$key]['name'] = $childProductField[$val['child_pid']]['name'];
         }
-
 
         $childProductArr = array();
         foreach($groupProductInfo as $key=>$val){
@@ -305,10 +311,9 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
         }
         $params['gift_num'] = empty($params['gift_num']) ? 1 : $params['gift_num'];
 
-
         //验证saler_id 与 gift_id是否同属inter_id
-        $countStaffRes = $this->db->where(['inter_id'=>$params['inter_id'],'qrcode_id'=>$params['saler_id'],'distribute_hidden'=>0])
-            ->count_all_results('hotel_staff');
+        $countStaffRes = $this->db->select(['exts'])->where(['inter_id'=>$params['inter_id'],'qrcode_id'=>$params['saler_id']])
+            ->get('hotel_staff')->row_array();
 
         $this->load->model('soma/Gift_detail_model', 'Gift_detail_model');
         $Gift_detail_model = $this->Gift_detail_model;
@@ -316,10 +321,27 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
 
         $countGiftRes = $this->db->where(['id'=>$params['gift_id'],'inter_id'=>$params['inter_id']])
             ->count_all_results('soma_gift');
-        if($countStaffRes <= 0 || $countGiftRes <= 0){
+        if(empty($countStaffRes) || $countGiftRes <= 0){
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'分销员与礼包不同属inter_id','');
         }
 
+        //验证是否有派送礼包权限
+        $extsArr = unserialize($countStaffRes['exts']);
+        if(empty($extsArr) || $extsArr['join_gift'] == 1){
+            return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'无派送礼包权限,请向管理员申请!','');
+        }
+
+        $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+        $endTime = strtotime(date('Y-m-d 23:59:59',time()));
+        //获取已成功派送的礼包数量
+        $giftCount = $this->db->select(['sum(gift_num) as gift_num_count'])->where(['inter_id'=>$params['inter_id'],'saler_id'=>$params['saler_id'],'is_receive'=>2,'add_time >'=>$startTime,'add_time <'=>$endTime])
+            ->get('soma_gift_detail')->row_array();
+        $generate_gift_num = intval($giftCount['gift_num_count'] + $params['gift_num']);
+        if(!empty($extsArr['gift_limit']) && $generate_gift_num > intval($extsArr['gift_limit'])){
+            $surplusNum = intval($extsArr['gift_limit'] - $giftCount['gift_num_count']);
+            $surplusNum = $surplusNum < 0 ? 0 : $surplusNum;
+            return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'发放数量超过上限,剩余数量'.$surplusNum,'');
+        }
         //礼包库存校验
         $countProductRes = $this->db->select(['sf.product_id','scp.stock'])->from('soma_gift sf')
             ->join('soma_catalog_product_package scp','scp.product_id = sf.product_id','left')
@@ -821,6 +843,24 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包商品不存在!','');
         }
 
+        //验证saler_id 与 gift_id是否同属inter_id
+        $countStaffRes = $this->db->select(['exts'])->where(['inter_id'=>$params['inter_id'],'qrcode_id'=>$giftDetailInfo['saler_id']])
+            ->get('hotel_staff')->row_array();
+        //验证是否有派送礼包权限
+        $extsArr = unserialize($countStaffRes['exts']);
+        if(empty($extsArr) || $extsArr['join_gift'] == 1){
+            return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'无派送礼包权限,请向管理员申请!','');
+        }
+        $startTime = strtotime(date('Y-m-d 00:00:00',time()));
+        $endTime = strtotime(date('Y-m-d 23:59:59',time()));
+        //获取已成功派送的礼包数量
+        $giftCount = $Gift_detail_model->_shard_db_r($this->inter_id)->select(['sum(gift_num) as gift_num_count'])->where(['inter_id'=>$params['inter_id'],'saler_id'=>$giftDetailInfo['saler_id'],'is_receive'=>2,'add_time >'=>$startTime,'add_time <'=>$endTime])
+            ->get('soma_gift_detail')->row_array();
+        $generate_gift_num = intval($giftCount['gift_num_count'] + $giftDetailInfo['gift_num']);
+        if(!empty($extsArr['gift_limit']) && $generate_gift_num > intval($extsArr['gift_limit'])){
+            return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'发放数量超过上限,暂不能领取!','');
+        }
+
         if($productRes['stock'] < $giftDetailInfo['gift_num']){
             return $this->json(BaseConst::OPER_STATUS_FAIL_TOAST,'礼包商品库存不足!','');
         }
@@ -847,18 +887,20 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
             $result = $result->getData();
             //直接支付
             if (in_array($result['payChannel'], ['already_pay', 'balance_pay', 'point_pay'])) {
-                $link = $this->link['already_pay'] . '&bType=' . '&saler=' . $this->session->tempdata('saler') . '&order_id=' . $result['orderInfo']['order_id'] . '&settlement=' . $params['settlement'] . '&zburl=' . $this->session->tempdata('zburl');
+//                $link = $this->link['already_pay'] . '&bType=' . '&saler=' . $this->session->tempdata('saler') . '&order_id=' . $result['orderInfo']['order_id'] . '&settlement=' . $params['settlement'] . '&zburl=' . $this->session->tempdata('zburl');
             } //微信支付
             elseif ($result['payChannel'] == 'wx_pay') {
                 $this->gift_delivery_model->gift_receive_callback($result['orderInfo']['order_id']);
-                $link = base_url().'index.php/soma/package/pay_success_stay?id='.$params['inter_id'].'&oid='.$result['orderInfo']['order_id']. '&settlement=' . $params['settlement'];
+//                $link = base_url().'index.php/soma/package/pay_success_stay?id='.$params['inter_id'].'&oid='.$result['orderInfo']['order_id']. '&settlement=' . $params['settlement'];
 
             } //威付通支付
             elseif ($result['payChannel'] == 'wft_pay') {
                 $this->gift_delivery_model->gift_receive_callback($result['orderInfo']['order_id']);
-                $link = base_url().'index.php/soma/package/pay_success_stay?id='.$params['inter_id'].'&oid='.$result['orderInfo']['order_id']. '&settlement=' . $params['settlement'];
+//                $link = base_url().'index.php/soma/package/pay_success_stay?id='.$params['inter_id'].'&oid='.$result['orderInfo']['order_id']. '&settlement=' . $params['settlement'];
             }
 
+            //商城订单列表
+            $link = base_url().'index.php/soma/order/my_order_list?id='.$params['inter_id'].'&layout=&tkid=&brandname=';
             $page_resource = [
                 'link' => [
                     'gift_detail' => $link
@@ -870,7 +912,7 @@ class GiftDelivery extends MY_Front_Soma_Iapi{
             $Gift_detail_model = $this->Gift_detail_model;
 
             //更改礼包状态
-            $Gift_detail_model->_shard_db_r($this->inter_id)->where(['inter_id'=>$params['inter_id'],'id'=>$gift_detail_id])->update('soma_gift_detail',['openid'=>$params['openid'],'is_receive'=>2,'order_id'=>$result['orderInfo']['order_id']]);
+            $Gift_detail_model->_shard_db_r($this->inter_id)->where(['inter_id'=>$params['inter_id'],'id'=>$gift_detail_id])->update('soma_gift_detail',['openid'=>$params['openid'],'is_receive'=>2,'order_id'=>$result['orderInfo']['order_id'],'updated_time'=>date('Y-m-d H:i:s',time())]);
             //订单记录分销员id
             $Gift_detail_model->_shard_db_r($this->inter_id)->where(['order_id'=>$result['orderInfo']['order_id']])->update('soma_sales_order_1001',['saler_id'=>$saler_id]);
             return $this->json(BaseConst::OPER_STATUS_SUCCESS,'支付成功!',$data);

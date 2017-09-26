@@ -13,7 +13,7 @@
     <link href="<?php echo get_cdn_url('public/soma/styles/global.css');?>" rel="stylesheet">
     <link href="<?php echo get_cdn_url('public/soma/styles/default.css');?>" rel="stylesheet">
     <link href="<?php echo get_cdn_url('public/soma/styles/theme.css');?>" rel="stylesheet">
-	<link href="<?php echo base_url('public/soma/zongzi/zongzi.css');?>" rel="stylesheet">
+	<link href="<?php echo get_cdn_url('public/soma/zongzi/zongzi.css');?>" rel="stylesheet">
     <script src="<?php echo get_cdn_url('public/soma/scripts/jquery.js');?>"></script>
     <script src="<?php echo get_cdn_url('public/soma/scripts/ui_control.js');?>"></script>
 	<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>

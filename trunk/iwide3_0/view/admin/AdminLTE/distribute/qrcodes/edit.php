@@ -136,6 +136,26 @@ echo $block_left;
     <div class="col-sm-8 radio"><label><input type="radio" name="distribute_hidden" value="1"<?php if($saler->distribute_hidden == 1):echo ' checked';endif;?>>隐藏</label>&nbsp;&nbsp;&nbsp;&nbsp;<label><input type="radio" name="distribute_hidden" value="0"<?php if($saler->distribute_hidden == 0):echo ' checked';endif;?>>显示</label>
     </div>
 </div>
+<div class="form-group "><?php $gift_set = isset($saler->exts) ? unserialize($saler->exts) : ['join_gift' => '1' ,'gift_limit' => 0];?>
+	<label for="el_is_distributed" class="col-sm-2 control-label">参与礼包派送</label>
+	<div class="col-sm-8 radio">
+		  <label>
+		    <input type="radio" value="2" name="exts[join_gift]"<?php if($gift_set['join_gift'] == 2): echo ' checked';endif;?>>参与
+		  </label>
+		  <label>
+		    <input type="radio" value="1" name="exts[join_gift]"<?php if($gift_set['join_gift'] == 1): echo ' checked';endif;?>>不参与
+		  </label>
+	</div>
+</div>
+<div class="form-group ">
+	<label for="el_is_distributed" class="col-sm-2 control-label">礼包派送每日数量上限</label>
+	<div class="col-sm-8">
+		<div class="input-group">
+		    <input type="number" class="form-control " name="exts[gift_limit]" id="gift_limit" placeholder="礼包派送每日数量上限" value="<?php echo empty($gift_set['gift_limit']) ? '0' : $gift_set['gift_limit']?>">
+		    <span class="input-group-addon">份数</span>
+		</div>
+	</div>
+</div>
         </div>
 		<!-- /.box-body -->
 		<div class="box-footer ">

@@ -145,7 +145,7 @@ class BankAccount extends MY_Admin
         }
 
         $this->load->model('iwidepay/iwidepay_merchant_model' );
-        $select = 'mi.jfk_no,mi.type,mi.account_aliases,mi.is_company,mi.status,mi.type';
+        $select = 'mi.jfk_no,mi.type,mi.account_aliases,mi.is_company,mi.status,mi.type,mi.bank_user_name,mi.bank_card_no';
         $list = $this->iwidepay_merchant_model->get_band_accounts($select,$filter,'','');
 
         if ($list)
@@ -167,14 +167,16 @@ class BankAccount extends MY_Admin
                 $item['name'] = !empty($value['name']) ? $value['name'] : '';
                 $item['hotel_name'] = !empty($value['hotel_name']) ? $value['hotel_name'] : '';
                 $item['account_aliases'] = $value['account_aliases'];
+                $item['bank_user_name'] = $value['bank_user_name'];
+                $item['bank_card_no'] = $value['bank_card_no'];
                 $item['is_company'] = $is_company[$value['is_company']];
                 $item['status'] = $status[$value['status']];
                 unset($value['type']);
                 $list[$key] = $item;
             }
         }
-        $headArr = array('账户ID','所属公众号','酒店名称','账户别名','账户类型','账户状态');
-        $widthArr = array(20,20,20,20,12,12);
+        $headArr = array('账户ID','所属公众号','酒店名称','账户别名','账户名','卡号','账户类型','账户状态');
+        $widthArr = array(20,25,25,25,25,25,12,12);
         getExcel('分账银行账户',$headArr,$list,$widthArr);
     }
 

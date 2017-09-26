@@ -69,7 +69,8 @@ class Lvyun_hotel_model extends CI_Model {
 			'web_rids' => $web_rids,
 			'web_code' => $level_price_code,
 			'member_level' => $member_level,
-			'code_config' => $code_config
+			'code_config' => $code_config,
+		    'enddate' => $condit ['enddate']
 		);
 		$pms_data = $this->get_web_roomtype ( $pms_set, $condit ['startdate'], $days, $params );
 		$data=[];
@@ -300,17 +301,22 @@ class Lvyun_hotel_model extends CI_Model {
 			/* 13,14,15,16,17,18,32,33,34,30,19,20,21,22,23,24,12,11,25,31,10,9,28,29,35,36 */
 			'hotelGroupId' => $pms_auth ['hotelGroupId']
 		);
-		
+
 		$func_data=['hotel_id'=>$params['idents']['hotel_id']];
 		$res = $this->get_to ( $url, $data, $pms_set ['inter_id'],$func_data,$pms_auth );
 		$code_des = array ();
 		$pms_state = array ();
 		$exprice = array ();
+		$room_web_rums = array();
 		if (! empty ( $res ['hrList'] )) {
 			$states = current ( $res ['hrList'] );
 			if (! empty ( $states ['roomList'] )) {
 				foreach ( $states ['rateCodes'] as $rc ) {
 					$code_des [$rc ['code']] = $rc ['descript'];
+				}
+				if (!empty($pms_auth['get_num_way'])){
+				    $rm_cds = implode(',', array_keys($params ['web_rids']));
+				    $room_web_rums = $this->get_web_nums($pms_set,$pms_auth, $startdate, $params['enddate'], $rm_cds,$pms_auth['get_num_way']);
 				}
 				$day_diff = round ( (strtotime ( $startdate ) - strtotime ( date ( 'Ymd' ) )) / 86400 );
 				foreach ( $states ['roomList'] as $rl ) {
@@ -346,13 +352,17 @@ class Lvyun_hotel_model extends CI_Model {
 						$pms_state [$rl ['rmtype']] [$rl ['ratecode']] ['disp_type'] = 'buy';
 						$allprice = '';
 						$amount = '';
+						$mins=array();
 						for($i = 0; $i < $days; $i ++) {
-							$pms_state [$rl ['rmtype']] [$rl ['ratecode']] ['date_detail'] [date ( 'Ymd', strtotime ( '+ ' . $i . ' day ', strtotime ( $startdate ) ) )] = array (
+						    $tmp_date=date ( 'Ymd', strtotime ( '+ ' . $i . ' day ', strtotime ( $startdate ) ) );
+						    $room_nums=isset($room_web_rums[$rl['rmtype']][$tmp_date]) ? $room_web_rums[$rl['rmtype']][$tmp_date] : $rl ['avail'];
+							$pms_state [$rl ['rmtype']] [$rl ['ratecode']] ['date_detail'] [$tmp_date] = array (
 								'price' => $rl ['avgRate1'],
-								'nums' => $rl ['avail']
+								'nums' => $room_nums
 							);
 							$allprice .= ',' . $rl ['avgRate1'];
 							$amount += $rl ['avgRate1'];
+							$mins[]=$room_nums;
 						}
 						if (isset ( $params ['web_rids'] [$rl ['rmtype']] )) {
 							$nums = empty ( $params ['condit'] ['nums'] [$params ['web_rids'] [$rl ['rmtype']]] ) ? 1 : $params ['condit'] ['nums'] [$params ['web_rids'] [$rl ['rmtype']]];
@@ -366,8 +376,9 @@ class Lvyun_hotel_model extends CI_Model {
 						$pms_state [$rl ['rmtype']] [$rl ['ratecode']] ['avg_price'] = $rl ['avgRate1'];
 						$pms_state [$rl ['rmtype']] [$rl ['ratecode']] ['price_resource'] = 'webservice';
 						
-						if ($rl['avail']>1&&empty($pms_auth['multi_rooms'])){
-							$rl ['avail'] = 1;
+						$least_num = min($mins);
+						if ($least_num>1&&empty($pms_auth['multi_rooms'])){
+						    $least_num = 1;
 						}
 						
 						if(!empty($pms_auth['max_rooms'])){
@@ -376,10 +387,10 @@ class Lvyun_hotel_model extends CI_Model {
 							$max_count=2;
 						}
 						
-						$least_num=min($rl['avail'],$max_count);
+						$least_num=min($least_num,$max_count);
 						$pms_state [$rl ['rmtype']] [$rl ['ratecode']] ['least_num'] =$least_num;
 						$book_status = 'full';
-						if ($rl ['avail'] >= $nums)
+						if ($least_num >= $nums)
 							$book_status = 'available';
 						$pms_state [$rl ['rmtype']] [$rl ['ratecode']] ['book_status'] = $book_status;
 
@@ -453,19 +464,20 @@ class Lvyun_hotel_model extends CI_Model {
 		if(!empty($pms_auth['new_upd'])){
 			return $this->update_web_order_multi($inter_id, $list, $pms_set);
 		}else{
-			switch($inter_id){
-				case 'a449675133' :
-				case 'a438686762' :
-				case 'a457946152' :
-				case 'a445223616' :
-				case 'a487647571' : //万信测试
-				case 'a487576098' : //万信正式
-					return $this->update_web_order_sub($inter_id, $list, $pms_set);
-					break;
-				default :
-					return $this->update_web_order_main($inter_id, $list, $pms_set);
-					break;
-			}
+		    return $this->update_web_order_sub($inter_id, $list, $pms_set);
+// 			switch($inter_id){
+// 				case 'a449675133' :
+// 				case 'a438686762' :
+// 				case 'a457946152' :
+// 				case 'a445223616' :
+// 				case 'a487647571' : //万信测试
+// 				case 'a487576098' : //万信正式
+// 					return $this->update_web_order_sub($inter_id, $list, $pms_set);
+// 					break;
+// 				default :
+// 					return $this->update_web_order_main($inter_id, $list, $pms_set);
+// 					break;
+// 			}
 		}
 		return FALSE;
 	}
@@ -474,6 +486,18 @@ class Lvyun_hotel_model extends CI_Model {
 		$web_order=$this->get_web_order_items($inter_id,$order,$pms_set);
 		$istatus=-1;
 		$pms_auth = json_decode($pms_set['pms_auth'], true);
+		$point_prices = array();
+		if ($order['paytype'] == 'point' && !empty($pms_auth['point_order_up'])){
+    		$res=$this->get_web_order($order['web_orderid'],$inter_id,$pms_set);
+    		if (isset ( $res ['resultCode'] ) && $res ['resultCode'] == 0) {
+        		$web_price = floatval($res ['guest'] ['rateSum']);
+        		$avg_web_price=intval($web_price/$order['roomnums']);
+        		$left_price=$web_price-$avg_web_price*$order['roomnums'];
+        		for($i=0;$i<$order['roomnums'];$i++){
+                    $point_prices [] = $i == 0 ?  $avg_web_price + $left_price : $avg_web_price;
+                }
+    		}
+		}
 		if($web_order){
 			//有数据返回
 			$this->load->model('hotel/Order_model');
@@ -539,7 +563,13 @@ class Lvyun_hotel_model extends CI_Model {
 					}
 					
 					//计算房费
-					if($istatus==3){
+					if ($point_prices){
+					    $new_price = array_shift($point_prices);
+					    if($new_price > 0 && $new_price != $od['iprice']){
+					        $updata['no_check_date'] = 1;
+					        $updata['new_price'] = $new_price;
+					    }
+					}else if($istatus==3){
 					    $acc_info=$this->get_web_acc($inter_id, $order, $v['id'], $pms_set);
 					    if(!$acc_info&&count($order['order_details'])==1){
 					    	//如果不存在财务明细，而且只有一间房时，尝试查询预订单的财务明细
@@ -806,11 +836,12 @@ class Lvyun_hotel_model extends CI_Model {
 		$this->load->library('MYLOG');
 		$pms_auth = json_decode ( $pms_set ['pms_auth'], TRUE );
 		$hotel_no = $pms_set ['hotel_web_id'];
-		$room_codes = json_decode ( $order ['room_codes'], TRUE );
-		$room_codes = $room_codes [$order ['first_detail'] ['room_id']];
+		$order_room_codes = json_decode ( $order ['room_codes'], TRUE );
+		$room_codes = $order_room_codes [$order ['first_detail'] ['room_id']];
 		$url = $pms_auth ['url'] . '/book';
 		$card_type = '';
 		$card_no = '';
+		$member_name = '';
 
 		//有绿云会员号才传
 		$this->load->model('hotel/Member_model');
@@ -832,6 +863,9 @@ class Lvyun_hotel_model extends CI_Model {
 		if (! empty ( $order ['member_no'] ) && (!empty($member)&&$member->member_mode==2&&$member->is_login=='t')) {
 			$card_type = $room_codes ['code'] ['extra_info'] ['member_level'];
 			$card_no = $order ['member_no'];
+			if (!empty($pms_auth['self_in'])){
+    			$member_name = $member->name;
+			}
 		}
 		$favor = empty ( $order ['coupon_favour'] ) ? 0 : $order ['coupon_favour'];
 
@@ -949,13 +983,18 @@ class Lvyun_hotel_model extends CI_Model {
 		 */
 		if (! empty ( $res ['crsNo'] )) {
 			$web_orderid = $res ['crsNo'];
+		    $order_updata=array ( // 将pms的单号更新到相应订单
+				'web_orderid' => $web_orderid
+			);
+		    if ($member_name){
+		        $order_room_codes[$order ['first_detail'] ['room_id']] ['code'] ['extra_info'] ['memname']=$member_name;
+		        $order_updata['room_codes']=json_encode($order_room_codes);
+		    }
 			$this->db->where ( array (
 				'orderid' => $order ['orderid'],
 				'inter_id' => $order ['inter_id']
 			) );
-			$this->db->update ( 'hotel_order_additions', array ( // 将pms的单号更新到相应订单
-				'web_orderid' => $web_orderid
-			) );
+			$this->db->update ( 'hotel_order_additions',$order_updata);
 			// $this->Order_model->update_order_status ( $inter_id, $orderid, 1 ); // 若pms的订单是即时确认的，执行确认操作
 
 			//修改积分储值扣减
@@ -1292,11 +1331,12 @@ class Lvyun_hotel_model extends CI_Model {
 		$this->load->library('MYLOG');
 		$pms_auth = json_decode ( $pms_set ['pms_auth'], TRUE );
 		$hotel_no = $pms_set ['hotel_web_id'];
-		$room_codes = json_decode ( $order ['room_codes'], TRUE );
-		$room_codes = $room_codes [$order ['first_detail'] ['room_id']];
+		$order_room_codes = json_decode ( $order ['room_codes'], TRUE );
+		$room_codes = $order_room_codes [$order ['first_detail'] ['room_id']];
 		$url = $pms_auth ['url'] . '/bookWithCoupon';
 		$card_type = '';
 		$card_no = '';
+		$member_name = '';
 		//有绿云会员号才传
 		$this->load->model('hotel/Member_model');
 		$member=$this->Member_model->check_openid_member($inter_id,$order['openid']);
@@ -1317,6 +1357,9 @@ class Lvyun_hotel_model extends CI_Model {
 		if (! empty ( $order ['member_no'] ) && (!empty($member)&&$member->member_mode==2&&$member->is_login=='t')) {
 			$card_type = $room_codes ['code'] ['extra_info'] ['member_level'];
 			$card_no = $order ['member_no'];
+			if (!empty($pms_auth['self_in'])){
+			    $member_name = $member->name;
+			}
 		}
 
 		$custom_price = array ();
@@ -1439,13 +1482,18 @@ class Lvyun_hotel_model extends CI_Model {
 		 */
 		if (! empty ( $res ['crsNo'] )) {
 			$web_orderid = $res ['crsNo'];
+		    $order_updata=array ( // 将pms的单号更新到相应订单
+		            'web_orderid' => $web_orderid
+		    );
+		    if ($member_name){
+		        $order_room_codes[$order ['first_detail'] ['room_id']] ['code'] ['extra_info'] ['memname']=$member_name;
+		        $order_updata['room_codes']=json_encode($order_room_codes);
+		    }
 			$this->db->where ( array (
 				'orderid' => $order ['orderid'],
 				'inter_id' => $order ['inter_id']
 			) );
-			$this->db->update ( 'hotel_order_additions', array ( // 将pms的单号更新到相应订单
-				'web_orderid' => $web_orderid
-			) );
+			$this->db->update ( 'hotel_order_additions', $order_updata);
 			// $this->Order_model->update_order_status ( $inter_id, $orderid, 1 ); // 若pms的订单是即时确认的，执行确认操作
 
 			//修改积分储值扣减
@@ -2058,4 +2106,61 @@ class Lvyun_hotel_model extends CI_Model {
 				'alarm_wait_time' => $alarm_wait_time
 		), $func_data );
 	}
+	function order_checkin_type($inter_id,$order,$order_item,$pms_set) {
+        if (empty ( $order ['member_no'] ) || empty ( $order ['web_orderid'] )) {
+            return 'unknown';
+        }
+        $room_codes = json_decode ( $order ['room_codes'], TRUE );
+        $room_codes = $room_codes [$order ['first_detail'] ['room_id']];
+        if (empty ( $room_codes ['code'] ['extra_info'] ['memname'] )) {
+            return 'unknown';
+        }
+        $member_name = $room_codes ['code'] ['extra_info'] ['memname'];
+        $pms_auth = json_decode ( $pms_set ['pms_auth'], TRUE );
+        $url = $pms_auth ['url'] . '/listMasterInHotel';
+        $data = array (
+                'hotelGroupId' => $pms_auth ['hotelGroupId'],
+                'name' => $member_name,
+                'hotelId' => '' 
+        );
+        $res = $this->post_to ( $url, $data, $pms_set ['inter_id'], '', $pms_auth );
+        if (! empty ( $res ['resultCode'] ) && $res ['resultCode'] == 1 && ! empty ( $res ['result'] )) {
+            $other = 0;
+            foreach ( $res ['result'] as $r ) {
+                if ($r ['crsNo'] == $order ['web_orderid']) {
+                    if ($r ['name'] == $member_name) {
+                        return 'self';
+                    } else {
+                        $other = 1;
+                    }
+                }
+            }
+            if ($other == 1) {
+                return 'other';
+            }
+        }
+        return 'unknown';
+    }
+    function get_web_nums($pms_set,$pms_auth, $startdate, $enddate, $rm_cds,$num_type=1) {
+        $data = array (
+                'arr' => date ( 'Y-m-d', strtotime ( $startdate ) ),
+                'dep' => date ( 'Y-m-d', strtotime ( $enddate ) ),
+                'salesChannel' => isset ( $pms_auth ['priceSalesChannel'] ) ? $pms_auth ['priceSalesChannel'] : $pms_auth ['salesChannel'],
+                'hotelId' => $pms_set ['hotel_web_id'],
+                'hotelGroupId' => $pms_auth ['hotelGroupId'],
+                'rmtype' => $rm_cds 
+        );
+        $func_data = [ 
+                'hotel_id' => $pms_set ['hotel_id'] 
+        ];
+        $url = $pms_auth ['url'] . '/listRoomAvail';
+        $web_nums = $this->get_to ( $url, $data, $pms_set ['inter_id'], $func_data, $pms_auth );
+        $room_web_rums = array ();
+        if (! empty ( $web_nums ['resultCode'] ) && $web_nums ['resultCode'] == 1 && ! empty ( $web_nums ['result'] )) {
+            foreach ( $web_nums ['result'] as $wn ) {
+                $room_web_rums [$wn ['rmtype']] [date ( 'Ymd', strtotime ( $wn ['occDate'] ) )] = $wn ['availWithLimit'];
+            }
+        }
+        return $room_web_rums;
+    }
 }

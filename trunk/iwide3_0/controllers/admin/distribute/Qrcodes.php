@@ -176,7 +176,7 @@ class Qrcodes extends MY_Admin {
 			if(empty($post['qrcode_id'])){//防止qrcode_id 由null变为0
                 unset($post['qrcode_id']);
             }
-			$model= $this->_load_model('distribute/staff_model');
+			$model= $this->_load_model('distribute/Staff_model');
 			$result= $model->load($post['id'])->m_sets($post)->m_save($post);
 
 

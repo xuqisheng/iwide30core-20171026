@@ -1,5 +1,5 @@
 
-<link href="<?php echo base_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
 <script>
 wx.config({
     debug: false,
@@ -73,7 +73,7 @@ else:
                 }
             ?>
             <a href="javascript:;<?php //echo Soma_const_url::inst()->get_url('*/*/package_detail', array('gid'=>$v['gift_id'],'id'=>$inter_id,'bsn'=>$business ) );?>" class="item bd">
-                <div class="img"><img class="lazy" src="<?php echo base_url('public/soma/images/default2.jpg'); ?>" data-original="<?php echo $vItem['face_img'];?>" /></div>
+                <div class="img"><img class="lazy" src="<?php echo get_cdn_url('public/soma/images/default2.jpg'); ?>" data-original="<?php echo $vItem['face_img'];?>" /></div>
                 <p class="txtclip h30"><?php echo $vItem['name'];?></p>
                 <p class="txtclip color_555"><?php echo $vItem['hotel_name'];?></p>
                 <p class="txtclip h30 color_main"><?php if($show_y_flag): ?><span class="y"><?php else: ?><span><?php endif; ?><?php echo $vItem['price_package'];?></span></p>

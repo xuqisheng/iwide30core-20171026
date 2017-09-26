@@ -101,4 +101,21 @@ class Skins_model extends CI_Model {
                   AND a.`func` = '" . $paras [1] . "' AND a.`status` = 1 order by s.hotel_id desc limit 1";
 		return $db->query ( $sql )->row_array ();
 	}
+
+
+    /**
+     * 获取某个模块的所有皮肤
+     * @param $module
+     * @param string $select
+     * @param int $status
+     * @return array
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    public function get_skins($module, $select = '*', $status = 1)
+    {
+        return $this->db->select($select)->get_where ( self::TAB_SKINS, array (
+            'module' => $module,
+            'status' => $status
+        ) )->result_array ();
+    }
 }

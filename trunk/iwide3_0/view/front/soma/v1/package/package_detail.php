@@ -54,7 +54,7 @@
 </style>
 <body>
 
-<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
 
 <style type="text/css">
 
@@ -94,8 +94,8 @@
     }
     @font-face{
       font-family: 'icon';
-      src : url('<?php echo base_url('public/soma/v1/font/iconfont.ttf');?>') format('truetype'),
-            url('<?php echo base_url('public/soma/v1/font/iconfont.woff');?>') format('woff');
+      src : url('<?php echo get_cdn_url('public/soma/v1/font/iconfont.ttf');?>') format('truetype'),
+            url('<?php echo get_cdn_url('public/soma/v1/font/iconfont.woff');?>') format('woff');
     }
     .fsfl{
         background-color: #27282d;
@@ -186,8 +186,8 @@
         font-size: 15px;
     }
 </style>
-<script src="<?php echo base_url('public/soma/scripts/imgscroll.js');?>"></script>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
 <script>
     wx.config({
         debug: false,
@@ -292,7 +292,7 @@
             <?php }?>
         <?php else: ?>
             <a class="slideson ui_img_auto_cut">
-                <img src="<?php echo base_url('public/soma/images/default.jpg'); ?>" />
+                <img src="<?php echo get_cdn_url('public/soma/images/default.jpg'); ?>" />
             </a>
         <?php endif; ?>
     </div>
@@ -521,7 +521,7 @@
 	<div class="flexgrow" style="min-height:40%"></div>
     <div class="bg_fff">
         <div class="flex bd_bottom bg_fff pad10">
-            <div class="specimg"><div class="squareimg"><img src="<?php  if( $package['face_img'] )echo $package['face_img'];else echo base_url('public/soma/images/default2.jpg');?>" /></div></div>
+            <div class="specimg"><div class="squareimg"><img src="<?php  if( $package['face_img'] )echo $package['face_img'];else echo get_cdn_url('public/soma/images/default2.jpg');?>" /></div></div>
             <div class="pad10 flexgrow">
 
                 <?php
@@ -573,7 +573,7 @@
 ?>
 <!-- <div class="whiteblock" id="ks_stock_div" style="display: none;">
 	<div class="justify webkitbox">
-    	<div class="progress"><span class="bg_main fill1" style="width:0<?php //echo $ks_percent; ?>%">&nbsp;<img src="<?php echo base_url('public/soma/images/ruler.png'); ?>"></span></div>
+    	<div class="progress"><span class="bg_main fill1" style="width:0<?php //echo $ks_percent; ?>%">&nbsp;<img src="<?php echo get_cdn_url('public/soma/images/ruler.png'); ?>"></span></div>
         <div>
             <span class="color_main"><?php echo $lang->line('remaining_places');?>：</span>
             <span class="color_888 fill2">0/1</span>
@@ -780,10 +780,10 @@ if(!empty($content) && $flag){ ?>
 <div class="foot_fixed foot_fixed__fsy">
     <div class="bg_fff webkitbox bd_top">
         <a href="<?php echo Soma_const_url::inst()->get_pacakge_home_page(array('id'=>$inter_id)); ?>" class="img_link">
-            <img src="<?php echo base_url('public/soma/v1/images'); ?>/ico9.png"/>
+            <img src="<?php echo get_cdn_url('public/soma/v1/images'); ?>/ico9.png"/>
         </a>
         <a href="<?php echo Soma_const_url::inst()->get_soma_ucenter(array('id'=>$inter_id)); ?>" class="img_link">
-            <img src="<?php echo base_url('public/soma/v1/images'); ?>/ico10.png"/>
+            <img src="<?php echo get_cdn_url('public/soma/v1/images'); ?>/ico10.png"/>
         </a>
 
         <?php if( $is_expire ): ?>

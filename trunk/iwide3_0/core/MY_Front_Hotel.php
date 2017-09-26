@@ -101,13 +101,44 @@ class MY_Front_Hotel extends MY_Front {
 		if ($this->session->userdata ( $this->inter_id . 'skin' )) {
 			$skin = $this->session->userdata ( $this->inter_id . 'skin' );
 		}
-
+		$data = $this->_get_view_commondata($data);
 		if (empty ( $extra_views ['module_view'] )) {
 			$extra_views ['module_view'] = $this->get_display_view ( $paras );
 		}
 		if ($return == TRUE)
 			return parent::display ( $paras, $data, $skin, $extra_views, $return );
 			parent::display ( $paras, $data, $skin, $extra_views, $return );
+	}
+	protected function _get_view_commondata($data){
+	    if (! isset ( $data ['signPackage'] )) {
+	        $this->load->model ( 'wx/Access_token_model' );
+	        $data ['signPackage'] = $this->Access_token_model->getSignPackage ( $this->inter_id );
+	    }
+	    isset ( $data ['pagetitle'] ) or $data ['pagetitle'] = $this->public ['name'];
+	    $this->load->model ( 'hotel/Hotel_config_model' );
+	    $config_data = $this->Hotel_config_model->get_hotel_config ( $this->inter_id, 'HOTEL', 0, array (
+	            'SHARE_SETTING'
+	    ) );
+	    if (empty($data ['share'] ['link'])){
+	        $slink = $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'];
+	        if (strpos ( $slink, '?' ))
+	            $slink = $slink . "&id=" . $this->inter_id;
+	            else
+	                $slink = $slink . "?id=" . $this->inter_id;
+	                $data ['share'] ['link'] = 'http://' . $slink;
+	    }
+	    $data ['share'] ['type'] = '';
+	    $data ['share'] ['dataUrl'] = '';
+	    if (! empty ( $config_data ['SHARE_SETTING'] ) && $share_config = json_decode($config_data ['SHARE_SETTING'],TRUE)) {
+	        $data ['share'] ['title'] = $share_config['page_title'];
+	        $data ['share'] ['imgUrl'] = $share_config['share_icon'];
+	        $data ['share'] ['desc'] = $share_config['page_desc'];
+	    } else {
+	        $data ['share'] ['title'] = $this->public ['name'] . '-微信订房';
+	        $data ['share'] ['imgUrl'] = 'http://7n.cdn.iwide.cn/public/uploads/201609/qf051934149038.jpg';
+	        $data ['share'] ['desc'] = $this->public ['name'] . '欢迎您使用微信订房,享受快捷服务...';
+	    }
+	    return $data;
 	}
 	function get_display_view($paras) {
 		$view = parent::get_display_view ( $paras );

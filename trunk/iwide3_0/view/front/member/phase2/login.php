@@ -44,7 +44,7 @@
     </div>
     <div class="sign_btn bg_main"><?php echo $inter_id=='a492669988'? '绑定':'登录'?></div>
     <div class="sign_list">
-    <?php if($inter_id!='a486201893'&&$inter_id!='a492669988'&&$inter_id!='a498464307'){?>
+    <?php if($inter_id!='a486201893'&&$inter_id!='a492669988'){?>
         <a class="f_r" href="<?php echo base_url("index.php/membervip/resetpassword");?>">忘记密码?</a>
         <?php }?>
         <a href="<?php echo site_url("membervip/reg/index"."?redir=".$redir);?>">注册账户</a>

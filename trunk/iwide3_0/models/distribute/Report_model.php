@@ -496,17 +496,22 @@ class Report_model extends MY_Model {
 	}
 
 	function get_send_logs($params,$limit=NULL,$offset=0){
-	
-        $sql = "SELECT * FROM (SELECT oi.id oiid,o.id,o.hotel_id,o.openid,o.inter_id,o.price,o.roomnums,o.name,o.order_time,o.orderid,
-                  o.paid,o.paytype,oa.web_orderid,oa.coupon_favour,oa.wxpay_favour,oa.point_used,oa.point_used_amount,oa.coupon_used,
-                  oi.id sid,oi.room_id,oi.iprice,oi.startdate,oi.enddate,oi.istatus,oi.allprice,oi.roomname,oi.webs_orderid,m.mem_card_no,ma.membership_number
-                FROM iwide_hotel_orders o
-                INNER JOIN iwide_hotel_order_additions oa ON o.orderid=oa.orderid AND oa.inter_id=o.inter_id
-                LEFT JOIN iwide_hotel_order_items oi ON o.orderid=oi.orderid
-                LEFT JOIN iwide_member m ON m.inter_id=o.inter_id AND m.openid=o.openid
-                LEFT JOIN iwide_member_additional ma ON m.mem_id=ma.mem_id
-
-                WHERE oi.istatus=3 AND o.inter_id=?";
+	if($this->input->get('debug') == 1){
+		echo $this->_db('iwide_r1')->last_query();echo '<br />';
+		echo '<p>'.microtime(TRUE).'</p>';
+	}
+		$sql = "SELECT oi.id oiid,o.id,o.hotel_id,o.openid,o.inter_id,o.price,o.roomnums,o.name,o.order_time,o.orderid, o.paid,o.paytype,oa.web_orderid,oa.coupon_favour,oa.wxpay_favour,oa.point_used,oa.point_used_amount,oa.coupon_used, oi.id sid,
+				oi.room_id,oi.iprice,oi.startdate,oi.enddate,oi.istatus,oi.allprice,oi.roomname,oi.webs_orderid,ga.inter_id,ga.saler,ga.grade_openid,ga.grade_table,ga.grade_id,ga.grade_id_name,ga.order_amount,ga.grade_total,ga.hotel_id saler_hotel,
+				 ga.grade_amount,ga.grade_time,ga.status,ga.grade_amount_rate,ga.grade_rate_type,ga.remark,ga.deliver_batch, ga.last_update_time,ga.partner_trade_no,ga.send_time,ga.deliver_fail,ga.order_hotel,ga.order_status,ga.fans_hotel, 
+				 ga.hotel_rate,ga.group_rate,ga.jfk_rate,ga.hotel_grades,ga.group_grades,ga.jfk_grades,hs.master_dept,m.mem_card_no,ma.membership_number 
+				FROM `iwide_distribute_grade_all` ga FORCE INDEX(grade_time) 
+				LEFT JOIN iwide_hotel_order_items oi ON ga.grade_id=oi.id
+				LEFT JOIN iwide_hotel_staff hs ON ga.inter_id=hs.inter_id AND ga.saler=hs.qrcode_id 
+				LEFT JOIN iwide_hotel_orders o ON o.inter_id=ga.inter_id AND o.orderid=oi.orderid
+				LEFT JOIN iwide_hotel_order_additions oa ON o.orderid=oa.orderid AND oa.inter_id=o.inter_id 
+				LEFT JOIN iwide_member m ON m.inter_id=o.inter_id AND m.openid=o.openid 
+				LEFT JOIN iwide_member_additional ma ON m.mem_id=ma.mem_id WHERE ga.grade_id=CONVERT(oi.id,CHARACTER) AND ga.grade_table='iwide_hotels_order' AND ga.inter_id=?";
+				
 		$argvs [] = $params['inter_id'];
 		//添加酒店权限筛选
 		if(!empty($params['entity_hotel_id'])){
@@ -532,30 +537,19 @@ class Report_model extends MY_Model {
 		if(isset($params['distribute'])){
 			$is_distributed = $params['distribute'];
 		}
-		$sql .= " GROUP BY oi.id) orders INNER JOIN
-(SELECT ga.inter_id,ga.saler,ga.grade_openid,ga.grade_table,ga.grade_id,ga.grade_id_name,ga.order_amount,ga.grade_total,ga.hotel_id saler_hotel,
-				ga.grade_amount,ga.grade_time,ga.status,ga.grade_amount_rate,ga.grade_rate_type,ga.remark,ga.deliver_batch,
-				ga.last_update_time,ga.partner_trade_no,ga.send_time,ga.deliver_fail,ga.order_hotel,ga.order_status,ga.fans_hotel,
-				ga.hotel_rate,ga.group_rate,ga.jfk_rate,ga.hotel_grades,ga.group_grades,ga.jfk_grades,ge.hotel_name,ge.staff_name,
-				ge.product,hs.master_dept
-				FROM iwide_distribute_grade_all ga
-				LEFT JOIN iwide_hotel_staff hs ON hs.qrcode_id=ga.saler and hs.inter_id = ?
-INNER JOIN iwide_distribute_grade_ext ge ON ga.inter_id=ge.inter_id AND ga.grade_table='iwide_hotels_order' AND ga.id=ge.grade_id
-WHERE ge.distribute=? AND ga.inter_id=? AND ga.saler>0 AND ga.status != 99";//期限外的绩效不统计 situguanchen 20170411
-        $argvs [] = $params['inter_id'];
+		$sql .= " AND hs.is_distributed=?";
 		$argvs [] = $is_distributed;
-		$argvs [] = $params['inter_id'];
 		if(!empty($params['saler_name'])){
-			$sql .= " AND ge.staff_name LIKE ?";
+			$sql .= " AND hs.`name` LIKE ?";
 			$argvs [] = '%'.$params['saler_name'].'%';
 		}
-        //一级部门
-        if(!empty($params['department']))
-        {
-            $sql .= " AND hs.master_dept = ?";
-            $argvs [] = $params['department'];
-        }
-
+		//一级部门
+		if(!empty($params['department']))
+		{
+			$sql .= " AND hs.master_dept = ? ";
+			$argvs [] = $params['department'];
+		}
+		
 		if(!empty($params['saler_no'])){
 			$sql .= " AND ga.saler=?";
 			$argvs [] = $params['saler_no'];
@@ -576,7 +570,89 @@ WHERE ge.distribute=? AND ga.inter_id=? AND ga.saler>0 AND ga.status != 99";//�
 			$sql .= " AND ga.send_time<=?";
 			$argvs [] = $params['send_date_end'].' 23:59:59';
 		}
-		$sql .=") grades ON orders.inter_id=grades.inter_id AND orders.oiid=grades.grade_id ORDER BY grades.grade_time DESC";
+		$sql .= " AND oi.istatus=3 AND  ga.saler>0 AND ga.status != 99 ORDER BY grade_time DESC";
+        
+//         $sql = "SELECT * FROM (SELECT oi.id oiid,o.id,o.hotel_id,o.openid,o.inter_id,o.price,o.roomnums,o.name,o.order_time,o.orderid,
+//                   o.paid,o.paytype,oa.web_orderid,oa.coupon_favour,oa.wxpay_favour,oa.point_used,oa.point_used_amount,oa.coupon_used,
+//                   oi.id sid,oi.room_id,oi.iprice,oi.startdate,oi.enddate,oi.istatus,oi.allprice,oi.roomname,oi.webs_orderid,m.mem_card_no,ma.membership_number
+//                 FROM iwide_hotel_orders o
+//                 INNER JOIN iwide_hotel_order_additions oa ON o.orderid=oa.orderid AND oa.inter_id=o.inter_id
+//                 LEFT JOIN iwide_hotel_order_items oi ON o.orderid=oi.orderid
+//                 LEFT JOIN iwide_member m ON m.inter_id=o.inter_id AND m.openid=o.openid
+//                 LEFT JOIN iwide_member_additional ma ON m.mem_id=ma.mem_id
+
+//                 WHERE oi.istatus=3 AND o.inter_id=?";
+// 		$argvs [] = $params['inter_id'];
+// 		//添加酒店权限筛选
+// 		if(!empty($params['entity_hotel_id'])){
+// 			$sql .= " AND o.hotel_id in ('" .implode("','",$params['entity_hotel_id']) . "') ";
+// 		}
+// 		if(!empty($params['hotel_id'])){
+// 			$sql .= " AND o.hotel_id=?";
+// 			$argvs [] = $params['hotel_id'];
+// 		}
+// 		if(!empty($params['cout_date_begin'])){
+// 			$sql .= " AND oi.enddate>=?";
+// 			$argvs [] = $params['cout_date_begin'];
+// 		}
+// 		if(!empty($params['cout_date_end'])){
+// 			$sql .= " AND oi.enddate<=?";
+// 			$argvs [] = $params['cout_date_end'];
+// 		}
+// 		if(!empty($params['order_id'])){
+// 			$sql .= " AND o.orderid LIKE ?";
+// 			$argvs [] = '%'.$params['order_id'].'%';
+// 		}
+// 		$is_distributed = 1;
+// 		if(isset($params['distribute'])){
+// 			$is_distributed = $params['distribute'];
+// 		}
+		
+// 		$sql .= " GROUP BY oi.id) orders INNER JOIN
+// (SELECT ga.inter_id,ga.saler,ga.grade_openid,ga.grade_table,ga.grade_id,ga.grade_id_name,ga.order_amount,ga.grade_total,ga.hotel_id saler_hotel,
+// 				ga.grade_amount,ga.grade_time,ga.status,ga.grade_amount_rate,ga.grade_rate_type,ga.remark,ga.deliver_batch,
+// 				ga.last_update_time,ga.partner_trade_no,ga.send_time,ga.deliver_fail,ga.order_hotel,ga.order_status,ga.fans_hotel,
+// 				ga.hotel_rate,ga.group_rate,ga.jfk_rate,ga.hotel_grades,ga.group_grades,ga.jfk_grades,ge.hotel_name,ge.staff_name,
+// 				ge.product,hs.master_dept
+// 				FROM iwide_distribute_grade_all ga
+// 				LEFT JOIN iwide_hotel_staff hs ON hs.qrcode_id=ga.saler and hs.inter_id = ?
+// INNER JOIN iwide_distribute_grade_ext ge ON ga.inter_id=ge.inter_id AND ga.grade_table='iwide_hotels_order' AND ga.id=ge.grade_id
+// WHERE ge.distribute=? AND ga.inter_id=? AND ga.saler>0 AND ga.status != 99";//期限外的绩效不统计 situguanchen 20170411
+//         $argvs [] = $params['inter_id'];
+// 		$argvs [] = $is_distributed;
+// 		$argvs [] = $params['inter_id'];
+// 		if(!empty($params['saler_name'])){
+// 			$sql .= " AND ge.staff_name LIKE ?";
+// 			$argvs [] = '%'.$params['saler_name'].'%';
+// 		}
+//         //一级部门
+//         if(!empty($params['department']))
+//         {
+//             $sql .= " AND hs.master_dept = ?";
+//             $argvs [] = $params['department'];
+//         }
+
+// 		if(!empty($params['saler_no'])){
+// 			$sql .= " AND ga.saler=?";
+// 			$argvs [] = $params['saler_no'];
+// 		}
+// 		if(!empty($params['grade_date_begin'])){
+// 			$sql .= " AND ga.grade_time>=?";
+// 			$argvs [] = $params['grade_date_begin'];
+// 		}
+// 		if(!empty($params['grade_date_end'])){
+// 			$sql .= " AND ga.grade_time<=?";
+// 			$argvs [] = $params['grade_date_end'].' 23:59:59';
+// 		}
+// 		if(!empty($params['send_date_begin'])){
+// 			$sql .= " AND ga.send_time>=?";
+// 			$argvs [] = $params['send_date_begin'];
+// 		}
+// 		if(!empty($params['send_date_end'])){
+// 			$sql .= " AND ga.send_time<=?";
+// 			$argvs [] = $params['send_date_end'].' 23:59:59';
+// 		}
+// 		$sql .=") grades ON orders.inter_id=grades.inter_id AND orders.oiid=grades.grade_id ORDER BY grades.grade_time DESC";
 		if(!empty($limit)){
 			$sql .= ' LIMIT ?,?';
 			$argvs[] = $offset;
@@ -585,21 +661,18 @@ WHERE ge.distribute=? AND ga.inter_id=? AND ga.saler>0 AND ga.status != 99";//�
 		$query = $this->_db('iwide_r1')->query($sql,$argvs);
 		if($this->input->get('debug') == 1){
 			echo $this->_db('iwide_r1')->last_query();echo '<br />';
+	echo '<p>'.microtime(TRUE).'</p>';
 		}
 		return $query;
 	}
 	
 	
 	function get_send_logs_count($params){
-            $sql = "SELECT count(oiid) nums FROM (SELECT oi.id oiid,o.id,o.hotel_id,o.openid,o.inter_id,o.price,o.roomnums,o.name,o.order_time,o.orderid,
-              o.paid,o.paytype,oa.web_orderid,oa.coupon_favour,oa.wxpay_favour,oa.point_used,oa.point_used_amount,oa.coupon_used,
-              oi.id sid,oi.room_id,oi.iprice,oi.startdate,oi.enddate,oi.istatus,oi.allprice,oi.roomname,oi.webs_orderid,m.mem_card_no,ma.membership_number
-            FROM iwide_hotel_orders o
-            INNER JOIN iwide_hotel_order_additions oa ON o.orderid=oa.orderid AND oa.inter_id=o.inter_id
-            LEFT JOIN iwide_hotel_order_items oi ON o.orderid=oi.orderid
-            LEFT JOIN iwide_member m ON m.inter_id=o.inter_id AND m.openid=o.openid
-            LEFT JOIN iwide_member_additional ma ON m.mem_id=ma.mem_id
-            WHERE oi.istatus=3 AND o.inter_id=?";
+		if($this->input->get('debug') == 1){
+			echo $this->_db('iwide_r1')->last_query();echo '<br />';
+			echo '<p>'.microtime(TRUE).'</p>';
+		}
+		$sql = "SELECT COUNT(oi.id) nums FROM `iwide_distribute_grade_all` ga LEFT JOIN iwide_hotel_order_items oi ON ga.grade_id=oi.id LEFT JOIN iwide_hotel_staff hs ON ga.inter_id=hs.inter_id AND ga.saler=hs.qrcode_id LEFT JOIN iwide_hotel_orders o ON o.inter_id=ga.inter_id AND o.orderid=oi.orderid LEFT JOIN iwide_hotel_order_additions oa ON o.orderid=oa.orderid AND oa.inter_id=o.inter_id LEFT JOIN iwide_member m ON m.inter_id=o.inter_id AND m.openid=o.openid LEFT JOIN iwide_member_additional ma ON m.mem_id=ma.mem_id WHERE ga.grade_id=CONVERT(oi.id,CHARACTER) AND ga.grade_table='iwide_hotels_order' AND ga.inter_id=? ";
 		$argvs [] = $params['inter_id'];
 		//添加酒店权限筛选
 		if(!empty($params['entity_hotel_id'])){
@@ -621,33 +694,23 @@ WHERE ge.distribute=? AND ga.inter_id=? AND ga.saler>0 AND ga.status != 99";//�
 			$sql .= " AND o.orderid LIKE ?";
 			$argvs [] = '%'.$params['order_id'].'%';
 		}
-
+		
 		$is_distributed = 1;
 		if(isset($params['distribute'])){
 			$is_distributed = $params['distribute'];
 		}
-		$sql .= " GROUP BY oi.id) orders INNER JOIN
-(SELECT ga.inter_id,ga.saler,ga.grade_openid,ga.grade_table,ga.grade_id,ga.grade_id_name,ga.order_amount,ga.grade_total,
-				ga.grade_amount,ga.grade_time,ga.status,ga.grade_amount_rate,ga.grade_rate_type,ga.remark,ga.deliver_batch,
-				ga.last_update_time,ga.partner_trade_no,ga.send_time,ga.deliver_fail,ga.order_hotel,ga.order_status,ga.fans_hotel,
-				ga.hotel_rate,ga.group_rate,ga.jfk_rate,ga.hotel_grades,ga.group_grades,ga.jfk_grades,ge.hotel_name,ge.staff_name,
-				ge.product FROM iwide_distribute_grade_all ga
-				LEFT JOIN iwide_hotel_staff hs ON hs.qrcode_id=ga.saler and hs.inter_id = ?
-                INNER JOIN iwide_distribute_grade_ext ge ON ga.inter_id=ge.inter_id AND ga.id=ge.grade_id AND ga.grade_table='iwide_hotels_order'
-                WHERE ge.distribute=? AND ga.inter_id=? AND ga.saler>0 AND ga.status != 99";//期限外的绩效不统计 situguanchen 20170411
-        $argvs [] = $params['inter_id'];
+		$sql .= " AND hs.is_distributed=? ";
 		$argvs [] = $is_distributed;
-		$argvs [] = $params['inter_id'];
 		if(!empty($params['saler_name'])){
-			$sql .= " AND ge.staff_name LIKE ?";
+			$sql .= " AND hs.`name` LIKE ?";
 			$argvs [] = '%'.$params['saler_name'].'%';
 		}
-        //一级部门
-        if(!empty($params['department']))
-        {
-            $sql .= " AND hs.master_dept = ?";
-            $argvs [] = $params['department'];
-        }
+		//一级部门
+		if(!empty($params['department']))
+		{
+			$sql .= " AND hs.master_dept = ?";
+			$argvs [] = $params['department'];
+		}
 		if(!empty($params['saler_no'])){
 			$sql .= " AND ga.saler=?";
 			$argvs [] = $params['saler_no'];
@@ -668,9 +731,92 @@ WHERE ge.distribute=? AND ga.inter_id=? AND ga.saler>0 AND ga.status != 99";//�
 			$sql .= " AND ga.send_time<=?";
 			$argvs [] = $params['send_date_end'].' 23:59:59';
 		}
-		$sql .=") grades ON orders.inter_id=grades.inter_id AND orders.oiid=grades.grade_id";
+		$sql .= " AND oi.istatus=3 AND ga.saler>0 AND ga.status != 99";
+		
+//             $sql = "SELECT count(oiid) nums FROM (SELECT oi.id oiid,o.id,o.hotel_id,o.openid,o.inter_id,o.price,o.roomnums,o.name,o.order_time,o.orderid,
+//               o.paid,o.paytype,oa.web_orderid,oa.coupon_favour,oa.wxpay_favour,oa.point_used,oa.point_used_amount,oa.coupon_used,
+//               oi.id sid,oi.room_id,oi.iprice,oi.startdate,oi.enddate,oi.istatus,oi.allprice,oi.roomname,oi.webs_orderid,m.mem_card_no,ma.membership_number
+//             FROM iwide_hotel_orders o
+//             INNER JOIN iwide_hotel_order_additions oa ON o.orderid=oa.orderid AND oa.inter_id=o.inter_id
+//             LEFT JOIN iwide_hotel_order_items oi ON o.orderid=oi.orderid
+//             LEFT JOIN iwide_member m ON m.inter_id=o.inter_id AND m.openid=o.openid
+//             LEFT JOIN iwide_member_additional ma ON m.mem_id=ma.mem_id
+//             WHERE oi.istatus=3 AND o.inter_id=?";
+// 		$argvs [] = $params['inter_id'];
+// 		//添加酒店权限筛选
+// 		if(!empty($params['entity_hotel_id'])){
+// 			$sql .= " AND o.hotel_id in ('" .implode("','",$params['entity_hotel_id']) . "') ";
+// 		}
+// 		if(!empty($params['hotel_id'])){
+// 			$sql .= " AND o.hotel_id=?";
+// 			$argvs [] = $params['hotel_id'];
+// 		}
+// 		if(!empty($params['cout_date_begin'])){
+// 			$sql .= " AND oi.enddate>=?";
+// 			$argvs [] = $params['cout_date_begin'];
+// 		}
+// 		if(!empty($params['cout_date_end'])){
+// 			$sql .= " AND oi.enddate<=?";
+// 			$argvs [] = $params['cout_date_end'];
+// 		}
+// 		if(!empty($params['order_id'])){
+// 			$sql .= " AND o.orderid LIKE ?";
+// 			$argvs [] = '%'.$params['order_id'].'%';
+// 		}
+
+// 		$is_distributed = 1;
+// 		if(isset($params['distribute'])){
+// 			$is_distributed = $params['distribute'];
+// 		}
+// 		$sql .= " GROUP BY oi.id) orders INNER JOIN
+// (SELECT ga.inter_id,ga.saler,ga.grade_openid,ga.grade_table,ga.grade_id,ga.grade_id_name,ga.order_amount,ga.grade_total,
+// 				ga.grade_amount,ga.grade_time,ga.status,ga.grade_amount_rate,ga.grade_rate_type,ga.remark,ga.deliver_batch,
+// 				ga.last_update_time,ga.partner_trade_no,ga.send_time,ga.deliver_fail,ga.order_hotel,ga.order_status,ga.fans_hotel,
+// 				ga.hotel_rate,ga.group_rate,ga.jfk_rate,ga.hotel_grades,ga.group_grades,ga.jfk_grades,ge.hotel_name,ge.staff_name,
+// 				ge.product FROM iwide_distribute_grade_all ga
+// 				LEFT JOIN iwide_hotel_staff hs ON hs.qrcode_id=ga.saler and hs.inter_id = ?
+//                 INNER JOIN iwide_distribute_grade_ext ge ON ga.inter_id=ge.inter_id AND ga.id=ge.grade_id AND ga.grade_table='iwide_hotels_order'
+//                 WHERE ge.distribute=? AND ga.inter_id=? AND ga.saler>0 AND ga.status != 99";//期限外的绩效不统计 situguanchen 20170411
+//         $argvs [] = $params['inter_id'];
+// 		$argvs [] = $is_distributed;
+// 		$argvs [] = $params['inter_id'];
+// 		if(!empty($params['saler_name'])){
+// 			$sql .= " AND ge.staff_name LIKE ?";
+// 			$argvs [] = '%'.$params['saler_name'].'%';
+// 		}
+//         //一级部门
+//         if(!empty($params['department']))
+//         {
+//             $sql .= " AND hs.master_dept = ?";
+//             $argvs [] = $params['department'];
+//         }
+// 		if(!empty($params['saler_no'])){
+// 			$sql .= " AND ga.saler=?";
+// 			$argvs [] = $params['saler_no'];
+// 		}
+// 		if(!empty($params['grade_date_begin'])){
+// 			$sql .= " AND ga.grade_time>=?";
+// 			$argvs [] = $params['grade_date_begin'];
+// 		}
+// 		if(!empty($params['grade_date_end'])){
+// 			$sql .= " AND ga.grade_time<=?";
+// 			$argvs [] = $params['grade_date_end'].' 23:59:59';
+// 		}
+// 		if(!empty($params['send_date_begin'])){
+// 			$sql .= " AND ga.send_time>=?";
+// 			$argvs [] = $params['send_date_begin'];
+// 		}
+// 		if(!empty($params['send_date_end'])){
+// 			$sql .= " AND ga.send_time<=?";
+// 			$argvs [] = $params['send_date_end'].' 23:59:59';
+// 		}
+// 		$sql .=") grades ON orders.inter_id=grades.inter_id AND orders.oiid=grades.grade_id";
 		
 		$query = $this->_db('iwide_r1')->query($sql,$argvs)->row();
+		if($this->input->get('debug') == 1){
+			echo $this->_db('iwide_r1')->last_query();echo '<br />';
+			echo '<p>'.microtime(TRUE).'</p>';
+		}
 		return $query->nums;
 	}
 	

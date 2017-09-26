@@ -1,5 +1,15 @@
 
-<link href="<?php echo base_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
+<style type="text/css">
+    .receive_list {
+        margin-bottom: 37px;
+    }
+    .receive_list_tips {
+        left: 0px;
+        bottom: 0;
+        z-index: 9999;
+    }
+</style>
 <script>
 var redirectUrl = '<?php 
 $redirect= urlencode( Soma_const_url::inst()->get_url('*/*/package_list_send', array('id'=> $this->inter_id) ) ); 
@@ -45,7 +55,7 @@ wx.ready(function(){
 <div class="pageloading"><p class="isload" style="margin-top:150px"><?php echo $lang->line('loading');?></p></div>
 <!-- 以上为head -->
 
-<div class="receive_list" style="background-image:url(<?php echo base_url('public/soma/mooncake_v1/bg3.jpg'); ?>)">
+<div class="receive_list" style="background-image:url(<?php echo get_cdn_url('public/soma/mooncake_v1/bg3.jpg'); ?>)">
     <?php foreach( $orders['items'] as $k=>$v ):
     ?>
 	<!--div class="receive_list_head center">
@@ -75,7 +85,7 @@ wx.ready(function(){
                     <div class="img">
                         <div class="squareimg">
                             <!-- 用户头像 -->
-                            <img src="<?php echo isset($sv['openid_headimg'])? $sv['openid_headimg']: base_url('public/soma/images/ucenter_headimg.jpg');?>">
+                            <img src="<?php echo isset($sv['openid_headimg'])? $sv['openid_headimg']: get_cdn_url('public/soma/images/ucenter_headimg.jpg');?>">
                         </div>
                     </div>
                     <div>
@@ -85,13 +95,15 @@ wx.ready(function(){
                     <div class="txt_r"><?php echo str_replace('[0]', $sv['get_qty'], $lang->line('received_copies'));?></div>
                 </li>
                 <?php endforeach;?>
+
+
             </ul>
         <?php else: ?>
             <div class="color_888 center" style="padding:20%;">
                 <p><?php echo $lang->line('your_gift_not_receive');?></p>
                 <p><?php echo $lang->line('click_continue_give');?></p>
                 <p><?php echo $lang->line('gift_return_tip');?></p>
-        		<p style="text-align:right; padding-top:10%"><img src="<?php echo base_url('public/soma/images/ico1.png'); ?>" style="width:20px;"></p>
+        		<p style="text-align:right; padding-top:10%"><img src="<?php echo get_cdn_url('public/soma/images/ico1.png'); ?>" style="width:20px;"></p>
             </div>
         <?php endif; ?>
     
@@ -115,7 +127,7 @@ wx.ready(function(){
                 <div class="img">
                     <div class="squareimg">
                         <!-- 用户头像 -->
-                        <img src="<?php echo isset($orders['openid_received_headimg'])? $orders['openid_received_headimg']: base_url('public/soma/images/ucenter_headimg.jpg');?>">
+                        <img src="<?php echo isset($orders['openid_received_headimg'])? $orders['openid_received_headimg']: get_cdn_url('public/soma/images/ucenter_headimg.jpg');?>">
                     </div>
                 </div>
                 <div>
@@ -130,14 +142,14 @@ wx.ready(function(){
                 <div class="color_888 center" style="padding:20%;">
                     <p><?php echo $lang->line('gift_not_received_tip');?></p>
                     <p><?php echo $lang->line('click_to_check_return_gift_tip');?></p>
-            		<p style="text-align:right; padding-top:10%"><img src="<?php echo base_url('public/soma/images/ico1.png'); ?>" style="width:20px;"></p>
+            		<p style="text-align:right; padding-top:10%"><img src="<?php echo get_cdn_url('public/soma/images/ico1.png'); ?>" style="width:20px;"></p>
                 </div>
             <?php else: ?>
                 <div class="color_888 center" style="padding:20%;">
                     <p><?php echo $lang->line('your_gift_not_receive');?></p>
                     <p><?php echo $lang->line('click_continue_give');?></p>
                     <p><?php echo $lang->line('gift_return_tip');?></p>
-            		<p style="text-align:right; padding-top:10%"><img src="<?php echo base_url('public/soma/images/ico1.png'); ?>" style="width:20px;"></p>
+            		<p style="text-align:right; padding-top:10%"><img src="<?php echo get_cdn_url('public/soma/images/ico1.png'); ?>" style="width:20px;"></p>
                 </div>
             <?php endif; ?>
         <?php endif; ?>
@@ -147,7 +159,6 @@ wx.ready(function(){
 <div class="ui_pull share_pull" style="display:none"></div>
 <script>
 $(document).ready(function() {
-	
     $(".goOnSend").click(function(){
         $.MsgBox.Confirm("<?php echo $lang->line('continue_give_tip');?>",function(){
             <?php if( $js_menu_show ): ?>wx.showMenuItems({ menuList: [<?php echo $js_menu_show; ?>] });<?php endif; ?>

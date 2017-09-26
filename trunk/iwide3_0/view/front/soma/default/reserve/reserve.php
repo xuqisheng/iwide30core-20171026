@@ -38,7 +38,7 @@ wx.ready(function(){
 <!-- 以上为head -->
 <a class="goods webkitbox">
     <div class="goodsimg"><div class="squareimg">
-    <!-- <img src="<?php echo base_url('public/soma/images');?>/eg4.jpg" /> -->
+    <!-- <img src="<?php echo get_cdn_url('public/soma/images');?>/eg4.jpg" /> -->
     <img src="<?php echo $product['face_img']; ?>"?>
     </div></div>
     <div>

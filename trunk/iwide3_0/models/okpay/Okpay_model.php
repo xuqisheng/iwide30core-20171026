@@ -53,7 +53,6 @@ class Okpay_model extends MY_Model{
 			'pay_type'=>'支付类型',
 			'trade_no'=>'交易号',
 			'pay_way'=>'支付方式',
-			'activity_id'=>'优惠id',
 			'remark'=>'备注',
 			'refund_money'=>'退款金额',
 		);
@@ -342,16 +341,6 @@ class Okpay_model extends MY_Model{
 				'function'=> 'string_format_pay_ways',
 				'type'=>'text',	//textarea|text|combobox|number|email|url|price
 			),
-			'activity_id' => array(
-				'grid_ui'=> '',
-				'grid_width'=> '5%',
-				//'form_ui'=> ' disabled ',
-				//'form_default'=> '0',
-				//'form_tips'=> '注意事项',
-				'form_hide'=> TRUE,
-				//'function'=> 'show_price_prefix|￥',
-				'type'=>'text',	//textarea|text|combobox|number|email|url|price
-			),
 		);
 	}
 
@@ -376,7 +365,7 @@ class Okpay_model extends MY_Model{
 		$insert_id = $this->db->insert_id();
 
 		if($insert_id){
-			return $insert_id;
+			return true;
 		}else{
 			return false;
 		}
@@ -573,12 +562,12 @@ class Okpay_model extends MY_Model{
 	}
 
 	public function get_order_info($inter_id,$id){
-		$this->_db('iwide_rw')->select( '*' );
-		$this->_db('iwide_rw')->where ( array (
+		$this->_db('iwide_r1')->select( '*' );
+		$this->_db('iwide_r1')->where ( array (
 			'id' => $id,
 			'inter_id'=>$inter_id
 		) );
-		return $this->_db('iwide_rw')->get(self::TAB_OKPAY_ORDERS)->row_array();
+		return $this->_db('iwide_r1')->get(self::TAB_OKPAY_ORDERS)->row_array();
 	}
 
 	/**

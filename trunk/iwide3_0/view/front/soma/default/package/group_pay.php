@@ -141,13 +141,13 @@ wx.ready(function(){
         <div style="text-align:justify; line-height:1.5">
         	<p class="color_main">＊亲，因为我们的商品可以自提或赠送，填写邮寄信息需购买成功哦！</p>
             <p>1  立即购买—支付成功—点击完成</p>
-            <p><img src="<?php echo base_url('public/soma/images/step1.jpg');?>"></p>
+            <p><img src="<?php echo get_cdn_url('public/soma/images/step1.jpg');?>"></p>
             <p>2  全部订单—点击使用</p>
-            <p><img src="<?php echo base_url('public/soma/images/step2.jpg');?>"></p>
+            <p><img src="<?php echo get_cdn_url('public/soma/images/step2.jpg');?>"></p>
             <p>3  订单明细 </p>
-            <p><img src="<?php echo base_url('public/soma/images/step3.jpg');?>"></p>
+            <p><img src="<?php echo get_cdn_url('public/soma/images/step3.jpg');?>"></p>
             <p>4  邮寄—填写信息</p>
-            <p><img src="<?php echo base_url('public/soma/images/step4.jpg');?>"></p>
+            <p><img src="<?php echo get_cdn_url('public/soma/images/step4.jpg');?>"></p>
         </div>
     </div>
     <div class="pull_close color_fff h0"><em class="iconfont">&#xe612;</em></div>

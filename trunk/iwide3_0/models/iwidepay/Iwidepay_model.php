@@ -1052,15 +1052,15 @@ class Iwidepay_model extends MY_Model{
 	public function get_sync_dis_fans_subs($inter_id = array()){
 		$s_time = date('Y-m-d 00:00:00',strtotime('-1 days'));
 		$e_time = date('Y-m-d 00:00:00');
-		$sql = "SELECT inter_id,hotel_id,sum(grade_total) as sum_total FROM `iwide_distribute_grade_all` WHERE inter_id = '{$inter_id}' saler >0 AND saler <=100000 AND saler in (SELECT qrcode_id FROM iwide_hotel_staff WHERE inter_id = '{$inter_id}' AND openid != '' AND status = 2) AND status in (1,2) AND grade_total >0 AND grade_table = 'iwide_fans_sub_log' AND grade_time >= '{$s_time}' AND grade_time <'{$e_time}' GROUP BY inter_id,hotel_id";
+		$sql = "SELECT inter_id,hotel_id,sum(grade_total) as sum_total FROM `iwide_distribute_grade_all` WHERE inter_id = '{$inter_id}' AND saler >0 AND saler <=100000 AND saler in (SELECT qrcode_id FROM iwide_hotel_staff WHERE inter_id = '{$inter_id}' AND openid != '' AND status = 2) AND status in (1,2) AND grade_total >0 AND grade_table = 'iwide_fans_sub_log' AND grade_time >= '{$s_time}' AND grade_time <'{$e_time}' GROUP BY inter_id,hotel_id";
 		return $this->db->query($sql)->result_array();
 	}
 
 	//获取分销的除了关注奖励的数据
-	public function get_sync_dis_record($inter_ids = array()){
+	public function get_sync_dis_record($inter_ids = array(),$type='iwide_distribute_group_member'){
 		$s_time = date('Y-m-d 00:00:00',strtotime('-1 days'));
 		$e_time = date('Y-m-d 00:00:00');
-		$sql = "SELECT inter_id,hotel_id,saler,grade_table,grade_total,grade_id FROM iwide_distribute_grade_all WHERE inter_id in ('".explode("','",$inter_ids)."') AND status in (1,2) AND saler >0 AND saler <= 100000 AND grade_total >0 AND grade_table in ('iwide_distribute_group_member','iwide_firstorder_reward')  AND grade_time >= '{$s_time}' AND grade_time <'{$e_time}' ";
+		$sql = "SELECT inter_id,hotel_id,sum(grade_total) as sum_total FROM iwide_distribute_grade_all WHERE inter_id in ('".implode("','",$inter_ids)."') AND status in (1,2) AND saler >0 AND saler <= 100000 AND grade_total >0 AND grade_table in ('{$type}')  AND grade_time >= '{$s_time}' AND grade_time <'{$e_time}' GROUP BY inter_id,hotel_id";
 		return $this->db->query($sql)->result_array();
 	}
 

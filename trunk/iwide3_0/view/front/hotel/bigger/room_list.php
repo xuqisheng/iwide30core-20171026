@@ -159,7 +159,7 @@
                                     <?php }?>
                                 </div>
                                 <div style="min-width:25px;">
-                                <?php if(isset($si['bookpolicy_condition']['breakfast_nums']) && !empty($si['bookpolicy_condition']['breakfast_nums'])){ ?>
+                                <?php if(isset($si['bookpolicy_condition']) && isset($si['bookpolicy_condition']['breakfast_nums']) && !empty($si['bookpolicy_condition']['breakfast_nums'])){ ?>
                                     <span class="color3"><?php echo $si['bookpolicy_condition']['breakfast_nums'];?></span>
                                 <?php }?>
                                 </div>
@@ -399,9 +399,12 @@
 
                             r_temp +='</div><div style="min-width:25px;">';
 
-                            if(si.bookpolicy_condition.breakfast_nums !=undefined && si.bookpolicy_condition.breakfast_nums!=''){
-                                r_temp +='<span class="color3">'+si.bookpolicy_condition.breakfast_nums+'</span>';
+                            if(si.bookpolicy_condition !=undefined){
+                                if(si.bookpolicy_condition.breakfast_nums !=undefined && si.bookpolicy_condition.breakfast_nums!=''){
+                                    r_temp +='<span class="color3">'+si.bookpolicy_condition.breakfast_nums+'</span>';
+                                }
                             }
+
                             r_temp +='</div>'
                             if(parseFloat(si.avg_price) >=0){
                                 r_temp +='<span class="color1 room_list_number h28">&#xFFE5<tt class="h34">'+si.avg_price+'</tt></span>';

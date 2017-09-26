@@ -362,7 +362,7 @@ class Send_records extends MY_Admin {
 		$config ['cur_tag_close'] = '</a>';
 		$config ['base_url'] = base_url ( "index.php/distribute/send_records/batch_log/".$batch_no.'_'.$from.'_'.$to );
 		$config ['first_url'] = $config ['base_url'] . '?s='.$source;
-		$config ['total_rows'] = $this->send_records_model->get_batch_logs ( $inter_id, $batch_no, $from, $to,null,0,$source)->num_rows();
+		$config ['total_rows'] = $this->send_records_model->get_batch_logs_count ( $inter_id, $batch_no, $from, $to,null,0,$source);
 		$config ['cur_tag_open'] = '<li class="paginate_button active"><a>';
 		$config ['cur_tag_close'] = '</a></li>';
 		$config ['num_tag_open'] = '<li class="paginate_button">';
@@ -744,22 +744,22 @@ class Send_records extends MY_Admin {
 	/**
 	 * 处理发放异常记录 
 	 */
-	public function sstatus(){
-		if($this->session->admin_profile['role']['role_name'] != 'admin'){
-			exit('没有权限');
-		}else{
-			if(empty($this->uri->segment(4)) || empty($this->uri->segment(5))){
-				exit('参数错误');
-			}
-			$this->load->model('distribute/Send_records_model');
-			$id = intval($this->uri->segment(5));
-			if($id < 1)
-				exit('绩效编号错误');
-			if($this->uri->segment(4) == 'f'){
-				echo $this->Send_records_model->set_status($id,Send_records_model::SEND_STATUS_FAILD) ? '重置成功' : '重置失败';
-			}else if($this->uri->segment(4) == 's'){
-				echo $this->Send_records_model->set_status($id,Send_records_model::SEND_STATUS_SUCCESS) ? '重置成功' : '重置失败';
-			}
-		}
-	}
+// 	public function sstatus(){
+// 		if($this->session->admin_profile['role']['role_name'] != 'admin'){
+// 			exit('没有权限');
+// 		}else{
+// 			if(empty($this->uri->segment(4)) || empty($this->uri->segment(5))){
+// 				exit('参数错误');
+// 			}
+// 			$this->load->model('distribute/Send_records_model');
+// 			$id = intval($this->uri->segment(5));
+// 			if($id < 1)
+// 				exit('绩效编号错误');
+// 			if($this->uri->segment(4) == 'f'){
+// 				echo $this->Send_records_model->set_status($id,Send_records_model::SEND_STATUS_FAILD) ? '重置成功' : '重置失败';
+// 			}else if($this->uri->segment(4) == 's'){
+// 				echo $this->Send_records_model->set_status($id,Send_records_model::SEND_STATUS_SUCCESS) ? '重置成功' : '重置失败';
+// 			}
+// 		}
+// 	}
 }

@@ -32,7 +32,8 @@ class DepositcardService extends MemberBaseService
             $saler = $this->getCI()->Staff_model->get_my_base_info_saler($this->getCI()->inter_id, $salesId);
             \MYLOG::w("get_my_base_info_saler :" . json_encode($saler) . '|' . $salesId . '|' . $this->getCI()->inter_id, 'membervip/debug-log');
             if (!empty($saler)) {
-                $this->getCI()->session->set_userdata('salesId',$salesId);
+//                $this->getCI()->session->set_userdata('salesId',$salesId);
+                $_SESSION['salesId'] = $salesId;
                 $this->saler_id = $salesId;
                 $saler_id = \App\services\member\SupportService::getInstance()->check_set_saler($this->getCI()->inter_id, $this->getCI()->openid, $this->saler_id); //分销保护
                 \MYLOG::w("check_set_saler_saler_id :" . $saler_id . '|' . $this->getCI()->inter_id, 'membervip/debug-log');

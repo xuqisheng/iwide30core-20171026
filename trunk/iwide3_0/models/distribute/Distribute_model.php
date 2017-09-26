@@ -741,8 +741,8 @@ INNER JOIN (SELECT * FROM iwide_hotel_staff WHERE inter_id=?) h ON h.inter_id=s.
 	function send_grades_by_saler_yestoday($inter_id,$saler,$batch_no = ''){
 		$this->load->model('distribute/grades_model');
 		$deliver_config = $this->grades_model->get_deliver_setting($inter_id);
-		$sql = 'SELECT gs.*,ds.openid FROM (SELECT SUM(grade_total) total,saler,inter_id,GROUP_CONCAT(id) ids FROM iwide_distribute_grade_all WHERE `status`=1 AND `inter_id`=? AND saler=? AND grade_time <? AND grade_time > ? GROUP BY saler) gs
-				LEFT JOIN (SELECT * FROM iwide_hotel_staff WHERE inter_id=?)ds ON ds.inter_id=gs.inter_id AND ds.qrcode_id=gs.saler';
+		$sql = 'SELECT gs.*,ds.openid,ds.hotel_id FROM (SELECT SUM(grade_total) total,saler,inter_id,GROUP_CONCAT(id) ids FROM iwide_distribute_grade_all WHERE `status`=1 AND `inter_id`=? AND saler=? AND grade_time <? AND grade_time > ? GROUP BY saler) gs
+				LEFT JOIN (SELECT openid,hotel_id,inter_id,qrcode_id FROM iwide_hotel_staff WHERE inter_id=?)ds ON ds.inter_id=gs.inter_id AND ds.qrcode_id=gs.saler';
 		$amount_query = $this->_db('iwide_r1')->query ( $sql,array($inter_id,$saler,date('Y-m-d 00:00:00'),$deliver_config->send_after_time,$inter_id) )->result_array ();
 		$err_count = 0;
 		$suc_count = 0;
@@ -782,6 +782,10 @@ INNER JOIN (SELECT * FROM iwide_hotel_staff WHERE inter_id=?) h ON h.inter_id=s.
 					$flag = $this->company_pay_model->company_pay ( $amount_item ['openid'], $amount * 100 ,$inter_id,$amount_item['ids'],$amount_item['saler'],'绩效激励',$batch_no,$deliver_id);
 					$this->load->model('distribute/distribute_notice_model');
 					$msg = '<p>核定绩效截止时间：'.date('Y-m-d 23:59:59',strtotime('-1 day',time())).'</p><p>核定发放绩效金额：'.$amount.'</p><p>发放状态：';
+					
+					//发放项目摘要信息
+					$send_summary = $this->_db('iwide_r1')->select('id,hotel_id,saler,grade_table,grade_id')->where(['status' => 1,'inter_id'=>$inter_id,'saler'=>$saler,'grade_time <' => date('Y-m-d 00:00:00'),'grade_time >' => $deliver_config->send_after_time])->from('distribute_grade_all')->get()->result_array();
+					
 					if(!empty($flag['rid'])){
 						//写入发放关联订单数据
 						$sql = "INSERT IGNORE INTO iwide_distribute_send_grade_rel (sr_id,ga_id) SELECT ?,id FROM iwide_distribute_grade_all WHERE inter_id=? AND saler=? AND `status`=1 AND grade_time<? AND grade_time>?";
@@ -800,6 +804,14 @@ INNER JOIN (SELECT * FROM iwide_hotel_staff WHERE inter_id=?) h ON h.inter_id=s.
 							$this->set_redis_key_status('CONTINUE_DELIVER','true');
 						}
 						
+						try {
+							//发放项目摘要信息同步至会员 
+							$this->load->model('membervip/front/Member_model');
+							$member_distribution_type = $this->Member_model->get_member_distribution_model();    // array('iwide_member4_order','iwide_member4_reg'); //目前会员只有这两种
+							$data = $this->Member_model->distribution_send_record($inter_id,[$flag['partner_trade_no'] => $send_summary]);
+						}catch (\Exception $e){
+							log_message('error', '发放摘要记录异常 ： '.$e->getMessage());
+						}
 						//发放系统消息
 						$msg .= '成功</p><p>亲，绩效金额已发放至您的微信“钱包-零钱”中，请查看。再接再厉，多多的绩效等着您...</p>';
 						$this->distribute_notice_model->create_deliver_notice_content($inter_id,$amount,date('Y-m-d 23:59:59',strtotime('-1 day',time())),$msg,$amount_item ['openid'],$batch_no);

@@ -10,6 +10,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 class Memberexport extends MY_Admin
 {
+    private $hotels = '';
+    private $hotel_ids = array();
+
+    public function __construct(){
+        $this->hotels =  $this->session->get_admin_hotels();
+        $this->hotel_ids  = explode(",",$this->hotels);
+    }
+
+
     //导出会员资料
     public function member(){
         ini_set('memory_limit','512M');
@@ -536,6 +545,20 @@ class Memberexport extends MY_Admin
 //        $request_params['start_time'] ='2017-07-25';
 //        $request_params['end_time'] ='2017-09-25';
 
+        if (isset($request_params['hotel_id']) && !empty($request_params['hotel_id'])) {
+            $hotel_id = $request_params['hotel_id'];
+            if (!empty($this->hotel_ids) && is_array($this->hotel_ids)) {
+                if(!in_array($hotel_id,$this->hotel_ids)){
+                    $returnData['status'] = 1000;
+                    $returnData['err'] = 0;
+                    $returnData['msg'] = '权限不足，无法查看其它酒店数据';
+                    return ;
+                }
+            }
+        }else if( !empty($this->hotel_ids) && is_array($this->hotel_ids)){
+            $request_params['hotel_id'] = $this->hotel_ids;
+        }
+
         $this->load->model('membervip/admin/Vapi_statements','statements');
         $staffs = $this->statements->hotel_staffs( $inter_id );
 
@@ -543,8 +566,7 @@ class Memberexport extends MY_Admin
             $staff_mapping[$staff['qrcode_id']] = $staff;
         }
 
-        $list = StatementsService::getInstance()->reg_distribution_statements($request_params);
-
+        $list = StatementsService::getInstance()->reg_distribution_statements($request_params,true);
         $filed = array(
               'member_info_id'  => '会员ID',
               'sn'  => '会员号',
@@ -553,11 +575,11 @@ class Memberexport extends MY_Admin
               'record_title'  => '绩效规则',
               'sales_id'  => '分销号',
               'reward'  => '分销绩效',
-              'createtime'  => '核定时间',
-              'last_update_time'  => '绩效发放时间',
+              'last_update_time'  => '核定时间',
+              'send_time'  => '绩效发放时间',
               'hotel_name'  => '所属酒店',
               'master_dept'  => '所属部门',
-//              ''  => '发放商户号',
+              'batch_no'  => '发放商户号',
         );
 
         if(empty($list)){
@@ -586,8 +608,8 @@ class Memberexport extends MY_Admin
             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $val);
             $col_++;
         }
-        unset($filed['hotel_name']);
-        unset($filed['master_dept']);
+//        unset($filed['hotel_name']);
+//        unset($filed['master_dept']);
 
         $row_ = 4;
         foreach($list as $single){
@@ -599,13 +621,13 @@ class Memberexport extends MY_Admin
                 $department = '';
             }
 
+            $single['hotel_name']  = $hotel_name;
+            $single['master_dept']  = $department;
             $col_ = 0;
             foreach($filed as $k => $val){
                 $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $single[$k]);
                 $col_++;
             }
-            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $hotel_name);
-            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_ + 1 , $row_, $department);
             $row_ ++ ;
         }
 
@@ -626,6 +648,20 @@ class Memberexport extends MY_Admin
         $inter_id = $this->session->get_admin_inter_id();
         $request_params = $this->input->get();
 
+        if (isset($request_params['hotel_id']) && !empty($request_params['hotel_id'])) {
+            $hotel_id = $request_params['hotel_id'];
+            if (!empty($this->hotel_ids) && is_array($this->hotel_ids)) {
+                if(!in_array($hotel_id,$this->hotel_ids)){
+                    $returnData['status'] = 1000;
+                    $returnData['err'] = 0;
+                    $returnData['msg'] = '权限不足，无法查看其它酒店数据';
+                    return ;
+                }
+            }
+        }else if( !empty($this->hotel_ids) && is_array($this->hotel_ids)){
+            $request_params['hotel_id'] = $this->hotel_ids;
+        }
+
         $this->load->model('membervip/admin/Vapi_statements','statements');
         $staffs = $this->statements->hotel_staffs( $inter_id );
 
@@ -633,7 +669,7 @@ class Memberexport extends MY_Admin
             $staff_mapping[$staff['qrcode_id']] = $staff;
         }
 
-        $list = StatementsService::getInstance()->deposit_card($request_params);
+        $list = StatementsService::getInstance()->deposit_card($request_params,true);
         if(empty($list)){
             return;
         }
@@ -667,9 +703,8 @@ class Memberexport extends MY_Admin
             'last_update_time'  => '核定时间',
             'hotel_name'  => '所属酒店',
             'master_dept'  => '所属部门',
-
-//            'send_time'  => '绩效发放时间',
-//              ''  => '发放商户号',
+            'send_time'  => '绩效发放时间',
+             'batch_no'  => '发放商户号',
         );
 
         //标题
@@ -679,8 +714,8 @@ class Memberexport extends MY_Admin
             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $val);
             $col_++;
         }
-        unset($filed['hotel_name']);
-        unset($filed['master_dept']);
+//        unset($filed['hotel_name']);
+//        unset($filed['master_dept']);
 
         $row_ = 4;
         foreach($list as $single){
@@ -693,17 +728,16 @@ class Memberexport extends MY_Admin
                 $hotel_name = '';
                 $department = '';
             }
-            $single['staff_name'] = $staff_name;
             $col_ = 0;
+            $single['staff_name'] = $staff_name;
+            $single['hotel_name']  = $hotel_name;
+            $single['master_dept'] = $department;
             foreach($filed as $k => $val){
                 $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $single[$k]);
                 $col_++;
             }
-            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $hotel_name);
-            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_ + 1 , $row_, $department);
             $row_ ++ ;
         }
-
 
         $objPHPExcel->setActiveSheetIndex ( 0 );
         $objWriter = IOFactory::createWriter ( $objPHPExcel, 'Excel5' );
@@ -943,7 +977,6 @@ class Memberexport extends MY_Admin
         }else{
             $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(0, 2,'');
         }
-//        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(30);
 
         //标题
         $col_ = 0;
@@ -995,5 +1028,290 @@ class Memberexport extends MY_Admin
     }
 
 
+    //导出日期内积分概况
+    public function export_credit_summary(){
+        ini_set('memory_limit','512M');
+        $inter_id = $this->session->get_admin_inter_id();
+        $params = $this->input->get();
+
+//        $start_date = $params['start_date'];
+//        $end_date = $params['end_date'] ;
+//        $log_type = empty($params['log_type']) ? 2 : $params['log_type'] ; //2使用，1增加 ,默认导出使用的
+
+        /*测试数据*/
+        $params['start_date'] = $start_date = '2017-08-11';
+        $params['end_date'] = $end_date = '2017-09-11';
+        $log_type = 1;
+        /*测试数据*/
+
+        if(isset($params['hotel_id']) && !empty($params['hotel_id']))
+            $filter['hotel_id'] = $params['hotel_id'];
+
+
+        if(isset($params['log_type'])){
+            $log_type = $params['log_type'];
+        }else{
+            $log_type = 2;  //默认是使用的
+        }
+
+        if(isset($params['hotel_id']) && !empty($params['hotel_id']))
+            $filter['hotel_id'] = $params['hotel_id'];
+
+        $filter['createtime >='] = strtotime($start_date ." 00:00:00");
+        $filter['createtime <='] = strtotime($end_date ." 23:59:59");
+
+        $this->load->model('membervip/admin/Vapi_statements','statements');
+        $hotels[0] = array(
+            'hotel_id'  => 0,
+            'name'    => '总部'
+        );
+
+        $hotels_list = $this->statements->hotel_list($inter_id);
+        foreach($hotels_list as $h){
+            $hotels[$h['hotel_id']] = $h;
+        }
+
+        if($log_type == 2){
+            $result = $this->statements->credit_statics_group_module( $inter_id ,$filter );
+            $detail_data = $this->statements->summary_format_data($start_date,$end_date,$result ,$hotels , array('admin','vip','hotel','soma'));
+            $title = '使用';
+            $filed = array(
+                'date' => '日期',
+                'vip'  => '会员',
+                'hotel'  => '订房扣减',
+                'soma'  => '商城兑换',
+                'admin'  => '后台调整',
+                'total'  => '总共',
+            );
+            $total = array(
+                'hotel' =>0,
+                'vip' =>0,
+                'soma' =>0,
+                'admin' =>0,
+                'total'  =>0
+            );
+        }else{
+            $result = $this->statements->credit_statics_group_module( $inter_id ,$filter , 1 );
+            $detail_data = $this->statements->summary_format_data($start_date,$end_date,$result,$hotels , array('admin','vip','sign','hotel'));
+            $title = '发放';
+            $filed = array(
+                'date' => '日期',
+                'vip'  => '会员',
+                'hotel'  => '订房扣减',
+                'soma'  => '商城兑换',
+                'admin'  => '后台调整',
+                'total'  => '总共',
+            );
+            $total = array(
+                'hotel' =>0,
+                'vip' =>0,
+                'soma' =>0,
+                'admin' =>0,
+                'total'  =>0
+            );
+        }
+
+        if(empty($detail_data))
+            return ;
+
+        $this->load->library ( 'PHPExcel' );
+        $this->load->library ( 'PHPExcel/IOFactory' );
+        $objPHPExcel = new PHPExcel ();
+        $objPHPExcel->getProperties()->setTitle ( "export" )->setDescription ( "none" );
+        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( 0, 1,'积分'.$title.'报表' );
+        if(isset($params['start_date']) && !empty($params['start_date'])
+            && isset($params['end_date']) && !empty($params['end_date']
+            )){
+            $date = "时间：".$params['start_date'] ." - ".$params['start_date'];
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(1, 1, $date);
+        }else{
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(0, 2,'');
+        }
+
+        //标题
+        $col_ = 0;
+        foreach($filed as $val){
+            $row_ = 3;
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $val);
+            $col_++;
+        }
+
+        $row_ = 4;
+        foreach($detail_data as $single){
+            $col_ = 0;
+            foreach ($filed as $k => $val) {
+                $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow($col_, $row_, $single[$k]);
+                if (is_numeric($single[$k])) {
+                    $total[$k] += $single[$k];
+                }
+                $col_++;
+            }
+            $row_++;
+        }
+        //结尾
+        $col_ = 0;
+        foreach($filed as $k => $val){
+            if($k == 'date')
+                $write_value = '合计';
+            else
+                $write_value = $total[$k] ;
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $write_value);
+            $col_++;
+        }
+
+        $objPHPExcel->setActiveSheetIndex ( 0 );
+        if($start_date == $end_date){
+            $objPHPExcel->getActiveSheet()->setTitle($start_date);
+        }else{
+            $objPHPExcel->getActiveSheet()->setTitle($start_date."-".$end_date);
+        }
+        $objWriter = IOFactory::createWriter ( $objPHPExcel, 'Excel5' );
+        // 发送标题强制用户下载文件
+        header ( 'Content-Type: application/vnd.ms-excel' );
+        header ( 'Content-Disposition: attachment;filename="积分'.$title."总览" . date ( 'YmdHis' ) . '.xls"' );
+        header ( 'Cache-Control: max-age=0' );
+        $objWriter->save ( 'php://output' );
+
+    }
+
+    //导出具体日期下各个酒店的积分情况
+    public function export_credit_summary_by_date(){
+        ini_set('memory_limit','512M');
+        $inter_id = $this->session->get_admin_inter_id();
+        $params = $this->input->get();
+
+        $start_date = $params['start_date'];
+        $end_date = $params['end_date'] ;
+        $log_type = empty($params['log_type']) ? 2 : $params['log_type'] ; //2使用，1增加 ,默认导出使用的
+
+        /*测试数据*/
+//        $params['start_date'] = $start_date = '2017-09-11';
+//        $params['end_date'] = $end_date = '2017-09-11';
+//        $log_type = 2;
+        /*测试数据*/
+
+        if(isset($params['hotel_id']) && !empty($params['hotel_id']))
+            $filter['hotel_id'] = $params['hotel_id'];
+
+        $filter['createtime >='] = strtotime($start_date ." 00:00:00");
+        $filter['createtime <='] = strtotime($end_date ." 23:59:59");
+
+        $this->load->model('membervip/admin/Vapi_statements','statements');
+
+        $hotels[0] = array(
+            'hotel_id'  => 0,
+            'name'    => '总部'
+        );
+
+        $hotels_list = $this->statements->hotel_list($inter_id);
+        foreach($hotels_list as $h){
+            $hotels[$h['hotel_id']] = $h;
+        }
+
+        if($log_type == 2){
+            $title = '使用';
+            $result = $this->statements->credit_statics_group_module( $inter_id ,$filter );
+            $detail_data = $this->statements->format_data($start_date,$end_date,$result ,$hotels , array('admin','vip','hotel','soma'));
+            $filed = array(
+                'date' => '日期',
+                'vip'  => '会员',
+                'hotel'  => '订房扣减',
+                'soma'  => '商城兑换',
+                'admin'  => '后台调整',
+                'total'  => '总共',
+            );
+            $total = array(
+                'hotel' =>0,
+                'vip' =>0,
+                'soma' =>0,
+                'admin' =>0,
+                'total'  =>0
+            );
+        }else{
+            $title = '发放';
+            $result = $this->statements->credit_statics_group_module( $inter_id ,$filter , 1 );
+            $detail_data = $this->statements->format_data($start_date,$end_date,$result,$hotels , array('admin','vip','sign','hotel'));
+            $filed = array(
+                'date' => '日期',
+                'hotel_name'  => '酒店名',
+                'vip'  => '礼包赠送',
+                'hotel'  => '订房发放',
+                'sign'  => '签到',
+                'admin'  => '后台调整',
+                'total'  => '总共',
+            );
+            $total = array(
+                'hotel' =>0,
+                'vip' =>0,
+                'sign' =>0,
+                'admin' =>0,
+                'total'  =>0
+            );
+        }
+
+        if(empty($detail_data))
+            return ;
+
+        $this->load->library ( 'PHPExcel' );
+        $this->load->library ( 'PHPExcel/IOFactory' );
+        $objPHPExcel = new PHPExcel ();
+        $objPHPExcel->getProperties()->setTitle ( "export" )->setDescription ( "none" );
+        $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( 0, 1,'积分'.$title.'报表' );
+        if(isset($params['start_date']) && !empty($params['start_date'])
+            && isset($params['end_date']) && !empty($params['end_date']
+            )){
+            $date = "时间：".$params['start_date'] ." - ".$params['start_date'];
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(1, 1, $date);
+        }else{
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(0, 2,'');
+        }
+
+        //标题
+        $col_ = 0;
+        foreach($filed as $k => $val){
+            $row_ = 3;
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $val);
+            $col_++;
+        }
+        unset($filed['date']);
+
+        $row_ = 4;
+        foreach($detail_data as $date => $date_data){
+            foreach($date_data as $single){
+                $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( 0, $row_, $date);
+                $col_ = 1;
+                foreach($filed as $k => $val){
+                    $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $single[$k]);
+                    if(is_numeric($single[$k]))
+                        $total[$k] +=  $single[$k] ;
+                    $col_++;
+                }
+                $row_ ++ ;
+            }
+        }
+        //结尾
+        $col_ = 1;
+        foreach($filed as $k => $val){
+            if($k == 'hotel_name')
+                $write_value = '合计';
+            else
+                $write_value = $total[$k] ;
+            $objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow( $col_, $row_, $write_value);
+            $col_++;
+        }
+
+        $objPHPExcel->setActiveSheetIndex ( 0 );
+        if($start_date == $end_date){
+            $objPHPExcel->getActiveSheet()->setTitle($start_date);
+        }else{
+            $objPHPExcel->getActiveSheet()->setTitle($start_date."-".$end_date);
+        }
+        $objWriter = IOFactory::createWriter ( $objPHPExcel, 'Excel5' );
+        // 发送标题强制用户下载文件
+        header ( 'Content-Type: application/vnd.ms-excel' );
+        header ( 'Content-Disposition: attachment;filename="积分'.$title . date ( 'YmdHis' ) . '.xls"' );
+        header ( 'Cache-Control: max-age=0' );
+        $objWriter->save ( 'php://output' );
+    }
 }
 ?>

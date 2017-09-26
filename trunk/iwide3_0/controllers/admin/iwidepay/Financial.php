@@ -197,9 +197,9 @@ class Financial extends MY_Admin
 
         $this->load->model('iwidepay/Iwidepay_financial_model');
         $list = $this->Iwidepay_financial_model->get_financial('fc.*',$filter);
-        $module = array('hotel'=>'订房','soma'=>'商城','vip'=>'会员','okpay'=>'快乐付','dc'=>'在线点餐','ticket' => '预约核销','base_pay' => '基础月费','dist' => '分销');
-        $trade_type = array(1 => '交易', 2 => '垫付退款', 3 => '原款退款', 4 => '分销奖励', 5 => '分销奖励', 6 => '月费基础', 7 => '交易');
-        $transfer_status = array(1 => '部分分账', 2 => '已分账', 3 => '已结清');
+        $module = array('hotel'=>'订房','soma'=>'商城','vip'=>'会员','okpay'=>'快乐付','dc'=>'在线点餐','ticket' => '预约核销','base_pay' => '基础月费','dist' => '分销','balance' => '结余');
+        $trade_type = array(1 => '交易', 2 => '垫付退款', 3 => '原款退款', 4 => '分销奖励', 5 => '分销奖励', 6 => '月费基础', 7 => '交易', 8 => '结余');
+        $transfer_status = array(1 => '部分分账', 2 => '已分账', 3 => '已结清', 4 => '未结清');
         if (!empty($list))
         {
             foreach ($list as $key => $value)
@@ -232,7 +232,7 @@ class Financial extends MY_Admin
                 {
                     $item['hotel_amount'] = '-' . formatMoney(($value['jfk_amount'] + $value['group_amount'] + $value['dist_amount'])/100);
                 }
-                else if (in_array($value['trade_type'],array(2,4,5,6)))
+                else if (in_array($value['trade_type'],array(2,4,5,6,8)))
                 {
                     $item['hotel_amount'] = '-' . $item['amount'];
                 }
@@ -245,6 +245,46 @@ class Financial extends MY_Admin
                 $list[$key] = $item;
             }
         }
+
+        //结余记录
+        /*
+        $balance = $this->Iwidepay_financial_model->financial_balance_order('DR.*',$filter);
+        if (!empty($balance))
+        {
+            foreach ($balance as $value)
+            {
+                $item = array();
+                $item['trade_time'] = $value['add_time'];
+                $item['name'] = !empty($value['name']) ? $value['name'] : '--';
+                $item['hotel_name'] = !empty($value['hotel_name']) ? $value['hotel_name'] : '--';
+
+                $item['module'] = !empty($module[$value['module']]) ? $module[$value['module']] : '--';
+                //来源模块
+                $order_type = '结余';
+                $hotel_amount = $value['amount'];
+
+                $item['order_no'] = !empty($value['order_no']) ? $value['order_no'] : '--';
+                $item['pay_no'] = !empty($value['ori_pay_no']) ? $value['ori_pay_no'] : '--';
+
+                $item['order_status'] = $order_type;
+                $item['transfer_status'] = '未结清';
+                $item['transfer_date'] = date('Y-m-d',strtotime($value['up_time']));
+
+                $item['amount'] = formatMoney($value['amount']/100);
+                $item['write_off_hotel_id'] = '';//核销门店
+
+                $item['cost_amount'] = '--';
+                $item['jfk_amount'] = '--';
+                $item['group_amount'] = '--';
+
+                $item['hotel_amount'] = '-'.formatMoney($hotel_amount/100);
+
+                $item['dist_amount'] = '--';
+
+                $list[] = $item;
+            }
+        }
+        */
 
         $headArr = array('交易时间','所属公众号','所属门店','来源模块','平台订单号','支付订单号','交易类型','分账状态','分账时间','交易/退款金额(元)','核销门店','交易手续费','金房卡分成','集团分成','门店分成','分销员分成');
         $widthArr = array(20,20,20,12,25,25,12,12,20,18,20,12,12,12,12,15);
@@ -262,7 +302,7 @@ class Financial extends MY_Admin
         $this->load->model('iwidepay/Iwidepay_financial_model');
 
         //退款记录
-        $stat_time = date('Y-m-d',strtotime('-1 days'));
+        $stat_time = date('Y-m-d',strtotime('-60 days'));
         $end_time = date('Y-m-d 23:59:60',strtotime('-1 days'));
         $list_refund = $this->Iwidepay_financial_model->refund_order($stat_time,$end_time,'1,3');
         if (!empty($list_refund))
@@ -294,11 +334,11 @@ class Financial extends MY_Admin
      */
     public function run_debt_financial()
     {
-        die('no allow');
+        //die('no allow');
         $this->load->model('iwidepay/Iwidepay_financial_model');
 
         //退款记录
-        $stat_time = date('Y-m-d',strtotime('-50 days'));//,strtotime('-50 days')
+        $stat_time = date('Y-m-d');//,strtotime('-50 days')
         $end_time = date('Y-m-d 23:59:60');
         $list_debt = $this->Iwidepay_financial_model->debt_order($stat_time,$end_time);
         if (!empty($list_debt))
@@ -343,6 +383,43 @@ class Financial extends MY_Admin
                 $this->Iwidepay_financial_model->insert_order($item);
             }
         }
+
+
+
+    }
+
+    /**
+     * 计划任务生成 财务对账单 => 每天结余记录
+     */
+    public function run_balance_record()
+    {
+        //die('no allow');
+        $this->load->model('iwidepay/Iwidepay_financial_model');
+        $stat_time = date('Y-m-d');//,strtotime('-50 days')
+        $end_time = date('Y-m-d 23:59:60');
+        //生成结余记录
+        $balance_record = $this->Iwidepay_financial_model->balance_record($stat_time,$end_time);
+        if (!empty($balance_record))
+        {
+            foreach ($balance_record as $value)
+            {
+                $item = array(
+                    'module'    => $value['module'],
+                    'order_no'  => $value['order_no'],
+                    'pay_no'    => $value['ori_pay_no'],
+                    'trade_type' => $this->get_financial_type($value['order_type']),
+                    'transfer_status' => 4, //4-未结清
+                    'transfer_date' => date('Y-m-d',strtotime($value['up_time'])),
+                    'inter_id' => $value['inter_id'],
+                    'hotel_id' => $value['hotel_id'],
+                    'trade_time' => $value['add_time'],
+                    'add_time' => date('Y-m-d H:i:s'),
+                    'amount' => $value['amount'],
+                );
+
+                $this->Iwidepay_financial_model->insert_order($item);
+            }
+        }
     }
 
     /**
@@ -356,7 +433,7 @@ class Financial extends MY_Admin
         $this->load->model('iwidepay/Iwidepay_transfer_model');
 
         //退款记录
-        $stat_time = date('Y-m-d');//,strtotime('-1 days')
+        $stat_time = date('Y-m-d',strtotime('-60 days'));//,strtotime('-1 days')
         $end_time = date('Y-m-d 23:59:60');//,strtotime('-1 days')
         $list_transfer = $this->Iwidepay_financial_model->transfer_order($stat_time,$end_time);
 
@@ -506,6 +583,9 @@ class Financial extends MY_Admin
                 break;
             case 'extra_dist':
                 $trade_type = 5;//分销奖励
+                break;
+            case 'balance':
+                $trade_type = 8;//结余
                 break;
             default :
                 $trade_type = 0;

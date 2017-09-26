@@ -25,67 +25,78 @@ class Booking extends MY_Front_Soma {
         $openid = $this->openid;
         $business = 'package';
 
+        $packageService = \App\services\soma\PackageService::getInstance();
+
         //获取资产和酒店配置信息
         $item = $this->get_asset_item( $assetItemId, $openid, $orderId, $interId, $business );
         if( !$item )
         {
-            redirect(Soma_const_url::inst()->get_url('soma/order/order_detail', array('id'=>$interId,'oid'=>$orderId,'bsn'=>'package')));
+            redirect(Soma_const_url::inst()->get_url('soma/order/order_detail', array(
+                'id'=>$interId,
+                'oid'=>$orderId,
+                'bsn'=>'package',
+                'tkid' => $packageService->getParams()['tkid'],
+                'layout' => $packageService->getParams()['layout'],
+                'brandname' => $packageService->getParams()['brandname'],
+            )));
         }
 
-        //luguihong 2017/02/28 这里的配置修改为同步商品表里的配置
-        $this->load->model('soma/Product_package_model','somaProductModel');
-        $somaProductModel = $this->somaProductModel;
-        $productInfo = $somaProductModel->get_product_package_by_ids( array($item['product_id']), $interId, 'product_id,wx_booking_config');
-        if( $productInfo )
-        {
-            $wx_booking_config = json_decode( $productInfo[0]['wx_booking_config'], true );
-        } else {
-            $wx_booking_config = json_decode( $item['wx_booking_config'], true );
-        }
 
-        //处理搜索
-        $isSearch = $this->input->post('is_search');
-        $search = $this->input->post('search');
-        $searchArr = array();
-        if( $isSearch && $isSearch == Soma_base::STATUS_TRUE && $search ){
+        if(!$this->isNewTheme()){
+            //luguihong 2017/02/28 这里的配置修改为同步商品表里的配置
+            $this->load->model('soma/Product_package_model','somaProductModel');
+            $somaProductModel = $this->somaProductModel;
+            $productInfo = $somaProductModel->get_product_package_by_ids( array($item['product_id']), $interId, 'product_id,wx_booking_config');
+            if( $productInfo )
+            {
+                $wx_booking_config = json_decode( $productInfo[0]['wx_booking_config'], true );
+            } else {
+                $wx_booking_config = json_decode( $item['wx_booking_config'], true );
+            }
 
-            //搜索页面，先简单处理，在$item['wx_booking_config']筛选结果
-            foreach ($wx_booking_config as $k => $v) {
-                if( isset( $v['name'] ) && stripos( $v['name'], $search ) !== FALSE ){
-                    $searchArr[$k] = $wx_booking_config[$k];
-                    continue;
-                }else{
-                    if( isset( $v['room_ids'] ) && !empty( $v['room_ids'] ) && is_array( $v['room_ids'] ) ){
-                        $is_exists = FALSE;
-                        $searchArrRooms = array();
-                        foreach( $v['room_ids'] as $sk=>$sv ){
-                            // var_dump( $sv['name'] );
-                            if( isset( $sv['name'] ) && stripos( $sv['name'], $search ) !== FALSE ){
-                                $is_exists = TRUE;
-                                $searchArrRooms[$sk] = $wx_booking_config[$k]['room_ids'][$sk];
-                                continue;
+            //处理搜索
+            $isSearch = $this->input->post('is_search');
+            $search = $this->input->post('search');
+            $searchArr = array();
+            if( $isSearch && $isSearch == Soma_base::STATUS_TRUE && $search ){
+
+                //搜索页面，先简单处理，在$item['wx_booking_config']筛选结果
+                foreach ($wx_booking_config as $k => $v) {
+                    if( isset( $v['name'] ) && stripos( $v['name'], $search ) !== FALSE ){
+                        $searchArr[$k] = $wx_booking_config[$k];
+                        continue;
+                    }else{
+                        if( isset( $v['room_ids'] ) && !empty( $v['room_ids'] ) && is_array( $v['room_ids'] ) ){
+                            $is_exists = FALSE;
+                            $searchArrRooms = array();
+                            foreach( $v['room_ids'] as $sk=>$sv ){
+                                // var_dump( $sv['name'] );
+                                if( isset( $sv['name'] ) && stripos( $sv['name'], $search ) !== FALSE ){
+                                    $is_exists = TRUE;
+                                    $searchArrRooms[$sk] = $wx_booking_config[$k]['room_ids'][$sk];
+                                    continue;
+                                }
                             }
-                        }
 
-                        if( $is_exists ){
-                            $searchArr[$k] = $wx_booking_config[$k];
-                            $searchArr[$k]['room_ids'] = $searchArrRooms;
+                            if( $is_exists ){
+                                $searchArr[$k] = $wx_booking_config[$k];
+                                $searchArr[$k]['room_ids'] = $searchArrRooms;
+                            }
                         }
                     }
                 }
+                // var_dump( $search, $searchArr );
+
+                //搜索有结果，没有结果输出全部内容z
+                if( $searchArr ){
+                    $wx_booking_config = $searchArr;
+                }
             }
-            // var_dump( $search, $searchArr );
 
-            //搜索有结果，没有结果输出全部内容z
-            if( $searchArr ){
-                $wx_booking_config = $searchArr;
-            }
-        }
+            //搜索链接
+            $search_url = Soma_const_url::inst()->get_url('*/booking/wx_select_hotel',array('oid'=>$orderId,'id'=>$interId,'aiid'=>$assetItemId,'aiidi'=>$aiidi));
 
-        //搜索链接
-        $search_url = Soma_const_url::inst()->get_url('*/booking/wx_select_hotel',array('oid'=>$orderId,'id'=>$interId,'aiid'=>$assetItemId,'aiidi'=>$aiidi));
-
-        $this->datas = array(
+            $this->datas = array(
                 'item'=>$item,
                 'aiid'=>$assetItemId,
                 'oid'=>$orderId,
@@ -95,12 +106,16 @@ class Booking extends MY_Front_Soma {
                 'wx_booking_config'=>$wx_booking_config,
             );
 
-        $header = array(
-            'title'=> '微信订房'
-        );
-        $this->_view("header",$header);
-        $this->_view("select_hotel",$this->datas);
+            $header = array(
+                'title'=> '微信订房'
+            );
+            $this->_view("header",$header);
+        }
+        else{
+            $this->headerDatas['title'] = '订房';
+        }
 
+        $this->_view("select_hotel",$this->datas);
     }
 
     //ajax select_time
@@ -200,82 +215,88 @@ class Booking extends MY_Front_Soma {
         $openid = $this->openid;
         $business = 'package';
 
+        $packageService = \App\services\soma\PackageService::getInstance();
+
         $params = array();
         $params['bsn'] = $business;
         $params['id'] = $interId;
         $params['oid'] = $orderId;
+        $params['tkid'] = $packageService->getParams()['tkid'];
+        $params['layout'] = $packageService->getParams()['layout'];
+        $params['brandname'] = $packageService->getParams()['brandname'];
         if( !$hotelId || !$roomId || !$priceCode ){
             //点解订房按钮进来，参数出错，跳回选择房型
             redirect(Soma_const_url::inst()->get_url('*/booking/wx_select_hotel', $params));
         }
 
-        $aiidi = isset( $aiidi ) && !empty( $aiidi ) ? $aiidi : 0;
+        if(!$this->isNewTheme()){
+            $aiidi = isset( $aiidi ) && !empty( $aiidi ) ? $aiidi : 0;
 
-        $jump = '*/booking/wx_select_hotel';
-        $item = $this->get_asset_item( $assetItemId, $openid, $orderId, $interId, $business, $jump );
+            $jump = '*/booking/wx_select_hotel';
+            $item = $this->get_asset_item( $assetItemId, $openid, $orderId, $interId, $business, $jump );
 
-        //取出券码
-        $this->load->model('soma/Consumer_code_model','CodeModel');
-        $CodeModel = $this->CodeModel;
-        $limit = isset( $item['qty'] ) ? $item['qty'] : 1;
-        $filter = array();
-        $filter['status'] = $CodeModel::STATUS_SIGNED;//取出没有消费的
-        $codes = $CodeModel->get_code_by_assetItemIds( array($assetItemId), $interId, $filter, $limit );
-        $code = isset( $codes[$aiidi]['code'] ) ? $codes[$aiidi]['code'] : '';
-        
-        //取出联系人和电话
-        $filter = array();
-        $filter['openid'] = $openid;
-        $customer_info = $CodeModel->get_customer_contact( $filter );
+            //取出券码
+            $this->load->model('soma/Consumer_code_model','CodeModel');
+            $CodeModel = $this->CodeModel;
+            $limit = isset( $item['qty'] ) ? $item['qty'] : 1;
+            $filter = array();
+            $filter['status'] = $CodeModel::STATUS_SIGNED;//取出没有消费的
+            $codes = $CodeModel->get_code_by_assetItemIds( array($assetItemId), $interId, $filter, $limit );
+            $code = isset( $codes[$aiidi]['code'] ) ? $codes[$aiidi]['code'] : '';
 
-        //调取订房时间接口
-        $this->load->library('Soma/Api_hotel');
-        $ApiModel = new Api_hotel( $interId );
-        $ApiModel->_write_log( '获取订房时间开始。inter_id：'.$interId.' order_id：'.$orderId, 'start' );
-        $return = $ApiModel->get_rooms( $openid, $interId, $hotelId, $roomId, $priceCode );
-        $ApiModel->_write_log( '获取订房时间结束。inter_id：'.$interId.' order_id：'.$orderId, 'end' );
+            //取出联系人和电话
+            $filter = array();
+            $filter['openid'] = $openid;
+            $customer_info = $CodeModel->get_customer_contact( $filter );
 
-        $rooms = $rooms_un_can_booking = $rooms_can_booking = array();
-        $room_name = $code_name = '';
-        if( isset( $return['status'] ) && $return['status'] == Soma_base::STATUS_TRUE ){
-            $room_name = isset( $return['data']['room_name'] ) ? $return['data']['room_name'] : '';
-            $code_name = isset( $return['data']['code_name'] ) ? $return['data']['code_name'] : '';
-            //如果没有返回$return['data']['rooms']信息，那么默认全部不可订
-            if( isset( $return['data']['rooms'] ) && !empty( $return['data']['rooms'] ) ){
-                $rooms_can_booking = isset( $return['data']['rooms']['can_booking'] ) 
-                                        ? $return['data']['rooms']['can_booking'] 
-                                        : array();
-                $rooms_un_can_booking = isset( $return['data']['rooms']['un_can_booking'] ) 
-                                        ? $return['data']['rooms']['un_can_booking'] 
-                                        : array();
+            //调取订房时间接口
+            $this->load->library('Soma/Api_hotel');
+            $ApiModel = new Api_hotel( $interId );
+            $ApiModel->_write_log( '获取订房时间开始。inter_id：'.$interId.' order_id：'.$orderId, 'start' );
+            $return = $ApiModel->get_rooms( $openid, $interId, $hotelId, $roomId, $priceCode );
+            $ApiModel->_write_log( '获取订房时间结束。inter_id：'.$interId.' order_id：'.$orderId, 'end' );
+
+            $rooms = $rooms_un_can_booking = $rooms_can_booking = array();
+            $room_name = $code_name = '';
+            if( isset( $return['status'] ) && $return['status'] == Soma_base::STATUS_TRUE ){
+                $room_name = isset( $return['data']['room_name'] ) ? $return['data']['room_name'] : '';
+                $code_name = isset( $return['data']['code_name'] ) ? $return['data']['code_name'] : '';
+                //如果没有返回$return['data']['rooms']信息，那么默认全部不可订
+                if( isset( $return['data']['rooms'] ) && !empty( $return['data']['rooms'] ) ){
+                    $rooms_can_booking = isset( $return['data']['rooms']['can_booking'] )
+                        ? $return['data']['rooms']['can_booking']
+                        : array();
+                    $rooms_un_can_booking = isset( $return['data']['rooms']['un_can_booking'] )
+                        ? $return['data']['rooms']['un_can_booking']
+                        : array();
+                }else{
+                    $rooms_un_can_booking = $ApiModel->get_un_booking();
+                }
+
             }else{
+                //如果获取数据失败，那么这个月都变成不可选
                 $rooms_un_can_booking = $ApiModel->get_un_booking();
             }
 
-        }else{
-            //如果获取数据失败，那么这个月都变成不可选
-            $rooms_un_can_booking = $ApiModel->get_un_booking();
-        }
+            //组装订房下单连接
+            $params = array();
+            $params['bsn'] = $business;
+            $params['id'] = $interId;
+            $post_url = Soma_const_url::inst()->get_url( '*/booking/post_booking', $params );
 
-        //组装订房下单连接
-        $params = array();
-        $params['bsn'] = $business;
-        $params['id'] = $interId;
-        $post_url = Soma_const_url::inst()->get_url( '*/booking/post_booking', $params );
+            //ajax获取订房时间
+            $get_booking_time_url = Soma_const_url::inst()->get_url( '*/booking/ajax_get_time',array('id'=>$interId,'bsn'=>$business));
 
-        //ajax获取订房时间
-        $get_booking_time_url = Soma_const_url::inst()->get_url( '*/booking/ajax_get_time',array('id'=>$interId,'bsn'=>$business));
+            //获取酒店名称
+            $hotelName = '';
+            $this->load->model( 'hotel/hotel_model', 'somaHotelModel' );
+            $hotelInfo = $this->somaHotelModel->get_hotel_detail( $interId, $hotelId );
+            if( $hotelInfo )
+            {
+                $hotelName = $hotelInfo['name'];
+            }
 
-        //获取酒店名称
-        $hotelName = '';
-        $this->load->model( 'hotel/hotel_model', 'somaHotelModel' );
-        $hotelInfo = $this->somaHotelModel->get_hotel_detail( $interId, $hotelId );
-        if( $hotelInfo )
-        {
-            $hotelName = $hotelInfo['name'];
-        }
-
-        $this->datas = array(
+            $this->datas = array(
                 'item'=>$item,
                 'aiid'=>$assetItemId,
                 'oid'=>$orderId,
@@ -296,12 +317,16 @@ class Booking extends MY_Front_Soma {
                 'hotel_name'=>$hotelName,
             );
 
-        $header = array(
-            'title'=> '选择订房时间'
-        );
-        $this->_view("header",$header);
-        $this->_view("select_time",$this->datas);
+            $header = array(
+                'title'=> '选择订房时间'
+            );
+            $this->_view("header",$header);
+        }
+        else{
+            $this->headerDatas['title'] = '订房';
+        }
 
+        $this->_view("select_time",$this->datas);
     }
 
     //提交订房

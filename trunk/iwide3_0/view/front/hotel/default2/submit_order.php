@@ -329,7 +329,7 @@
         </div>
         <?php }?>
         <?php if(!empty($point_exchange)&&isset($point_exchange['can_exchange'])&&!empty($member)){?>
-        <div id='bonus_pay_way' pay_type='bonus' class="pay_way <?php if($point_exchange['can_exchange']==0){?>disable<?php }?>">
+        <div id='bonus_pay_way' pay_type='bonus' pname="<?php echo $point_name;?>兑换" pfavour="0" class="pay_way <?php if($point_exchange['can_exchange']==0){?>disable<?php }?>">
             <span class="color_main"><em class="iconfont">&#x4f;</em></span>
             <span><?php echo $point_name;?>兑换(<?php echo $point_exchange['point_need'];?>/<?php echo $member->bonus;?>)</span>
         </div>

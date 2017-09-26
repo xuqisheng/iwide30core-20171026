@@ -1,7 +1,7 @@
 <body>
 <div class="pageloading"><p class="isload">正在加载</p></div>
-<script src="<?php echo base_url('public/soma/scripts/imgscroll.js');?>"></script>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
 <script>
     var package_obj= {
 		'appId': '<?php echo $wx_config["appId"]?>',
@@ -80,7 +80,7 @@
 <!--div class="class_list bd_bottom bg_fff">
         <?php foreach($categories as $k=>$v){?>
                 <a href="<?php echo Soma_const_url::inst()->get_category(array('catid'=>$v['cat_id'],'id'=>$inter_id));?>" class="item">
-                <img class="lazy" src="<?php echo base_url('public/soma/images/default.jpg'); ?>" data-original="<?php echo $v['cat_img'];?>"/> <p><?php echo $v['cat_name'];?></p></a>
+                <img class="lazy" src="<?php echo get_cdn_url('public/soma/images/default.jpg'); ?>" data-original="<?php echo $v['cat_img'];?>"/> <p><?php echo $v['cat_name'];?></p></a>
         <?php } ?>
     </div-->
 <div class="tp_list" style="margin-bottom:3%;" id="tp_list">
@@ -101,7 +101,7 @@
         //endif;
         ?>" class="item color_555">
             <div class="img">
-                <img class="lazy" src="<?php echo base_url('public/soma/images/default.jpg'); ?>" data-original="<?php echo $v['face_img'];?>" />
+                <img class="lazy" src="<?php echo get_cdn_url('public/soma/images/default.jpg'); ?>" data-original="<?php echo $v['face_img'];?>" />
                 <div class="fn">
                     <?php if($v['can_gift']== $packageModel::CAN_T){ ?><span class="bg_main">可赠好友</span><?php } ?>
                     <?php if($v['can_reserve']== $packageModel::CAN_F){ ?><span class="bg_main">不需预约</span><?php } ?>

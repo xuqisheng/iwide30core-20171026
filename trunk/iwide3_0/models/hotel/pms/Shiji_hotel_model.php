@@ -213,6 +213,46 @@ class Shiji_hotel_model extends MY_Model{
 				$this->db->update('hotel_order_additions', array(        //更新pms单号到本地
 				                                                         'web_orderid' => $web_orderid
 				));
+				//pms核销优惠卷代码
+				
+				//下单成功，比对优惠券是否是pms兑换券
+				$this->apiInit($pms_set);//配置api类
+				if($order ['coupon_favour'] > 0){
+				    $coupon_arr = [];
+				    $coupon_des = json_decode($order['coupon_des'], true);
+				    if(array_key_exists('cash_token', $coupon_des)){
+				        $coupon_count = count($coupon_des['cash_token']);
+				        for($i = 0; $i < $coupon_count; $i++){
+				            $t = $coupon_des['cash_token'][$i];
+				            if(!empty($t['extra']['ascription'])&&$t['extra']['ascription']=='pms'){
+// 				                var_dump($t['code'],$order);exit;
+				                $res = $this->serv_api->UseCoupon($t['code'],$order['price']);//调用api类里的核销优惠券方法
+				                if ($res != '3001'){
+				                    //如果优惠券使用失败，则取消pms订单
+				                    $info = $this->Order_model->cancel_order ( $inter_id, array (
+				                        'only_openid' => $order ['openid'],
+				                        'member_no' => '',
+				                        'orderid' => $order ['orderid'],
+				                        'cancel_status' => 5,
+				                        'no_tmpmsg' => 1,
+				                        'delete' => 2,
+				                        'idetail' => array (
+				                            'i'
+				                        )
+				                    ) );
+				                    return array (
+				                        's' => 0,
+				                        'errmsg' => '优惠券使用失败，请重试'
+				                    );
+				                }
+				            }
+				        }
+				    }
+				}
+				//下单成功，比对优惠券是否是pms兑换券
+				
+				//pms核销优惠卷代码
+				
 				$upstatus=NULL;
 				$has_paid=NULL;
 				$this->load->model ( 'hotel/Hotel_config_model' );

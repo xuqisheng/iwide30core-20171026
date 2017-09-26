@@ -643,41 +643,43 @@ class Staff_model extends MY_Model {
 		// 		$sql = 'SELECT COUNT(*) fans_count FROM (SELECT * FROM iwide_fans_sub_log WHERE `event`=2 AND inter_id=? GROUP BY openid) a WHERE a.source=?';
 		$sql = 'SELECT COUNT(*) fans_count FROM iwide_fans_subs WHERE `event`=2 AND inter_id=? AND source=?';
 // 		$sql = "SELECT COUNT(*) fans_count FROM `iwide_distribute_grade_all` WHERE `saler` = ? AND `grade_table` LIKE 'iwide_fans_sub_log' AND inter_id=?";
-		$saler_details = $this->saler_info($openid,$inter_id);
-		$fans_query = $this->_db('iwide_r1')->query($sql,array($inter_id,$saler_details['qrcode_id']))->row_array();
-		$sql = "";
-		$sql = "SELECT SUM(grade_total) total_fee FROM iwide_distribute_grade_all WHERE saler=? AND inter_id=? AND `status`=1";
-		$fee_query = $this->_db('iwide_r1')->query($sql,array($saler_details['qrcode_id'],$inter_id))->row_array();
-		$total_fee = 0;
-		if(isset($fee_query['total_fee']))$total_fee = $fee_query['total_fee'];
-		return array('name'=>$saler_details['name'],'hotel_name'=>$saler_details['hotel_name'],'total_fee'=>$total_fee,'headimgurl'=>$saler_details['ext']['headimgurl'],'url'=>$saler_details['url'],'id'=>$saler_details['qrcode_id'],'fans_count'=>$fans_query['fans_count'],'master_dept'=>$saler_details['master_dept']);
-	}
-	/**
-	 * 粉丝产生收益
-	 * @param unknown $openid
-	 * @param unknown $inter_id
-	 */
-	function get_fans_recs_all($openid,$inter_id){
-		$saler_info = $this->get_my_base_info_openid($inter_id, $openid);
-		if(empty($saler_info)){
-			return null;
-		}
-		$fans_details = $this->get_my_fans_by_openid($openid,$inter_id)->result_array();
-		$openids_arr  = array_column($fans_details,'openid');
-		$openids_str  = implode($openids_arr,"','");
-		$sql = "SELECT * FROM (SELECT `grade_openid`,`inter_id`,SUM(dg.grade_total) total_fee,SUM(dg.grade_amount) total_amount,SUM(dg.order_amount) order_amount,count(*) total FROM ".$this->_db('iwide_r1')->dbprefix("distribute_grade_all")." dg WHERE inter_id=? AND saler=? GROUP BY grade_openid) g RIGHT JOIN (SELECT `nickname`,`headimgurl`,`openid`,`inter_id`,`id` fid FROM ".$this->_db('iwide_r1')->dbprefix("fans")." WHERE inter_id=? AND openid IN ('".$openids_str."')) f ON f.inter_id=g.inter_id AND f.openid=g.grade_openid";
-		return $this->_db('iwide_r1')->query($sql,array($inter_id,$saler_info['qrcode_id'],$inter_id));
-	}
-	/**
-	 * 粉丝收入详细
-	 * @param int 粉丝openID
-	 * @param int 分销员ID
-	 * @param string 公众号标识
-	 */
-	function get_fans_recs($fans_openid,$saler_id,$inter_id){
-		$sql = 'SELECT ga.*,ge.cellphone,ge.distribute,ge.hotel_name,ge.order_id,ge.product,ge.staff_name,f.nickname,f.headimgurl,f.id fid FROM iwide_distribute_grade_all ga INNER JOIN iwide_distribute_grade_ext ge ON ga.inter_id=ge.inter_id AND ga.id=ge.grade_id AND ga.inter_id=? AND ga.saler=? AND ga.grade_openid=? LEFT JOIN iwide_fans f ON f.inter_id=ga.inter_id AND f.openid=ga.grade_openid';
-		return $this->_db('iwide_r1')->query($sql,array($inter_id,$saler_id,$fans_openid));
-	}
+        $saler_details = $this->saler_info($openid,$inter_id);
+        $saler_details['exts'] = unserialize($saler_details['exts']);
+        $join_gift = empty($saler_details['exts']) || $saler_details['exts']['join_gift'] == 1 ? 1 : 2;
+        $fans_query = $this->_db('iwide_r1')->query($sql,array($inter_id,$saler_details['qrcode_id']))->row_array();
+        $sql = "";
+        $sql = "SELECT SUM(grade_total) total_fee FROM iwide_distribute_grade_all WHERE saler=? AND inter_id=? AND `status`=1";
+        $fee_query = $this->_db('iwide_r1')->query($sql,array($saler_details['qrcode_id'],$inter_id))->row_array();
+        $total_fee = 0;
+        if(isset($fee_query['total_fee']))$total_fee = $fee_query['total_fee'];
+        return array('name'=>$saler_details['name'],'hotel_name'=>$saler_details['hotel_name'],'total_fee'=>$total_fee,'headimgurl'=>$saler_details['ext']['headimgurl'],'url'=>$saler_details['url'],'id'=>$saler_details['qrcode_id'],'fans_count'=>$fans_query['fans_count'],'master_dept'=>$saler_details['master_dept'],'join_gift'=>$join_gift);
+    }
+    /**
+     * 粉丝产生收益
+     * @param unknown $openid
+     * @param unknown $inter_id
+     */
+    function get_fans_recs_all($openid,$inter_id){
+        $saler_info = $this->get_my_base_info_openid($inter_id, $openid);
+        if(empty($saler_info)){
+            return null;
+        }
+        $fans_details = $this->get_my_fans_by_openid($openid,$inter_id)->result_array();
+        $openids_arr  = array_column($fans_details,'openid');
+        $openids_str  = implode($openids_arr,"','");
+        $sql = "SELECT * FROM (SELECT `grade_openid`,`inter_id`,SUM(dg.grade_total) total_fee,SUM(dg.grade_amount) total_amount,SUM(dg.order_amount) order_amount,count(*) total FROM ".$this->_db('iwide_r1')->dbprefix("distribute_grade_all")." dg WHERE inter_id=? AND saler=? GROUP BY grade_openid) g RIGHT JOIN (SELECT `nickname`,`headimgurl`,`openid`,`inter_id`,`id` fid FROM ".$this->_db('iwide_r1')->dbprefix("fans")." WHERE inter_id=? AND openid IN ('".$openids_str."')) f ON f.inter_id=g.inter_id AND f.openid=g.grade_openid";
+        return $this->_db('iwide_r1')->query($sql,array($inter_id,$saler_info['qrcode_id'],$inter_id));
+    }
+    /**
+     * 粉丝收入详细
+     * @param int 粉丝openID
+     * @param int 分销员ID
+     * @param string 公众号标识
+     */
+    function get_fans_recs($fans_openid,$saler_id,$inter_id){
+        $sql = 'SELECT ga.*,ge.cellphone,ge.distribute,ge.hotel_name,ge.order_id,ge.product,ge.staff_name,f.nickname,f.headimgurl,f.id fid FROM iwide_distribute_grade_all ga INNER JOIN iwide_distribute_grade_ext ge ON ga.inter_id=ge.inter_id AND ga.id=ge.grade_id AND ga.inter_id=? AND ga.saler=? AND ga.grade_openid=? LEFT JOIN iwide_fans f ON f.inter_id=ga.inter_id AND f.openid=ga.grade_openid';
+        return $this->_db('iwide_r1')->query($sql,array($inter_id,$saler_id,$fans_openid));
+    }
 
 	/**
 	 * @todo 通过openid获取我的粉丝列表
@@ -1094,7 +1096,12 @@ LEFT JOIN iwide_fans f ON f.openid=dg.grade_openid AND f.inter_id=dg.inter_id OR
 		if( isset($this->_data[$pk]) && !empty($this->_data[$pk]) && $update ) {
 			if($data){
 				foreach ($data as $k=>$v){
-					if(in_array($k,$fields)) $this->_data[$k]= $v;
+					if(in_array($k,$fields)) {
+						if($k == 'exts')
+							$this->_data[$k]= serialize($v);
+						else							
+							$this->_data[$k]= $v;
+					}
 				}
 			}
 			$where= array( $pk=> $this->_data[$pk],'inter_id'=>$this->_data['inter_id'] );
@@ -1105,7 +1112,12 @@ LEFT JOIN iwide_fans f ON f.openid=dg.grade_openid AND f.inter_id=dg.inter_id OR
 		} else {
 			if($data){
 				foreach ($data as $k=>$v){
-					if(in_array($k,$fields)) $this->_data[$k]= $v;
+					if(in_array($k,$fields)) {
+						if($k == 'exts')
+							$this->_data[$k]= serialize($v);
+						else
+							$this->_data[$k]= $v;
+					}
 				}
 			}
 			//手工生成主键字段时，不释放主键的变量 -- 2015-12-07 ounianfeng --

@@ -16,6 +16,7 @@
     <link href="<?php echo get_cdn_url('public/soma/mooncake4/css/swiper_1.css');?>" rel="stylesheet">
     <link href="<?php echo get_cdn_url('public/soma/mooncake4/css/style_1.css');?>" rel="stylesheet">
 
+    <script src="<?php echo get_cdn_url('public/soma/scripts/jquery.js');?>"></script>
     <script src="<?php echo get_cdn_url('public/soma/mooncake4/js/swiper.js');?>"></script>
     <script src="<?php echo get_cdn_url('public/soma/scripts/jquery.js');?>"></script>
     <script src="<?php echo get_cdn_url('public/soma/scripts/ui_control.js');?>"></script>

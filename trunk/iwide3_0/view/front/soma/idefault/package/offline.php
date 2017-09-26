@@ -1,4 +1,2 @@
-<body>
-  <div id="app"></div>
-  <div id="scriptArea" data-page-id="invalid"></div>
-</body>
+<div id="app"></div>
+<div id="scriptArea" data-page-id="invalid"></div>

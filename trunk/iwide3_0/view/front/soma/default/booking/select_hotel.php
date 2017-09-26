@@ -17,7 +17,7 @@
                         <?php foreach( $sv['price_codes'] as $ssk=>$ssv ): ?>
 <div class="bd webkitbox con_list martop bg_fff">
     <div class="img"><div class="squareimg">
-    	<img src="<?php echo isset($sv['room_img'])&&$sv['room_img']!=''?$sv['room_img']:base_url('public/soma/images/default2.jpg');?>">
+    	<img src="<?php echo isset($sv['room_img'])&&$sv['room_img']!=''?$sv['room_img']:get_cdn_url('public/soma/images/default2.jpg');?>">
     </div></div>
     <div>
     	<div class="webkitbox">

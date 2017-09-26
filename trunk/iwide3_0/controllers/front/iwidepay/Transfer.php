@@ -52,13 +52,31 @@ class Transfer extends MY_Controller {
             $ok = $this->redis_proxy->setNX ( $key, $value );
         }elseif($type == 'delete' ){
             $ok = $this->redis_proxy->del ( $key );
+        }elseif ($type == 'get') {
+            $ok = $this->redis_proxy->get( $key );
+        }elseif ($type == 'update') {
+            $ok = $this->redis_proxy->set( $key, $value );
         }
         return $ok;
+    }
+
+    /**
+     * [check_key 检测此前是否有脚本未正常执行完成]
+     */
+    protected function check_key(){
+        // 获取key
+        $val = $this->redis_lock('get','IWIDEPAY_EXECUTE_SORT');
+        $this->load->library('IwidePay/IwidePayExecute',null,'IwidePayExecute');
+        if($val!=IwidePayExecute::TRANSFER_CHECK_SORT){
+            MYLOG::w('err:上一个的脚本未正常执行完成', 'iwidepay_transfer');
+            exit('上一个的脚本未正常执行完成');
+        }
     }
 
     //处理订单
     public function check(){
         $this->check_arrow();
+        $this->check_key();
         //上锁
         $ok = $this->redis_lock();
         if(!$ok){
@@ -95,6 +113,8 @@ class Transfer extends MY_Controller {
         echo 'done|执行完毕';
         //遍历结束，解锁
         $this->redis_lock('delete');
+        //执行顺序+1
+        $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::TRANSFER_CHECK_SORT+1);
         MYLOG::w('结束分账的脚本', 'iwidepay/transfer');
     }
     //脚本统一处理 传线上线下订单

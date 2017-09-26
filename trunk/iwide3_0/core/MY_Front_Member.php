@@ -5,7 +5,7 @@ class MY_Front_Member extends MY_Front
     protected $_token;
     protected $_template;
     protected $_raw_template;
-    protected $_skin_theme='default';
+    protected $_skin_theme = 'default';
     protected $_template_filed_names;
     protected $_file_name;
     public $user_info;
@@ -161,10 +161,10 @@ class MY_Front_Member extends MY_Front
         $result = $this->doCurlPostRequest($post_tem_url, $post_tem_data);
         $this->_template = $result['data'];
         $this->_raw_template = $result['data'];
-        if (strpos($this->_template,'#')!=FALSE){
-            $theme=explode('#', $this->_template,2);
-            $this->_template=$theme[0];
-            $this->_skin_theme=$theme[1];
+        if (strpos($this->_template, '#') != FALSE) {
+            $theme = explode('#', $this->_template, 2);
+            $this->_template = $theme[0];
+            $this->_skin_theme = $theme[1];
         }
     }
 
@@ -222,7 +222,7 @@ class MY_Front_Member extends MY_Front
     {
         $this->_file_name = $file_name;
         $view_path = $route . "/";
-        $data['_skin_theme']=$this->_skin_theme;
+        $data['_skin_theme'] = $this->_skin_theme;
         if (!empty($template)) {
             $view_path .= $template . "/";
         }
@@ -235,6 +235,7 @@ class MY_Front_Member extends MY_Front
             $display_path = $route . "/version4/" . $file_name;
         }
         $data = $this->_get_view_commondata($data);
+        $data['url_param'] = !empty($_GET) ? json_encode($_GET) : '';
         $this->load->view($display_path, $data);
     }
 
@@ -289,20 +290,20 @@ class MY_Front_Member extends MY_Front
         $config = array(
             'allskins' => array(
                 'share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201709/qf111530113850.jpg',//默认
-                'buydeposit' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529093025.jpg'),//充值
-                'depositcard' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529404765.jpg'),//购卡列表
-                'depositcardinfo' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529404765.jpg'),//购卡详情
-                'sign_index' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529573875.jpg')//签到
+                'buydeposit' => array('share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529093025.jpg'),//充值
+                'depositcard' => array('share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529404765.jpg'),//购卡列表
+                'depositcardinfo' => array('share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529404765.jpg'),//购卡详情
+                'sign_index' => array('share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201709/qf111529573875.jpg')//签到
             ),
             'highclass' => array(
                 'share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201708/qf081454028608.jpg',
-                'buydeposit' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf081738567940.jpg'),//充值
-                'depositcard' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf081739235743.jpg'),//购卡列表
-                'depositcardinfo' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf081739235743.jpg'),//购卡详情
-                'sign_index' =>array('share_img'=>'http://7n.cdn.iwide.cn/public/uploads/201709/qf081739443522.jpg')//签到
+                'buydeposit' => array('share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201709/qf081738567940.jpg'),//充值
+                'depositcard' => array('share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201709/qf081739235743.jpg'),//购卡列表
+                'depositcardinfo' => array('share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201709/qf081739235743.jpg'),//购卡详情
+                'sign_index' => array('share_img' => 'http://7n.cdn.iwide.cn/public/uploads/201709/qf081739443522.jpg')//签到
             )
         );
-        if(empty ($config [$skin_name])){
+        if (empty ($config [$skin_name])) {
             $skin_name = 'allskins';
         }
         return empty ($config [$skin_name][$this->_file_name]) ? $config [$skin_name] : $config [$skin_name][$this->_file_name];

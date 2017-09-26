@@ -1,6 +1,6 @@
 <body>
-<script src="<?php echo base_url('public/soma/scripts/imgscroll.js');?>"></script>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
 <div class="pageloading"><p class="isload">正在加载</p></div>
 <script>
     wx.config({
@@ -67,7 +67,7 @@
 <div class="box">
 
     <a href="<?php echo Soma_const_url::inst()->get_category(array('catid'=>10178,'id'=>$inter_id)); //枕头?>">
-        <img src="<?php echo base_url('public/soma');?>/images/super82.jpg"/>
+        <img src="<?php echo get_cdn_url('public/soma');?>/images/super82.jpg"/>
     </a>
 </div>
 </body>

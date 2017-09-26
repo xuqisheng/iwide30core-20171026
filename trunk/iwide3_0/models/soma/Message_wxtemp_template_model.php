@@ -1114,6 +1114,11 @@ class Message_wxtemp_template_model extends MY_Model_Soma {
             return FALSE;
         }
 
+        //模板数据为空的时候记录日志 2017-09-20 19:25
+        if(empty($createInfo['message'])){
+            $this->_write_log('订单商品过期提醒生成模板内容为空!');
+        }
+
         $sendResult = $this->send_template( $createInfo['message'], $inter_id );
         if( isset( $sendResult['status'] ) && $sendResult['status'] == 1 ){
             //发送成功
@@ -1759,7 +1764,7 @@ class Message_wxtemp_template_model extends MY_Model_Soma {
             $filter['inter_id'] = $inter_id;
 
             $time = date( 'Y-m-d H:i:s', time() );
-            $expireTime = date( 'Y-m-d H:i:s', time() + 15*24*60*60 );//现在的时间加上15天就是>=过期时间，发送模版消息是在过期前15开始发送，只发送一条
+            $expireTime = date( 'Y-m-d H:i:s', time() + 7*24*60*60 );//现在的时间加上15天就是>=过期时间，发送模版消息是在过期前15开始发送，只发送一条
             
             $list = $this->_shard_db_r('iwide_soma_r')
                             ->where( $filter )

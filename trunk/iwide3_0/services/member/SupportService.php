@@ -76,8 +76,10 @@ class SupportService extends MemberBaseService
                 MYLOG::w("save_saler_protection_info :" . $saler_res . '|' . $saler_id . '|' . $inter_id . " | " . $openid, 'membervip/debug-log');
             }
         } elseif (empty($this->saler_id) && !in_array($type, $types)) {
-            $this->saler_id = $this->getCI()->session->userdata('salesId');
+            $this->saler_id = !empty($_SESSION['salesId']) ? $_SESSION['salesId'] : 0;
         }
+
+        MYLOG::w("get_saler_id :" . $this->saler_id . '|' . $inter_id . '|' . $openid . " | " . $saler_id, 'membervip/debug-log');
         return $this->saler_id;
     }
 }

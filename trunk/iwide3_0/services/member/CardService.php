@@ -61,7 +61,8 @@ class CardService extends MemberBaseService
             'member_info_id'=>$member_info_id,
             'openid'=>$openid,
             'token'=>'',
-            'range'=>'0,100',
+            'range'=>'0,250',
+            'num' => 250,
             'template'=>$template
         );
 
@@ -191,9 +192,17 @@ class CardService extends MemberBaseService
         $card_info = $this->doCurlPostRequest( $post_member_card_url , $post_member_card_data );
         $this->assign_data = $url_group;
         $data = $this->assign_data;
-        $centerinfo = $this->parse_curl_msg($card_info);
-        $data['cardlist'] = $centerinfo['data'];
-        $data['cardlist'] = $this->parse_card_data($data,'cardlist',$url_group);
+        $card_info = $this->parse_curl_msg($card_info);
+
+        $data['all'] = isset($card_info['data'])?$card_info['data']:array();
+        $data['usableCardLists'] = isset($card_info['data'])?$card_info['data']:array();
+        $data['unusedCardLists'] = array();
+        $data['expiredCardLists'] = array();
+
+        $data['all'] = $this->parse_card_data($data,'all',$url_group);
+        $data['usableCardLists'] = $this->parse_card_data($data,'usableCardLists',$url_group);
+        $data['unusedCardLists'] = $this->parse_card_data($data,'unusedCardLists',$url_group);
+        $data['expiredCardLists'] = $this->parse_card_data($data,'expiredCardLists',$url_group);
 
         $data['next_id'] = isset($card_info['data']['next_id'])?$card_info['data']['next_id']:0;
         $data['inter_id'] = $inter_id;

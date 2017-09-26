@@ -1,2 +1,2 @@
 <?php
-$js_css_version = "7227343466690";
+$js_css_version = "73232234";

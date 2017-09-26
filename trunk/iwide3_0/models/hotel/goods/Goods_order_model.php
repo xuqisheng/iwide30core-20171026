@@ -82,6 +82,7 @@ class Goods_order_model extends MY_Model_Hotel {
                                         'details' => $goods_info [$i ['gs_id']] ['external_info'] ['details'],
                                         'intro_img' => $goods_info [$i ['gs_id']] ['external_info'] ['intro_img'],
                                         'sale_way' => $state ['goods_info'] ['sale_way'],
+                                        'count_way' => isset($state ['goods_info'] ['count_way']) ? $state ['goods_info'] ['count_way'] : 0,
                                         'price' => $goods_info [$i ['gs_id']] ['price'],
                                         'oprice' => empty ( $goods_info [$i ['gs_id']] ['external_info'] ['price'] ) ? 0 : $goods_info [$i ['gs_id']] ['external_info'] ['price'],
                                         'short_intro' => $goods_info [$i ['gs_id']] ['short_intro'],
@@ -190,6 +191,7 @@ class Goods_order_model extends MY_Model_Hotel {
         ) );
         if ($goods_info) {
             $total_price = 0;
+            $package_nums=array();
             foreach ( $goods_ids as $gid ) {
                 if (empty ( $goods_info [$gid] )) {
                     $result ['errmsg'] = '该商品已下架';
@@ -211,7 +213,15 @@ class Goods_order_model extends MY_Model_Hotel {
                                 'goods_name' => $goods_info [$gid] ['external_info'] ['name'],
                                 'unit' => $goods_info [$gid] ['unit'] 
                         );
+                        if ($package_config ['sale_way'] == 1) {
+                            $package_num = intval ( $package_config ['items'] [$gid] ['num'] );
+                            if ($package_config ['count_way'] == 1) {
+                                $package_num *= $room_night;
+                            }
+                            $package_nums[]=floor($goods_info [$gid] ['external_info'] ['nums']/$package_num);
+                        }
                         $result ['data'] [$gid] ['sale_way'] = $package_config ['sale_way'];
+                        $result ['data'] [$gid] ['count_way'] = isset($package_config ['count_way']) ? $package_config ['count_way'] : 0;
                         $result ['data'] [$gid] ['oprice'] *= 1;
                         $result ['data'] [$gid] ['price'] = $result ['data'] [$gid] ['sale_way'] == 1 ? 0 : $result ['data'] [$gid] ['oprice'];
                         if ($result ['data'] [$gid] ['price'] <= 0 && $package_config ['sale_way'] != 1) {
@@ -225,6 +235,9 @@ class Goods_order_model extends MY_Model_Hotel {
             }
             $result ['s'] = 1;
             $result ['total_price'] = $total_price;
+            if ($package_config ['sale_way'] == 1) {
+                $result ['min_package_num'] = min($package_nums);
+            }
             return $result;
         } else {
             $result ['errmsg'] = '所选商品已下架';

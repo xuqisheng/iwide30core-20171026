@@ -1,5 +1,5 @@
 
-<link href="<?php echo base_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
 <script>
 wx.config({
     debug: false,
@@ -91,7 +91,7 @@ array([1000001234] array(
                 <p class="txtclip"> <?php echo $item['name']; ?></p>
                 <span class="btn_main h24"><?php echo $v['status_label']; ?> <?php echo $get_count; ?>/<?php echo $total_count; ?> 人</span>
             </div>
-            <div class="item_hr"><img src="<?php echo base_url('public/soma/images/hr.jpg');?>" /></div>
+            <div class="item_hr"><img src="<?php echo get_cdn_url('public/soma/images/hr.jpg');?>" /></div>
             <div class="bg_fff item_foot">
                 <p class="h36"><?php echo str_replace('[0]', $total_count, $lang->line('sent_to_other')); ?></p>
                 <p class="h24"><?php echo $v['create_time']; ?></p>

@@ -1838,65 +1838,82 @@ class Sales_order_model extends MY_Model_Soma {
         // 进行邮费核销处理
         $this->consumer_shipping();
 
-            //需要直接邮寄
-            $this->load->model('soma/Sales_order_idx_model','SalesOrderIdxModel');
-            $mailInfo = $this->SalesOrderIdxModel->get_extra_value($order_id,'mail');
-            if($mailInfo){
+        //需要直接邮寄
+        $this->load->model('soma/Sales_order_idx_model','SalesOrderIdxModel');
+        $mailInfo = $this->SalesOrderIdxModel->get_extra_value($order_id,'mail');
+        if($mailInfo){
 
 //                $this->_write_log( '邮寄：' . $order_id. json_encode($mailInfo));
 
-                $this->load->model('soma/Consumer_order_model','ConsumerOrderModel');
-                $ConsumerOrderModel = $this->ConsumerOrderModel;
+            $this->load->model('soma/Consumer_order_model','ConsumerOrderModel');
+            $ConsumerOrderModel = $this->ConsumerOrderModel;
 
-                //是否使用的是微信地址
+            //是否使用的是微信地址
 
-                $SalesOrderModel = $this->load($order_id);
-                if( !$SalesOrderModel ){
-                    return false;
+            $SalesOrderModel = $this->load($order_id);
+            if( !$SalesOrderModel ){
+                return false;
+            }
+
+            //检查能否邮寄
+            if( !$SalesOrderModel->can_mail_order() ){
+                return false ;
+            }
+
+            $detail = $SalesOrderModel->get_order_asset($business,$inter_id); //资产订单
+            \App\libraries\Support\Log::error('邮寄：' . $order_id. '资产', $detail);
+            $arid = $mailInfo['address_id']; //地址ID
+
+            foreach( $detail['items'] as $mailItem){
+                $mailPost = array(
+                    'aiid' =>$mailItem['item_id'],                 //资产细单ID
+                    'arid' =>$arid,                //地址ID
+                    'num' => $mailItem['qty'],                   //邮寄数量
+                    'datetime' =>'',             //预约发货时间
+                    'note' => !empty($mailInfo['note']) ? $mailInfo['note'] :'',                //备注
+                );
+                $result = $ConsumerOrderModel->mail_consumer( $mailPost, $openid, $inter_id, $business );
+                \App\libraries\Support\Log::debug('邮寄：' . $order_id. ' | aiid : '.$mailItem['item_id'], $result);
+
+                if( isset( $result['status'] ) && $result['status'] == Soma_base::STATUS_TRUE ){
+
+                }else{
+                    return FALSE;
                 }
-
-                //检查能否邮寄
-                if( !$SalesOrderModel->can_mail_order() ){
-                    return false ;
-                }
-
-                $detail = $SalesOrderModel->get_order_asset($business,$inter_id); //资产订单
-                \App\libraries\Support\Log::error('邮寄：' . $order_id. '资产', $detail);
-                $arid = $mailInfo['address_id']; //地址ID
-
-                foreach( $detail['items'] as $mailItem){
-                    $mailPost = array(
-                        'aiid' =>$mailItem['item_id'],                 //资产细单ID
-                        'arid' =>$arid,                //地址ID
-                        'num' => $mailItem['qty'],                   //邮寄数量
-                        'datetime' =>'',             //预约发货时间
-                        'note' => !empty($mailInfo['note']) ? $mailInfo['note'] :'',                //备注
-                    );
-                    $result = $ConsumerOrderModel->mail_consumer( $mailPost, $openid, $inter_id, $business );
-                    \App\libraries\Support\Log::error('邮寄：' . $order_id. ' | aiid : '.$mailItem['item_id'], $result);
-
-                    if( isset( $result['status'] ) && $result['status'] == Soma_base::STATUS_TRUE ){
-
-                    }else{
-                        return FALSE;
-                    }
-
-                }
-
 
             }
-            //end需要直接邮寄
+
+
+        }
+        //end需要直接邮寄
 
 
         // 插入短信记录，组合商品主订单不发
         if(empty($childs) && $item[0]['can_sms_notify'] == self::STATUS_CAN_YES) {
 
+            /** @var \soma/Sms_model $somaSmsModel **/
             $this->load->model('soma/Sms_model', 'somaSmsModel');
-            $this->somaSmsModel->switch_db($this->db_soma);
+            $somaSmsModel = $this->somaSmsModel;
+            $somaSmsModel->switch_db($this->db_soma);
             $smsData = $this->somaSmsModel->get_order_success_sms($this->m_get('order_id'));
             if($smsData['res'])
             {
-                $this->somaSmsModel->sms_insert($this->m_get('inter_id'), Sms_model::SMS_TYPE_ORDER_SUCCESS, $this->m_get('order_id'), $smsData['data']);
+                //恒大短信接口
+                if($inter_id == 'a468919145'){
+                    $res = $smsData['data']['datas'];
+                    $smsMessage = '亲爱的'.$res[0].'，您已成功订购了'.$res[1].'，订单号：'.$res[2].'；券码：'.$res[3].'；有效期至'.$res[4].'，'.$res[5].'查看更多详情';
+                    $sms = $somaSmsModel->everGrandSms($this->m_get('mobile'), $smsMessage);
+                    if($sms){
+                        $sms = '成功';
+                    }
+                    else{
+                        $sms = '失败';
+                    }
+                    \App\libraries\Support\Log::error('恒大短信API，手机：'.$this->m_get('mobile').'，状态：'.$sms);
+                }
+                else{
+                    $this->somaSmsModel->sms_insert($this->m_get('inter_id'), Sms_model::SMS_TYPE_ORDER_SUCCESS, $this->m_get('order_id'), $smsData['data']);
+                }
             }
             else
             {
@@ -1905,8 +1922,10 @@ class Sales_order_model extends MY_Model_Soma {
         }
 
         // 发送后台通知
+        /** @var \message_wxtemp_template_model $message_model  **/
         $this->load->model('soma/message_wxtemp_template_model', 'message_model');
-        if ($message = $this->message_model->getOrderAdminNoticeMessage($order_id)) {
+        $message_model = $this->message_model;
+        if ($message = $message_model->getOrderAdminNoticeMessage($order_id)) {
             $this->load->model('hotel/hotel_notify_model');
             $this->hotel_notify_model->insert_wxmsg_queue(
                 $this->m_get('inter_id'),

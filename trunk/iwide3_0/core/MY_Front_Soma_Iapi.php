@@ -61,7 +61,7 @@ class MY_Front_Soma_Iapi extends MY_Front_Iapi
             'my_order_list' => site_url('iapi/soma/order/index') . "?" . http_build_query(['id' => $this->inter_id, 'type' => '', 'tkid' => $tkId, 'brandname' => $brandName,
                     'layout' => $layout]), // 我的订单(全部、待使用、已完成)
             'my_gift_list' => site_url('iapi/soma/order/gift_list') . "?id=" . $this->inter_id.'&layout='.$layout."&tkid=".$tkId.'&brandname='.$brandName, // 我的礼物
-            'detail_link' => site_url('soma/order/order_detail') . "?id=" . $this->inter_id.'&layout='.$layout."&tkid=".$tkId.'&brandname='.$brandName . '&oid=', //  订单详情
+            'detail_link' => site_url('soma/order/order_detail') . "?id=" . $this->inter_id.'&layout='.$layout."&tkid=".$tkId.'&brandname='.$brandName .'&bsn=package'. '&oid=', //  订单详情
             'delete_order_link' => site_url('iapi/soma/order/index') . "?id=" . $this->inter_id.'&layout='.$layout."&tkid=".$tkId.'&brandname='.$brandName, // 删除 需要参数 oid=
             // 我的礼物
             'package_received' => site_url('soma/gift/package_received') . '?id=' . $this->inter_id .'&layout='.$layout."&tkid=".$tkId.'&brandname='.$brandName. '&gid=', // 礼物详情
@@ -206,7 +206,14 @@ class MY_Front_Soma_Iapi extends MY_Front_Iapi
                     'layout' => $layout,
                     'fans_saler' => '',
                 ]),
-
+            //提交微信订房，下单成功跳转的页面
+            'booking_success' => site_url('soma/booking/success').'?'.http_build_query(
+                [
+                    'id' => $this->inter_id,
+                    'bsn' => '',
+                    'bid' => ''
+                ]
+                ),
             //退款首页
             'refund_index' => site_url('soma/refund/apply') . "?id=" . $this->inter_id.'&layout='.$layout."&tkid=".$tkId.'&brandname='.$brandName .'&bsn=package'.'&oid=',
             //退款详情 //http://credit.iwide.cn/index.php/soma/refund/detail?&oid=1000013037&saler=35
@@ -225,7 +232,21 @@ class MY_Front_Soma_Iapi extends MY_Front_Iapi
                     'bsn' => '%s',
                     'gid' => '%s'
 
-                ])
+                ]),
+            //订房订单详情
+            'hotel_order_info' => site_url('hotel/hotel/myorder').'?'.http_build_query([
+                    'id' => $this->inter_id,
+                    'tkid' => $tkId,
+                    'brandname' => $brandName,
+                    'layout' => $layout,
+                ]),
+            //订房订单列表
+            'hotel_order_list' => site_url('hotel/hotel/myorder').'?'.http_build_query([
+                    'id' => $this->inter_id,
+                    'tkid' => $tkId,
+                    'brandname' => $brandName,
+                    'layout' => $layout,
+                ]),
         );
     }
 

@@ -17,18 +17,18 @@ wx.ready(function(){
 <body>
 <div class="pageloading"><p class="isload" style="margin-top:150px"><?php echo $lang->line('loading'); ?></p></div>
 <!-- 选择日历插件 -->
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.core.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.widget.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.scroller.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.util.datetime.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.datetimebase.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.widget.ios.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.i18n.zh.js');?>"></script>
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.animation.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.widget.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.widget.ios.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.scroller.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.scroller.ios.css');?>" rel="stylesheet" type="text/css">
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.core.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.scroller.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.util.datetime.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.datetimebase.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.ios.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.i18n.zh.js');?>"></script>
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.animation.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.ios.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.scroller.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.scroller.ios.css');?>" rel="stylesheet" type="text/css">
 <!-- 日历插件 -->
 <form action="<?php echo $shipping_url; ?>" method="post" id="mailPost">
 <div class="whiteblock webkitbox justify bd" style="margin-top:0">

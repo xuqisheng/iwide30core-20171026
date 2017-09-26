@@ -73,7 +73,7 @@ class Iwidepay_clears_model extends MY_Model{
 	/**
 	 * 生成结余记录
 	 */
-	public function save_residual_record($inter_id,$hotel_id,$amount,$last_surplus_id=0){
+	public function save_residual_record($inter_id,$hotel_id,$amount,$last_surplus_id=0,$set_id=0){
 		$this->db->trans_begin();
 		if($last_surplus_id>0){
 			//修改上一个结余记录为已结清
@@ -91,6 +91,7 @@ class Iwidepay_clears_model extends MY_Model{
 			'amount' => $amount,
 			'order_type' => 'balance',
 			'debt_type' => 2,
+			'set_id' => $set_id,
 			'add_time' => date('Y-m-d H:i:s'),
 			'up_time' => date('Y-m-d H:i:s'),
 			);

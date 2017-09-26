@@ -211,6 +211,8 @@ class Gift extends MY_Front_Soma {
         else{     //新皮肤
             //$this->footerDatas['js_menu_show']= implode(",",$js_menu_show);
             //$this->footerDatas['js_share_config']= $share_config;
+
+            $this->headerDatas['title'] = '收礼列表';
         }
 
 
@@ -991,6 +993,7 @@ class Gift extends MY_Front_Soma {
             $this->_view("header",$header);
         }
         if($this->isNewTheme()){
+
             $pageTitle = $this->lang->line('gift_to_friend');
             $this->headerDatas['titile'] = $pageTitle;
         }
@@ -1075,9 +1078,7 @@ class Gift extends MY_Front_Soma {
 
             $this->gift_new_router();
 
-
             return;
-
         }
 
 
@@ -2154,6 +2155,7 @@ class Gift extends MY_Front_Soma {
      */
     public function  received_gift_empty(){
         $this->datas = array();
+        $this->headerDatas['title'] = '赠送主题';
         $this->_view("empty", $this->datas);
         return TRUE;
     }
@@ -2165,6 +2167,7 @@ class Gift extends MY_Front_Soma {
     public function received_gift_detail(){
 
         $this->datas = array();
+        $this->headerDatas['title'] = '礼物详情';
         $this->_view("package_received", $this->datas);
         return TRUE;
     }

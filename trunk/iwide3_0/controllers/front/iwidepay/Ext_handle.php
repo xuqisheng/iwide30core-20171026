@@ -47,13 +47,31 @@ class Ext_handle extends MY_Controller {
             $ok = $this->redis_proxy->setNX ( $key, $value );
         }elseif($type == 'delete' ){
             $ok = $this->redis_proxy->del ( $key );
+        }elseif ($type == 'get') {
+            $ok = $this->redis_proxy->get( $key );
+        }elseif ($type == 'update') {
+            $ok = $this->redis_proxy->set( $key, $value );
         }
         return $ok;
+    }
+
+    /**
+     * [check_key 检测此前是否有脚本未正常执行完成]
+     */
+    protected function check_key(){
+        // 获取key
+        $val = $this->redis_lock('get','IWIDEPAY_EXECUTE_SORT');
+        $this->load->library('IwidePay/IwidePayExecute',null,'IwidePayExecute');
+        if($val!=IwidePayExecute::EXT_HANDLE_RUN_OFFLINE_SORT){
+            MYLOG::w('err:上一个的脚本未正常执行完成', 'iwidepay/sync_offline');
+            exit('上一个的脚本未正常执行完成');
+        }
     }
 
     //同步线下订单
     public function run_offline(){
     	$this->check_arrow();
+        $this->check_key();
     	// 上锁
     	$ok = $this->redis_lock();
         if(!$ok){
@@ -69,9 +87,16 @@ class Ext_handle extends MY_Controller {
         $this->sync_update_offline_order();
         sleep(1);	
         //同步订单
+        MYLOG::w('info:开始同步线下订单拉拉拉拉啦', 'iwidepay/sync_offline');
         $this->sync_offline_order();
+        //同步分销其他奇葩奖励
+        sleep(1); 
+         MYLOG::w('info:开始同步分销奇葩奖励', 'iwidepay/sync_offline');
+        $this->sycn_distribute_record();
         //释放锁
         $this->redis_lock('delete');
+        //执行顺序+1
+        $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::EXT_HANDLE_RUN_OFFLINE_SORT+1);
         MYLOG::w('info:结束订单状态同步的脚本', 'iwidepay/sync_offline');
         echo '订单状态同步完毕';
     }
@@ -183,116 +208,82 @@ class Ext_handle extends MY_Controller {
 
     //同步分销杂七杂八的奖励：粉丝关注 首单奖励 额外奖励（查询绩效表）
     protected function sycn_distribute_record(){
-        $this->load('iwidepay/IwidePay_configs_model');
+        $this->load->model('iwidepay/IwidePay_configs_model');
         $this->load->model('iwidepay/Iwidepay_model');
         $this->load->model('iwidepay/Iwidepay_debt_model');
-        //查询分销配置信息 
-        $res = $this->IwidePay_configs_model->get_iwidepay_dis_config('inter_id,type');
+        //查询开启分账的inter_id 
+        $res = $this->IwidePay_configs_model->get_transfer_inter_id();
+        //查询不启用分销代发的inter_id
+        $unsplit_ids = $this->IwidePay_configs_model->get_unsplit_configs_by_iwidepay();
+        MYLOG::w('不进行分销的inter_id：inter_id数组:'.json_encode($unsplit_ids), 'iwidepay/sync_offline');
+        //查出所有开启分账的
         if(empty($res)){
             return false;
         }
-        $result = $inter_ids = $subs_inter_ids = array();
+        $inter_ids = array();
         foreach($res as $k=>$v){
-            if($v['type'] == 'fans_subs_reward'){//粉丝关注inter_id
-                if(!in_array($v['inter_id'],$subs_inter_ids)){
-                    $subs_inter_ids[] = $v['inter_id'];
-                }
-            }else{
-                $result[$v['inter_id']][] = $v['type'];
-                if(!in_array($v['inter_id'],$inter_ids)){
-                    $inter_ids[] = $v['inter_id'];
-                }
+            if(!in_array($v['inter_id'],$unsplit_ids)){//没有启用分销代发才进来
+                $inter_ids[] = $v['inter_id'];
             }
         }
-        unset($res);
-        
+        if(empty($inter_ids)){
+            MYLOG::w('没有可以进行同步奇葩分销奖励的inter_id', 'iwidepay/sync_offline');
+            return false;
+        }
         //查询绩效表 粉丝关注 首单奖励 额外奖励(分组奖励)
-        foreach($subs_inter_ids as $sk=>$sv){//粉丝关注 按酒店进行汇总
+        foreach($inter_ids as $sk=>$sv){//粉丝关注 按酒店进行汇总
             $subs_res = $this->Iwidepay_model->get_sync_dis_fans_subs($sv);
             if(!empty($subs_res)){
-                $data = array();
-                $data['inter_id'] = $sv;//inter_id
-                $data['hotel_id'] = $subs_res['hotel_id'];
-                $data['module'] = 'dis';
-                $data['openid'] = '';
-                $data['order_no'] = 'subs_' . date('Ymd');
-                $data['order_status'] = 0;
-                $data['transfer_status'] = 3;//直接设为已分账
-                $data['orig_amt'] = $subs_res['sum_total'];
-                $data['trans_amt'] = $subs_res['sum_total'];
-                $data['dist_amts'] = 0;
-                $data['add_time'] = date('Y-m-d H:i:s');
-                $data['handled'] = 1;
-                if($this->Iwidepay_model->save_sync_offline_order($data)){//保存在offline_order表后 再保存在debt_record表
+                foreach($subs_res as $subk=>$subv){
                     $debt_data = array();
-                    $debt_data['inter_id'] = $data['inter_id'];//inter_id
-                    $debt_data['hotel_id'] = $data['hotel_id'];
-                    $debt_data['module'] = $data['module'];
-                    $debt_data['order_no'] = $data['order_no'];
-                    $debt_data['amount'] = $data['trans_amt'];
+                    $debt_data['inter_id'] = $subv['inter_id'];//inter_id
+                    $debt_data['hotel_id'] = $subv['hotel_id'];
+                    $debt_data['module'] = 'extra_dist';
+                    $debt_data['order_no'] = 'fans_subs_' . date('Ymd');
+                    $debt_data['amount'] = $subv['sum_total'] * 100;
                     $debt_data['status'] = 0;
-                    $debt_data['order_type'] = 'fans_subs';
+                    $debt_data['order_type'] = 'extra_dist';
                     $debt_data['debt_type'] = 1;
                     $debt_data['add_time'] = date('Y-m-d H:i:s');
                     $debt_data['up_time'] = date('Y-m-d H:i:s');
                     $ins_res = $this->Iwidepay_debt_model->save_debt_record($debt_data);
                     if(is_array($ins_res)){
-                        MYLOG::w('记录保存到debt表失败：order:'.$data['order_no'], 'iwidepay/sync_offline');
+                        MYLOG::w('记录保存到debt表失败：order:'.$debt_data['order_no'], 'iwidepay/sync_offline');
                     }
-                }else{
-                    MYLOG::w('同步分销关注奖励记录保存到offline_order表失败：order:'.$data['order_no'], 'iwidepay/sync_offline');
                 }
             }
         }
         //查询首单奖励 分组奖励什么的 这些奖励目前是都是有分销员的，不用做saler身份判断
-        $dis_order = $this->Iwidepay_model->get_sync_dis_record($inter_ids);
-        if(!empty($dis_order)){            
-            foreach($dis_order as $dk=>$dv){
-                if(isset($result[$dv['inter_id']]) && in_array($dv['grade_table'],$result[$dv['inter_id']])){
-                    $data = array();
+        $dis_type = array('iwide_distribute_group_member','iwide_firstorder_reward');
+        foreach($dis_type as $dis_k=>$dis_v){
+            $dis_order = $this->Iwidepay_model->get_sync_dis_record($inter_ids,$dis_v);
+            if(!empty($dis_order)){            
+                foreach($dis_order as $dk=>$dv){
                     $order_no = '';
-                    $order_type = '';
-                    if($dv['grade_table'] == 'iwide_distribute_group_member'){
-                        $order_no = 'dis_group_' . $dv['grade_id'];
-                        $order_type = 'dis_group';
-                    }elseif($dv['grade_table'] == 'iwide_firstorder_reward'){
-                        $order_no = 'dis_first_o_' . $dv['grade_id'];
-                        $order_type = 'first_order';
+                    if($dis_v == 'iwide_distribute_group_member'){
+                        $order_no = 'dis_group_' . date('Ymd');
+                    }elseif($dis_v == 'iwide_firstorder_reward'){
+                        $order_no = 'dis_firstorder_' . date('Ymd');
                     }
-                    $data['inter_id'] = $dv['inter_id'];//inter_id
-                    $data['hotel_id'] = $dv['hotel_id'];
-                    $data['module'] = 'dis';
-                    $data['openid'] = '';
-                    $data['order_no'] = $order_no;
-                    $data['order_status'] = 0;
-                    $data['transfer_status'] = 3;//直接设为已分账
-                    $data['orig_amt'] = $dv['grade_total'];
-                    $data['trans_amt'] = $dv['grade_total'];
-                    $data['dist_amts'] = 0;
-                    $data['add_time'] = date('Y-m-d H:i:s');
-                    $data['handled'] = 1;
-                    if($this->Iwidepay_model->save_sync_offline_order($data)){
-                        $debt_data = array();
-                        $debt_data['inter_id'] = $data['inter_id'];//inter_id
-                        $debt_data['hotel_id'] = $data['hotel_id'];
-                        $debt_data['module'] = $data['module'];
-                        $debt_data['order_no'] = $data['order_no'];
-                        $debt_data['amount'] = $data['trans_amt'];
-                        $debt_data['status'] = 0;
-                        $debt_data['order_type'] = $order_type;
-                        $debt_data['debt_type'] = 1;
-                        $debt_data['add_time'] = date('Y-m-d H:i:s');
-                        $debt_data['up_time'] = date('Y-m-d H:i:s');
-                        $ins_res = $this->Iwidepay_debt_model->save_debt_record($debt_data);
-                        if(is_array($ins_res)){
-                            MYLOG::w('记录保存到debt表失败：order:'.$data['order_no'], 'iwidepay/sync_offline');
-                        }
-                    }else{
-                        MYLOG::w('同步分销奇葩奖励记录保存到offline_order表失败：order:'.$data['order_no'], 'iwidepay/sync_offline');
+                    $debt_data = array();
+                    $debt_data['inter_id'] = $dv['inter_id'];//inter_id
+                    $debt_data['hotel_id'] = $dv['hotel_id'];
+                    $debt_data['module'] = 'extra_dist';
+                    $debt_data['order_no'] = $order_no;
+                    $debt_data['amount'] = $dv['sum_total'] * 100;
+                    $debt_data['status'] = 0;
+                    $debt_data['order_type'] = 'extra_dist';
+                    $debt_data['debt_type'] = 1;
+                    $debt_data['add_time'] = date('Y-m-d H:i:s');
+                    $debt_data['up_time'] = date('Y-m-d H:i:s');
+                    $ins_res = $this->Iwidepay_debt_model->save_debt_record($debt_data);
+                    if(is_array($ins_res)){
+                        MYLOG::w('记录保存到debt表失败：inter_id:'.$debt_data['inter_id'].'|hotel_id:'.$debt_data['hotel_id'], 'iwidepay/sync_offline');
                     }
-                }
-            }   
+                }   
+            }    
         }
+        
     }
 
     /*

@@ -49,6 +49,8 @@ class Split extends MY_Controller {
             $ok = $this->redis_proxy->del ( $key );
         }elseif ($type == 'get') {
             $ok = $this->redis_proxy->get( $key );
+        }elseif ($type == 'update') {
+            $ok = $this->redis_proxy->set( $key, $value );
         }
         return $ok;
     }
@@ -65,12 +67,12 @@ class Split extends MY_Controller {
      * [check_key 检测此前是否有脚本未正常执行完成]
      */
     protected function check_key(){
-        $keys = array('synchro_lock','_sync_offline_lock');
-        foreach ($keys as $k) {
-            if($this->redis_lock('get',$k)){
-                MYLOG::w('err:此前有脚本未正常执行完成:'.$k, 'iwidepay_split');
-                exit('此前有脚本未正常执行完成:'.$k);
-            }
+        // 获取key
+        $val = $this->redis_lock('get','IWIDEPAY_EXECUTE_SORT');
+        $this->load->library('IwidePay/IwidePayExecute',null,'IwidePayExecute');
+        if($val!=IwidePayExecute::SPLIT_CHECK_SORT){
+            MYLOG::w('err:上一个的脚本未正常执行完成', 'iwidepay_split');
+            exit('上一个的脚本未正常执行完成');
         }
     }
 
@@ -104,6 +106,8 @@ class Split extends MY_Controller {
 
         //释放锁
         $this->redis_lock('delete');
+        //执行顺序+1
+        $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::SPLIT_CHECK_SORT+1);
         MYLOG::w('info:结束分账的脚本', 'iwidepay_split');
         exit('分账执行完毕');
     }

@@ -622,4 +622,55 @@ class Publics_model extends CI_Model {
     	return $this->db->update('publics',$avgs);
     }
 
+    /**
+     * 前后端分离更新轮播图
+     * @param $post
+     * @return bool
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    public function update_focus_new($post)
+    {
+        $data = [];
+        if (isset($post['link'])) {
+            $link = trim($post['link']);
+            if (empty($post['link'])) {
+                $link = '#';
+            } else {
+                if (strpos($post['link'], 'http://') !== 0 && strpos($post['link'], 'https://') !== 0) {
+                    $link = 'http://' . $post['link'];
+                }
+            }
+
+            $data['link'] = $link;
+        }
+
+        if (!empty($post['sort'])) {
+            $data['sort'] = $post['sort'];
+        }
+
+        if (!empty($post['image_url'])) {
+            $data['image_url'] = trim($post['image_url']);
+        }
+
+        if (!empty($post['id'])) {
+            $this->db->where('id', $post['id']);
+            return $this->db->update(self::TAB_PUBIMG, $data) > 0;
+        } else {
+            $data['inter_id'] = $post['inter_id'];
+            return $this->db->insert(self::TAB_PUBIMG, $data) > 0;
+        }
+    }
+
+    /**
+     * 前后端分离删除轮播图
+     * @param $post
+     * @return bool
+     * @author daikanwu <daikanwu@jperation.com>
+     */
+    function del_focus_new($post){
+        $this->db->where('id', $post['id']);
+        return $this->db->update(self::TAB_PUBIMG, ['status' => 2]) > 0;
+    }
+
+
 }

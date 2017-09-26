@@ -1,4 +1,4 @@
-<link href="<?php echo base_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
 <script>
 wx.config({
     debug: false,
@@ -49,7 +49,7 @@ if( $theme_id == Soma_base::STATUS_TRUE ){
                 }else{  echo $detail['face_img']; } ?>" /></div>
             </div>
             <div class="themechid2">
-            	<p><img src="<?php echo isset( $fans_received['headimgurl'] ) ? $fans_received['headimgurl'] : base_url('public/soma/images/ucenter_headimg.jpg'); ?>"></p><!--  用户头像 -->
+            	<p><img src="<?php echo isset( $fans_received['headimgurl'] ) ? $fans_received['headimgurl'] : get_cdn_url('public/soma/images/ucenter_headimg.jpg'); ?>"></p><!--  用户头像 -->
                 <p>
                     <span>
                         <?php echo isset( $fans_received['nickname'] ) ? $fans_received['nickname'] : $lang->line('your_friends'); ?>

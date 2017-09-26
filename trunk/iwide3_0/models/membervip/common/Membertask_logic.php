@@ -19,14 +19,16 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class Membertask_logic extends MY_Model_Member
 {
 
-    const SEND_URL = 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=';
-    private $err = '';
-    private $err_msg = '';
-    private $data = array();
-    private $redis = null;
-    private $send_success_num = 0;
-    private $send_fail_num = 0;
-    private $inter_id = '';
+    const SEND_URL                 = 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=';
+    private $err                   = '';
+    private $err_msg               = '';
+    private $data                  = array();
+    private $redis                 = null;
+    private $send_success_num      = 0;
+    private $send_fail_num         = 0;
+    private $send_temp_success_num = 0;
+    private $send_temp_fail_num    = 0;
+    private $inter_id              = '';
 
     public function __construct()
     {
@@ -68,9 +70,9 @@ class Membertask_logic extends MY_Model_Member
     protected function start_task_event($inter_id = '', $task_id = '', $task_execute_id = '')
     {
         $where = array(
-            'inter_id' => $inter_id,
-            'task_id' => $task_id,
-            'task_status' => 1
+            'inter_id'    => $inter_id,
+            'task_id'     => $task_id,
+            'task_status' => 1,
         );
         if (!empty($task_execute_id)) {
             $where['task_execute_id'] = $task_execute_id;
@@ -93,18 +95,47 @@ class Membertask_logic extends MY_Model_Member
     {
         $where = array(
             'inter_id' => $inter_id,
-            'task_id' => $task_id,
+            'task_id'  => $task_id,
         );
         if (!empty($task_execute_id)) {
             $where['task_execute_id'] = $task_execute_id;
         }
         $data = array(
-            'task_status' => 3,
+            'task_status'      => 3,
             'send_success_num' => $this->send_success_num,
-            'send_fail_num' => $this->send_fail_num
+            'send_fail_num'    => $this->send_fail_num,
         );
         $update = $this->_shard_db(true)->where($where)->set($data)->update('send_task_execute');
         return $update;
+    }
+
+    /**
+     * [结束发送模板消息任务]
+     * @param  string $inter_id        [酒店集团ID]
+     * @param  string $task_id         [任务ID]
+     * @param  string $task_execute_id [任务执行ID]
+     * @return [object|int|boolean]
+     */
+    protected function end_temp_task_event($inter_id = '', $task_id = '', $task_execute_id = '', $send_type = '')
+    {
+        if ($send_type == 3) {
+            $where = array(
+                'inter_id' => $inter_id,
+                'task_id'  => $task_id,
+            );
+            if (!empty($task_execute_id)) {
+                $where['task_execute_id'] = $task_execute_id;
+            }
+            $data = array(
+                'task_status'      => 3,
+                'send_success_num' => $this->send_temp_success_num,
+                'send_fail_num'    => $this->send_temp_fail_num,
+            );
+            $update = $this->_shard_db(true)->where($where)->set($data)->update('send_task_execute');
+            return $update;
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -115,10 +146,10 @@ class Membertask_logic extends MY_Model_Member
     protected function execute_task_event($param = array())
     {
         $this->inter_id = $param['task_id'];
-        $where = array(
-            'task_id' => $param['task_id'],
-            'inter_id' => $param['inter_id'],
-            'is_active' => 't'
+        $where          = array(
+            'task_id'   => $param['task_id'],
+            'inter_id'  => $param['inter_id'],
+            'is_active' => 't',
         );
         $task_info = $this->_shard_db()->where($where)->get('send_task')->row_array();
         if (empty($task_info)) {
@@ -143,45 +174,48 @@ class Membertask_logic extends MY_Model_Member
             return $start_task;
         }
 
-        $send_data = $this->get_send_content($task_info);
-        MYLOG::w(@json_encode(array('where' => $task_info, 'res' => $send_data, 'err_msg' => $this->err_msg())), 'membervip/debug-log/membertask', 'send_data');
-        if (!empty($send_data)) {
-            $this->load->helper('common');
-            $task_info['task_execute_id'] = $param['task_execute_id'];
-            $user_info = $this->get_send_user($task_info);
-            if (empty($user_info)) {
-                $this->__set_err('411');
-                $this->__set_msg('找不到发送用户');
-                MYLOG::w(@json_encode(array('res' => $task_info, 'err_msg' => $this->err_msg())), 'membervip/debug-log/membertask', 'err_msg');
-                $this->end_task_event($param['inter_id'], $param['task_id'], $param['task_execute_id']); //结束发送
-                return false;
-            }
+        if ($param['send_type'] != 3) {
+            $send_data = $this->get_send_content($task_info);
+            MYLOG::w(@json_encode(array('where' => $task_info, 'res' => $send_data, 'err_msg' => $this->err_msg())), 'membervip/debug-log/membertask', 'send_data');
+        }
 
-            $card_url = INTER_PATH_URL . 'intercard/sp_receive'; //领取卡劵
+        $this->load->helper('common');
+        $task_info['task_execute_id'] = $param['task_execute_id'];
+        $user_info                    = $this->get_send_user($task_info);
+        if (empty($user_info)) {
+            $this->__set_err('411');
+            $this->__set_msg('找不到发送用户');
+            MYLOG::w(@json_encode(array('res' => $task_info, 'err_msg' => $this->err_msg())), 'membervip/debug-log/membertask', 'err_msg');
+            $this->end_task_event($param['inter_id'], $param['task_id'], $param['task_execute_id']); //结束发送
+            return false;
+        }
+
+        if (!empty($send_data) && $param['send_type'] == 3) {
+            $card_url  = INTER_PATH_URL . 'intercard/sp_receive'; //领取卡劵
             $temp_data = array();
             foreach ($user_info as $item) {
                 $send_status = 0;
-                $send_count = $task_info['send_count'];
+                $send_count  = $task_info['send_count'];
                 if ($task_info['send_type'] == 1) {
                     $card_data = array(
-                        'token' => '',
-                        'inter_id' => $task_info['inter_id'],
+                        'token'          => '',
+                        'inter_id'       => $task_info['inter_id'],
                         'member_info_id' => $item['member_info_id'],
-                        'openid' => $item['open_id'],
-                        'card_id' => $send_data['card_id'],
-                        'uu_code' => md5(uniqid($send_data['card_id'] . $item['open_id'] . $send_data['member_info_id'])) . microtime(true),
-                        'module' => 'vip',
-                        'scene' => '优惠券批量发放',
-                        'give_count' => $send_count,
-                        'receive_repeat' => $task_info['receive_repeat']
+                        'openid'         => $item['open_id'],
+                        'card_id'        => $send_data['card_id'],
+                        'uu_code'        => md5(uniqid($send_data['card_id'] . $item['open_id'] . $send_data['member_info_id'])) . microtime(true),
+                        'module'         => 'vip',
+                        'scene'          => '优惠券批量发放',
+                        'give_count'     => $send_count,
+                        'receive_repeat' => $task_info['receive_repeat'],
                     );
 
                     $requestString = http_build_query($card_data);
-                    $result = doCurlPostRequest($card_url, $requestString);
+                    $result        = doCurlPostRequest($card_url, $requestString);
                     MYLOG::w(@json_encode(array($card_url, $result, $card_data)), 'membervip/debug-log/membertask', 'card_url');
                     $receive_res = @json_decode($result, true);
-                    if ((isset($receive_res['err']) && $receive_res['err'] == '0') OR (!isset($receive_res['err']) && !empty($receive_res['data']))) {
-                        $send_status = 1;
+                    if ((isset($receive_res['err']) && $receive_res['err'] == '0') or (!isset($receive_res['err']) && !empty($receive_res['data']))) {
+                        $send_status            = 1;
                         $this->send_success_num = $this->send_success_num + 1;
                     } else {
                         if (!empty($receive_res['err']) && $receive_res['err'] == '1060') {
@@ -192,24 +226,24 @@ class Membertask_logic extends MY_Model_Member
                     $_param = array(
                         'send_status' => $send_status,
                         'receive_res' => $receive_res,
-                        'task_info' => $task_info,
-                        'userinfo' => $item
+                        'task_info'   => $task_info,
+                        'userinfo'    => $item,
                     );
                     MYLOG::w(@json_encode(array('res' => $_param, 'err_msg' => $this->err_msg())), 'membervip/debug-log/membertask', 'err_msg');
                     $this->add_send_task_event($_param);
                 } elseif ($task_info['send_type'] == 2) {
-                    $packge_url = INTER_PATH_URL . 'package/receive';
+                    $packge_url   = INTER_PATH_URL . 'package/receive';
                     $package_data = array(
-                        'token' => '',
-                        'inter_id' => $task_info['inter_id'],
-                        'openid' => $item['open_id'],
+                        'token'          => '',
+                        'inter_id'       => $task_info['inter_id'],
+                        'openid'         => $item['open_id'],
                         'member_info_id' => $item['member_info_id'],
-                        'uu_code' => uniqid(),
-                        'package_id' => $send_data['package_id'],
-                        'number' => $send_count,
-                        'count' => $send_count,
-                        'extra' => 1,
-                        'add' => 1
+                        'uu_code'        => uniqid(),
+                        'package_id'     => $send_data['package_id'],
+                        'number'         => $send_count,
+                        'count'          => $send_count,
+                        'extra'          => 1,
+                        'add'            => 1,
                     );
 
                     if ($task_info['receive_repeat'] == 1) {
@@ -219,11 +253,11 @@ class Membertask_logic extends MY_Model_Member
                     }
 
                     $requestString = http_build_query($package_data);
-                    $result = doCurlPostRequest($packge_url, $requestString);
+                    $result        = doCurlPostRequest($packge_url, $requestString);
                     MYLOG::w(@json_encode(array($packge_url, $result, $package_data)), 'membervip/debug-log/membertask', 'packge_url');
                     $receive_res = @json_decode($result, true);
                     if ($receive_res['err'] == '0') {
-                        $send_status = 1;
+                        $send_status            = 1;
                         $this->send_success_num = $this->send_success_num + 1;
                     } else {
                         $this->send_fail_num = $this->send_fail_num + 1;
@@ -231,15 +265,15 @@ class Membertask_logic extends MY_Model_Member
                     $_param = array(
                         'send_status' => $send_status,
                         'receive_res' => $receive_res,
-                        'task_info' => $task_info,
-                        'userinfo' => $item
+                        'task_info'   => $task_info,
+                        'userinfo'    => $item,
                     );
                     MYLOG::w(@json_encode(array('res' => $_param, 'err_msg' => $this->err_msg())), 'membervip/debug-log/membertask', 'err_msg');
                     $this->add_send_task_event($_param);
                 }
                 $temp_data[] = array(
                     'send_status' => $send_status,
-                    'userinfo' => $item,
+                    'userinfo'    => $item,
                 );
             }
 
@@ -249,38 +283,53 @@ class Membertask_logic extends MY_Model_Member
                 $this->__set_msg('该任务已完成');
                 return $end_task;
             }
+        } else {
+            foreach ($user_info as $item) {
+                $temp_data[] = array(
+                    'send_status' => 1,
+                    'userinfo'    => $item,
+                );
+            }
+        }
 
-            if ($task_info['is_send_temp'] == 1) {
-                if (empty($task_info['temp_id'])) {
-                    $this->__set_err('801');
-                    $this->__set_msg('请先配置模版ID');
-                    return false;
-                }
+        if ($task_info['is_send_temp'] == 1) {
+            if (empty($task_info['temp_id'])) {
+                $this->__set_err('801');
+                $this->__set_msg('请先配置模版ID');
+                return false;
+            }
 
-                if (empty($task_info['temp_conf'])) {
-                    $this->__set_err('802');
-                    $this->__set_msg('请先配置模版消息内容');
-                    return false;
-                }
+            if (empty($task_info['temp_conf'])) {
+                $this->__set_err('802');
+                $this->__set_msg('请先配置模版消息内容');
+                return false;
+            }
 
-                foreach ($temp_data as $vo) {
-                    if ($vo['send_status'] == '1') {
-                        if (!empty($send_data['name'])) $send_data['package_name'] = $send_data['name'];
-                        $temp_param = array_merge($send_data, $vo['userinfo'], $task_info);
-                        $this->send_template($temp_param);
+            foreach ($temp_data as $vo) {
+                if ($vo['send_status'] == '1') {
+                    if (!empty($send_data['name'])) {
+                        $send_data['package_name'] = $send_data['name'];
                     }
+
+                    $temp_param = array_merge($send_data, $vo['userinfo'], $task_info);
+                    $this->send_template($temp_param);
                 }
             }
-            return true;
+            $end_task = $this->end_temp_task_event($param['inter_id'], $param['task_id'], $param['task_execute_id'], $param['send_type']); //结束发送
+            if (!$end_task) {
+                $this->__set_err('413');
+                $this->__set_msg('该任务的模版消息已发送完成');
+                return $end_task;
+            }
         }
-        return false;
+        return true;
     }
 
     public function update_task_send_user_count($inter_id = '', $task_id = '', $task_execute_id = '', $count = 0)
     {
         $where = array(
             'inter_id' => $inter_id,
-            'task_id' => $task_id,
+            'task_id'  => $task_id,
         );
 
         if (!empty($task_execute_id)) {
@@ -297,14 +346,17 @@ class Membertask_logic extends MY_Model_Member
     //添加发送任务结果记录
     protected function add_send_task_event($param = array())
     {
-        if (empty($param)) return false;
+        if (empty($param)) {
+            return false;
+        }
+
         $send_status = $param['send_status'];
         $receive_res = $param['receive_res'];
-        $task_info = $param['task_info'];
-        $userinfo = $param['userinfo'];
-        $telephone = !empty($userinfo['telephone']) ? $userinfo['telephone'] : $userinfo['cellphone'];
-        $state = $send_status == 1 ? 1 : 2;
-        $msg = '';
+        $task_info   = $param['task_info'];
+        $userinfo    = $param['userinfo'];
+        $telephone   = !empty($userinfo['telephone']) ? $userinfo['telephone'] : $userinfo['cellphone'];
+        $state       = $send_status == 1 ? 1 : 2;
+        $msg         = '';
         if (!empty($receive_res['msg']) && $receive_res['msg'] != 'ok') {
             $msg = $receive_res['msg'];
         } elseif (!empty($receive_res['data'])) {
@@ -313,27 +365,27 @@ class Membertask_logic extends MY_Model_Member
             $msg = '未知错误';
         }
 
-        $send_target = $task_info['send_target'];
+        $send_target       = $task_info['send_target'];
         $send_target_field = 0;
         if (!empty($send_target) && $send_target == 3) {
             json_decode($task_info['target_value']);
             if ((json_last_error() == JSON_ERROR_NONE)) {
-                $target_value = @json_decode($task_info['target_value'], true);
+                $target_value      = @json_decode($task_info['target_value'], true);
                 $send_target_field = !empty($target_value['field']) ? $target_value['field'] : 0;
             }
         }
 
         $add_data = array(
-            'inter_id' => $task_info['inter_id'],
-            'task_id' => $task_info['task_id'],
-            'member_info_id' => $userinfo['member_info_id'],
+            'inter_id'          => $task_info['inter_id'],
+            'task_id'           => $task_info['task_id'],
+            'member_info_id'    => $userinfo['member_info_id'],
             'membership_number' => $userinfo['membership_number'],
-            'telephone' => $telephone,
-            'openid' => $userinfo['open_id'],
-            'entry_method' => $send_target_field,
-            'state' => $state,
-            'msg' => $msg,
-            'send_time' => date('Y-m-d H:i:s')
+            'telephone'         => $telephone,
+            'openid'            => $userinfo['open_id'],
+            'entry_method'      => $send_target_field,
+            'state'             => $state,
+            'msg'               => $msg,
+            'send_time'         => date('Y-m-d H:i:s'),
         );
         $this->_shard_db(true)->set($add_data)->insert('send_task_event');
     }
@@ -354,24 +406,24 @@ class Membertask_logic extends MY_Model_Member
                 $package_content = array();
                 if (!empty($temp_param['card'])) {
                     foreach ($temp_param['card'] as $kvo) {
-                        $title = !empty($kvo['title']) ? $kvo['title'] : '';
+                        $title             = !empty($kvo['title']) ? $kvo['title'] : '';
                         $package_content[] = "{$title}*{$kvo['count']}张";
                     }
                 }
 
                 if (!empty($temp_param['credit']) && intval($temp_param['credit']) > 0) {
-                    $credit = intval($temp_param['credit']);
+                    $credit            = intval($temp_param['credit']);
                     $package_content[] = "{$credit}积分";
                 }
 
                 if (!empty($temp_param['balance']) && floatval($temp_param['balance']) > 0) {
-                    $balance = intval($temp_param['balance']);
+                    $balance           = intval($temp_param['balance']);
                     $package_content[] = "{$balance}储值";
                 }
 
                 if (!empty($temp_param['lvl_name'])) {
-                    $member_lvl = $this->common_model->get_field_by_level_config($temp_param['inter_id']);
-                    $lvl_name = !empty($member_lvl[$temp_param['lvl_name']]) ? $member_lvl[$temp_param['lvl_name']] : '';
+                    $member_lvl        = $this->common_model->get_field_by_level_config($temp_param['inter_id']);
+                    $lvl_name          = !empty($member_lvl[$temp_param['lvl_name']]) ? $member_lvl[$temp_param['lvl_name']] : '';
                     $package_content[] = "{$lvl_name} (会员等级)";
                 }
                 $temp_content = implode(', ', $package_content);
@@ -379,21 +431,20 @@ class Membertask_logic extends MY_Model_Member
 
             $openid = $temp_param['open_id'];
 
-            $type = 15;
+            $type     = 15;
             $inter_id = $temp_param['inter_id'];
-            $task_id = !empty($temp_param['task_id']) ? $temp_param['task_id'] : 0;
+            $task_id  = !empty($temp_param['task_id']) ? $temp_param['task_id'] : 0;
 
-            $content['first']['value'] = $temp_conf['first'];
+            $content['first']['value']  = $temp_conf['first'];
             $content['remark']['value'] = $temp_conf['remark'];
 
-
-            $message['touser'] = $openid;//发送给哪个用户
-            $message['template_id'] = $temp_param['temp_id'];//微信模版ID
+            $message['touser']      = $openid; //发送给哪个用户
+            $message['template_id'] = $temp_param['temp_id']; //微信模版ID
 
             //链接处理
-            $url = '';
-            $param = array('id' => $inter_id, 'membertaskid' => $task_id);
-            $templateUrl = $temp_conf['url'];//需要处理链接
+            $url         = '';
+            $param       = array('id' => $inter_id, 'membertaskid' => $task_id);
+            $templateUrl = $temp_conf['url']; //需要处理链接
             if ($templateUrl) {
                 switch ($templateUrl) {
                     case 1:
@@ -412,7 +463,7 @@ class Membertask_logic extends MY_Model_Member
                         break;
                 }
             }
-            $message['url'] = $url;
+            $message['url']           = $url;
             $message['data']['first'] = array(
                 'value' => $temp_conf['first'],
                 'color' => '#000000',
@@ -422,26 +473,85 @@ class Membertask_logic extends MY_Model_Member
                 'color' => '#000000',
             );
 
+            $temp_type = !empty($temp_conf['temp_title_field']) ? $temp_conf['temp_title_field'] : '';
 
-            $message['data']['keyword1'] = array(
-                'value' => $temp_conf['keyword1'],
-                'color' => '#000000',
-            );
+            switch ($temp_type) {
+                case 'interest_account':
+                    $message['data']['keyword1'] = array(
+                        'value' => $temp_conf['keyword1'],
+                        'color' => '#000000',
+                    );
 
-            $message['data']['keyword2'] = array(
-                'value' => $temp_conf['keyword2'],
-                'color' => '#000000',
-            );
+                    $message['data']['keyword2'] = array(
+                        'value' => $temp_conf['keyword2'],
+                        'color' => '#000000',
+                    );
 
-            $message['data']['keyword3'] = array(
-                'value' => $temp_conf['keyword3'],
-                'color' => '#000000',
-            );
+                    $message['data']['keyword3'] = array(
+                        'value' => $temp_conf['keyword3'],
+                        'color' => '#000000',
+                    );
 
-            $message['data']['keyword4'] = array(
-                'value' => $temp_conf['keyword4'],
-                'color' => '#000000',
-            );
+                    $message['data']['keyword4'] = array(
+                        'value' => $temp_conf['keyword4'],
+                        'color' => '#000000',
+                    );
+                    break;
+                case 'coupon_expiration':
+                    $message['data']['name'] = array(
+                        'value' => $temp_conf['name'],
+                        'color' => '#000000',
+                    );
+
+                    $message['data']['expDate'] = array(
+                        'value' => $temp_conf['expDate'],
+                        'color' => '#000000',
+                    );
+                    break;
+                case 'membership_review':
+                    $message['data']['keyword1'] = array(
+                        'value' => $temp_conf['keyword1'],
+                        'color' => '#000000',
+                    );
+
+                    $message['data']['keyword2'] = array(
+                        'value' => $temp_conf['keyword2'],
+                        'color' => '#000000',
+                    );
+                    break;
+                case 'service_status':
+                    $message['data']['keyword1'] = array(
+                        'value' => $temp_conf['keyword1'],
+                        'color' => '#000000',
+                    );
+
+                    $message['data']['keyword2'] = array(
+                        'value' => $temp_conf['keyword2'],
+                        'color' => '#000000',
+                    );
+                    break;
+                default:
+                    $message['data']['keyword1'] = array(
+                        'value' => $temp_conf['keyword1'],
+                        'color' => '#000000',
+                    );
+
+                    $message['data']['keyword2'] = array(
+                        'value' => $temp_conf['keyword2'],
+                        'color' => '#000000',
+                    );
+
+                    $message['data']['keyword3'] = array(
+                        'value' => $temp_conf['keyword3'],
+                        'color' => '#000000',
+                    );
+
+                    $message['data']['keyword4'] = array(
+                        'value' => $temp_conf['keyword4'],
+                        'color' => '#000000',
+                    );
+                    break;
+            }
 
             $json_data = @json_encode($message);
             $json_data = str_replace(array('{membernum}', '{temp_content}', '{send_time}', '{username}'), array($temp_param['membership_number'], $temp_content, $temp_param['send_time'], $temp_param['name']), $json_data);
@@ -455,20 +565,20 @@ class Membertask_logic extends MY_Model_Member
             MYLOG::w(json_encode(array('res' => $sendResult, 'param' => array('inter_id' => $inter_id, 'json_data' => $json_data))), 'membervip/debug/membertask', 'request_send_template');
 
             $data = array(
-                'inter_id' => $inter_id,
-                'hotel_id' => 0,
-                'temp_id' => 0,
+                'inter_id'    => $inter_id,
+                'hotel_id'    => 0,
+                'temp_id'     => 0,
                 'template_id' => $temp_param['temp_id'],
-                'openid' => $openid,
-                'type' => $type,
-                'msg' => $json_data,
-                'result' => $sendResult,
+                'openid'      => $openid,
+                'type'        => $type,
+                'msg'         => $json_data,
+                'result'      => $sendResult,
                 'create_time' => date("Y-m-d H:i:s"),
-                'status' => $sendResult === true ? 1 : 2
+                'status'      => $sendResult === true ? 1 : 2,
             );
-            $data['result'] = $sendResult;
+            $data['result']      = $sendResult;
             $data['create_time'] = date("Y-m-d H:i:s");
-            $data['status'] = $sendResult === true ? 1 : 2;//STATUS_FAIL
+            $data['status']      = $sendResult === true ? 1 : 2; //STATUS_FAIL
 
             //保存到record
             $res = $this->common_model->add_data($data, 'message_wxtemp_record');
@@ -499,42 +609,51 @@ class Membertask_logic extends MY_Model_Member
 
         $this->load->model('wx/access_token_model');
         $access_token = $this->access_token_model->get_access_token($inter_id);
-        $url = self::SEND_URL . $access_token;
-        $result = doCurlPostRequest($url, $json_data);
+        $url          = self::SEND_URL . $access_token;
+        $result       = doCurlPostRequest($url, $json_data);
         //保存日志
         MYLOG::w(json_encode(array('res' => $result, 'url' => $url, 'data' => $json_data)), 'membervip/debug/membertask', 'request_send_template');
 
         $result_data = json_decode($result, true);
         if ($result_data['errcode'] == 0 && $result_data['errmsg'] == 'ok') {
+            $this->send_temp_success_num = $this->send_temp_success_num + 1;
             $this->__set_err('0');
             $this->__set_msg('发送成功');
             return true;
         } elseif ($result_data['errcode'] == '40001') {
             $access_token = $this->access_token_model->reflash_access_token($inter_id);
-            $url = self::SEND_URL . $access_token;
-            $result = doCurlPostRequest($url, $json_data);
+            $url          = self::SEND_URL . $access_token;
+            $result       = doCurlPostRequest($url, $json_data);
             //保存日志
             MYLOG::w(json_encode(array('res' => $result, 'url' => $url, 'data' => $json_data)), 'membervip/debug/membertask', 'request_send_template');
 
             $result_data = json_decode($result, true);
             if ($result_data['errcode'] == 0 && $result_data['errmsg'] == 'ok') {
+                $this->send_temp_success_num = $this->send_temp_success_num + 1;
                 $this->__set_err('0');
                 $this->__set_msg('发送成功');
                 return true;
+            } else {
+                $this->send_temp_fail_num = $this->send_temp_fail_num + 1;
             }
         } elseif ($result_data['errcode'] == '42001') {
             $access_token = $this->access_token_model->reflash_access_token($inter_id);
-            $url = self::SEND_URL . $access_token;
-            $result = doCurlPostRequest($url, $json_data);
+            $url          = self::SEND_URL . $access_token;
+            $result       = doCurlPostRequest($url, $json_data);
             //保存日志
             MYLOG::w(json_encode(array('res' => $result, 'url' => $url, 'data' => $json_data)), 'membervip/debug/membertask', 'request_send_template');
 
             $result_data = json_decode($result, true);
             if ($result_data['errcode'] == 0 && $result_data['errmsg'] == 'ok') {
+                $this->send_temp_success_num = $this->send_temp_success_num + 1;
                 $this->__set_err('0');
                 $this->__set_msg('发送成功');
                 return true;
+            } else {
+                $this->send_temp_fail_num = $this->send_temp_fail_num + 1;
             }
+        } else {
+            $this->send_temp_fail_num = $this->send_temp_fail_num + 1;
         }
         $this->__set_err('10001');
         $this->__set_msg('发送失败');
@@ -549,7 +668,7 @@ class Membertask_logic extends MY_Model_Member
             return false;
         }
         $__key = $param['inter_id'] . "_MemBerTaskSendUser_" . $param['task_id'] . $param['send_target'];
-        $user = $this->redis->get($__key);
+        $user  = $this->redis->get($__key);
         if (!empty($user)) {
             return @json_decode($user, true);
         }
@@ -567,7 +686,7 @@ class Membertask_logic extends MY_Model_Member
                         return false;
                     }
                     $member_ids = array_keys($member_lvl);
-                    $user_info = $this->member_model->get_user_by_lvl($param['inter_id'], $member_ids);
+                    $user_info  = $this->member_model->get_user_by_lvl($param['inter_id'], $member_ids);
                     if (empty($user_info)) {
                         $this->__set_err('408');
                         $this->__set_msg("该公众号{$param['inter_id']}通过等级无法找到会员信息");
@@ -579,7 +698,7 @@ class Membertask_logic extends MY_Model_Member
                     json_decode($param['target_value']);
                     if ((json_last_error() == JSON_ERROR_NONE)) {
                         $member_ids = json_decode($param['target_value'], true);
-                        $user_info = $this->member_model->get_user_by_lvl($param['inter_id'], $member_ids);
+                        $user_info  = $this->member_model->get_user_by_lvl($param['inter_id'], $member_ids);
                         if (empty($user_info)) {
                             $this->__set_err('408');
                             $this->__set_msg("该公众号{$param['inter_id']}通过等级无法找到会员信息");
@@ -594,19 +713,19 @@ class Membertask_logic extends MY_Model_Member
                 break;
             case 2:
                 $target_value = json_decode($param['target_value'], true);
-                $source = !empty($target_value[0]) ? $target_value[0] : '';
-                $rfm = !empty($target_value[1]) ? $target_value[1] : '';
-                $rfm_level = !empty($target_value[2]) ? $target_value[2] : '';
+                $source       = !empty($target_value[0]) ? $target_value[0] : '';
+                $rfm          = !empty($target_value[1]) ? $target_value[1] : '';
+                $rfm_level    = !empty($target_value[2]) ? $target_value[2] : '';
                 $request_data = array(
-                    't' => time(),
+                    't'        => time(),
                     'inter_id' => $param['inter_id'],
-                    'source' => $source,
-                    $rfm => $rfm_level
+                    'source'   => $source,
+                    $rfm       => $rfm_level,
                 );
-                $secretKey = '6lPgIYNsmJhVdyqhtX';
-                $signature = $this->common_model->signature($request_data, $secretKey);
+                $secretKey             = '6lPgIYNsmJhVdyqhtX';
+                $signature             = $this->common_model->signature($request_data, $secretKey);
                 $request_data['token'] = $signature;
-                $openids = $this->common_model->get_rfm_data($request_data);
+                $openids               = $this->common_model->get_rfm_data($request_data);
                 if (empty($openids)) {
                     $this->update_task_send_user_count($param['inter_id'], $param['task_id'], $param['task_execute_id'], 0); //更新发送人数
                     $this->__set_err('408');
@@ -627,10 +746,10 @@ class Membertask_logic extends MY_Model_Member
                 $this->redis->setex($__key, 1800, $json_data);
                 break;
             case 3:
-                $target_value = json_decode($param['target_value'], true);
-                $send_target_field = !empty($target_value['field']) ? $target_value['field'] : '';
-                $send_target_type = !empty($target_value['type']) ? $target_value['type'] : '';
-                $send_target_value = !empty($target_value['value']) ? $target_value['value'] : '';
+                $target_value          = json_decode($param['target_value'], true);
+                $send_target_field     = !empty($target_value['field']) ? $target_value['field'] : '';
+                $send_target_type      = !empty($target_value['type']) ? $target_value['type'] : '';
+                $send_target_value     = !empty($target_value['value']) ? $target_value['value'] : '';
                 $send_target_value_arr = array();
                 if ($send_target_type == 1) {
                     $send_target_value_arr = explode(',', $send_target_value);
@@ -645,37 +764,41 @@ class Membertask_logic extends MY_Model_Member
                     return false;
                 }
 
+                foreach ($send_target_value_arr as &$val) {
+                    $val = trim($val);
+                }
+
                 $send_user_count = is_array($send_target_value_arr) ? count($send_target_value_arr) : 0;
                 $this->update_task_send_user_count($param['inter_id'], $param['task_id'], $param['task_execute_id'], $send_user_count); //更新发送人数
 
                 $vfield = '';
-                $where = array(
+                $where  = array(
                     'inter_id' => $param['inter_id'],
                 );
                 switch ($send_target_field) {
                     case 1:
                         $member_mode = $this->member_model->get_member_mode($param['inter_id']);
-                        $field = 'inter_id,open_id,member_info_id,name,membership_number,telephone,cellphone';
+                        $field       = 'inter_id,open_id,member_info_id,name,membership_number,telephone,cellphone';
                         if ($member_mode == 'login') {
-                            $vfield = 'telephone';
+                            $vfield             = 'telephone';
                             $where['telephone'] = $send_target_value_arr;
                         } else {
-                            $vfield = 'cellphone';
-                            $where['cellphone'] = $send_target_value_arr;
+                            $vfield               = 'cellphone';
+                            $where['cellphone']   = $send_target_value_arr;
                             $where['member_mode'] = 1;
                         }
                         break;
                     case 2:
-                        $vfield = 'member_info_id';
+                        $vfield                  = 'member_info_id';
                         $where['member_info_id'] = $send_target_value_arr;
                         break;
                     case 3:
-                        $vfield = 'membership_number';
+                        $vfield                     = 'membership_number';
                         $where['membership_number'] = $send_target_value_arr;
                         break;
                     case 4:
-                        $vfield = 'open_id';
-                        $where['open_id'] = $send_target_value_arr;
+                        $vfield               = 'open_id';
+                        $where['open_id']     = $send_target_value_arr;
                         $where['member_mode'] = 1;
                         break;
                     default:
@@ -684,7 +807,7 @@ class Membertask_logic extends MY_Model_Member
                 }
 
                 if (!empty($where)) {
-                    $field = 'inter_id,open_id,member_info_id,name,membership_number,telephone,cellphone';
+                    $field     = 'inter_id,open_id,member_info_id,name,membership_number,telephone,cellphone';
                     $user_info = $this->member_model->get_member_info_list($where, $field);
                     $this->check_task_event($param, $send_target_value_arr, $user_info, $vfield, $send_target_field);
                     if (empty($user_info)) {
@@ -717,8 +840,13 @@ class Membertask_logic extends MY_Model_Member
     {
         if (!empty($param) && !empty($send_arr)) {
             $field = $key;
-            if ($key == 'open_id') $field = 'openid';
-            if ($key == 'cellphone') $field = 'telephone';
+            if ($key == 'open_id') {
+                $field = 'openid';
+            }
+
+            if ($key == 'cellphone') {
+                $field = 'telephone';
+            }
 
             $key_name = '';
             switch ($key) {
@@ -759,13 +887,13 @@ class Membertask_logic extends MY_Model_Member
 
                 if ($err) {
                     $this->send_fail_num = $this->send_fail_num + 1;
-                    $add_data = array(
-                        'inter_id' => $param['inter_id'],
-                        'task_id' => $param['task_id'],
-                        'state' => 2,
-                        'msg' => $msg,
-                        'send_time' => date('Y-m-d H:i:s'),
-                        'entry_method' => $entry_method
+                    $add_data            = array(
+                        'inter_id'     => $param['inter_id'],
+                        'task_id'      => $param['task_id'],
+                        'state'        => 2,
+                        'msg'          => $msg,
+                        'send_time'    => date('Y-m-d H:i:s'),
+                        'entry_method' => $entry_method,
                     );
                     $add_data[$field] = $v;
                     $this->_shard_db(true)->set($add_data)->insert('send_task_event');
@@ -774,7 +902,6 @@ class Membertask_logic extends MY_Model_Member
         }
         return true;
     }
-
 
     /**
      * 获取发送内容
@@ -789,7 +916,7 @@ class Membertask_logic extends MY_Model_Member
             return false;
         }
         $__key = $param['inter_id'] . "_MemBerTaskSendContent_" . $param['task_id'] . $param['send_type'] . $param['send_value'];
-        $data = $this->redis->get($__key);
+        $data  = $this->redis->get($__key);
         if (!empty($data)) {
             return @json_decode($data, true);
         }
@@ -830,9 +957,9 @@ class Membertask_logic extends MY_Model_Member
     private function err_msg()
     {
         $return = array(
-            'err' => $this->err,
-            'msg' => $this->err_msg,
-            'data' => $this->data
+            'err'  => $this->err,
+            'msg'  => $this->err_msg,
+            'data' => $this->data,
         );
         MYLOG::w(@json_encode(array('inter_id' => $this->inter_id, 'res' => $return)), 'membervip/debug-log/membertask', 'err_msg');
         return $return;
@@ -844,22 +971,22 @@ class Membertask_logic extends MY_Model_Member
             $config = array(
                 'task' => array(
                     'socket_type' => 'tcp',
-                    'password' => NULL,
-                    'timeout' => 5,
-                    'cachedb' => 14,
-                    'host' => 'redis02',
-                    'port' => 6381
+                    'password'    => null,
+                    'timeout'     => 5,
+                    'cachedb'     => 14,
+                    'host'        => 'redis02',
+                    'port'        => 6381,
                 ),
             );
         } else {
             $config = array(
                 'task' => array(
                     'socket_type' => 'tcp',
-                    'password' => NULL,
-                    'timeout' => 5,
-                    'cachedb' => 2,
-                    'host' => '120.27.132.97',
-                    'port' => 16379
+                    'password'    => null,
+                    'timeout'     => 5,
+                    'cachedb'     => 2,
+                    'host'        => '120.27.132.97',
+                    'port'        => 16379,
                 ),
             );
         }
@@ -869,11 +996,11 @@ class Membertask_logic extends MY_Model_Member
     protected function get_vip_redis($select = 'task')
     {
         $redis_config = $this->redis_setting();
-        $config = $redis_config[$select];
+        $config       = $redis_config[$select];
         if (!is_array($config)) {
             return false;
         }
-        $redis = new Redis();
+        $redis   = new Redis();
         $success = $redis->connect($config['host'], $config['port'], $config['timeout']);
         MYLOG::w(@json_encode(array('data' => $redis_config, 'success' => $success)), 'membervip/debug-log', 'membertask_logic_redis');
         if (!$success) {

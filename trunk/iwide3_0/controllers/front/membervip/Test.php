@@ -2,35 +2,35 @@
 
 class Test extends MY_Front_Member
 {
-
+    
     const SEND_URL = 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=';
-
+    
     /**
      */
     function test1()
     {
         ini_set('memory_limit', - 1); // 无内存限制
         set_time_limit(0); // 无时间限制
-        $dataset = $this->read_Excel('wn.xlsx');
+        $dataset = $this->read_Excel('xn.xlsx');
         // var_dump($dataset);exit;
-       /*    $init  组装数据配置项
-              notnull 为不为空的字段选项，可空
-             其余字段为对应的字段名=>字段值
-             level比较特殊，当第五个参数level不为空时，会获取对应的等级ID，需要提前配置
-        */
+        /*    $init  组装数据配置项
+         notnull 为不为空的字段选项，可空
+         其余字段为对应的字段名=>字段值
+         level比较特殊，当第五个参数level不为空时，会获取对应的等级ID，需要提前配置
+         */
         $init = [
-            'membership_number'=>1,
-            'name'=>2,
-            'id_card_no'=>4,
-            'phone' => 3,
-            'balance' => 7,
-            'level'=>8
+            //             'membership_number'=>1,
+            'name'=>0,
+            //             'id_card_no'=>4,
+            'phone' => 1,
+            //             'balance' => 7,
+            'level'=>2
         ];
         $level=['银卡会员'=>914,'金卡会员'=>915,'白金卡会员'=>916];
         $this->make_data($dataset, $init, 'a491809563', false, $level);
         exit();
     }
-
+    
     // function test2(){
     // $str='{"cat_id":"","brand_name":"1231","card_type":"1","module":["shop","vip"],"title":"124","sub_title":"124","card_stock":"124","logo_url":"","notice":"1","card_note":"1","description":"","is_online":"1","can_give_friend":"f","passwd":"","page_config":"","header_url":"","hotel_header_url":"","soma_header_url":"","shop_header_url":"","least_cost":"1","over_limit":"12","reduce_cost":"1","remark":"","time_start":1498752000,"time_end":1499443200,"use_time_start":1498752000,"use_time_end_model":"g","use_time_end":1499443200,"is_active":"t","is_f":"f","inter_id":"a421641095","createtime":1498806608}';
     // $data=json_decode($str,true);
@@ -96,7 +96,7 @@ class Test extends MY_Front_Member
         
         exit();
     }
-
+    
     function get($inter_id, $openid)
     {
         $post_center_url = PMS_PATH_URL . "member/center";
@@ -113,7 +113,7 @@ class Test extends MY_Front_Member
         $this->center_data = $center_data;
         return true;
     }
-
+    
     /**
      * 读取Excel表格内容，返回数组
      *
@@ -139,7 +139,7 @@ class Test extends MY_Front_Member
         }
         return $dataset;
     }
-
+    
     /**
      * 组装数据 兼备插入数据库功能
      *
@@ -178,10 +178,10 @@ class Test extends MY_Front_Member
                     $newdata[$key][$e] = $val[$a] == '男' ? 1 : 2;
                 } else
                     $newdata[$key][$e] = $val[$a];
-                
-                if ($e == 'birth') {
-                    $newdata[$key][$e] = PHPExcel_Shared_Date::ExcelToPHP($val[$a]);
-                }
+                    
+                    if ($e == 'birth') {
+                        $newdata[$key][$e] = PHPExcel_Shared_Date::ExcelToPHP($val[$a]);
+                    }
             }
         }
         $this->load->model('membervip/admin/Public_model', 'pum');
@@ -202,7 +202,7 @@ class Test extends MY_Front_Member
         print_r($data_db);
         exit();
     }
-
+    
     /**
      * 封装curl的调用接口，post的请求方式
      *
@@ -248,12 +248,12 @@ class Test extends MY_Front_Member
         $this->api_write_log(serialize($log_data));
         return json_decode($res, true);
     }
-
+    
     /**
      * 把请求/返回记录记入文件
      *
-     * @param String $content            
-     * @param string $type            
+     * @param String $content
+     * @param string $type
      */
     protected function api_write_log($content, $type = 'request')
     {
@@ -270,7 +270,7 @@ class Test extends MY_Front_Member
         fwrite($fp, $content);
         fclose($fp);
     }
-
+    
     public function request_send_template($inter_id = null, $json_data = array())
     {
         MYLOG::w(json_encode(array(
@@ -279,23 +279,9 @@ class Test extends MY_Front_Member
         )), 'front/membervip/api/openapi', 'request_send_template');
         if (empty($inter_id) || empty($json_data))
             return $this->return_json('缺少必要参数!', - 1, true);
-        
-        $this->load->model('wx/access_token_model');
-        $access_token = $this->access_token_model->get_access_token($inter_id);
-        $url = self::SEND_URL . $access_token;
-        $result = $this->doCurlPostRequest_wx($url, $json_data);
-        // 保存日志
-        MYLOG::w(json_encode(array(
-            'res' => $result,
-            'url' => $url,
-            'data' => $json_data
-        )), 'front/membervip/verify', 'request_send_template');
-        
-        $result_data = json_decode($result, true);
-        if ($result_data['errcode'] == 0 && $result_data['errmsg'] == 'ok') {
-            return $this->return_json('发送成功', $result_data['errcode'], true);
-        } elseif ($result_data['errcode'] == '40001') {
-            $access_token = $this->access_token_model->reflash_access_token($inter_id);
+            
+            $this->load->model('wx/access_token_model');
+            $access_token = $this->access_token_model->get_access_token($inter_id);
             $url = self::SEND_URL . $access_token;
             $result = $this->doCurlPostRequest_wx($url, $json_data);
             // 保存日志
@@ -303,31 +289,45 @@ class Test extends MY_Front_Member
                 'res' => $result,
                 'url' => $url,
                 'data' => $json_data
-            )), 'admin/membervip/verify', 'request_send_template');
+            )), 'front/membervip/verify', 'request_send_template');
             
             $result_data = json_decode($result, true);
             if ($result_data['errcode'] == 0 && $result_data['errmsg'] == 'ok') {
                 return $this->return_json('发送成功', $result_data['errcode'], true);
+            } elseif ($result_data['errcode'] == '40001') {
+                $access_token = $this->access_token_model->reflash_access_token($inter_id);
+                $url = self::SEND_URL . $access_token;
+                $result = $this->doCurlPostRequest_wx($url, $json_data);
+                // 保存日志
+                MYLOG::w(json_encode(array(
+                    'res' => $result,
+                    'url' => $url,
+                    'data' => $json_data
+                )), 'admin/membervip/verify', 'request_send_template');
+                
+                $result_data = json_decode($result, true);
+                if ($result_data['errcode'] == 0 && $result_data['errmsg'] == 'ok') {
+                    return $this->return_json('发送成功', $result_data['errcode'], true);
+                }
+            } elseif ($result_data['errcode'] == '42001') {
+                $access_token = $this->access_token_model->reflash_access_token($inter_id);
+                $url = self::SEND_URL . $access_token;
+                $result = $this->doCurlPostRequest_wx($url, $json_data);
+                // 保存日志
+                MYLOG::w(json_encode(array(
+                    'res' => $result,
+                    'url' => $url,
+                    'data' => $json_data
+                )), 'admin/membervip/verify', 'request_send_template');
+                
+                $result_data = json_decode($result, true);
+                if ($result_data['errcode'] == 0 && $result_data['errmsg'] == 'ok') {
+                    return $this->return_json('发送成功', $result_data['errcode'], true);
+                }
             }
-        } elseif ($result_data['errcode'] == '42001') {
-            $access_token = $this->access_token_model->reflash_access_token($inter_id);
-            $url = self::SEND_URL . $access_token;
-            $result = $this->doCurlPostRequest_wx($url, $json_data);
-            // 保存日志
-            MYLOG::w(json_encode(array(
-                'res' => $result,
-                'url' => $url,
-                'data' => $json_data
-            )), 'admin/membervip/verify', 'request_send_template');
-            
-            $result_data = json_decode($result, true);
-            if ($result_data['errcode'] == 0 && $result_data['errmsg'] == 'ok') {
-                return $this->return_json('发送成功', $result_data['errcode'], true);
-            }
-        }
-        return $this->return_json('发送失败！', '40001', true);
+            return $this->return_json('发送失败！', '40001', true);
     }
-
+    
     function doCurlPostRequest_wx($url, $requestString, $extra = array(), $timeout = 20)
     {
         if ($url == "" || $requestString == "" || $timeout <= 0) {
@@ -361,7 +361,7 @@ class Test extends MY_Front_Member
         // var_dump(curl_error($con));
         return $res;
     }
-
+    
     /**
      * 输出JSON提示
      *
@@ -378,7 +378,7 @@ class Test extends MY_Front_Member
         $result->errmsg = $errmsg;
         if ($flag === true)
             return json_encode($result);
-        exit(json_encode($result));
+            exit(json_encode($result));
     }
 }
 ?>

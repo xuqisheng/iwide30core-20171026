@@ -45,6 +45,7 @@ $(function(){
 	});
 
     new Swiper('.search_img_wrapper', {
+        spaceBetween: 10
     });
 
 	

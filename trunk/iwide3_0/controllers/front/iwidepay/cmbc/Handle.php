@@ -46,9 +46,10 @@ class Handle extends MY_Controller {
 				"10.168.162.35",
 				"10.51.28.219",
 				"10.80.176.170",
+				"127.0.0.1",
 	        );//只允许服务器自动访问，不能手动
 	        if(!in_array($_SERVER['REMOTE_ADDR'],$arrow_ip)/*&&$_SERVER['SERVER_ADDR']!=$_SERVER['REMOTE_ADDR']*/){
-	        	MYLOG::w('非法访问！' . $_SERVER['REMOTE_ADDR'], 'iwidepay/refund');
+	        	MYLOG::w('非法访问！' . $_SERVER['REMOTE_ADDR'], 'iwidepay/handled');
 	            exit('非法访问！');
 	        }
     	}else{

@@ -321,6 +321,41 @@ class Product_package extends MY_Admin_Soma {
 	    $this->load->library('form_validation');
 	    $post= $this->input->post();
 
+        //不支持邮寄的话 send_hotel传 -1
+        if ($post['can_mail'] == 2) {
+            $post['send_hotel'] = -1;
+        }
+
+        //如果有send_hotel 和 can_mail 变更的话 记录日志
+        if ( isset( $post[$pk] ) && !empty( $post[$pk] )) {
+            $this->load->model('soma/Product_package_model', 'product_model');
+            $product_id = $post[$pk];
+            $product_detail = $this->product_model->get_product_package_phone_by_product_id($product_id, $this->session->get_admin_inter_id());
+            if (empty($product_detail)) {
+                $this->session->put_notice_msg('商品不存在');
+                $this->_redirect(Soma_const_url::inst()->get_url('*/*/grid'));
+            }
+            if ($product_detail['can_mail'] != $post['can_mail'] || $product_detail['send_hotel'] != $post['send_hotel']) {
+                $setting_change_log = [
+                    'can_mail' => [
+                        $product_detail['can_mail'] => $post['can_mail']
+                    ],
+                    'send_hotel' => [
+                        $product_detail['send_hotel'] => $post['send_hotel']
+                    ],
+                    'pid' => $post[$pk]
+                ];
+                MYLOG::w('update_product_diff_'.json_encode($setting_change_log), 'soma/product_setting');
+            }
+        } else {
+            $setting_add_log = [
+                'can_mail' => $post['can_mail'],
+                'send_hotel' => $post['send_hotel']
+            ];
+
+            MYLOG::w('add_product_'.json_encode($setting_add_log), 'soma/product_setting');
+        }
+
         // 默认不可预约邮寄
         $post['is_hide_reserve_date'] = 2;
 

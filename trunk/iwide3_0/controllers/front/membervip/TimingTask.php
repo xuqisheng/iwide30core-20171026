@@ -74,6 +74,50 @@ class TimingTask extends MY_Controller {
         echo "Completion of transaction";
     }
 
+    public function send_coupons(){
+        $this->load->model('membervip/common/Public_model','public_model');
+        $file_path = FD_PUBLIC . '/send_coupons.xlsx';
+        $arrays = $this->public_model->do_xlsx_parser($file_path);
+        $post_data_list = array();
+        foreach ($arrays[0]['Content'] as $key => $val){
+            if((!empty($val[0]))) $post_data_list[] = json_decode(str_replace('POST=','',$val[0]),true);
+        }
+
+        if(!empty($this->input->get('debug')=='on')){
+            echo '<pre>';
+            print_r($post_data_list);
+            echo '</pre>';
+            exit;
+        }
+
+        MYLOG::w(@json_encode($post_data_list),'membervip/debug-log','send_coupons_list');
+
+        $this->load->helper('common');
+        $card_url = INTER_PATH_URL . 'package/give'; //领取礼包
+        $total = count($post_data_list);
+        foreach ($post_data_list as $post_data){
+            $f = 1;
+            $s = 1;
+            if(!empty($post_data) && $post_data['openid'] != 'ocbScju4oHP2LwcI7a8WLBfOiieU' && $post_data['inter_id'] != 'a467012702'){
+                $requestString = http_build_query($post_data);
+                $curl = $card_url . "?t=" . time();
+                $result = doCurlPostRequest($curl, $requestString);
+                $receive_res = @json_decode($result, true);
+                if(isset($receive_res['err']) && $receive_res['err'] == '0'){
+                    MYLOG::w(@json_encode(array('send_coupons_success: ' . $total . ' | ' . $s,$post_data,$receive_res)),'membervip/debug-log','send_coupons');
+                    $s++;
+                }else{
+                    MYLOG::w(@json_encode(array('send_coupons_fail: ' . $total . ' | ' . $f,$post_data,$receive_res,$result)),'membervip/debug-log','send_coupons');
+                    $f++;
+                }
+            }else{
+                MYLOG::w(@json_encode(array('s: '.$f,$post_data,null)),'membervip/debug-log','send_coupons_fail');
+                $f++;
+            }
+        }
+        echo "Completion of transaction";
+    }
+
     public function member_sales(){
         ini_set('memory_limit',-1); //无内存限制
         set_time_limit(0); //无时间限制
@@ -627,6 +671,80 @@ class TimingTask extends MY_Controller {
         $this->load->model('membervip/common/Membertask_logic','task_logic');
         $res = $this->task_logic->comply_task_event();
         echo @json_encode($res)."\r\n";
+    }
+
+    //更新分销绩效奖励的hotel_id
+    public function update_distribution_record(){
+        $this->load->helper('member_helper');
+        //获取绩效奖励记录
+        $where = array(
+            'sales_id >' => 0,
+        );
+        $data_list = IWIDE_DB()->select('record_id,inter_id,sales_id,hotel_id')
+                                                         ->group_start()
+                                                         ->or_where('hotel_id','')
+                                                         ->or_where('hotel_id', null)
+                                                         ->group_end()
+                                                         ->where($where)->limit(1000)->get('distribution_record')->result_array();
+        if(!empty($data_list)){
+            $sales_ids = array();
+            foreach ($data_list as $vo){
+                $sales_ids[$vo['inter_id']][] = $vo['sales_id'];
+            }
+
+            $sales_list = array();
+            foreach ($sales_ids as $key => $sid){
+                $sids = array_unique($sid);
+                $where = array(
+                    'hotel_id >' => 0,
+                    'inter_id' => $key,
+                );
+                //获取分销员信息
+                $sales_info = IWIDE_DB('iwide_r1')->select('inter_id,qrcode_id,hotel_id,hotel_name')
+                                                       ->where_in('qrcode_id',$sids)
+                                                       ->where($where)->get('hotel_staff')->result_array();
+                if(!empty($sales_info)) $sales_list = array_merge($sales_list,$sales_info);
+            }
+
+            $_sales_list = array();
+            if(!empty($sales_list)){
+                foreach ($sales_list as $value){
+                    $_sales_list[$value['inter_id'] . '_' . $value['qrcode_id']] = $value['hotel_id'];
+                }
+            }else{
+                echo "hotel_staff No data found";
+                exit;
+            }
+
+            $update_count = 0;
+            foreach ($data_list as $item){
+                if(!empty($_sales_list[$item['inter_id'] . '_' . $item['sales_id']])){
+                    $where = array(
+                        'record_id' => $item['record_id'],
+                        'inter_id' => $item['inter_id'],
+                    );
+                    $data = array(
+                        'hotel_id' => $_sales_list[$item['inter_id'] . '_' . $item['sales_id']]
+                    );
+                    //更新hotel_id
+                    $result = IWIDE_DB('iwide_vip',true)->where($where)->set($data)->update('distribution_record');
+                    if($result===true) {
+                        $update_count++;
+                        $update_rows = IWIDE_DB('iwide_vip',true)->affected_rows();
+                        MYLOG::w("Updated_distribution_record_success | {$result} | " . @json_encode(array($update_count,$where,$data)), 'membervip/debug-log');
+                    }else{
+                        MYLOG::w("Updated_distribution_record_fail | {$result} | " . @json_encode(array($where,$data,IWIDE_DB('Member','iwide_vip',true)->last_query())), 'membervip/debug-log');
+                    }
+                }else{
+                    MYLOG::w("Updated_distribution_record_fail | Not found hotel_id | ". $item['inter_id'] . '_' . $item['sales_id'] . "|" . @json_encode(array($item)), 'membervip/debug-log');
+                }
+            }
+            echo "Updated ". $update_count;
+            exit;
+
+        }else{
+            echo "distribution_record No data updates";
+        }
     }
 
     /**

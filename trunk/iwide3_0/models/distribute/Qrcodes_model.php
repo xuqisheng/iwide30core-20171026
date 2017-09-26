@@ -395,9 +395,10 @@ class Qrcodes_model extends MY_Model {
     private function _get_qr_code($inter_id, $intro, $keyword, $name, $id = NULL) {
 		$this->load->model ( 'wx/access_token_model' );
 		if (is_null ( $id )) {
-			$sql = "SELECT MAX(id) id FROM " . $this->_db ( 'iwide_rw' )->dbprefix ( 'qrcode' ) . " WHERE inter_id='" . $inter_id . "'";
-			$max_query = $this->_db ( 'iwide_rw' )->query ( $sql )->row_array ();
-			$id = $max_query ['id'] + 1;
+		    $id = $this->get_max_id($inter_id);
+			if($id == -1) {
+			    return FALSE;
+			}
 		}
 		$this->load->helper ( 'common' );
 		$access_token = $this->access_token_model->get_access_token ( $inter_id );
@@ -423,12 +424,56 @@ class Qrcodes_model extends MY_Model {
 					'create_date' => date ( 'Y-m-d H:i:s' ) 
 			) );
 			if($res > 0){
+			    $this->free_qrcode_id($inter_id);
 				return $id;
 			}else{
+			    $this->free_qrcode_id($inter_id);
 				return false;
 			}
-		} else
+		} else{
+		    $this->free_qrcode_id($inter_id);
 			return $jsoninfo;
+		}
+	}
+	private function _get_max_id($inter_id){
+	    $sql = "SELECT MAX(id) id FROM " . $this->_db ( 'iwide_rw' )->dbprefix ( 'qrcode' ) . " WHERE inter_id='" . $inter_id . "'";
+	    $max_query = $this->_db ( 'iwide_rw' )->query ( $sql )->row_array ();
+	    return $max_query ['id'] + 1;
+	}
+	/**
+	 * 取最大qrcode_id
+	 * 取失败返回-1
+	 * @param unknown $inter_id
+	 * @return number
+	 */
+	private function get_max_id($inter_id,$re_check = TRUE){
+	    $_times  = 0;
+	    while (!empty($this->get_redis_key_status($inter_id)) && $_times < 10){
+	        usleep(100000);//睡眠0.1秒
+    	    $_times ++;
+	    }
+	    if($_times > 9){
+	        $_max_id = -1;
+	    }else{
+    	    $_max_id = $this->_get_max_id();
+	        $this->lock_qrcode_id($inter_id, $_max_id);
+	        //重复检查
+	        if(intval($this->get_redis_key_status($inter_id)) == $this->_get_max_id()){
+	            return $_max_id;
+	        }else{
+	            if($re_check){ 
+	                return $this->get_max_id($inter_id,FALSE);
+	            }else{
+	                return -1;
+	            }
+	        }
+	    }
+	}
+	private function lock_qrcode_id ($inter_id,$key){
+	    $this->set_redis_key_status($inter_id,$key);
+	}
+	private function free_qrcode_id($inter_id){
+	    $this->set_redis_key_status($inter_id,'');
 	}
 	/**
 	 * 员工绩效记录
@@ -660,5 +705,22 @@ LEFT JOIN iwide_fans f ON f.openid=a.grade_openid AND f.inter_id=a.inter_id WHER
 	            0=>'显示',
 	            1=>'隐藏'
 	        );
+	    }
+	    
+	    protected function _load_cache( $name='Cache' ){
+	        if(!$name || $name=='cache')
+	            $name='Cache';
+	            $this->load->driver('cache', array('adapter' => 'redis', 'backup' => 'file', 'key_prefix' => 'QRCODE_ID_PROTECTION_'), $name );
+	            return $this->$name;
+	    }
+	    public function get_redis_key_status($key = 'QRCODE_ID_PROTECTION'){
+	        $cache= $this->_load_cache();
+	        $redis= $cache->redis->redis_instance();
+	        return $redis->get( $key );
+	    }
+	    public function set_redis_key_status($key = 'QRCODE_ID_PROTECTION',$val = 'false'){
+	        $cache= $this->_load_cache();
+	        $redis= $cache->redis->redis_instance();
+	        return $redis->set( $key , $val);
 	    }
 }

@@ -109,6 +109,41 @@ class Package extends MY_Front_Soma
 
         $this->getTicketTheme();
 
+
+        $ticketList = array();
+        $ticketId = $this->input->get('tkid');
+        if ($ticketId) {
+            $this->session->set_userdata('tkid', $ticketId);
+
+            //获取产品id列表
+            $serviceName = $this->serviceName(Product_Service::class);
+            $serviceAlias = $this->serviceAlias(Product_Service::class);
+            $this->load->service($serviceName, null, $serviceAlias);
+            $catId = $this->input->get('catid');
+
+            $info = $this->soma_product_service->getProductPackageTicketProductIds($ticketId, $catId);
+            if (!$info) {
+                die('没有找到该门店内容！');
+            }
+
+            $products = $info['products'];
+            $ticketList = $info['ticketList'];
+
+            //门店设置了皮肤
+            $ticketDetail = current($ticketList);
+            if (isset($ticketDetail['theme_path']) && $ticketDetail['theme_path']) {
+                $this->theme = $ticketDetail['theme_path'];
+            }
+
+            $title = isset($ticketDetail['name']) ? $ticketDetail['name'] : '门店商品列表';
+
+            $header = array(
+                'title' => $title,
+            );
+
+            $this->headerDatas['title'] = $title;
+        }
+
         if (!$this->isNewTheme()) {
 
             $is_show_navigation = isset($this->themeConfig['is_show_navigation']) ? $this->themeConfig['is_show_navigation'] : Soma_base::STATUS_FALSE;
@@ -154,40 +189,11 @@ class Package extends MY_Front_Soma
             $this->load->model('soma/Category_package_model', 'categoryModel');
             $this->datas['categories'] = $this->categoryModel->get_package_category_list($this->inter_id, null, 5, $filter_cat);
 
-            $ticketList = array();
-            $ticketId = $this->input->get('tkid');
-            if ($ticketId) {
-                $this->session->set_userdata('tkid', $ticketId);
-
-                //获取产品id列表
-                $serviceName = $this->serviceName(Product_Service::class);
-                $serviceAlias = $this->serviceAlias(Product_Service::class);
-                $this->load->service($serviceName, null, $serviceAlias);
-                $catId = $this->input->get('catid');
-
-                $info = $this->soma_product_service->getProductPackageTicketProductIds($ticketId, $catId);
-                if (!$info) {
-                    die('没有找到该门店内容！');
-                }
-
-                $products = $info['products'];
-                $ticketList = $info['ticketList'];
-
-                //门店设置了皮肤
-                $ticketDetail = current($ticketList);
-                if (isset($ticketDetail['theme_path']) && $ticketDetail['theme_path']) {
-                    $this->theme = $ticketDetail['theme_path'];
-                }
-
-                $header = array(
-                    'title' => isset($ticketDetail['name']) ? $ticketDetail['name'] : '门店商品列表',
-                );
-
-            } else {
+            if (!$this->input->get('tkid')) {
                 $this->session->set_userdata('tkid', '');
                 $products = $this->productModel->get_product_package_list($filter_cat, $this->inter_id, null, null, false, true);
-            }
 
+            }
 
             //$this->theme = 'v1';
             //$this->theme = 'mooncake4';
@@ -1694,6 +1700,8 @@ class Package extends MY_Front_Soma
             $this->_view("header", $header);
         }
         else{
+            $this->headerDatas['title'] = '商品详情';
+
             //商品下架
             $isOff = $this->productPackageModel->isOff($productDetail);
             if (is_null($isOff) || $isOff === true) {

@@ -248,6 +248,7 @@ class Order extends MY_Front_Soma {
                     $consumer_ids[] = $consumer['consumer_id'];
 
                     $isBookingHotel = FALSE;
+
                     $consumerMethod = $ConsumerOrderModel->load( $consumer['consumer_id'] )->m_get('consumer_method');
                     if( $consumerMethod == $ConsumerOrderModel::CONSUME_HOTEL_SELF ){
                         $isBookingHotel = TRUE;
@@ -326,12 +327,12 @@ class Order extends MY_Front_Soma {
 
         // 过滤开具发票按钮
         $invoice_enable = false;
-        
-        if($orderDetail['is_invoice'] == $SalesOrderModel::IS_INVOICE_NOT 
+
+        if($orderDetail['is_invoice'] == $SalesOrderModel::IS_INVOICE_NOT
             && count($orderDetail['items']) > 0 ) {
 
             $payment_time = $orderDetail['payment_time'];
-            $can_invoice_time = date('Y-m-d H:i:s', strtotime("+1 months", strtotime($payment_time)));
+            $can_invoice_time = date('Y-m-d H:i:s', strtotime("+1 years", strtotime($payment_time)));
             $now_date_time = date('Y-m-d H:i:s');
             $item = $orderDetail['items'][0];
 
@@ -361,7 +362,7 @@ class Order extends MY_Front_Soma {
         $this->datas['gift_model'] = $GiftOrderModel;
 
         $this->datas['consumer_status'] = $this->ConsumerItemModel->get_item_status_label();
-
+//exit(json_encode($consumerOrderDetail));
         $ConsumerItemModel = $this->ConsumerItemModel;
         $this->datas['can_mail_status'] = $ConsumerItemModel::STATUS_ITEM_SHIPPING;
 // var_dump( $this->datas['can_mail_status'] );
@@ -990,24 +991,19 @@ class Order extends MY_Front_Soma {
             $SalesOrderModel->customer= $customer;
             $SalesOrderModel->scope_product_link_id = isset($posts['scope_product_link_id']) ? $posts['scope_product_link_id'] : 0;
 
-			/* edit by chencong <chencong@mofly.cn> 去掉session判断 start */
             /**
              * 20170503 luguihong 判断是否给予绩效
              */
-//            $giveDistribute = $this->session->userdata( 'giveDistribute'.$this->inter_id.$this->openid );
-//            if( $giveDistribute )
-//            {
-//                $SalesOrderModel->saler_id      = $posts['saler'];
-//                $SalesOrderModel->saler_group = $posts['saler_group'];
-//                $SalesOrderModel->fans_saler_id = $posts['fans_saler'];
-//            } else {
-//                $SalesOrderModel->saler_id      = 0;
-//                $SalesOrderModel->fans_saler_id = 0;
-//            }
-			$SalesOrderModel->saler_id      = $posts['saler'] ?: 0;
-			$SalesOrderModel->saler_group = $posts['saler_group'] ?: '';
-			$SalesOrderModel->fans_saler_id = $posts['fans_saler'] ?: 0;
-			/* edit by chencong <chencong@mofly.cn> 去掉session判断 end */
+            $giveDistribute = $this->session->userdata( 'giveDistribute'.$this->inter_id.$this->openid );
+            if( $giveDistribute )
+            {
+                $SalesOrderModel->saler_id      = $posts['saler'];
+                $SalesOrderModel->saler_group = $posts['saler_group'];
+                $SalesOrderModel->fans_saler_id = $posts['fans_saler'];
+            } else {
+                $SalesOrderModel->saler_id      = 0;
+                $SalesOrderModel->fans_saler_id = 0;
+            }
 
             $SalesOrderModel->killsec_instance = isset($posts['inid']) ? $posts['inid'] : 0;
             $SalesOrderModel->shipping= 0;

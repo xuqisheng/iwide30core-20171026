@@ -1,6 +1,6 @@
 <body>
-<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
-<link href="<?php echo base_url('public/soma/v3/v3.css'). config_item('css_debug');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/v3/v3.css'). config_item('css_debug');?>" rel="stylesheet">
 <div class="pageloading"><p class="isload">正在加载</p></div>
 <script>
 wx.config({

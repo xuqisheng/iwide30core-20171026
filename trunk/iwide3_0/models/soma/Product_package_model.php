@@ -2730,4 +2730,26 @@ class Product_package_model extends MY_Model_Soma
 
         return $result;
     }
+
+    /**
+     * 获取商品关联酒店
+     * @param $interId
+     * @param $productId
+     * @return mixed
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
+    public function getProductExtra($interId, $productId){
+
+        if(!$this->soma_db_conn_read)
+        {
+            $this->load->somaDatabaseRead($this->db_soma_read);
+        }
+
+        $tb_name = $this->extra_table_name($interId);
+        $this->soma_db_conn_read->select('*')->from($tb_name);
+        $this->soma_db_conn_read->where('inter_id', $interId);
+        $this->soma_db_conn_read->where('product_id', $productId);
+
+        return $this->soma_db_conn_read->get()->result_array();
+    }
 }

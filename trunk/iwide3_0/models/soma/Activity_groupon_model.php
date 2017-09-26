@@ -118,7 +118,7 @@ class Activity_groupon_model extends Activity_model {
             'banner_url'=> '封面图',
             'act_type'=> '活动类型',
             'act_name'=> '活动名称',
-            'product_id'=> '商品ID',
+            'product_id'=> '选择商品',
             'product_name'=> '商品名',
             'group_price'=> '团购价',
             'group_count'=> '拼团人数',
@@ -192,7 +192,7 @@ class Activity_groupon_model extends Activity_model {
         else $inter_id= $this->session->get_admin_inter_id();
         // $inter_id = $this->session->get_admin_inter_id();   //'a429262687';//
 
-        $products_arr = $this->product_package->get_product_package_list( $cat_id, $inter_id );
+        $products_arr = $this->product_package->get_product_package_list($cat_id,$inter_id,NULL,NULL,true);
         //把套票商品转成array(product_id=>product_name)数组
         $products = array();
         foreach( $products_arr as $k => $v ){

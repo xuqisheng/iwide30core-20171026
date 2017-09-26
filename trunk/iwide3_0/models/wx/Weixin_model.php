@@ -108,8 +108,8 @@ class Weixin_model extends CI_Model {
 		
 		if(!empty($interid)){
 			//要求转到他们自己客服
-                        $this->load->config('transfer_customer_service.php');
-                        $interIds = $this->config->item('inter_id');
+                         $this->load->config('transfer_customer_service.php');
+                         $interIds = $this->config->item('inter_id');
             //恒大亿讯人工客服消息转发
 //             if($this->get_redis_val('custom_service_gh_edf5ea3f64a3') == 'on' && $this->getCusMsgStatus() && isset($this->data['ToUserName']) && $this->data['ToUserName'] == 'gh_edf5ea3f64a3'){
             if($this->get_redis_val('custom_service_gh_cd271da358a9') == 'on' && $this->getCusMsgStatus() && isset($this->data['ToUserName']) && $this->data['ToUserName'] == 'gh_cd271da358a9'){
@@ -127,7 +127,16 @@ class Weixin_model extends CI_Model {
 // 				$str = $xml->asXML ();
 				
 // 				$this->write_log(date('Y-m-d H:i:s').' | '.$_SERVER['REQUEST_URI'].' | '.$str,APPPATH.'logs/wxapi/');
-				
+				//恒大消息非关键字回复提示消息
+				if(isset($this->data['ToUserName']) && $this->data['ToUserName'] == 'gh_cd271da358a9'){
+					$this->load->model('wx/Keyword_reply_model');
+					$result = $this->Keyword_reply_model->get_keyword_reply_text_all('~人工客服',$interid)->row_array();
+					if(isset($result['description']))
+						$this->replyText($result['description']);
+					else
+						echo 'SUCCESS';
+					exit;
+				}
 				$this->_replyData([], 'transfer_customer_service');
 				
 // 				echo $str;

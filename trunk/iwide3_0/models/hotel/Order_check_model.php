@@ -295,6 +295,7 @@ class Order_check_model extends CI_Model {
 				1,2
 			);
 			foreach ($order['goods_details'] as $k=>$go){
+				$goods_state[$k]['usable']=0;
 				if (in_array($go['gstatus'],$order_goods_usable_status)){
 					$goods_state[$k]['usable']=1;
 					if ($go['external_channel']=='soma'){

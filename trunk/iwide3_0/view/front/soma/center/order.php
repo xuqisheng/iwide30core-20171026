@@ -38,7 +38,7 @@ wx.ready(function(){
 });
 </script>
 
-<link href="<?php echo base_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
 <?php if(count($orders) <= 0): ?>
     <div class="ui_none"><div>您还没订单<br>如有疑问，联系客服</div></div>
 <?php else: ?>
@@ -51,7 +51,7 @@ wx.ready(function(){
                     <p class="txt_r"><?php echo $order['create_time'];?></p>
                 </div>
                 <div class="item bd">
-                    <div class="img"><img class="lazy" src="<?php echo base_url('public/soma/images/default2.jpg'); ?>" data-original="<?php echo $item['face_img'];?>" /></div>
+                    <div class="img"><img class="lazy" src="<?php echo get_cdn_url('public/soma/images/default2.jpg'); ?>" data-original="<?php echo $item['face_img'];?>" /></div>
                     <p class="txtclip h30"><?php echo $item['name'];?></p>
                     <p class="txtclip color_555"><?php echo $order['hotel_name'];?></p>
                     <p class="txtclip h30 color_main"><span class="y"><?php echo $item['price_package'];?> x<?php echo $item['qty'];?></span></p>

@@ -34,4 +34,5 @@
     interID: '<?php echo $inter_id;?>',
     wxShare: <?php echo json_encode($js_share_config);?>,
 };
+  window.jfkParam = <?php echo $url_param; ?>
 </script>

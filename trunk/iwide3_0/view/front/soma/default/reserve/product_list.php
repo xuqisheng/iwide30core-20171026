@@ -1,4 +1,4 @@
-<link href="<?php echo base_url('public/soma/styles/quantity.css'). config_item('css_debug');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/styles/quantity.css'). config_item('css_debug');?>" rel="stylesheet">
 <script>
 wx.config({
     debug: false,
@@ -42,7 +42,7 @@ wx.ready(function(){
     
     <?php foreach ($product_list as $item): ?>
         <a href="<?php echo Soma_const_url::inst()->get_url('*/*/reserve_page',array('id'=>$inter_id,'pid'=>$item['product_id']));?>" class="squareimg">
-            <!-- <img src="<?php echo base_url('public/soma/images');?>/eg4.jpg" /> -->
+            <!-- <img src="<?php echo get_cdn_url('public/soma/images');?>/eg4.jpg" /> -->
             <img src="<?php echo $item['face_img']; ?>" />
             <div class="webkitbox absolute mask">
                 <div>
@@ -56,7 +56,7 @@ wx.ready(function(){
 
     <!--
 	<a href="pay.html" class="squareimg">
-    	<img src="<?php echo base_url('public/soma/images');?>/eg4.jpg" />
+    	<img src="<?php echo get_cdn_url('public/soma/images');?>/eg4.jpg" />
         <div class="webkitbox absolute mask">
         	<div>
             	<p class="color_fff">金房卡酒店月饼</p>
@@ -66,7 +66,7 @@ wx.ready(function(){
         </div>
     </a>
 	<a href="pay.html" class="squareimg">
-    	<img src="<?php echo base_url('public/soma/images');?>/eg4.jpg" />
+    	<img src="<?php echo get_cdn_url('public/soma/images');?>/eg4.jpg" />
         <div class="webkitbox absolute mask">
         	<div>
             	<p class="color_fff">金房卡酒店月饼</p>

@@ -1,5 +1,5 @@
 <body>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
 <link href="<?php echo get_cdn_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
 <link href="<?php echo get_cdn_url('public/soma/junting/styles/junting.css'). config_item('css_debug');?>" rel="stylesheet">
 <div class="pageloading"><p class="isload">正在加载</p></div>
@@ -61,14 +61,14 @@
     	</header>
     </div>
     <div class="cg_foot">
-    	<span onClick="$('.cg').fadeOut('fast')"><img src="<?php echo base_url('public/soma/junting/icon/home.png'); ?>"></span>
-    	<span onClick="$.MsgBox.Alert('请从右上角菜单分享')"><img src="<?php echo base_url('public/soma/junting/icon/share.png'); ?>"></span>
+    	<span onClick="$('.cg').fadeOut('fast')"><img src="<?php echo get_cdn_url('public/soma/junting/icon/home.png'); ?>"></span>
+    	<span onClick="$.MsgBox.Alert('请从右上角菜单分享')"><img src="<?php echo get_cdn_url('public/soma/junting/icon/share.png'); ?>"></span>
     </div>
 </div>
     <div class="tmp" style="padding-top:39px"></div>
     <div class="tab_menus bg_fff to_fixed bd_bottom">
-        <div class="menu_item"><img src="<?php echo base_url('public/soma/junting/icon/ico01.png'); ?>" class="icon"> 积分 <span class="color_main"><?php echo isset( $point ) ? $point : 0;?></span></div>
-        <a class="bd_left menu_item" href="<?php echo $my_order_url;?>"><img src="<?php echo base_url('public/soma/junting/icon/ico02.png'); ?>" class="icon"> 兑换记录</a>
+        <div class="menu_item"><img src="<?php echo get_cdn_url('public/soma/junting/icon/ico01.png'); ?>" class="icon"> 积分 <span class="color_main"><?php echo isset( $point ) ? $point : 0;?></span></div>
+        <a class="bd_left menu_item" href="<?php echo $my_order_url;?>"><img src="<?php echo get_cdn_url('public/soma/junting/icon/ico02.png'); ?>" class="icon"> 兑换记录</a>
     </div>
     <div class="tp_list" id="tp_list">
         <?php foreach($products as $k=>$v){?>

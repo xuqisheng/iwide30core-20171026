@@ -103,7 +103,7 @@ class Groupon extends MY_Front_Soma {
 //        print_r($users);
 //        exit;
 
-        if($timeLeft <= 0 && $gouponDetial['status'] != $activityGrouponModel::GROUP_STATUS_FINISHED)
+        if($timeLeft <= '00:00:00' && $gouponDetial['status'] != $activityGrouponModel::GROUP_STATUS_FINISHED)
             $gouponDetial['status'] = $activityGrouponModel::GROUP_STATUS_FAILED;
 
         $this->datas['inGroup'] = $inGroup;

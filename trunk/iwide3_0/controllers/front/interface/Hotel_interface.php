@@ -96,7 +96,6 @@ class Hotel_interface extends CI_Controller {
 	        $this->load->model ( 'interface/Icommon_model' );
 	        $source = $this->Icommon_model->_base_input_valid ();
 	        $inter_id = $source ['itd'];
-	        $saler_id= $source ['saler_id'];
 	        $result = array (
 	            's' => 0,
 	            'errmsg' => ''
@@ -108,14 +107,12 @@ class Hotel_interface extends CI_Controller {
 	        $result = $this->Template_msg_model->send_template_msg ( $inter_id, $json, 'interface' );
 	        $errmsg = empty ( $result ['errmsg'] ) ? '' : $result ['errmsg'];
 	        if ($result ['s'] == 1) {
-	            if (isset($saler_id)&&!empty($saler_id)){
 	            /*注册分销绩效*/
-	            $data = json_decode ( $json, TRUE );
 	                    $rule_info = $this->getCI()->Distribution_model->get_distribution_rule($inter_id,'reg','t');
 	                    $saler_id = 0;
 	                    switch ($rule_info['belonging']){
 	                        case 1://粉丝归属
-	                            $fan = $this->getCI()->Fans_model->get_fans_beloning($inter_id,$data['touser']);
+	                            $fan = $this->getCI()->Fans_model->get_fans_beloning($inter_id,$this->vars['openid']);
 	                            if(!empty($fan) && $fan->source > 0){
 	                                $saler_id = $fan->source;
 	                            }
@@ -126,7 +123,7 @@ class Hotel_interface extends CI_Controller {
 	                        case 3://优先归属于链接分销号
 	                            $saler_id = intval($source ['salesId']);
 	                            if (!$saler_id){
-	                                $fan = $this->getCI()->Fans_model->get_fans_beloning($inter_id,$data['touser']);
+	                                $fan = $this->getCI()->Fans_model->get_fans_beloning($inter_id,$this->vars['openid']);
 	                                if(!empty($fan) && $fan->source > 0){
 	                                    $saler_id = $fan->source;
 	                                }
@@ -150,6 +147,7 @@ class Hotel_interface extends CI_Controller {
 	                            $dis_record['sales_id'] = $sales['qrcode_id'];
 	                            $dis_record['sales_name'] = $sales['name'];
 	                            $dis_record['hotel_name']  = $sales['hotel_name'];
+                                $dis_record['hotel_id'] = $sales['hotel_id'];
 	                            /*分销绩效记录写入*/
 	                            $record_id = $this->getCI()->Distribution_model->add_distribution_record($inter_id,$dis_record);
 	                            if(!$record_id){
@@ -159,7 +157,7 @@ class Hotel_interface extends CI_Controller {
 	                            \MYLOG::w("Staff not found :".json_encode($dis_record).'|'.$inter_id.'|'.$saler_id." | Staff Failed ",'distribution_record/failed');
 	                        }
 	                } /*end注册分销绩效*/
-	            }
+	            
 	            $this->Icommon_model->out_put_msg ( TRUE, $errmsg );
 	        } else {
 	            $datas = empty ( $result ['datas'] ) ? array () : $result ['datas'];

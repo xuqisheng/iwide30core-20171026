@@ -83,6 +83,27 @@ class ShijiApi{
 		return $res['header'];
 	}
 	
+	public function useCoupon($serialNumber,$billPrice){
+	    
+	    $params = [
+	        'SerialNumber'=>$serialNumber,
+	        'CardNo'=>'',
+	        'BillPrice'=>$billPrice
+	    ];
+	    
+	    $service = [
+	        'uri'  => self::PROFILE,
+	        'func' => 'useCoupon',
+	    ];
+	    
+	    $res = $this->postService($service, $params);
+	    if(3001 == $res['header']['RetCode']){
+	        return '3001';
+	    }else{
+	        return false;
+	    }
+	}
+	
 	/**
 	 * 查询单个酒店房型房价
 	 * @param $params

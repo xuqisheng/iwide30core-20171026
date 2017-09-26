@@ -1495,4 +1495,9 @@ class Lvyun_webservice implements IPMS {
         }
     }
 
+    public function order_checkin_type($params)
+    {
+        $this->CI->load->model ( 'hotel/pms/Lvyun_hotel_model', 'pms' );
+        return $this->CI->Lvyun_hotel_model->order_checkin_type ($params[0],$params[2],$params[1],$this->pms_set);
+    }
 }

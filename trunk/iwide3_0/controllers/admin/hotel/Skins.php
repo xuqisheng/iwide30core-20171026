@@ -41,6 +41,18 @@ class Skins extends MY_Admin {
 		$data ['skin_decoras'] = json_decode($model->enums('skin_decora',$skin_set['skin_name']),TRUE);
 		$this->_render_content ( $this->_load_view_file ( 'skin_theme' ), $data, false );
 	}
+
+    /**
+     * 前后端分离后的皮肤管理
+     * @author daikanwu <daikanwu@jperation.com>
+     *
+     */
+    public function handle_skin()
+    {
+        $data = $this->common_data;
+        $this->_render_content($this->_load_view_file('handle_skin'), $data, false);
+    }
+
 	public function edit_theme() {
 		$data = $this->input->post ();
 		$model = $this->main_model ();

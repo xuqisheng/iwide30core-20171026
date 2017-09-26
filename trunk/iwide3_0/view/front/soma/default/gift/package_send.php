@@ -1,7 +1,7 @@
 <div class="pageloading"><p class="isload"><?php echo $lang->line('loading'); ?></p></div>
 
-<script src="<?php echo base_url('public/soma/scripts/imgscroll.js');?>"></script>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
 <script>
 wx.config({
     debug: false,
@@ -132,7 +132,7 @@ if( isset( $themeConfig['receive_bg'] ) && !empty( $themeConfig['receive_bg'] ) 
                                 if( $v['theme_id'] == Soma_base::STATUS_TRUE && isset( $themeConfig['receive_preview_bg'] ) && !empty( $themeConfig['receive_preview_bg'] ) ) 
                                     echo $themeConfig['receive_preview_bg'];
                                 else 
-                                    echo base_url('public/soma/images/gift_send_theme/'.$v['theme'] );
+                                    echo get_cdn_url('public/soma/images/gift_send_theme/'.$v['theme'] );
                                 ?>" />
                 <p class="themefoot"><em class="btn_img h24"><?php echo $v['theme_name'];?></em></p>
             </div>
@@ -155,7 +155,7 @@ if( isset( $themeConfig['receive_bg'] ) && !empty( $themeConfig['receive_bg'] ) 
                 </div>
             </div>
             <div class="themechid2">
-                <p><img src="<?php echo isset( $fans['headimgurl'] ) ? $fans['headimgurl'] : base_url('public/soma/images/ucenter_headimg.jpg'); ?>"></p><!--  用户头像 -->
+                <p><img src="<?php echo isset( $fans['headimgurl'] ) ? $fans['headimgurl'] : get_cdn_url('public/soma/images/ucenter_headimg.jpg'); ?>"></p><!--  用户头像 -->
                 <p><span><?php if($nickname) echo $nickname;else echo $lang->line('friends');?></span></p>
                 <p id="fill_txt"><?php echo $lang->line('happy_life'); ?></p>
             </div>

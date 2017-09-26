@@ -4,7 +4,8 @@ class Hotel_check_model extends CI_Model {
 		parent::__construct ();
 	}
 	public $confict_cities=array(
-	        '鞍山'
+	        '鞍山',
+	        '鞍山市',
 	);
 	const TAB_H = 'hotels';
 	function get_near_hotel($inter_id, $longitude, $latitude, $nums = null) {
@@ -204,7 +205,7 @@ class Hotel_check_model extends CI_Model {
 		if (isset ( $paras ['city'] ) || isset ( $paras ['keyword'] )) {
 			if (isset ( $paras ['city'] )) {
 			    if(in_array($paras ['city'], $this->confict_cities)){
-    				$s .= ' and (city like "' . $paras ['city'] .'市'. '" or CONCAT(city,"市") like "' . $paras ['city'] . '")';
+    				$s .= ' and (city = "' . $paras ['city'] .'市'. '" or CONCAT(city,"市") = "' . $paras ['city'] . '" or city = "' . $paras ['city'].'")';
 			    }else{
     				$s .= ' and (city like "%' . $paras ['city'] . '%" or CONCAT(city,"市") like "%' . $paras ['city'] . '%")';
 			    }
@@ -215,7 +216,7 @@ class Hotel_check_model extends CI_Model {
 		}
 
         if(isset($paras['area']) && !empty($paras['area'])){
-            $s .=' and area = "' . $paras ['area'] . '"';
+            $s .= ' and (area like "%' . $paras ['area'] . '%" or CONCAT(area,"县") like "%' . $paras ['area'] . '%" or CONCAT(area,"区") like "%' . $paras ['area'] . '%")';
         }
 		
 		if ($extra_where){

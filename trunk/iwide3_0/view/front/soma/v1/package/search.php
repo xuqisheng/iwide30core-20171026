@@ -1,5 +1,5 @@
 <body>
-<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
 <div class="pageloading"><p class="isload"><?php echo $lang->line('loading');?></p></div>
 <script>
 wx.config({
@@ -53,7 +53,7 @@ wx.ready(function(){
 
                 <?php if(isset($v['scopes'])){ //专属价 ?>
                     <div class="j_label color_main f_s_12">
-                        <?php echo $lang->line('exclusive'); ?>
+                    <?php echo $lang->line('exclusive'); ?>
                     </div>
                 <?php }elseif(isset($v['killsec'])){ //有秒杀 ?>
                     <div class="j_label color_main f_s_12"><?php echo $lang->line('flash_sale');?></div>

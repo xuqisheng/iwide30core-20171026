@@ -1,5 +1,5 @@
 <body>
-<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
 <div class="pageloading"><p class="isload">正在加载</p></div>
 <script>
 wx.config({
@@ -60,7 +60,7 @@ body,html{ background:#fffaf4}
 </div>
 <?php endif;?>
 <div class="squareimg" style="padding-bottom:51%; overflow:hidden">
-	<img <?php if( $zongzi_cat_bg ):?>src="<?php echo $zongzi_cat_bg;?>"<?php else :?>src="<?php echo base_url('public/soma/zongzi/banner.jpg');?>"<?php endif;?>>
+	<img <?php if( $zongzi_cat_bg ):?>src="<?php echo $zongzi_cat_bg;?>"<?php else :?>src="<?php echo get_cdn_url('public/soma/zongzi/banner.jpg');?>"<?php endif;?>>
 </div>
 <div class="tp_list">
     <?php foreach($products as $k=>$v){?>

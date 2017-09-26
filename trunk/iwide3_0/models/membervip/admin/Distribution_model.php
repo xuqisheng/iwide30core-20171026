@@ -30,7 +30,7 @@ class Distribution_model extends MY_Model_Member
         'status'
     );
 
-
+    //获取分销规则
     public function get_distribution_rule($inter_id , $type = 'reg' ,$status = ''){
 
         if(empty($inter_id)) return false;
@@ -154,9 +154,10 @@ class Distribution_model extends MY_Model_Member
             'status' => $data['status']
         );
 
-        if(!empty($data['sales_id']))   $insertData['sales_id']  =  $data['sales_id'];
-        if(!empty($data['sales_name']))   $insertData['sales_name']  =  $data['sales_name'];
-        if(!empty($data['hotel_name']))   $insertData['sales_hotel']  =  $data['hotel_name'];
+        if( isset($data['sales_id']) && !empty($data['sales_id']))   $insertData['sales_id']  =  $data['sales_id'];
+        if( isset($data['sales_name']) &&!empty($data['sales_name']))   $insertData['sales_name']  =  $data['sales_name'];
+        if( isset($data['hotel_name']) &&!empty($data['hotel_name']))   $insertData['sales_hotel']  =  $data['hotel_name'];
+        if( isset($data['hotel_id']) &&!empty($data['hotel_id']))   $insertData['hotel_id']  =  $data['hotel_id'];
 
         $this->_shard_db(true)->set($insertData)->insert($this->table_record);
         $last_id = $this->_shard_db(true)->insert_id();
@@ -197,7 +198,8 @@ class Distribution_model extends MY_Model_Member
         if(!empty($inter_id)) $where['inter_id'] = $inter_id;
         if(!empty($type)) $where['type'] = $type;
 
-        $where['status'] = $status;
+        if(!empty($status)) $where['status'] = $status;
+
         $records = $this->_shard_db(true)->select('*')
             ->get_where($this->table_record, $where)
             ->result_array();
@@ -270,6 +272,7 @@ class Distribution_model extends MY_Model_Member
         $result = $this->_shard_db(true)->where($where)->set($setData)->update($this->table_relation);
         return $result;
     }
+
 
     /**
      * 运行日志记录

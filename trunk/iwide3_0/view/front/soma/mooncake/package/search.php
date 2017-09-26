@@ -1,5 +1,5 @@
 <?php 
-    $bg_img = (isset($themeConfig['cat_bg']) && !empty($themeConfig['cat_bg'])) ? $themeConfig['cat_bg'] : base_url('public/soma/mooncake_v1/theme1/bg2.jpg');
+    $bg_img = (isset($themeConfig['cat_bg']) && !empty($themeConfig['cat_bg'])) ? $themeConfig['cat_bg'] : get_cdn_url('public/soma/mooncake_v1/theme1/bg2.jpg');
 ?>
 <script>
 wx.config({
@@ -40,12 +40,12 @@ wx.ready(function(){
 
 <!-- 显示分销号start -->
     <div class="distribute_btn" style="display:none">
-        <span><img src="<?php echo base_url('public/soma/images/distributeimg.jpg');?>" /></span>
+        <span><img src="<?php echo get_cdn_url('public/soma/images/distributeimg.jpg');?>" /></span>
     </div>
     <div class="ui_pull distribute" style="display:none" >
         <div class="pullbox center bg_fff">
             <div class="pullclose bg_999" onClick="toclose()">&times;</div>
-            <div class="pullimg"><div class="squareimg"><img src="<?php echo base_url('public/soma/images/distributeimg.jpg');?>" /></div></div>
+            <div class="pullimg"><div class="squareimg"><img src="<?php echo get_cdn_url('public/soma/images/distributeimg.jpg');?>" /></div></div>
             <div>分销号:<span id="distribute_id"></span></div>
             <div>姓　名:<span id="distribute_name"></span></div>
             <div class="bg_999 pullbtn h26" onClick="toclose()">取消</div>
@@ -119,13 +119,13 @@ wx.ready(function(){
     ?>
 <!--    <a href="pay.html">-->
 <!--        <span class="itemborder"></span>-->
-<!--        <div class="img"><img src="--><?php //echo base_url('public/soma/mooncake_v1/images/eg3.jpg');?><!--"/></div>-->
+<!--        <div class="img"><img src="--><?php //echo get_cdn_url('public/soma/mooncake_v1/images/eg3.jpg');?><!--"/></div>-->
 <!--        <p class="txtclip color_000 h28">金房卡月饼一号1234</p>-->
 <!--        <p class="h28"><span class="color_main">售价</span>&nbsp;<span class="btn_main y bdradius">399.00</span></p>-->
 <!--    </a>-->
 <!--    <a href="pay.html">-->
 <!--        <span class="itemborder"></span>-->
-<!--        <div class="img"><img src="--><?php //echo base_url('public/soma/mooncake_v1/images/eg3.jpg');?><!--"/></div>-->
+<!--        <div class="img"><img src="--><?php //echo get_cdn_url('public/soma/mooncake_v1/images/eg3.jpg');?><!--"/></div>-->
 <!--        <p class="txtclip color_000 h28">金房卡月饼一号1234</p>-->
 <!--        <p class="h28"><span class="color_main">售价</span>&nbsp;<span class="btn_main y bdradius">399.00</span></p>-->
 <!--    </a>-->

@@ -8,6 +8,13 @@
  */
 class Member_model extends MY_Model_Member {
 
+    //分销记录类型
+    public $member_distribution_model = array(
+        'iwide_member4_order', //购卡、充值（支付回调后）
+        'iwide_member4_reg'    //注册分销奖励
+    );
+
+
     /**
      * 获取会员卡信息(优先拿取PMS会员卡信息)
      * @param string $inter_id 酒店集团ID
@@ -531,6 +538,7 @@ class Member_model extends MY_Model_Member {
                     $dis_record['sales_id'] = $fan->source;
                     $dis_record['sales_name'] = $sales['name'];
                     $dis_record['hotel_name']  = $sales['hotel_name'];
+                    $dis_record['hotel_id'] = $sales['hotel_id'];
                     $record_id = $this->Distribution_model->add_distribution_record($this->inter_id,$dis_record);
                     if(!$record_id){
                         MYLOG::w("Distribution Record Reg Insert :".json_encode($dis_record)." | Result Failed ",'distribution_record/failed');
@@ -593,6 +601,90 @@ class Member_model extends MY_Model_Member {
 
 
     }
+
+
+   //会员分销类型
+    public function get_member_distribution_model( $inter_id ='' ){
+        return $this->member_distribution_model;
+    }
+
+
+    /**
+     * @param $inter_id
+     * @param $data  array('batch_no'=>[])
+     * @return bool|object
+     * @author zhangyi  <zhangyi@mofly.cn>
+     */
+    public function distribution_send_record( $inter_id,$distribution_send_data ){
+        if(empty($inter_id))
+            return false;
+
+        $keyArr = array(
+//            'inter_id',
+            'distribution_type',    //分销种类
+//            'send_time',             //发放时间
+            'saler_id',              //分销员QRCODE_ID
+            'hotel_id',              //所属酒店
+            'grade_id',              //绩效记录的id( iwide30dev table :grade_all)
+            'sn',
+//            'batch_no',              //发放号
+        );
+        $this->load->library ("MYLOG");
+        MYLOG::w("Distribution record insert data_array : ".json_encode($distribution_send_data),"membervip/distribution");
+        foreach($distribution_send_data as $batch_no => $data){
+            foreach($data as $k => $v){
+                if(!in_array($k,$keyArr))
+                    unset($data[$k]);
+            }
+            $insert_data['batch_no'] = $batch_no;
+            $insert_data['send_time'] =  date("Y-m-d H:i:s",time());
+            $insert_data['distribution_type'] = $data['grade_table'];
+            $insert_data['hotel_id'] = $data['hotel_id'];
+            $insert_data['grade_id'] = $data['id'];
+            $insert_data['sn'] = $data['grade_id'];
+            $insert_data['saler_id'] = $data['saler'];
+            $insert_data['hotel_id'] = $data['hotel_id'];
+
+            try{
+                MYLOG::w("Distribution record insert data : ".json_encode($insert_data),"membervip/distribution");
+                $this->_shard_db(true)->trans_begin();
+                $this->_shard_db(true)->insert('distribution_send_record',$insert_data);
+                $this->_shard_db(true)->trans_commit();
+            } catch(Exception $e){
+                $this->_shard_db(true)->trans_rollback();
+                MYLOG::w("Distribution record insert failed ! ".json_encode($data),"membervip/distribution");
+//                return false;
+            }
+        }
+
+
+
+//        if( !is_array($data['grade_id'])){
+//            $grade_id_arr = explode( ",",$data['grade_id']);
+//        }else{
+//            $grade_id_arr = $data['grade_id'];
+//        }
+
+//        $this->_shard_db(true)->trans_begin();
+//        try{
+//            foreach($grade_id_arr as $grade_id){
+//                $data['grade_id'] = $grade_id;
+//                $this->_shard_db(true)->insert('distribution_send_record',$data);
+//            }
+//            $this->_shard_db(true)->trans_commit();
+//        } catch(Exception $e){
+//            $this->_shard_db(true)->trans_rollback();
+//            $this->load->library ("MYLOG");
+//            MYLOG::w("Distribution record insert failed ! ".json_encode($data),"membervip/front/debug-log");
+//            return false;
+//        }
+        return true;
+
+       // return $this->_shard_db(true)->insert('wechat_member_card',$data);
+
+
+    }
+
 
     /**
      * 封装curl的调用接口，post的请求方式

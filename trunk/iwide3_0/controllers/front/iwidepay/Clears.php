@@ -47,12 +47,30 @@ class Clears extends MY_Controller {
             $ok = $this->redis_proxy->setNX ( $key, $value );
         }elseif($type == 'delete' ){
             $ok = $this->redis_proxy->del ( $key );
+        }elseif ($type == 'get') {
+            $ok = $this->redis_proxy->get( $key );
+        }elseif ($type == 'update') {
+            $ok = $this->redis_proxy->set( $key, $value );
         }
         return $ok;
     }
 
+    /**
+     * [check_key 检测此前是否有脚本未正常执行完成]
+     */
+    protected function check_key(){
+        // 获取key
+        $val = $this->redis_lock('get','IWIDEPAY_EXECUTE_SORT');
+        $this->load->library('IwidePay/IwidePayExecute',null,'IwidePayExecute');
+        if($val!=IwidePayExecute::CLEARS_HANDLE_SORT){
+            MYLOG::w('err:上一个的脚本未正常执行完成', 'iwidepay_clears');
+            exit('上一个的脚本未正常执行完成');
+        }
+    }
+
     public function handle(){
     	$this->check_arrow();
+        $this->check_key();
         // 上锁
         $ok = $this->redis_lock();
         if(!$ok){
@@ -73,6 +91,8 @@ class Clears extends MY_Controller {
 
         //释放锁
         $this->redis_lock('delete');
+        //执行顺序+1
+        $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::CLEARS_HANDLE_SORT+1);
         MYLOG::w('info:结束清算汇总的脚本', 'iwidepay_clears');
         exit('清算汇总完毕');
     }
@@ -116,9 +136,9 @@ class Clears extends MY_Controller {
 	    	if($return['amount']>=0){
 	    		//生成结余记录
 	    		if($return['is_settle']==0){
-	    			$res = $this->Iwidepay_clears_model->save_residual_record($vh['inter_id'],$vh['hotel_id'],0,$last_surplus_id);
+	    			$res = $this->Iwidepay_clears_model->save_residual_record($vh['inter_id'],$vh['hotel_id'],0,$last_surplus_id,$vh['id']);
 	    		}else{
-	    			$res = $this->Iwidepay_clears_model->save_residual_record($vh['inter_id'],$vh['hotel_id'],$return['amount'],$last_surplus_id);
+	    			$res = $this->Iwidepay_clears_model->save_residual_record($vh['inter_id'],$vh['hotel_id'],$return['amount'],$last_surplus_id,$vh['id']);
 	    		}
 	    		if($res!==true){
 					MYLOG::w('err:save_residual_record fail-'.json_encode($res),'iwidepay_clears');
@@ -254,7 +274,10 @@ class Clears extends MY_Controller {
     				//关联id汇总
     				$debt_ids[] = $vd['id'];
     				$debt_ids_va[] = $vd['id'];
-    			}
+    			}elseif ($vd['order_type']=='refund') {
+                    //关联id汇总
+                    $debt_ids_va[] = $vd['id'];
+                }
     		}
 
     		//门店汇总

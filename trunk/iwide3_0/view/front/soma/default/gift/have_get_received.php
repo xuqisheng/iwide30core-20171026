@@ -1,6 +1,6 @@
 
 
-<link href="<?php echo base_url('public/soma/mooncake_v1/mooncake.css'). config_item('css_debug');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/mooncake_v1/mooncake.css'). config_item('css_debug');?>" rel="stylesheet">
 <style>
 body,html{background:#fff !important}
 </style>

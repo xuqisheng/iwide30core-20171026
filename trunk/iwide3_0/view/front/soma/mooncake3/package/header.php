@@ -10,14 +10,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=320.1,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
-    <script src="<?php echo base_url('public/soma/scripts/jquery.js');?>"></script>
-    <script src="<?php echo base_url('public/soma/scripts/ui_control.js'). config_item('css_debug');?>"></script>
-    <link href="<?php echo base_url('public/soma/styles/global.css'). config_item('css_debug');?>" rel="stylesheet">
-    <link href="<?php echo base_url('public/soma/styles/default.css'). config_item('css_debug');?>" rel="stylesheet">
-    <link href="<?php echo base_url('public/soma/styles/theme.css'). config_item('css_debug');?>" rel="stylesheet">
-    <link href="<?php echo base_url('public/soma/mooncake_v1/mooncake.css'). config_item('css_debug');?>" rel="stylesheet">
-    <script src="<?php echo base_url('public/soma/scripts/lazyload.js');?>"></script>
-    <script src="<?php echo base_url('public/soma/scripts/alert.js');?>"></script>
+    <script src="<?php echo get_cdn_url('public/soma/scripts/jquery.js');?>"></script>
+    <script src="<?php echo get_cdn_url('public/soma/scripts/ui_control.js'). config_item('css_debug');?>"></script>
+    <link href="<?php echo get_cdn_url('public/soma/styles/global.css'). config_item('css_debug');?>" rel="stylesheet">
+    <link href="<?php echo get_cdn_url('public/soma/styles/default.css'). config_item('css_debug');?>" rel="stylesheet">
+    <link href="<?php echo get_cdn_url('public/soma/styles/theme.css'). config_item('css_debug');?>" rel="stylesheet">
+    <link href="<?php echo get_cdn_url('public/soma/mooncake_v1/mooncake.css'). config_item('css_debug');?>" rel="stylesheet">
+    <script src="<?php echo get_cdn_url('public/soma/scripts/lazyload.js');?>"></script>
+    <script src="<?php echo get_cdn_url('public/soma/scripts/alert.js');?>"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.1.0.js"></script>
     <title><?php echo $title;?></title>
 </head>

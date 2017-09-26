@@ -1,7 +1,7 @@
 
 <body>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
-<link href="<?php echo base_url('public/soma/v2/v2.css'). config_item('css_debug');?>" rel="stylesheet">
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<link href="<?php echo get_cdn_url('public/soma/v2/v2.css'). config_item('css_debug');?>" rel="stylesheet">
 <div class="pageloading"><p class="isload">正在加载</p></div>
 <script>
     var package_obj= {
@@ -89,7 +89,7 @@
     ?>
     <a class="item" href="<?php echo Soma_const_url::inst()->get_package_detail(array('pid'=>$v['product_id'],'id'=>$inter_id) );?>">
     <div class="squareimg">
-    	<img src="<?php echo base_url('public/soma/images/default2.jpg'); ?>" data-original="<?php echo $v['face_img'];?>" class="lazy"/>
+    	<img src="<?php echo get_cdn_url('public/soma/images/default2.jpg'); ?>" data-original="<?php echo $v['face_img'];?>" class="lazy"/>
     </div></a>
     <?php } ?>
 </div>

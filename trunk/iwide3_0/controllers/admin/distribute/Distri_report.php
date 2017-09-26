@@ -1289,7 +1289,7 @@ class Distri_report extends MY_Admin {
  				$data = $data.mb_convert_encoding($item['master_dept'],'GB18030','utf-8').",";
 				$data = $data.mb_convert_encoding($item['hotel_name'],'GB18030','utf-8').",";
 				$data = $data.$item['grade_rate_type'].",";
-				$data = $data.$item['grade_amount_rate'].",";
+				$data = $data.$item['grade_total'].",";
 				$data = $data.$item['send_time']." ,";
 				$data = $data.$item['status'].",";
 				$data = $data."\n";

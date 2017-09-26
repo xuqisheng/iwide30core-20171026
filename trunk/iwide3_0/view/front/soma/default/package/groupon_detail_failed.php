@@ -1,7 +1,7 @@
 <body>
 <div class="pageloading"><p class="isload">正在加载</p></div>
-<script src="<?php echo base_url('public/soma/scripts/imgscroll.js');?>"></script>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
 <script>
 wx.config({
     debug: false,
@@ -106,7 +106,7 @@ wx.ready(function(){
 <div class="foot_fixed">
     <div class="bg_fff foot_fixed_list center">
         <a href="<?php echo Soma_const_url::inst()->get_pacakge_home_page();?>" class="store_link bd_top_img pad10">商城首页</a>
-        <a class="bg_main pad10" href="<?php echo Soma_const_url::inst()->get_pacakge_home_page();?>">我不服，再开一团！</a>
+        <a class="bg_main pad10" href="<?php echo Soma_const_url::inst()->get_package_detail(array('pid'=>$packageDetail['product_id'],'id'=>$inter_id));?>">我不服，再开一团！</a>
     </div>
 </div>
 <div class="ui_pull share_pull" style="display:none"><div class="fen_bg"></div></div>

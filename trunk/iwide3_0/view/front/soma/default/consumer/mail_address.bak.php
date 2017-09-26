@@ -10,12 +10,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=320,user-scalable=0,shrink-to-fit=no">
-    <script src="<?php echo base_url('public/soma/scripts/jquery.js');?>"></script>
-    <script src="<?php echo base_url('public/soma/scripts/ui_control.js');?>"></script>
-    <link href="<?php echo base_url('public/soma/styles/global.css');?>" rel="stylesheet">
-    <link href="<?php echo base_url('public/soma/styles/default.css');?>" rel="stylesheet">
-    <link href="<?php echo base_url('public/soma/styles/theme_v1.css');?>" rel="stylesheet">
-    <script src="<?php echo base_url('public/soma/scripts/lazyload.js');?>"></script>
+    <script src="<?php echo get_cdn_url('public/soma/scripts/jquery.js');?>"></script>
+    <script src="<?php echo get_cdn_url('public/soma/scripts/ui_control.js');?>"></script>
+    <link href="<?php echo get_cdn_url('public/soma/styles/global.css');?>" rel="stylesheet">
+    <link href="<?php echo get_cdn_url('public/soma/styles/default.css');?>" rel="stylesheet">
+    <link href="<?php echo get_cdn_url('public/soma/styles/theme_v1.css');?>" rel="stylesheet">
+    <script src="<?php echo get_cdn_url('public/soma/scripts/lazyload.js');?>"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.1.0.js"></script>
     <title><?php echo $title;?></title>
 </head>
@@ -47,18 +47,18 @@
 <!-- 以上为head -->
 
 <!-- 选择日历插件 -->
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.core.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.widget.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.scroller.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.util.datetime.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.datetimebase.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.widget.ios.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.i18n.zh.js');?>"></script>
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.animation.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.widget.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.widget.ios.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.scroller.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.scroller.ios.css');?>" rel="stylesheet" type="text/css">
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.core.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.scroller.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.util.datetime.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.datetimebase.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.ios.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.i18n.zh.js');?>"></script>
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.animation.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.ios.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.scroller.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.scroller.ios.css');?>" rel="stylesheet" type="text/css">
 <!-- 日历插件 -->
 <form action="<?php echo $shipping_url; ?>" method="post" id="mailPost">
 

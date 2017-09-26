@@ -193,7 +193,258 @@ class Hotel_fans extends MY_Admin {
     }
 
 
+    public function ext_date_data(){
 
+        $data = $this->common_data;
+        $this->load->model("wx/Fans_model");
+        $this->load->model ( 'plugins/Excel_model');
+        $params = array();
+        $data['new_total'] = 0;
+        $data['self_total'] = 0;
+        $data['scan_total'] = 0;
+        $data['dis_total'] = 0;
+        $data['cancel_total'] = 0;
+        $data['date_data'] = array();
+        $data['hotel_data'] = array();
+
+//        $post = json_decode($this->input->raw_input_stream,true);
+        $post = $this->input->get();
+        if(isset($post['hotel_id']) && !empty($post['hotel_id']))$params['hotel_id'] = $post['hotel_id'];
+
+
+        if(!isset($post['startdate']) || !isset($post['enddate'])){
+            $post['startdate'] = date('Y-m-d' , strtotime("-2 day"));;
+            $post['enddate'] = date('Y-m-d' , time());;
+        }
+
+        $params['startdate'] = $post['startdate'];
+        $params['enddate'] = $post['enddate'];
+
+
+        $dt_start = strtotime($params['startdate']);
+        $dt_end = strtotime($params['enddate']);
+        while ($dt_start<=$dt_end){
+            $each_day[date('Y-m-d',$dt_start)] = array('date'=>date('Y-m-d',$dt_start));
+            $dt_start = strtotime('+1 day',$dt_start);
+        }
+
+        $params['cur_status'] = 1;
+
+        $date_new_fans = $this->Fans_model->count_con_fans($this->inter_id,$params,'date');  //按日期统计新增
+        $date_self_fans = $this->Fans_model->count_con_fans($this->inter_id,$params,'date',-1);  //按日期统计自主关注
+        $dis_date_fans = $this->Fans_model->dis_fans($this->inter_id,$params,'date');   //按日期统计分销
+        $scan_date_fans = $this->Fans_model->dis_fans($this->inter_id,$params,'date',2);   //按日期统计扫码关注
+
+        $params['cur_status'] = 2;
+        $date_cancel_fans = $this->Fans_model->count_con_fans($this->inter_id,$params,'date');  //按日期统计取消
+
+        if(!empty($each_day)){
+            foreach($each_day as $key => $e_day){
+                $each_day[$key]['new'] = isset($date_new_fans[$key])? $date_new_fans[$key]['total'] : 0;
+                $each_day[$key]['self'] = isset($date_self_fans[$key])? $date_self_fans[$key]['total'] : 0;
+                $each_day[$key]['dis'] = isset($dis_date_fans[$key])? $dis_date_fans[$key]['total'] : 0;
+                $each_day[$key]['scan'] = isset($scan_date_fans[$key])? $scan_date_fans[$key]['total'] : 0;
+                $each_day[$key]['cancel'] = isset($date_cancel_fans[$key])? $date_cancel_fans[$key]['total'] : 0;
+            }
+        }
+
+
+        $head = array ('时间','新增粉丝','自主关注','扫码关注','分销关注','取消关注');
+
+        $ext_data = array();
+
+        if(!empty($each_day)){
+            foreach($each_day as $key=>$item){
+                $temp[0]=$key;
+                $temp[1]=$item['new'];
+                $temp[2]=$item['self'];
+                $temp[3]=$item['dis'];
+                $temp[4]=$item['scan'];
+                $temp[5]=$item['cancel'];
+                $ext_data[]=$temp;
+            }
+
+        }
+
+        $ext_date = date('Y-m-d',time());
+
+        $filename='';
+
+        $filename = $filename.'每日粉丝明细_'.$ext_date;
+
+        $this->Excel_model->exp_exl($head,$ext_data,$filename);
+
+    }
+
+
+    public function ext_hotel_data(){
+
+        $data = $this->common_data;
+        $this->load->model("wx/Fans_model");
+        $this->load->model("hotel/Hotel_model");
+        $this->load->model ( 'plugins/Excel_model');
+        $hotels = $this->Hotel_model->get_all_hotels($this->inter_id,null,'key');
+        $params = array();
+        $data['new_total'] = 0;
+        $data['self_total'] = 0;
+        $data['scan_total'] = 0;
+        $data['dis_total'] = 0;
+        $data['cancel_total'] = 0;
+        $data['hotel_data'] = array();
+
+//        $post = json_decode($this->input->raw_input_stream,true);
+        $post = $this->input->get();
+        if(isset($post['hotel_id']) && !empty($post['hotel_id']))$params['hotel_id'] = $post['hotel_id'];
+
+        if(!isset($post['startdate']) || !isset($post['enddate'])){
+            $post['startdate'] = date('Y-m-d' , strtotime("-2 day"));;
+            $post['enddate'] = date('Y-m-d' , time());;
+        }
+
+        $params['startdate'] = $post['startdate'];
+        $params['enddate'] = $post['enddate'];
+
+        $params['cur_status'] = 1;
+        $hotel_new_fans = $this->Fans_model->count_con_fans($this->inter_id,$params,'hotel');//按酒店统计新增
+        $hotel_self_fans = $this->Fans_model->count_con_fans($this->inter_id,$params,'hotel',-1);  //按酒店统计自主关注
+        $dis_hotel_fans = $this->Fans_model->dis_fans($this->inter_id,$params,'hotel');   //按酒店统计分销
+        $scan_hotel_fans = $this->Fans_model->dis_fans($this->inter_id,$params,'hotel',2);   //按酒店统计扫码关注
+        $params['cur_status'] = 2;
+        $hotel_cancel_fans = $this->Fans_model->count_con_fans($this->inter_id,$params,'hotel');//按酒店统计取消
+
+
+        if(!empty($hotels)){
+            $hotel_data = array(
+                -1 => array(
+                    'hotel_id' => -1,
+                    'hotel_name' => '无'
+                )
+            );
+            $hotel_data[-1]['new'] = isset($hotel_new_fans[-1])? $hotel_new_fans[-1]['total'] : 0;
+            $hotel_data[-1]['self'] = isset($hotel_self_fans[-1])? $hotel_self_fans[-1]['total'] : 0;
+            $hotel_data[-1]['dis'] = isset($dis_hotel_fans[-1])? $dis_hotel_fans[-1]['total'] : 0;
+            $hotel_data[-1]['scan'] = isset($scan_hotel_fans[-1])? $scan_hotel_fans[-1]['total'] : 0;
+            $hotel_data[-1]['cancel'] = isset($hotel_cancel_fans[-1])? $hotel_cancel_fans[-1]['total'] : 0;
+            foreach($hotels as $key => $hotel){
+                $hotel_data[$key]['hotel_id'] = $key;
+                $hotel_data[$key]['hotel_name'] = $hotel['name'];
+                $hotel_data[$key]['new'] = isset($hotel_new_fans[$key])? $hotel_new_fans[$key]['total'] : 0;
+                $hotel_data[$key]['self'] = isset($hotel_self_fans[$key])? $hotel_self_fans[$key]['total'] : 0;
+                $hotel_data[$key]['dis'] = isset($dis_hotel_fans[$key])? $dis_hotel_fans[$key]['total'] : 0;
+                $hotel_data[$key]['scan'] = isset($scan_hotel_fans[$key])? $scan_hotel_fans[$key]['total'] : 0;
+                $hotel_data[$key]['cancel'] = isset($hotel_cancel_fans[$key])? $hotel_cancel_fans[$key]['total'] : 0;
+            }
+        }
+
+
+        $head = array ('所属酒店','新增粉丝','自主关注','扫码关注','分销关注','取消关注');
+
+        $ext_data = array();
+
+        if(!empty($hotel_data)){
+            foreach($hotel_data as $key=>$item){
+                $temp[0]=$item['hotel_name'];
+                $temp[1]=$item['new'];
+                $temp[2]=$item['self'];
+                $temp[3]=$item['dis'];
+                $temp[4]=$item['scan'];
+                $temp[5]=$item['cancel'];
+                $ext_data[]=$temp;
+            }
+
+        }
+
+        $ext_date = date('Y-m-d',time());
+
+        $filename='';
+
+        $filename = $filename.'酒店发展粉丝统计_'.$ext_date;
+
+        $this->Excel_model->exp_exl($head,$ext_data,$filename);
+
+
+    }
+
+
+    public function ext_hotel_detail(){
+
+        $data = $this->common_data;
+        $this->load->model("wx/Fans_model");
+        $this->load->model("hotel/Hotel_model");
+        $this->load->model ( 'plugins/Excel_model');
+        $inter_id = $this->inter_id;
+
+//        $post = json_decode($this->input->raw_input_stream,true);
+        $post = $this->input->get();
+        $params = array();
+
+        if(isset($post['hotel_id']) && !empty($post['hotel_id']))$params['hotel_id'] = $post['hotel_id'];
+        if(isset($post['startdate']))$params['startdate'] = $post['startdate'];
+        if(isset($post['enddate']))$params['enddate'] = $post['enddate'];
+
+//        $params['startdate'] = '2015-08-01';
+//        $params['enddate'] = '2017-08-12';
+
+        $new = $this->Fans_model->dept_fans($inter_id,$params);
+        $cancel = $this->Fans_model->dept_fans($inter_id,$params,2);
+        $data['data'] = array();
+
+        if(!empty($new)){
+            foreach($new as $temp_new){
+                if(!isset($data['data'][$temp_new['date']]['合计']['new']))$data['data'][$temp_new['date']]['合计']['new']=0;
+                if(!isset($data['data'][$temp_new['date']]['合计']['cancel']))$data['data'][$temp_new['date']]['合计']['cancel']=0;
+                if(!isset($data['data'][$temp_new['date']]['合计']['dept']))$data['data'][$temp_new['date']]['合计']['dept']='合计';
+                $data['data'][$temp_new['date']][$temp_new['master_dept']] = array(
+                    'new' => $temp_new['total'],
+                    'dept' => $temp_new['master_dept'],
+                    'cancel'=>0
+                );
+                $data['data'][$temp_new['date']]['合计']['new'] += $temp_new['total'];
+            }
+        }
+
+        if(!empty($cancel)){
+            foreach($cancel as $temp_cancel){
+                if(!isset($data['data'][$temp_cancel['date']]['合计']['new']))$data['data'][$temp_cancel['date']]['合计']['new']=0;
+                if(!isset($data['data'][$temp_cancel['date']]['合计']['cancel']))$data['data'][$temp_cancel['date']]['合计']['cancel']=0;
+                if(!isset($data['data'][$temp_cancel['date']]['合计']['dept']))$data['data'][$temp_cancel['date']]['合计']['dept']='合计';
+                $data['data'][$temp_cancel['date']][$temp_cancel['master_dept']] = array(
+                    'cancel' => $temp_cancel['total'],
+                    'dept' => $temp_cancel['master_dept']
+                );
+                if(!isset( $data['data'][$temp_cancel['date']][$temp_cancel['master_dept']]['new']))$data['data'][$temp_cancel['date']][$temp_cancel['master_dept']]['new'] =0;
+
+                $data['data'][$temp_new['date']]['合计']['cancel'] += $temp_cancel['total'];
+            }
+        }
+
+
+
+        $head = array ('日期','部门','分销关注','取消关注');
+
+        $ext_data = array();
+
+        if(!empty($data['data'])){
+            foreach($data['data'] as $key=>$item){
+                $temp[0]=$key;
+                $temp[1]=$item['dept'];
+                $temp[2]=$item['new'];
+                $temp[3]=$item['cancel'];
+                $ext_data[]=$temp;
+            }
+
+        }
+
+        $ext_date = date('Y-m-d',time());
+
+        $filename='';
+
+        $filename = $filename.'各部门每日发展明细_'.$ext_date;
+
+        $this->Excel_model->exp_exl($head,$ext_data,$filename);
+
+
+    }
 
 
 

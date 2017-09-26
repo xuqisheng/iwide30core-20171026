@@ -18,7 +18,7 @@
     <link href="<?php echo get_cdn_url('public/soma/styles/global.css'). config_item('css_debug');?>" rel="stylesheet">
     <link href="<?php echo get_cdn_url('public/soma/styles/default.css'). config_item('css_debug');?>" rel="stylesheet">
     <link href="<?php echo get_cdn_url('public/soma/styles/theme.css'). config_item('css_debug');?>" rel="stylesheet">
-    <link href="<?php echo base_url('public/soma/v1/style.css'); ?>" rel="stylesheet">
+    <link href="<?php echo get_cdn_url('public/soma/v1/style.css'); ?>" rel="stylesheet">
     <script src="http://res.wx.qq.com/open/js/jweixin-1.1.0.js"></script>
     <?php if(isset($langDir) && $langDir == 'english' ): ?>
         <link href="<?php echo get_cdn_url('public/soma/styles/en_v1.css');?>" rel="stylesheet">

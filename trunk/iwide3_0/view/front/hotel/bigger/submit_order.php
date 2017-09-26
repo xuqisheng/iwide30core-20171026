@@ -53,7 +53,7 @@
                     <div class="inblock number_control h30">
                         <span class="reduce_room off" rid='<?php echo $first_room['room_info']['room_id'];?>'>-</span>
                         <span class="number_control_main room_num" style="width: 2rem;">1</span>
-                        <span class="add_room" rid='<?php echo $first_room['room_info']['room_id'];?>'>+</span>
+                        <span class="add_room<?php if(isset($first_state['least_num']) && $first_state['least_num']==1)echo ' off';?>" rid='<?php echo $first_room['room_info']['room_id'];?>'>+</span>
                     </div>
                     <p class="inblock">间</p>
                 </div>
@@ -87,7 +87,7 @@
                 </div>
                 <div class="main_shadow_wrap"  style="margin:0px 0.7rem"></div>
                 <div class="color3 h24 flexgrow pad10 clearfix mar_l10" style="max-width:50%;" bonus="<?php echo $exchange_max_point;?>" id="bonuspay2">
-                    <div class="main_color1 h32 mar_b20" id="bonus_title">积分抵用</div>
+                    <div class="main_color1 h32 mar_b20" id="bonus_title"><?php echo empty($point_name)?'积分':$point_name;?>抵用</div>
                     <div class="float" style="width: calc(100% - 70px);">
                         <div class="martop multiclip" id='max_use_bonus' style="-webkit-line-clamp: 1;">可用<?php echo $exchange_max_point;?><?php echo $point_name;?></div>
                         <div id="max_exchange_bonus">¥<?php echo $exchange_max_point*$point_consum_rate;?></div>
@@ -312,13 +312,15 @@ var timeOpt = {
         }
         $room_num.html(_num);
         $("#room_nums").html(_num+'间');
-        $(".reduce_room").removeClass("off")
+        $(".reduce_room").removeClass("off");
         rid=$(this).attr('rid');
         room_nums_change(_num,rid);
     })
 
-$(".reduce_room").on("click",function(){
-        if( $(".add_room").hasClass("off"))$(".add_room").removeClass("off");
+    $(".reduce_room").on("click",function(){
+        if( $(".add_room").hasClass("off") && max_room_nums !=1){
+            $(".add_room").removeClass("off");
+        }
         var _num = Number($room_num.html());
         if(_num <= 1){$(this).addClass("off"); return;}
         _num--;
@@ -326,14 +328,17 @@ $(".reduce_room").on("click",function(){
         $room_num.html(_num);
         rid=$(this).attr('rid');
         room_nums_change(_num,rid);
+        if(_num == 1){$(this).addClass("off");}
     });
 
     function room_nums_change(_num,rid){
         check_more_room = more_room_favour();
         if(check_more_room==true){
+            $('#coupon_i').html('不可用');
             $('#coupon_title').css({color:"gray"});
             $('#bonus_title').css({color:"gray"});
         }else{
+            $('#coupon_i').html('选择优惠券');
             $('#coupon_title').css({color:"#b2945e"});
             $('#bonus_title').css({color:"#b2945e"});
         }
@@ -519,7 +524,7 @@ $(".reduce_room").on("click",function(){
         <?php }}?>
 
 
-        str +='<div class="mar_t60"><p class="clearfix mar_t40"><span class="float h28">使用积分</span><span id="list_total_bonus_price" class="floatr h32 main_color1"></span></p></div>';
+        str +='<div class="mar_t60"><p class="clearfix mar_t40"><span class="float h28">使用'+point_name+'</span><span id="list_total_bonus_price" class="floatr h32 main_color1"></span></p></div>';
 
         str +='<div class="mar_t60"><p class="clearfix mar_t40"><span class="float h28">支付优惠</span><span id="list_pay_favour" class="floatr h32 main_color1">0</span><span class="floatr h18 main_color1 order_money_ico">¥ </span><span class="floatr h32 main_color1">-</span></p></div>';
 
@@ -770,6 +775,11 @@ $(".reduce_room").on("click",function(){
                     $("#bonuspay2").attr('bonus','');
                 }
             });
+        }else{
+            $("#max_use_bonus").html('不可用');
+            $("#max_exchange_bonus").html('');
+            $('#bonus').val('');
+            $("#bonuspay2").attr('bonus','');
         }
     }
     function getPointpaySet(){

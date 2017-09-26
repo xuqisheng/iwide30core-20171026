@@ -1584,7 +1584,7 @@ class IwidepayApi extends MY_Controller
             $list = $this->iwidepay_refund_model->get_refund($select,$filter,$cur_page,$per_page);
 
             $module = $this->module_arr;
-            $refund_status = array('0'=>'--','1'=>'成功','2'=>'失败','3'=>'异常','4' => '失败');
+            $refund_status = array('0'=>'--','1'=>'成功','2'=>'退款中','3'=>'退款中','4' => '失败');
             $type = array('0'=>'--','1'=>'原路退回','2'=>'已结清全额退款','3'=>'部分原路退回','4'=>'已结清部分退款');
 
             if ($list)

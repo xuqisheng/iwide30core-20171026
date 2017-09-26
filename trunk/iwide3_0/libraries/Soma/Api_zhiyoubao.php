@@ -59,10 +59,10 @@ class Api_zhiyoubao extends Soma_base
                 'key'           => '4D47D32E9F442DA2775BC3FA36238D9C',
             ),
 			'a476756979' => array(//山东银座旅游集团有限公司-微信
-                'username'      => 'sdyzjt',
-                'password'      => 'kdmfgmjz',
-                'company_code'  => 'sdzfxsdyzjt',
-                'key'           => '822B56397E5A8081FE35B593DB8B3D0E',
+                'username'      => 'sdyzdl',
+                'password'      => '123456',
+                'company_code'  => 'sdzgysdyzdl',
+                'key'           => '80F304B7357919CC6B8DC861EE1F3A07',
             ),
         );
 

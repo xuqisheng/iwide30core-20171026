@@ -312,6 +312,7 @@ class CI_Session_redis_driver extends CI_Session_driver implements SessionHandle
 	protected function _get_lock($session_id)
 	{
 	    return true;
+	    
 		if (isset($this->_lock_key))
 		{
 			return $this->_redis->setTimeout($this->_lock_key, 5);

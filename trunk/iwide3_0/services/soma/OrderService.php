@@ -460,8 +460,8 @@ class OrderService extends BaseService
 
         $resultData = $killResult->toArray();
         if (!empty($killResult->getData())) {
-            $msg = '新版秒杀流程尚不支持重复拉起支付';
-            return new Result(Result::STATUS_FAIL, $msg);
+            //$msg = '新版秒杀流程尚不支持重复拉起支付';
+            //return new Result(Result::STATUS_FAIL, $msg);
             // $resultData['step'] = $default_step;
             // if( in_array( $this->getCI()->inter_id, $this->wft_pay_inter_ids ) ){
             //     $resultData['step'] = 'wft_pay';
@@ -1497,10 +1497,11 @@ class OrderService extends BaseService
             $result->setData(['data' => $data]);
             return $result;
         };
-        $this->getCI()->load->model('soma/sales_order_model', 'somaSalesOrderModel');
+        $this->getCI()->load->model('soma/Sales_order_model', 'somaSalesOrderModel');
         $this->getCI()->load->model('soma/sales_item_package_model', 'salesItemPackageModel');
         $this->getCI()->load->model('soma/Consumer_code_model', 'consumer_code_model');
         $this->getCI()->load->model('soma/Consumer_shipping_model', 'consumer_shipping_model');
+        $this->getCI()->load->model('soma/Consumer_order_model', 'consumer_order_model');
         $this->getCI()->load->model('soma/Gift_order_model', 'soma_gift_order');
         $this->getCI()->load->model('soma/Gift_item_package_model','Gift_item_package_model');
         $this->getCI()->load->model('soma/Sales_order_product_record_model', 'Sales_order_product_record_model');
@@ -1508,6 +1509,7 @@ class OrderService extends BaseService
         $this->getCI()->load->model('soma/Sales_refund_model', 'Sales_refund_model');
         $this->getCI()->load->model('soma/Asset_item_package_model', 'Asset_item_package_model');
 
+        /** @var \Sales_order_model $somaSalesOrderModel */
         $somaSalesOrderModel = $this->getCI()->somaSalesOrderModel;
         $salesItemPackageModel = $this->getCI()->salesItemPackageModel;
         /** @var \Consumer_code_model $consumer_code_model */
@@ -1523,12 +1525,14 @@ class OrderService extends BaseService
         $sales_refund_model = $this->getCI()->Sales_refund_model;
         /** @var \Asset_item_package_model $asset_item_package_model */
         $asset_item_package_model = $this->getCI()->Asset_item_package_model;
+        /** @var \Consumer_order_model $consumer_order_model */
+        $consumer_order_model = $this->getCI()->consumer_order_model;
 
 
         $Sales_order_product_record_model = $this->getCI()->Sales_order_product_record_model;
 
         // order 相关
-        $condition = ['order_id' => $oid, 'del_time' => 0];
+        $condition = ['order_id' => $oid, 'del_time' => 0, 'openid' => $this->getCI()->openid];
         $order = $somaSalesOrderModel->get(array_keys($condition), array_values($condition), [
             'order_id',
             'create_time',
@@ -1539,10 +1543,11 @@ class OrderService extends BaseService
             'status',
             'refund_status',
             'consume_status',
+            'settlement'
         ]);
 
         if (empty($order)) {
-            return $callback_func([], Result::STATUS_FAIL, 'order not in');
+            return $callback_func([], Result::STATUS_FAIL, '订单不存在');
         }
 
 
@@ -1593,15 +1598,18 @@ class OrderService extends BaseService
             $item_map[$key]['name'] = isset($val['name']) && !empty($val['name']) ? strip_tags($val['name']) : '';
 //            $item_map[$key]['img_detail'] = isset($val['img_detail']) && !empty($val['img_detail']) ? htmlspecialchars($val['img_detail']) : '';
 //            $item_map[$key]['order_notice'] = isset($val['order_notice']) && !empty($val['order_notice']) ? htmlspecialchars($val['order_notice']) : '';
-            //积分、储值商品不显示退款
             $product = $product_package_model->get(['product_id'], [$val['product_id']]);
             if(!empty($product)){
+                //积分、储值商品不显示退款
                if(in_array($product[0]['type'], [$product_package_model::PRODUCT_TYPE_BALANCE, $product_package_model::PRODUCT_TYPE_POINT])){
                    $item_map[$key]['can_refund'] = (string)$product_package_model::CAN_F;
                }
                $item_map[$key]['type'] = $product[0]['type'];
+               //特权券商品，不能订房
+                if(in_array($product[0]['type'], [$product_package_model::PRODUCT_TYPE_PRIVILEGES_VOUCHER])){
+                    $item_map[$key]['can_wx_booking'] = (string)$product_package_model::CAN_F;
+                }
             }
-
         }
 
         $order['package'] = $item_map;
@@ -1612,13 +1620,13 @@ class OrderService extends BaseService
         $gift_item_table_name = $this->getCI()->soma_db_conn_read->dbprefix($soma_gift_order->item_table_name('package'));
         $asset_item_table_name = $this->getCI()->soma_db_conn_read->dbprefix($salesItemPackageModel->asset_item_table_name('package'));
 
-        $code_condition = [
-            'order_id' => $oid,
-            'status' => [2, 3, 4],
-            function () use ($asset_item_table_name, $openid) {
-                return 'asset_item_id in (select item_id from ' . $asset_item_table_name . ' where openid =  "' . $openid . '" )';
-            },
-        ];
+//        $code_condition = [
+//            'order_id' => $oid,
+//            'status' => [2, 3, 4],
+//            function () use ($asset_item_table_name, $openid) {
+//                return 'asset_item_id in (select item_id from ' . $asset_item_table_name . ' where openid =  "' . $openid . '" )';
+//            },
+//        ];
 
         $name = $order['item_name'];
 
@@ -1654,6 +1662,7 @@ class OrderService extends BaseService
             ['order_id', 'code', 'status', 'asset_item_id', 'code_id', 'consumer_item_id', 'consumer_id'],
             ['limit' => null, 'orderBy' => 'status asc']
         );
+
         if(!empty($consumer_code_list)){
             foreach ($consumer_code_list as $key => $val){
                 $consumer_order[$key]['shipping_id'] = 0;
@@ -1665,6 +1674,8 @@ class OrderService extends BaseService
                 $consumer_order[$key]['asset_item_id'] = $val['asset_item_id'];
                 $consumer_order[$key]['code_id'] = $val['code_id'];
                 $consumer_order[$key]['consumer_item_id'] = $val['consumer_item_id'];
+                $consumer_order[$key]['is_booking_hotel'] = false;
+                //$consumer_order[$key]['consumer_id'] = $val['consumer_id'];
                 if($val['status'] == 3){
                     //shipping_id
                     $consumer_shipping_list = $consumer_shipping_model->get(
@@ -1703,6 +1714,12 @@ class OrderService extends BaseService
                         $consumer_order[$key]['send_from'] = $gift_order_list[0]['send_from'];
                     }
                 }
+                $consumer_order_info = $consumer_order_model->get(['consumer_id'], [$val['consumer_id']]);
+                if(!empty($consumer_order_info)){
+                    if( $consumer_order_info[0]['consumer_method'] == $consumer_order_model::CONSUME_HOTEL_SELF ){
+                        $consumer_order[$key]['is_booking_hotel'] = true;
+                    }
+                }
             }
         }
 
@@ -1733,9 +1750,11 @@ class OrderService extends BaseService
 
         //退款表
         $refund_info_status = 0;
-        $sales_refund_info = $sales_refund_model->get(['order_id', 'inter_id'], [$oid, $inter_id]);
-        if(!empty($sales_refund_info)){
-            $refund_info_status = $sales_refund_info[0]['status'];
+        if($order['settlement'] != $somaSalesOrderModel::SETTLE_HOTEL_GIFT){
+            $sales_refund_info = $sales_refund_model->get(['order_id', 'inter_id'], [$oid, $inter_id]);
+            if(!empty($sales_refund_info)){
+                $refund_info_status = $sales_refund_info[0]['status'];
+            }
         }
         $order['refund_info_status'] = (string)$refund_info_status;
 
@@ -1778,23 +1797,22 @@ class OrderService extends BaseService
         ]);
 
         foreach ($order as $item) {
-            if ($item['consume_status'] == 23) { // 消费完毕
-                continue;
+            if ($item['consume_status'] != $somaSalesOrderModel::CONSUME_ALL) {
+                return $callback_func([], Result::STATUS_FAIL, '未消费完毕，删除失败');
             }
-            if (strtotime($item['expiration_date']) < time()) { // 过期时间
-                continue;
+            if (strtotime($item['expiration_date']) < time()) {
+                return $callback_func([], Result::STATUS_FAIL, '订单未过期，删除失败');
             }
-            if ($item['refund_status'] == 33) { // 全部退款
-                continue;
+            if ($item['refund_status'] != $somaSalesOrderModel::REFUND_PENDING) {
+                return $callback_func([], Result::STATUS_FAIL, '退款订单，删除失败');
             }
-            return $callback_func([], Result::STATUS_FAIL, '删除失败');
         }
 
         $result = $somaSalesOrderModel->_shard_db()->update($somaSalesOrderModel->table_name(), ['del_time' => time()], ['order_id' => $oid, 'del_time' => 0], 1);
         if ($somaSalesOrderModel->_shard_db()->affected_rows()) {
             return $callback_func();
         }
-        return $callback_func([], Result::STATUS_FAIL, '删除失败');
+        return $callback_func([], Result::STATUS_FAIL, '删除失败，请稍后重试');
     }
 
     /**
@@ -2053,6 +2071,8 @@ class OrderService extends BaseService
             }
         }
 
+        $packageService = PackageService::getInstance()->getParams();
+
         //搜索
         $hotelInfoList = [];
         foreach ($wx_booking_config as $key => $item) {
@@ -2106,7 +2126,7 @@ class OrderService extends BaseService
                                     'room_cover' => $vale['room_img'],
                                     'room_price_code' => $value['price_code'],
                                     'room_price_name' => $value['price_name'],
-                                    'link' => site_url('soma/booking/select_hotel_time').'?id='.$val['inter_id'].'&bsn=package&hid='.$val['hotel_id'].'&aiid='.$aiid.'&oid='.$oid.'&rmid='.$vale['room_id'].'&cdid='.$value['price_code'].'&tkid='.$this->getCI()->session->tempdata('tkid').'&brandname='.$this->getCI()->session->tempdata('brandname').'&code_id='
+                                    'link' => site_url('soma/booking/select_hotel_time').'?id='.$val['inter_id'].'&bsn=package&hid='.$val['hotel_id'].'&aiid='.$aiid.'&oid='.$oid.'&rmid='.$vale['room_id'].'&cdid='.$value['price_code'].'&tkid='.$packageService['tkid'].'&brandname='.$packageService['brandname'].'&layout='.$packageService['layout'].'&code_id='
                                 ];
                             }
                         }
@@ -2130,7 +2150,7 @@ class OrderService extends BaseService
      * @param $priceCode
      * @return Result
      */
-    public function getSelectHotelInfo($assetItemId, $codeId, $interId, $openid, $hotelId, $roomId, $priceCode)
+    public function getSelectHotelInfo($assetItemId, $codeId, $hotelId, $roomId, $priceCode)
     {
         $callback_func = function ($data = [], $status = Result::STATUS_OK, $msg = '') {
             $result = new Result();
@@ -2139,6 +2159,9 @@ class OrderService extends BaseService
             $result->setData($data);
             return $result;
         };
+
+        $interId = $this->getCI()->inter_id;
+        $openid = $this->getCI()->openid;
 
         // 获取卷码
         $this->getCI()->load->model('soma/Consumer_code_model', 'CodeModel');
@@ -2223,7 +2246,11 @@ class OrderService extends BaseService
             'current_date' => time(),
             'code_use_date' => [
                 'begin_date' => $begin_date,
-                'end_date' => $end_date
+                'end_date' => $end_date,
+            ],
+            'booking_date' => [
+                'begin_date' => date('Y/m/01'),
+                'end_date' => date('Y/m/d', strtotime(date('Y/m/01')." +3 month -1 day")),
             ],
             'order_params' => [
                 'post_hotel_id' => $hotelId,
@@ -2234,7 +2261,7 @@ class OrderService extends BaseService
                 'post_start' => null,
                 'post_end' => null,
                 'post_room_name' => $room['name'],
-                'post_code_name' => $price_code[0]['price_name'],
+                'post_code_name' => !empty($price_code) ? $price_code[0]['price_name'] : null,
                 'post_num' => 1,
                 'post_order_id' => $orderId,
                 'aiid' => $assetItemId,
@@ -2559,6 +2586,7 @@ class OrderService extends BaseService
         //订房返回成功, 核销该核销码
         $booking_status = FALSE;
         $consumer_status = FALSE;
+        $recordId = 0;
         if (isset($return['status']) && $return['status'] == \Soma_base::STATUS_TRUE) {
 
             $booking_status = TRUE;
@@ -2656,7 +2684,7 @@ class OrderService extends BaseService
 
         //后续处理 这里需要跳转，不能在这里显示成功或者失败页面，否则可能会重复发送数据给订房下单
         if ($booking_status == TRUE && $consumer_status == TRUE) {
-            return new Result(Result::STATUS_OK, '下单成功');
+            return new Result(Result::STATUS_OK, '下单成功', ['bid' => $recordId]);
         } else {
             return new Result(Result::STATUS_FAIL, '下单失败');
         }

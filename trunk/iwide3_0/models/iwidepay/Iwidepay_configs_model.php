@@ -71,4 +71,11 @@ class Iwidepay_configs_model extends MY_Model{
 		}
 		return $this->db->get(self::TAB_CONFIGS)->result_array();
 	}
+
+	//获取开启分账的inter_id
+	public function get_transfer_inter_id(){
+		$sql = "SELECT inter_id FROM iwide_publics WHERE split_status = 1";
+		return $this->db->query($sql)->result_array();
+	}
+
 }

@@ -876,6 +876,9 @@ class HotelService extends HotelBaseService {
     		    }else{
     		        $data['packages']=$package_check['data'];
     		        $data['packages_price']=array_sum(array_column($data['packages'], 'total_price'));
+    		        if (isset($package_check['min_package_num'])){
+    		            $package_check['min_package_num'] < $data['first_state']['least_num'] and $data['first_state']['least_num'] = $package_check['min_package_num'];
+    		        }
     		    }
 		    }
 		}else if (!empty($package_info)){
@@ -1011,6 +1014,7 @@ class HotelService extends HotelBaseService {
 		foreach ($data ['pay_ways'] as $k=>$pay_way){
 			$data ['pay_ways'][$k]->favour=0;
 			$data ['pay_ways'][$k]->des='';
+			$data ['pay_ways'][$k]->cosume_code_need = 0;
 			switch ($pay_way->pay_type){
 				case 'point':
 					//PMS的自定义积分计算 Add By 鹏 On 2016-10-17
@@ -1068,9 +1072,15 @@ class HotelService extends HotelBaseService {
 						$data ['pay_ways'][$k]->des=$data ['pay_ways'][$k]->point_need.'/'.$data['member']->bonus;
 					}
 					$data ['has_point_pay']=1;
+					if (! empty ( $config_data ['POINT_PAY_CODE_NEED'] ) && $config_data ['POINT_PAY_CODE_NEED'] == 1) {
+					    $data ['pay_ways'][$k]->cosume_code_need = 1;
+					}
 					break;
 				case 'balance':
 					$data ['pay_ways'][$k]->des=$data['member']->balance.'元';
+					if (! empty ( $config_data ['BANCLANCE_COMSUME_CODE_NEED'] ) && $config_data ['BANCLANCE_COMSUME_CODE_NEED'] == 1) {
+					    $data ['pay_ways'][$k]->cosume_code_need = 1;
+					}
 					break;
 				case 'weixin':
 					if (!empty($prepay_favour[$pay_way->pay_type])){
@@ -1640,7 +1650,7 @@ class HotelService extends HotelBaseService {
     		    $package_check = $this->_hotel_ci->Goods_order_model->check_order_package($this->_hotel_ci->inter_id,$first_state['goods_info'],$package_info,array('startdate'=>$startdate,'enddate'=>$enddate,'roomnums'=>$order_data['roomnums']));
     		    if ($package_check['s']==0){
     		        unset($package_check['data']);
-    		        return $info;
+    		        return $package_check;
     		    }else{
     		        $package_data=$package_check['data'];
     		        $order_data ['price']+=$package_check ['total_price'];
@@ -2113,6 +2123,8 @@ class HotelService extends HotelBaseService {
 					'pay_type'=>array($list['paytype']),
 					'key'=>'value'
 			) );
+			$data ['pay_ways']['bonus'] = new \stdClass();
+			$data ['pay_ways']['bonus']->pay_name='积分兑换';
 			$list ['paytype_des'] = $data ['pay_ways'][$list['paytype']]->pay_name;
 			// 显示订单状态，判断评论和可否取消
 			$this->_hotel_ci->load->model ( 'hotel/Order_check_model' );
@@ -2341,6 +2353,13 @@ class HotelService extends HotelBaseService {
         }else{
             $data ['comments'] = $this->_hotel_ci->Comment_model->get_hotel_comments ( $this->_hotel_ci->inter_id, $hotel_id, 1);
         }
+        $comments=array();
+        foreach ($data ['comments'] as $k=>$c){
+            if((!empty($c['content']) && isset($c['type']) && $c['type']=='user') && ($c['status']==1 || $c['openid']==$this->_hotel_ci->open_id)){
+                $comments[$k]=$c;
+            }
+        }
+        $data ['comments'] = $comments;
 		$data ['hotel_id'] = $hotel_id;
 
         $this->_hotel_ci->load->model ( 'hotel/Comment_model' );
@@ -2744,7 +2763,7 @@ class HotelService extends HotelBaseService {
         }
 
         $res = $this->_hotel_ci->Comment_model->add_comment($data);
-
+        $res['hotel_id'] = $data ['hotel_id'];
         if($res && isset($res['comment_id'])){       //评论成功执行送积分
             $comment_info = $this->_hotel_ci->Comment_model->get_comment_by_id($this->_hotel_ci->inter_id,$res['comment_id']);
             if(!empty($comment_info) && $comment_info['point_give']==0){

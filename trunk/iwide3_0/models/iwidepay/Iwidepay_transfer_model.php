@@ -54,7 +54,7 @@ class Iwidepay_Transfer_Model extends MY_Model{
 
     //获取未分账订单（查询分账订单表）取前一天之前的
     public function get_unsplit_orders(){
-        $end_time = date('Y-m-d');
+        $end_time = date('Y-m-d 00:00:00');
         $sql = "select * from " . self::TAB_IWIDEPAY_ORDER . " where (is_dist = 0 or is_dist = 2) and (refund_status = 0 or refund_status=2 or refund_status = 8) and ((transfer_status in (1,2,5,8) and module = 'soma') or (transfer_status in (2,8) and module != 'soma'))  and add_time <'{$end_time}'";
         $res = $this->db_read()->query($sql)->result_array();
         return $res;
@@ -62,7 +62,7 @@ class Iwidepay_Transfer_Model extends MY_Model{
 
     //获取未分账订单（查询分账订单表）取前一天之前的 | 线下
     public function get_offline_unsplit_orders(){
-        $end_time = date('Y-m-d 23:55:00');
+        $end_time = date('Y-m-d 06:00:00');
         $sql = "select id,order_sn,inter_id,hotel_id,module,openid,order_no_main,order_no,transfer_status,trans_amt,dist_amt,handled from " . self::TAB_IWIDEPAY_UNSPLIT_ORDER . " where handled=1 and ((transfer_status in (1,2,5,8) and module = 'soma') or (transfer_status in (2,8) and module != 'soma'))  and add_time <'{$end_time}'";
         $res = $this->db_read()->query($sql)->result_array();
         return $res;

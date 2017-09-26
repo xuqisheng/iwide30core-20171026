@@ -282,7 +282,7 @@ class Settlement extends MY_Admin
         $this->load->model('iwidepay/iwidepay_refund_model' );
         $this->load->model('iwidepay/iwidepay_transfer_model' );
         $this->load->model('iwidepay/Iwidepay_financial_model' );
-        $module = array('hotel'=>'订房','soma'=>'商城','vip'=>'会员','okpay'=>'快乐付','dc'=>'在线点餐','ticket' => '预约核销','base_pay' => '基础月费','dist' => '分销');
+        $module = array('hotel'=>'订房','soma'=>'商城','vip'=>'会员','okpay'=>'快乐付','dc'=>'在线点餐','ticket' => '预约核销','base_pay' => '基础月费','dist' => '分销','balance' => '结余');
 
         # 一、交易对账单
         $list_transfer = $this->Iwidepay_financial_model->transfer_accounts_order($record_id);
@@ -382,21 +382,22 @@ class Settlement extends MY_Admin
         $settlement = $this->Iwidepay_financial_model->sum_settlement($record_id);
         if (!empty($settlement))
         {
-            foreach ($settlement as $item)
+            $add = array();
+            foreach ($settlement as $item_set)
             {
                 # 2、通过 set_id 查询订单
 
-                if ($item['type'] == 'hotel')
+                if ($item_set['type'] == 'hotel')
                 {
-                    $where_sql = ' DR.set_id = '.$item['id'];
+                    $where_sql = ' DR.set_id = '.$item_set['id'];
                 }
-                else if ($item['type'] == 'jfk')
+                else if ($item_set['type'] == 'jfk')
                 {
-                    $where_sql = ' DR.jfk_id = '.$item['id'];
+                    $where_sql = ' DR.jfk_id = '.$item_set['id'];
                 }
-                else if ($item['type'] == 'group')
+                else if ($item_set['type'] == 'group')
                 {
-                    $where_sql = ' DR.group_id = '.$item['id'];
+                    $where_sql = ' DR.group_id = '.$item_set['id'];
                 }
 
                 $list_debt = $this->Iwidepay_financial_model->transfer_accounts_debt_order($where_sql);
@@ -405,6 +406,13 @@ class Settlement extends MY_Admin
                 {
                     foreach ($list_debt as $value)
                     {
+                        //解决门店集团同一账户，订单重复的问题
+                        if(in_array($value['id'],$add))
+                        {
+                            continue;
+                        }
+                        $add[] = $value['id'];
+
                         $item = array();
                         $item['trade_time'] = $value['add_time'];
                         $item['name'] = !empty($value['name']) ? $value['name'] : '--';
@@ -423,16 +431,10 @@ class Settlement extends MY_Admin
                             $order_type = '基础月费';
                             $jfk_amount = $hotel_amount;
                         }
-                        else if ($value['order_type'] == 'orderReward')
+                        else if ($value['order_type'] == 'extra_dist')
                         {
                             $item['module'] = '分销';
-                            $order_type = '首单奖励';
-                            $dist_amount = $hotel_amount;
-                        }
-                        else if ($value['order_type'] == 'extraReward')
-                        {
-                            $item['module'] = '分销';
-                            $order_type = '额外奖励';
+                            $order_type = '分销奖励';
                             $dist_amount = $hotel_amount;
                         }
                         else if ($value['order_type'] == 'refund')
@@ -472,6 +474,45 @@ class Settlement extends MY_Admin
                         $list[] = $item;
                     }
                 }
+
+                //结余记录
+                if (!empty($item_set['hotel_id']) && $item_set['hotel_id'] > 0)
+                {
+                    $balance_order = $this->Iwidepay_financial_model->balance_order($item_set['inter_id'],$item_set['hotel_id'],$item_set['id']);
+                    if (!empty($balance_order))
+                    {
+                        $item = array();
+                        $item['trade_time'] = $balance_order['add_time'];
+                        $item['name'] = !empty($balance_order['name']) ? $balance_order['name'] : '--';
+                        $item['hotel_name'] = !empty($balance_order['hotel_name']) ? $balance_order['hotel_name'] : '--';
+
+                        $item['module'] = !empty($module[$balance_order['module']]) ? $module[$balance_order['module']] : '--';
+                        //来源模块
+                        $order_type = '结余';
+                        $hotel_amount = $balance_order['amount'];
+
+                        $item['order_no'] = !empty($balance_order['order_no']) ? $balance_order['order_no'] : '--';
+                        $item['pay_no'] = !empty($balance_order['ori_pay_no']) ? $balance_order['ori_pay_no'] : '--';
+
+                        $item['order_status'] = $order_type;
+                        $item['transfer_status'] = '未结清';
+                        $item['transfer_date'] = date('Y-m-d',strtotime($balance_order['up_time']));
+
+                        $item['amount'] = formatMoney($balance_order['amount']/100);
+                        $item['write_off_hotel_id'] = '';//核销门店
+
+                        $item['cost_amount'] = '--';
+                        $item['jfk_amount'] = '--';
+                        $item['group_amount'] = '--';
+
+                        $item['hotel_amount'] = '-'.formatMoney($hotel_amount/100);
+
+                        $item['dist_amount'] = '--';
+
+                        $list[] = $item;
+                    }
+                }
+
             }
         }
 

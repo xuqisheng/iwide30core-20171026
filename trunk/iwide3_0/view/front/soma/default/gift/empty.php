@@ -1,6 +1,6 @@
 
 
-<link href="<?php echo base_url('public/soma/mooncake_v1/mooncake.css'). config_item('css_debug');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/mooncake_v1/mooncake.css'). config_item('css_debug');?>" rel="stylesheet">
 <style>
 body,html{background:#fff !important}
 </style>
@@ -33,7 +33,7 @@ body,html{background:#fff !important}
 <div class="receive_list" style="padding-top:15px">
     <ul class="list_style bd">
         <li class="webkitbox">
-            <div class="img"><div class="squareimg"><img src="<?php echo isset($gift_data['openid_received_headimg'])? $gift_data['openid_received_headimg']: base_url('public/soma/images/ucenter_headimg.jpg');?>"></div></div>
+            <div class="img"><div class="squareimg"><img src="<?php echo isset($gift_data['openid_received_headimg'])? $gift_data['openid_received_headimg']: get_cdn_url('public/soma/images/ucenter_headimg.jpg');?>"></div></div>
             <div>
                 <p><?php echo isset($gift_data['openid_received_nickname'])? $gift_data['openid_received_nickname']: '';?></p>
                 <p><?php echo $gift_data['update_time'];?></p>

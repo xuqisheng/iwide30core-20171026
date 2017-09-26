@@ -1,6 +1,6 @@
 <body>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
-<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<link href="<?php echo get_cdn_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
 <div class="pageloading"><p class="isload"><?php echo $lang->line('loading');?></p></div>
 <script>
     var package_obj= {
@@ -144,7 +144,7 @@
             ?>
             <a href="<?php echo Soma_const_url::inst()->get_package_detail(array('pid'=>$v['product_id'],'id'=>$inter_id) );?>" class="item bg_fff">
                 <div class="img" style="height: 306.266px;">
-                    <img s="<?php echo base_url('public/soma/images/default2.jpg'); ?>" src="<?php echo $v['face_img'];?>">
+                    <img s="<?php echo get_cdn_url('public/soma/images/default2.jpg'); ?>" src="<?php echo $v['face_img'];?>">
                     <?php if(isset($v['scopes']) ){ //专属价 ?>
                         <div class="j_label color_main f_s_12">
                             <?php echo $lang->line('exclusive'); ?>
@@ -226,7 +226,7 @@
             ?>
                 <a href="<?php echo Soma_const_url::inst()->get_package_detail(array('pid'=>$v['product_id'],'id'=>$inter_id) );?>" class="item bg_fff">
                     <div class="img" style="height: 306.266px;">
-                        <img s="<?php echo base_url('public/soma/images/default2.jpg'); ?>" src="<?php echo $v['face_img'];?>">
+                        <img s="<?php echo get_cdn_url('public/soma/images/default2.jpg'); ?>" src="<?php echo $v['face_img'];?>">
                         <?php if(isset($v['scopes'])){ //专属价 ?>
                             <div class="j_label color_main f_s_12">
                                 <?php echo $lang->line('exclusive'); ?>

@@ -57,9 +57,9 @@
                 <?php endif; ?>
             })
         </script>
-        <script type=text/javascript src="<?php echo refer_res('manifest.js', $path) ?>"></script>
-        <script type=text/javascript src="<?php echo refer_res('vendor.js', $path) ?>"></script>
-        <script type=text/javascript src="<?php echo refer_res('app.js', $path) ?>"></script>
+        <script type=text/javascript src="<?php echo refer_res('manifest.js', 'SOMA', 'manifest.json', $path.'/20170926') ?>"></script>
+        <script type=text/javascript src="<?php echo refer_res('vendor.js', 'SOMA', 'manifest.json', $path.'/20170926') ?>"></script>
+        <script type=text/javascript src="<?php echo refer_res('app.js', 'SOMA', 'manifest.json', $path.'/20170926') ?>"></script>
         <script>
             /*下列字符不能删除，用作替换之用*/
             //[<sign_update_code>]

@@ -270,7 +270,7 @@ class Iwidepay_capital_model extends MY_Model
     public function arrears_amount($where_arr)
     {
         $sql = "SELECT SUM(amount) AS amount FROM ".self::TAB_IWIDEPAY_DEBT_RD."
-                WHERE `order_type` IN('order','base_pay','refund','orderReward','extraReward') AND status = 0";
+                WHERE `order_type` IN('order','base_pay','refund','orderReward','extra_dist') AND status = 0";
         if (!empty($where_arr['inter_id']) && $where_arr['inter_id'] != 'ALL_PRIVILEGES')
         {
             $sql .= " AND  inter_id = '{$where_arr['inter_id']}'";

@@ -142,7 +142,9 @@ class Luopan_hotel_model extends CI_Model {
 						$amount = 0;
 						foreach ( $tmp ['date_detail'] as $dk => $td ) {
 							
-							if ($data [$room_key] ['state_info'] [$sik] ['price_type'] == 'member'||(!empty($si ['related_cal_value'])&&!empty($si ['related_cal_way']))) {
+							if ($si ['external_way']==1){
+							    $tmp ['date_detail'] [$dk] ['price'] = round ( $data [$room_key] ['state_info'] [$sik] ['date_detail'] [$dk] ['price'] );
+							}else if ($data [$room_key] ['state_info'] [$sik] ['price_type'] == 'member'||(!empty($si ['related_cal_value'])&&!empty($si ['related_cal_way']))) {
 								$tmp ['date_detail'] [$dk] ['price'] = round ( $this->Order_model->cal_related_price ( $td ['price'], $si ['related_cal_way'], $si ['related_cal_value'], 'price' ) );
 							} else {
 								$tmp ['date_detail'] [$dk] ['price'] = round ( $data [$room_key] ['state_info'] [$sik] ['date_detail'] [$dk] ['price'] );

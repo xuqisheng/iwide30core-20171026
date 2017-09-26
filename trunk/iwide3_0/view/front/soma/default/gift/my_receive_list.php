@@ -1,5 +1,5 @@
 
-<link href="<?php echo base_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
+<link href="<?php echo get_cdn_url('public/soma/mooncake_v1/mooncake.css');?>" rel="stylesheet">
 <script>
 wx.config({
     debug: false,
@@ -95,7 +95,7 @@ array([1000001234] array(
                 endif;
             ?></span>
         </div>
-        <div class="item_hr"><img src="<?php echo base_url('public/soma/images/hr.jpg');?>" /></div>
+        <div class="item_hr"><img src="<?php echo get_cdn_url('public/soma/images/hr.jpg');?>" /></div>
         <div class="bg_fff item_foot">
             <p class="h36">
                 <?php //接收份数的计算

@@ -98,7 +98,7 @@ class Menu_model extends CI_Model {
 		$this->db->trans_complete();
 		if($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
-			MYLOG::w('Save Menu Sort | Admin Id:'.$this->session->get_admin_id().' | Admin Name:'.$this->session->get_admin_username().' | sort:'.json_encode($this->input->post('sort')).' | Result:SUCCESS','weixin_api');
+// 			MYLOG:w('Save Menu Sort | Admin Id:'.$this->session->get_admin_id().' | Admin Name:'.$this->session->get_admin_username().' | sort:'.json_encode($this->input->post('sort')).' | Result:SUCCESS','weixin_api');
 			return json_encode(array('errmsg'=>'数据保存失败'));
 		}else{
 			$this->db->trans_commit();
@@ -300,7 +300,7 @@ class Menu_model extends CI_Model {
 			doCurlGetRequest ( 'https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=' . $access_token );
 			$url = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=' . $access_token;
 			$result = doCurlPostRequest ( $url, $data );
-			MYLOG::w('Generate Menu | Admin Id:'.$this->session->get_admin_id().' | Admin Name:'.$this->session->get_admin_username().' | Access Token:'.$access_token.' | Menu:'.$data.' | Result:'.$result,'weixin_api');
+			MYLOG:w('Generate Menu | Admin Id:'.$this->session->get_admin_id().' | Admin Name:'.$this->session->get_admin_username().' | Access Token:'.$access_token.' | Menu:'.$data.' | Result:'.$result,'weixin_api');
 			$res = json_decode($result);
 			if (isset ( $res->errcode ) && ($res->errcode == 40001 || $res->errcode == 42001) && $do_continue) {
 				$this->load->model('wx/access_token_model');

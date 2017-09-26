@@ -563,8 +563,13 @@ class Prices extends MY_Admin {
 		$this->load->model('common/Pms_model');
 		$pms_set=$this->Pms_model->get_hotel_pms_set($this->inter_id,0);
 		$data['is_pms']=0;
+		$data['external_way_valid']=NULL;
 		if (!empty($pms_set)){
-			$data['is_pms']=1;
+		    $data['is_pms']=1;
+		    $pms_auth=json_decode($pms_set['pms_auth'],TRUE);
+		    if (isset($pms_auth['vew'])){
+		        $data['external_way_valid']=$data ['list']['external_way'];
+		    }
 		}
 		//与券关联
 		$this->load->model('hotel/Coupons_model');
@@ -597,6 +602,10 @@ class Prices extends MY_Admin {
 		$data ['price_name'] = htmlspecialchars ( $this->input->post ( 'price_name' ) );
 		$data ['unlock_code'] = htmlspecialchars ( $this->input->post ( 'unlock_code' ) );
 		$data ['external_code'] = htmlspecialchars ( $this->input->post ( 'external_code' ) );
+		$external_way = $this->input->post('external_way');
+		if (isset($external_way)){
+		    $data['external_way']=intval($external_way);
+		}
 		$data ['use_condition'] ['pre_pay'] = intval ( $this->input->post ( 'pre_pay' ) );
 		$no_pay_way = $this->input->post ( 'no_pay_way' );
 		if (! empty ( $no_pay_way )) {

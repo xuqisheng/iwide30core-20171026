@@ -47,8 +47,37 @@ class Autorun extends MY_Controller {
             $ok = $this->redis_proxy->setNX ( $key, $value );
         }elseif($type == 'delete' ){
             $ok = $this->redis_proxy->del ( $key );
+        }elseif ($type == 'get') {
+            $ok = $this->redis_proxy->get( $key );
+        }elseif ($type == 'update') {
+            $ok = $this->redis_proxy->set( $key, $value );
         }
         return $ok;
+    }
+
+    /**
+     * [check_key 检测此前是否有脚本未正常执行完成]
+     */
+    protected function check_key($func_name){
+        // 获取key
+        $val = $this->redis_lock('get','IWIDEPAY_EXECUTE_SORT');
+        $this->load->library('IwidePay/IwidePayExecute',null,'IwidePayExecute');
+        $sort = 0;
+        if($func_name=='settlement_info'){
+            $sort = IwidePayExecute::AUTORUN_SETTLEMENT_INFO_SORT;
+        }elseif($func_name=='sum_info'){
+            $sort = IwidePayExecute::AUTORUN_SUM_INFO_SORT;
+        }elseif($func_name=='run_refund_financial'){
+            $sort = IwidePayExecute::AUTORUN_RUN_REFUND_FINANCIAL_SORT;
+        }elseif($func_name=='run_debt_financial'){
+            $sort = IwidePayExecute::AUTORUN_RUN_DEBT_FINANCIAL_SORT;
+        }elseif($func_name=='run_transfer_financial'){
+            $sort = IwidePayExecute::AUTORUN_RUN_TRANSFER_FINANCIAL_SORT;
+        }
+        if($sort>0&&$val!=$sort){
+            MYLOG::w('err:上一个的脚本未正常执行完成', 'iwidepay');
+            exit('上一个的脚本未正常执行完成');
+        }
     }
 
     //处理订单
@@ -103,6 +132,7 @@ class Autorun extends MY_Controller {
     //汇总数据
     public function sum_info(){
         $this->check_arrow();
+        $this->check_key('sum_info');
         //上锁
         $ok = $this->redis_lock('set','_CMBC_SUM_RECORD');
         if(!$ok){
@@ -311,6 +341,8 @@ class Autorun extends MY_Controller {
             }
         }
         $this->redis_lock('delete','_CMBC_SUM_RECORD');
+        //执行顺序+1
+        $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::AUTORUN_SUM_INFO_SORT+1);
         echo date('Y-m-d H:i:s').' : '.microtime(TRUE).' 结束处理汇总脚本...<br/>';
         MYLOG::w('结束处理汇总脚本', 'iwidepay/transfer_auto');
 
@@ -320,6 +352,7 @@ class Autorun extends MY_Controller {
     public function settlement_info()
     {
         $this->check_arrow();
+        $this->check_key('settlement_info');
         //上锁
 
 
@@ -473,6 +506,8 @@ class Autorun extends MY_Controller {
         }
 
         $this->redis_lock('delete','_CMBC_SETTLEMENT_RECORD');
+        //执行顺序+1
+        $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::AUTORUN_SETTLEMENT_INFO_SORT+1);
         echo date('Y-m-d H:i:s').' : '.microtime(TRUE).' 结束处理汇总结算脚本...<br/>';
         MYLOG::w('结束处理汇总结算脚本', 'iwidepay/transfer_auto_settlement');
 
@@ -575,7 +610,7 @@ class Autorun extends MY_Controller {
     public function run_refund_financial()
     {
         $this->check_arrow();
-
+        $this->check_key('run_refund_financial');
         //上锁
         $ok = $this->redis_lock('set','_CMBC_REFUND_FINANCIAL_');
         if(!$ok){
@@ -616,6 +651,8 @@ class Autorun extends MY_Controller {
         }
 
         $this->redis_lock('delete','_CMBC_REFUND_FINANCIAL_');
+        //执行顺序+1
+        $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::AUTORUN_RUN_REFUND_FINANCIAL_SORT+1);
     }
 
 
@@ -625,7 +662,7 @@ class Autorun extends MY_Controller {
     public function run_debt_financial()
     {
         $this->check_arrow();
-
+        $this->check_key('run_debt_financial');
         //上锁
         $ok = $this->redis_lock('set','_CMBC_DEBT_FINANCIAL_');
         if(!$ok){
@@ -686,6 +723,8 @@ class Autorun extends MY_Controller {
         }
 
         $this->redis_lock('delete','_CMBC_DEBT_FINANCIAL_');
+        //执行顺序+1
+        $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::AUTORUN_RUN_DEBT_FINANCIAL_SORT+1);
     }
 
     /**
@@ -694,7 +733,7 @@ class Autorun extends MY_Controller {
     public function run_transfer_financial()
     {
         $this->check_arrow();
-
+        $this->check_key('run_transfer_financial');
         //上锁
         $ok = $this->redis_lock('set','_CMBC_TRANSFER_FINANCIAL_');
         if(!$ok){
@@ -784,7 +823,34 @@ class Autorun extends MY_Controller {
             }
         }
 
+        //生成结余记录
+        $balance_record = $this->Iwidepay_financial_model->balance_record($stat_time,$end_time);
+        if (!empty($balance_record))
+        {
+            foreach ($balance_record as $value)
+            {
+                $item = array(
+                    'module'    => $value['module'],
+                    'order_no'  => $value['order_no'],
+                    'pay_no'    => $value['ori_pay_no'],
+                    'trade_type' => $this->get_financial_type($value['order_type']),
+                    'transfer_status' => 4, //4-未结清
+                    'transfer_date' => date('Y-m-d',strtotime($value['up_time'])),
+                    'inter_id' => $value['inter_id'],
+                    'hotel_id' => $value['hotel_id'],
+                    'trade_time' => $value['add_time'],
+                    'add_time' => date('Y-m-d H:i:s'),
+                    'amount' => $value['amount'],
+                );
+
+                $this->Iwidepay_financial_model->insert_order($item);
+            }
+        }
+
+
         $this->redis_lock('delete','_CMBC_TRANSFER_FINANCIAL_');
+        //最后执行的脚本要清除key
+        $this->redis_lock('delete','IWIDEPAY_EXECUTE_SORT');
     }
 
     /**
@@ -810,6 +876,9 @@ class Autorun extends MY_Controller {
                 break;
             case 'extra_dist':
                 $trade_type = 5;//分销奖励
+                break;
+            case 'balance':
+                $trade_type = 8;//结余
                 break;
             default :
                 $trade_type = 0;

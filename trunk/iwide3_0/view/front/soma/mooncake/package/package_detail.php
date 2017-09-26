@@ -1,7 +1,7 @@
 <body>
-<script src="<?php echo base_url('public/soma/scripts/imgscroll.js');?>"></script>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
-<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<link href="<?php echo get_cdn_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
 <script>
     wx.config({
         debug: false,
@@ -53,12 +53,12 @@
 
 <!-- 显示分销号start -->
     <div class="distribute_btn" style="display:none">
-        <span><img src="<?php echo base_url('public/soma/images/distributeimg.jpg');?>" /></span>
+        <span><img src="<?php echo get_cdn_url('public/soma/images/distributeimg.jpg');?>" /></span>
     </div>
     <div class="ui_pull distribute" style="display:none" >
         <div class="pullbox center bg_fff">
             <div class="pullclose bg_999" onClick="toclose()">&times;</div>
-            <div class="pullimg"><div class="squareimg"><img src="<?php echo base_url('public/soma/images/distributeimg.jpg');?>" /></div></div>
+            <div class="pullimg"><div class="squareimg"><img src="<?php echo get_cdn_url('public/soma/images/distributeimg.jpg');?>" /></div></div>
             <div>分销号:<span id="distribute_id"></span></div>
             <div>姓　名:<span id="distribute_name"></span></div>
             <div class="bg_999 pullbtn h26" onClick="toclose()">取消</div>
@@ -110,7 +110,7 @@
             <?php }?>
         <?php else: ?>
             <a class="slideson">
-                <img src="<?php echo base_url('public/soma/images/default2.jpg'); ?>" />
+                <img src="<?php echo get_cdn_url('public/soma/images/default2.jpg'); ?>" />
             </a>
         <?php endif; ?>
     </div>
@@ -147,7 +147,7 @@
 <?php /**有秒杀**/ if( !empty($killsec) && isset($killsec['is_stock']) && $killsec['is_stock']==Soma_base::STATUS_TRUE ): ?>
 <div class="whiteblock" id="ks_stock_div" style="display: none;">
 	<div class="justify webkitbox">
-    	<div class="progress"><span class="bg_main fill1" style="width:0<?php //echo $ks_percent; ?>%">&nbsp;<img src="<?php echo base_url('public/soma/images/ruler.png'); ?>"></span></div>
+    	<div class="progress"><span class="bg_main fill1" style="width:0<?php //echo $ks_percent; ?>%">&nbsp;<img src="<?php echo get_cdn_url('public/soma/images/ruler.png'); ?>"></span></div>
         <div><span class="color_main">剩余名额：</span><span class="color_888 fill2">0<?php //echo $ks_stock; ?>/1<?php //echo $ks_count; ?></span></div>
     </div>
 </div>
@@ -365,8 +365,8 @@ function get_in_line(){
 		<a class="h24 btn_void bdradius" href="<?php echo Soma_const_url::inst()->get_package_pay(). "&pid={$package['product_id']}&bType=gift";?>">送朋友</a>
 		<a class="h24 btn_void bdradius" href="<?php echo Soma_const_url::inst()->get_package_pay(). "&pid={$package['product_id']}&bType=gift";?>">送群友</a>
     <?php else: ?>
-        <a href="<?php echo Soma_const_url::inst()->get_pacakge_home_page(array('id'=>$inter_id)); ?>" class="img_link"><img src="<?php echo base_url('public/soma/v1/images'); ?>/ico9.png"/></a>
-        <a href="<?php echo Soma_const_url::inst()->get_soma_ucenter(array('id'=>$inter_id)); ?>" class="img_link"><img src="<?php echo base_url('public/soma/v1/images'); ?>/ico10.png"/></a>
+        <a href="<?php echo Soma_const_url::inst()->get_pacakge_home_page(array('id'=>$inter_id)); ?>" class="img_link"><img src="<?php echo get_cdn_url('public/soma/v1/images'); ?>/ico9.png"/></a>
+        <a href="<?php echo Soma_const_url::inst()->get_soma_ucenter(array('id'=>$inter_id)); ?>" class="img_link"><img src="<?php echo get_cdn_url('public/soma/v1/images'); ?>/ico10.png"/></a>
 	<?php endif; ?>
 	
    		<?php if( isset($finish_killsec) && $finish_killsec ): ?>

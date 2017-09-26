@@ -47,12 +47,30 @@ class Debt extends MY_Controller {
             $ok = $this->redis_proxy->setNX ( $key, $value );
         }elseif($type == 'delete' ){
             $ok = $this->redis_proxy->del ( $key );
+        }elseif ($type == 'get') {
+            $ok = $this->redis_proxy->get( $key );
+        }elseif ($type == 'update') {
+            $ok = $this->redis_proxy->set( $key, $value );
         }
         return $ok;
     }
 
+    /**
+     * [check_key 检测此前是否有脚本未正常执行完成]
+     */
+    protected function check_key(){
+        // 获取key
+        $val = $this->redis_lock('get','IWIDEPAY_EXECUTE_SORT');
+        $this->load->library('IwidePay/IwidePayExecute',null,'IwidePayExecute');
+        if($val!=IwidePayExecute::DEBT_CREATE_SORT){
+            MYLOG::w('err:上一个的脚本未正常执行完成', 'iwidepay_debt');
+            exit('上一个的脚本未正常执行完成');
+        }
+    }
+
     public function create(){
     	$this->check_arrow();
+    	$this->check_key();
         // 上锁
         $ok = $this->redis_lock();
         if(!$ok){
@@ -80,6 +98,8 @@ class Debt extends MY_Controller {
 
         //释放锁
         $this->redis_lock('delete');
+        //执行顺序+1
+        $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::DEBT_CREATE_SORT+1);
         MYLOG::w('info:结束生成欠款单的脚本', 'iwidepay_debt');
         exit('欠款单生成完毕');
     }

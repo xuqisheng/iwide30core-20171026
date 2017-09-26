@@ -10,6 +10,9 @@ use App\services\BaseService;
  */
 class StatementsService extends BaseService
 {
+    public $config = array(
+        'limit' => 20,
+    );
 
     /**
      *
@@ -29,7 +32,7 @@ class StatementsService extends BaseService
             $params['inter_id'] = $inter_id ? $inter_id : 'deny';
         }
 
-        $limit = isset($params['limit']) && !empty($params['limit']) ?  $params['limit'] : 30 ;
+        $limit = isset($params['limit']) && !empty($params['limit']) ?  $params['limit'] : $this->config['limit'] ;
         $offset = isset($params['offset']) && !empty($params['offset']) ?  $params['offset'] : '' ;
         $filter = array();
 
@@ -42,20 +45,24 @@ class StatementsService extends BaseService
         }
 
         if(isset($params['time_type']) && $params['time_type']== 'update_time'){
-            $time_type = "last_update_time";
+            $time_type = "last_update_time";     //核定时间
+        }else if(isset($params['time_type']) && $params['time_type']== 'send_time'){
+            $time_type = 'send_time';    //发放时间
         }else{
-            $time_type = 'createtime';
+            $time_type = 'createtime';  //创建时间
         }
         //时间
         if(isset($params['start_time']) && !empty($params['start_time'])){
             $filter[$time_type ." >=" ]  = $params['start_time']." 00:00:00 ";
         }
         if(isset($params['end_time']) && !empty($params['end_time'])){
-            $filter[$time_type . " <= "]  =  $params['end_time']." 00:00:00 ";
+            $filter[$time_type . " <= "]  =  $params['end_time']." 23:59:59 ";
         }
 
+        if(isset($params['page']) && !empty($params['page']) && $params['page'] > 0){
+            $offset = $limit * ($params['page'] - 1);
+        }
 
-//        print_r($filter);exit;
         $this->getCI()->load->model('membervip/admin/Vapi_statements','statements');
         $result = $this->getCI()->statements->distribution_list( $inter_id ,$limit ,$offset ,$filter  );
         return $result;
@@ -75,17 +82,24 @@ class StatementsService extends BaseService
             $filter['sales_id']  =  $params['sales_id'];
         }
 
-        if(isset($params['time_type']) && $params['time_type']== 'update_time'){
-            $time_type = "last_update_time";
-        }else{
-            $time_type = 'createtime';
+        if(isset($params['hotel_id']) && !empty($params['hotel_id'])){
+            $filter['hotel_id']  =  $params['hotel_id'];
         }
+
+        if(isset($params['time_type']) && $params['time_type']== 'createtime'){
+            $time_type = "createtime";     //核定时间
+        }else if(isset($params['time_type']) && $params['time_type']== 'send_time'){
+            $time_type = 'send_time';    //发放时间
+        }else{
+            $time_type = 'last_update_time';  //创建时间
+        }
+
         //时间
         if(isset($params['start_time']) && !empty($params['start_time'])){
             $filter[$time_type ." >=" ]  = $params['start_time']." 00:00:00 ";
         }
         if(isset($params['end_time']) && !empty($params['end_time'])){
-            $filter[$time_type . " <= "]  =  $params['end_time']." 00:00:00 ";
+            $filter[$time_type . " <= "]  =  $params['end_time']." 23:59:59 ";
         }
 
         $this->getCI()->load->model('membervip/admin/Vapi_statements','statements');
@@ -95,7 +109,7 @@ class StatementsService extends BaseService
     }
 
     //储值分销报表
-    public function deposit_card( $params = '' ){
+    public function deposit_card( $params = '', $export = false ){
         $inter_id = $this->getCI()->session->get_admin_inter_id();
         if($inter_id != FULL_ACCESS){
             $params['inter_id'] = $inter_id ? $inter_id : 'deny';
@@ -103,34 +117,63 @@ class StatementsService extends BaseService
         $filter = array();
 
         /*搜索条件*/
-        if(isset($params['time_type']) && $params['time_type']== 'update_time'){
-            $time_type = "last_update_time";
+        if(isset($params['time_type']) && $params['time_type']== 'send_time'){
+            $time_type = "send_time";
         }else{
-            $time_type = 'send_time';
+            $time_type = 'last_update_time';
         }
         //时间
         if(isset($params['start_time']) && !empty($params['start_time'])){
             $filter[$time_type ." >=" ]  = $params['start_time']." 00:00:00 ";
         }
         if(isset($params['end_time']) && !empty($params['end_time'])){
-            $filter[$time_type . " <= "]  =  $params['end_time']." 00:00:00 ";
+            $filter[$time_type . " <= "]  =  $params['end_time']." 23:59:59 ";
+        }
+
+        //分销号
+        if(isset($params['sales_id']) && !empty($params['sales_id'])){
+            $filter["distribution_num"]  =  $params['sales_id'];
+        }
+
+        if(isset($params['hotel_id']) && !empty($params['hotel_id'])){
+            $filter["hotel_id"]  =  $params['hotel_id'];
         }
         /*end 搜索条件*/
 
-        $this->getCI()->load->model('membervip/admin/Vapi_statements','statements');
-        $result = $this->getCI()->statements->deposit_card_list( $inter_id ,$filter  );
+        $limit = isset($params['limit']) && !empty($params['limit']) ?  $params['limit'] : $this->config['limit'] ;
+        $offset = 0;
+        if(isset($params['page']) && !empty($params['page']) && $params['page'] > 0){
+            $offset = $limit * ($params['page'] - 1);
+        }
 
+        $this->getCI()->load->model('membervip/admin/Vapi_statements','statements');
+        if($export){
+            return  $this->getCI()->statements->deposit_card_list_for_exprot( $inter_id ,$filter  );
+        }else{
+            $result = $this->getCI()->statements->deposit_card_list( $inter_id ,$limit,$offset,$filter  );
+        }
         $staffs_mapping = array();
-        if(!empty($result)){
+        if(!empty($result['data'])){
             $staffs = $this->getCI()->statements->hotel_staffs($inter_id);
             foreach($staffs as $s){
                 $staffs_mapping[$s['qrcode_id']]  = $s['name'];
             }
-            foreach($result as $key => $v){
+            foreach($result['data'] as $key => $v){
                   if( !empty($staffs_mapping[$v['distribution_num']]) && isset($staffs_mapping[$v['distribution_num']]) && !empty($staffs_mapping[$v['distribution_num']])){
-                      $result[$key]['distribution_name']  = $staffs_mapping[$v['distribution_num']];
+                      $result['data'][$key]['distribution_name']  = $staffs_mapping[$v['distribution_num']];
                   }else{
-                      $result[$key]['distribution_name']  = '';
+                      $result['data'][$key]['distribution_name']  = '';
+                  }
+                  switch( $result['data'][$key]['deposit_type']){
+                      case "g":
+                          $result['data'][$key]['distribution_type'] = '购卡';
+                          break;
+                      case "c":
+                          $result['data'][$key]['distribution_type'] = '储值';
+                          break;
+                      default :
+                          $result['data'][$key]['distribution_type'] = '其他';
+                          break;
                   }
             }
 
@@ -204,8 +247,8 @@ class StatementsService extends BaseService
             $total_use += $return_data[ $v."_use"] = $this->getCI()->statements->balance_statics_group_module_total( $inter_id ,$filter);    //各个模块使用总额
         }
 
-        $return_data['total_use'] = $total_use;
-        $return_data['total_add'] = $total_add;
+        $return_data['use_total'] = $total_use;
+        $return_data['add_total'] = $total_add;
 
         //环比
         //上一个周期
@@ -213,8 +256,9 @@ class StatementsService extends BaseService
         $datetime2 = date_create($end_date);
         $interval = date_diff($datetime1, $datetime2);
         $counts = $interval->days;
-        $filter['last_update_time >='] = date('Y-m-d',strtotime("$start_date -$counts day"));
-        $filter['last_update_time <='] = date('Y-m-d',strtotime("$end_date -$counts day"));
+        $filter['last_update_time >='] = date('Y-m-d',strtotime("$start_date -$counts day"))." 00:00:00";
+//        $filter['last_update_time <='] = date('Y-m-d',strtotime("$end_date -$counts day"));
+        $filter['last_update_time <='] = $start_date." 23:59:59";
         $return_data['mom_add_total'] = $this->getCI()->statements->balance_statics_group_module_total( $inter_id ,$filter ,1 );
         $return_data['mom_use_total'] = $this->getCI()->statements->balance_statics_group_module_total( $inter_id ,$filter );
         //end环比
@@ -279,8 +323,11 @@ class StatementsService extends BaseService
         $start_date = $params['start_date'];
         $end_date  = $params['end_date'];
 
-        $filter['last_update_time >='] = $start_date ." 00:00:00";
-        $filter['last_update_time <='] = $end_date ." 23:59:59";
+        if(isset($params['hotel_id']) && !empty($params['hotel_id']))
+            $filter['hotel_id'] = $params['hotel_id'];
+
+        $filter['createtime >='] = strtotime($start_date ." 00:00:00");
+        $filter['createtime <='] = strtotime($end_date ." 23:59:59");
 
         $this->getCI()->load->model('membervip/admin/Vapi_statements','statements');
 
@@ -338,14 +385,61 @@ class StatementsService extends BaseService
         $datetime2 = date_create($end_date);
         $interval = date_diff($datetime1, $datetime2);
         $counts = $interval->days;
-        $filter['last_update_time >='] = date('Y-m-d',strtotime("$start_date -$counts day"));
-        $filter['last_update_time <='] = date('Y-m-d',strtotime("$end_date -$counts day"));
+        $filter['createtime >='] = strtotime("$start_date -$counts day" . " 00:00:00");
+//        $filter['createtime <='] = strtotime("$end_date -$counts day");
+        $filter['createtime <='] = strtotime($start_date ." 23:59:59");
         $return['mom_add_total'] = $this->getCI()->statements->credit_statics_group_module_amount_total( $inter_id ,$filter ,1 );
         $return['mom_use_total'] = $this->getCI()->statements->credit_statics_group_module_amount_total( $inter_id ,$filter );
         //end环比
 
-        print_r($return);exit;
+       return $return;
 
+    }
+
+    public function deposit_credit_detail_by_date(  $params = '' ){
+        $inter_id = $this->getCI()->session->get_admin_inter_id();
+        if($inter_id != FULL_ACCESS){
+            $params['inter_id'] = $inter_id ? $inter_id : 'deny';
+        }
+        $filter = array();
+
+        $start_date = $params['start_date'];
+        $end_date  = $params['end_date'];
+
+        if(isset($params['hotel_id']) && !empty($params['hotel_id']))
+            $filter['hotel_id'] = $params['hotel_id'];
+
+        $filter['createtime >='] = strtotime($start_date ." 00:00:00");
+        $filter['createtime <='] = strtotime($end_date ." 23:59:59");
+
+
+        $this->getCI()->load->model('membervip/admin/Vapi_statements','statements');
+
+        $hotels[0] = array(
+            'hotel_id'  => 0,
+            'name'    => '总部'
+        );
+
+        $hotels_list = $this->getCI()->statements->hotel_list($inter_id);
+        foreach($hotels_list as $h){
+            $hotels[$h['hotel_id']] = $h;
+        }
+
+        if(isset($params['log_type'])){
+            $log_type = $params['log_type'];
+        }else{
+            $log_type = 2;  //默认是使用的
+        }
+
+        if($log_type == 2){
+            $result = $this->getCI()->statements->credit_statics_group_module( $inter_id ,$filter );
+            $return = $this->getCI()->statements->format_data($start_date,$end_date,$result ,$hotels , array('admin','vip','hotel','soma'));
+        }else{
+            $result = $this->getCI()->statements->credit_statics_group_module( $inter_id ,$filter , 1 );
+            $return = $this->getCI()->statements->format_data($start_date,$end_date,$result,$hotels , array('admin','vip','sign','hotel'));
+        }
+
+        return $return;
     }
 
 }

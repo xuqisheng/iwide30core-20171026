@@ -18,26 +18,27 @@
 .searchLayer .date-title{margin-bottom: 9.8px;}
 .checkdate{justify-content:space-around;padding: .3rem 20px 0 20px;}
 .checkdate .iconfont>*{vertical-align:middle}
-.checkdate .day{font-size:49px; padding-bottom:15px; padding-bottom:6px;}
+.checkdate .day{font-size:45px; padding-bottom:15px; padding-bottom:6px;}
 .checkdate .rotate60{width:80px}
 .histroy div{margin-bottom: 1.187rem;}
 .histroy_bottom{margin-bottom: 1.406rem;}
-.searchLayer .button{font-size: 1.1rem;letter-spacing: 6px;padding-left: 12px;}
+.searchLayer .button{font-size: 1.05rem;letter-spacing: 6px;padding-left: 12px;}
 .searchLayer .main_tab_line{height: 0.909rem;}
-.search_bg .search_top_img{margin-right: 0.609rem;border-radius: 4px;overflow: hidden;position: relative;width: 319px;height: 159.5px;}
+.search_bg .search_top_img{border-radius: 4px;overflow: hidden;position: relative;width: 319px;height: 159.5px;}
 .search_top_img:after{content: "";background-color: black;opacity: 0.1;position: absolute;top: 0px;left: 0px;width: 100%;height: 100%;}
 .search_top_img .squareimg{padding-bottom: 159.5px;}
 .search_img_wrapper{padding: 0.875rem 0 0 0.875rem;padding-right: 30px;}
-.search_top_word{position: absolute;bottom: 3px;right: 8px;z-index: 2;}
+.search_top_word{position: absolute;bottom: 3px;right: 8px;z-index: 2;display: none;}
+.swiper-slide-active .search_top_word{display: block;}
 .search_discount_word{margin-bottom: 0.168rem;}
-.search_bg .others>*{padding: 0.3rem 2px 1rem 2px;}
+.search_bg .others>*{padding: 0rem 2px .827rem 2px;}
 #old_search a{margin-bottom: 1.406rem;}
 #old_search a:last-child{margin-bottom: 0px;}
 .others .img .always:before{content:"\e055";font-family:iconfont;font-size: 1.42rem}
 .others .img .collect:before{content:"\e061";font-family:iconfont;font-size: 1.42rem}
 .others .img .order:before{content:"\e053";font-family:iconfont;font-size: 1.42rem}
 /*广告位*/
-.others>*{padding: 0 2px 1.2rem 2px;margin-right:0.625rem;border-radius: 3.5px;border:0.5px solid transparent;background-clip:border-box;position: relative;}
+.others>*{padding: 0 2px 1.2rem 2px;margin-right: 0.469rem;border-radius: 3.5px;border:0.5px solid transparent;background-clip:border-box;position: relative;}
 .others>*:last-child{margin-right:0}
 .others .txtclip{width:6em; min-width:100%}
 .others .img{width:40px;margin: 1.112rem auto  0.75rem auto;}
@@ -64,7 +65,7 @@
 .hide_pack .main_tab_line ,.hide_pack .shadow_b,.hide_pack #j-swim{display: none!important;}
 .hide_pack #business_portal{position: absolute;top: 11px;right: 17px;width: 66px!important;}
 .hide_pack{padding-bottom: 7px;position: relative;}
-.room_collect{cursor: pointer;}
+.room_collect{cursor: pointer;margin-top: 11px;}
 .room_list_question{cursor: pointer;}
 /*评分*/
 .score:after, .room_list_score:after{content:"分"; font-size:0.853rem;}
@@ -86,7 +87,7 @@
 .room_collect_hide .room_triangle{transform:rotate(180deg); -webkit-transform:rotate(180deg);display: inline-block;}
 .room_collect_hide .discount_price{display: block;}
 .room_collect_hide .original_price{display: none;}
-.room_collect:after{content: "收起";color: #808080;font-size: 14px;}
+.room_collect:after{content: "收起";color: #808080;font-size:0.731rem;}
 .room_collect_hide .room_collect:after{content: "更多";}
 .server>*{margin-right:10px;}
 .imgtitle{position:absolute; bottom: -1px; padding: 1rem 12px; width:100%; background: -webkit-linear-gradient(bottom,rgba(22,22,22,1),rgba(22,22,22,0)); /* Safari 5.1 - 6.0 */ background: linear-gradient(bottom, rgba(22,22,22,1) ,rgba(22,22,22,0)); /* 标准的语法*/ z-index: 1; }
@@ -97,9 +98,9 @@
 .bookBtn .room_reserve{line-height: 24px;font-size: .85rem;}
 .bookBtn_need{padding: 0.15rem 0.1rem;}
 .room_description{height: 192px;padding-bottom: 0px;border-top-left-radius: 4px;border-top-right-radius: 4px;position: relative;z-index: 1;}
-.room_description_rows{ margin: 0px 10px;}
+.room_description_rows{ margin: 0px 18px;}
 .room_description_rows div{width: 33%;margin-bottom: 15px;}
-.room_description_rows em{float: left;width: 20px;height: 23px;text-align: left;margin-right: 3px;font-size: 1.05rem;margin-top: -1px;}
+.room_description_rows em{float: left;width: 20px;height: 23px;text-align: left;margin-right: 10px;font-size: 1.05rem;margin-top: -1px;}
 .room_description_rows p{margin-bottom: 1.3rem;}
 .hotel_details_wrap .room_description_rows em{margin-top: 0px;}
 .item *{letter-spacing: 0.2px;}
@@ -133,7 +134,7 @@
 .order_nologin_spacing{letter-spacing: 3px;}
 .order_nologin_word{/*background: -webkit-linear-gradient(right,rgba(31,31,31,1) 30%,rgba(31,31,31,0) 100%);background:linear-gradient(right,rgba(31,31,31,1) 30%,rgba(31,31,31,0) 100%);*/position: absolute;top: 0px;height: 100%;width: 100%;text-align: right;line-height: 3.125rem;border-radius: 5px}
 .order_money_ico{margin: 5px 2px 0 3px;}
-.submit_order_button{    position: fixed; z-index: 90; width: 100%; left: 0; bottom: 0;}
+.submit_order_button{    position: fixed; z-index: 10; width: 100%; left: 0; bottom: 0;}
 .submit_order_button > div{    float: left; margin-top: 8px;}
 .submit_order_button > span{    width: 150px; float: right;}
 .j_sumit_order{display: none;}

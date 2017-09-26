@@ -13,14 +13,14 @@
     <link href="<?php echo get_cdn_url('public/soma/styles/global.css');?>" rel="stylesheet">
     <link href="<?php echo get_cdn_url('public/soma/styles/default.css');?>" rel="stylesheet">
     <link href="<?php echo get_cdn_url('public/soma/styles/theme.css');?>" rel="stylesheet">
-	<link href="<?php echo base_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
+	<link href="<?php echo get_cdn_url('public/soma/v1/v1.css'). config_item('css_debug');?>" rel="stylesheet">
     <script src="<?php echo get_cdn_url('public/soma/scripts/jquery.js');?>"></script>
     <script src="<?php echo get_cdn_url('public/soma/scripts/ui_control.js');?>"></script>
 	<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
     <script src="<?php echo get_cdn_url('public/soma/scripts/lazyload.js');?>"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
     <script src="<?php echo get_cdn_url('public/soma/scripts/alert.js');?>"></script>
-    <link href="<?php echo base_url('public/soma/v1/style.css'); ?>" rel="stylesheet">
+    <link href="<?php echo get_cdn_url('public/soma/v1/style.css'); ?>" rel="stylesheet">
     <title><?php echo $title;?></title>
       <?php echo $statistics_js;?>
 </head>
@@ -48,8 +48,8 @@
         .bg_minor,a.bg_minor,.btn_minor,a.btn_minor{background:<?php echo $sub_color;?>;}
     <?php } ?>
 	.step_style{background:#fff7f1}
-	.tp_list .item,.spring_bg,.spring_bg2{background:url('<?php echo base_url('public/soma/images/spring/bg_red1.png'); ?>') #fff no-repeat bottom left; background-size:100%; box-shadow:none}
-	.spring_bg2{background-image:url('<?php echo base_url('public/soma/images/spring/bg_red2.png'); ?>')}
+	.tp_list .item,.spring_bg,.spring_bg2{background:url('<?php echo get_cdn_url('public/soma/images/spring/bg_red1.png'); ?>') #fff no-repeat bottom left; background-size:100%; box-shadow:none}
+	.spring_bg2{background-image:url('<?php echo get_cdn_url('public/soma/images/spring/bg_red2.png'); ?>')}
 </style>
 
 <script type='text/javascript'>

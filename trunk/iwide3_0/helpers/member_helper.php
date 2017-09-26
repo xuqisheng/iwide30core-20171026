@@ -53,7 +53,7 @@ if (!function_exists('check_separate_backend_frontend')) {
             'inter_id' => 'ALL_INTER_ID',
             'type_code' => 'SEPARATE_BACKEND_FRONTEND'
         );
-        $conf = IWIDE_DB('Member', 'iwide_vip', true)->where($where)->limit(1)->get('inter_member_config')->row_array();
+        $conf = IWIDE_DB()->where($where)->limit(1)->get('inter_member_config')->row_array();
         if (empty($conf)) return false;
         $ids = explode(',', $conf['value']);
         if (in_array($id, $ids)) {
@@ -155,22 +155,21 @@ if (!function_exists('IWIDE_DB')) {
      * @param boolean $read 是否读库 【会员用】
      * @return bool|CI_DB
      */
-    function IWIDE_DB($name = 'Db', $select = '', $read = false)
+    function IWIDE_DB($select = '', $read = false)
     {
         static $_model = array();
         $namespace = 'App\\core\\Db\\';
-        if (!empty($name)) {
-            $class = $namespace . $name . 'Model';
-        } else {
-            $class = $namespace . 'DbModel';
-        }
+        $class = $namespace . 'DbModel';
         $linktp = var_export($read, true);
-        $guid = $name . $select . $linktp . '_IWIDE_DB_' . $class;
+        $guid = $select . $linktp . '_IWIDE_DB_' . $class;
         if (class_exists($class)) {
             if (!isset($_model[$guid])) {
                 $driver = new $class();
-                if ($read) $select = $read;
-                $_model[$guid] = $driver->_shard_db($select);
+                if(method_exists($driver,'_shard_db')){
+                    $_model[$guid] = $driver->_shard_db($select,$read);
+                }else{
+                    show_error('The method \'_shard_db\' does not exist in the \'DbModel\' class! ');
+                }
             }
             return $_model[$guid];
         }

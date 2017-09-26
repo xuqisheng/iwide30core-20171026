@@ -48,7 +48,7 @@ wx.ready(function(){
 ?>
 <a href="<?php echo Soma_const_url::inst ()->get_package_detail(array('pid'=>$v['product_id'],'id'=>$inter_id) );?>" class="item color_555">
 	<div class="img">
-		<img class="lazy" src="<?php echo base_url('public/soma/images/default.jpg'); ?>"  data-original="<?php echo $v['face_img'];?>" />
+		<img class="lazy" src="<?php echo get_cdn_url('public/soma/images/default.jpg'); ?>"  data-original="<?php echo $v['face_img'];?>" />
 		<div class="fn">
 			<?php if($v['can_gift']== $packageModel::CAN_T){ ?><span>可赠好友</span><?php } ?>
 			<?php if($v['can_reserve']== $packageModel::CAN_F){ ?><span>不需预约</span><?php } ?>

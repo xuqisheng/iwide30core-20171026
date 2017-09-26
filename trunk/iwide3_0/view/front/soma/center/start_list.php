@@ -2,15 +2,15 @@
 <!-- <div class="pageloading"><p class="isload">正在加载</p></div> -->
 <!-- 以上为header.php -->
 
-<script src="<?php echo base_url('public/soma/scripts/imgscroll.js');?>"></script>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js');?>"></script>
 <!-- <header class="headers" style="border-bottom:7px solid #e5e5e5">
     <div class="headerslide">
         <a class="slideson" href="">
-            <img src="<?php echo base_url('public/soma/images/super81.jpg');?>" />
+            <img src="<?php echo get_cdn_url('public/soma/images/super81.jpg');?>" />
         </a>
         <a class="slideson" href="">
-            <img src="<?php echo base_url('public/soma/images/super81.jpg');?>" />
+            <img src="<?php echo get_cdn_url('public/soma/images/super81.jpg');?>" />
         </a>
     </div>
 </header> -->
@@ -80,7 +80,7 @@ wx.ready(function(){
 <?php endif;?>
 
 <div class="ui_pull center" id="newurl" style="background:#fff; padding:50px; display:none">
-	<div><img src="<?php echo base_url('public/soma/images/href.jpg');?>" style=" margin-bottom:20px"></div>
+	<div><img src="<?php echo get_cdn_url('public/soma/images/href.jpg');?>" style=" margin-bottom:20px"></div>
     <div id="interNmae">正在跳转至金房卡酒店官网商城</div>
 </div>
 

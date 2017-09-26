@@ -273,7 +273,7 @@ class Cron extends MY_Controller
                     }
 
 
-                }//else 
+                }//else
                 //    die('Can not find gift #'. $v['gift_id']. ' in idx.');
             }
         }
@@ -917,7 +917,7 @@ class Cron extends MY_Controller
         $skip_inter_id = $this->skipKillsecCronTaskInterId();
         if(!empty($skip_inter_id)) {
             foreach ($instance as $k => $v) {
-                if (isset($v['inter_id']) && $v['inter_id']) {  
+                if (isset($v['inter_id']) && $v['inter_id']) {
                     if(in_array($v['inter_id'], $skip_inter_id)) {
                         continue;
                     }
@@ -927,7 +927,7 @@ class Cron extends MY_Controller
                         $this->current_inter_id = $v['inter_id'];
                         $this->db_shard_config = $this->model_shard_config->build_shard_config($v['inter_id']);
                         //print_r($this->db_shard_config);
-                    }   
+                    }
 
                     $result = $this->Activity_killsec_model->instance_payment_clean($v['inter_id'], $v);
                 }
@@ -1959,12 +1959,12 @@ class Cron extends MY_Controller
                 $table = $somaSalesOrderModel->table_name($inter_id);
                 $select = 'order_id,conn_devices_status,status';
                 $orderList = $db->where( 'inter_id', $inter_id )
-                                ->where( 'status', $somaSalesOrderModel::STATUS_PAYMENT )
-                                ->where( 'conn_devices_status', $somaSalesOrderModel::CONN_DEVICES_DEFAULT )
-                                ->select( $select )
-                                ->limit( $limit )
-                                ->get( $table )
-                                ->result_array();
+                    ->where( 'status', $somaSalesOrderModel::STATUS_PAYMENT )
+                    ->where( 'conn_devices_status', $somaSalesOrderModel::CONN_DEVICES_DEFAULT )
+                    ->select( $select )
+                    ->limit( $limit )
+                    ->get( $table )
+                    ->result_array();
                 if( $orderList )
                 {
                     //对接智游宝
@@ -2023,7 +2023,7 @@ class Cron extends MY_Controller
         $this->sms_model->send_sms();
         // $service = SmsService::getInstance();
         // $service->send_sms();
-        echo 'SUCCESS';                    
+        echo 'SUCCESS';
     }
 
 
@@ -2058,9 +2058,9 @@ class Cron extends MY_Controller
         $db = $this->load->database('iwide_soma_r', TRUE);
         $table = $db->dbprefix('soma_shard_link');
         $interIdArr = $db->select('inter_id')
-                         ->group_by('inter_id')
-                         ->get($table)
-                         ->result_array();
+            ->group_by('inter_id')
+            ->get($table)
+            ->result_array();
 
         //遍历订单
         foreach ($combineList as $items => $values){
@@ -2088,9 +2088,9 @@ class Cron extends MY_Controller
                 $orderList = [];
                 foreach ($combineList as $val){
                     $orderList = $db->where( 'order_id', $items )
-                                    ->select( '*' )
-                                    ->get( $table )
-                                    ->result_array();
+                        ->select( '*' )
+                        ->get( $table )
+                        ->result_array();
                 }
 
                 if(!empty($orderList)){
@@ -2177,5 +2177,71 @@ class Cron extends MY_Controller
 
     }
 
-    
+
+    /**
+     * 手动任务
+     * 获取泛分销员自己下单自己获取绩效名单
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
+    public function fansalerorders(){
+
+        $db = $this->load->database('iwide_soma_r', TRUE);
+        $table = $db->dbprefix('soma_shard_link');
+        $interIdArr = $db->select('inter_id')
+                         ->group_by('inter_id')
+                         ->get($table)
+                         ->result_array();
+
+        //获取某一时间段内所有订单
+        $problemOrders = [];
+        foreach($interIdArr as $v){
+            $inter_id = $v['inter_id'];
+            if( $inter_id )
+            {
+                //初始化数据库分片配置，微信接口关闭订单需要初始化shard_id
+                $this->load->model('soma/shard_config_model', 'model_shard_config');
+                $this->current_inter_id= $v['inter_id'];
+                $this->db_shard_config= $this->model_shard_config->build_shard_config( $v['inter_id'] );
+            }
+            $this->load->model('soma/Sales_order_model','somaSalesOrderModel');
+            $somaSalesOrderModel = $this->somaSalesOrderModel;
+
+            /**
+             * @var Sales_order_model $somaSalesOrderModel
+             */
+            $db = $somaSalesOrderModel->_shard_db_r('iwide_soma_r');
+            $table = $somaSalesOrderModel->table_name($inter_id);
+
+            $orderList = $db->where( 'create_time >= ', '2017-09-15 00:00:00' )
+                            ->where( 'create_time <= ', '2017-09-15 23:59:59' )
+                            ->where('inter_id', $inter_id)
+                            ->select( '*' )
+                            ->get( $table )
+                            ->result_array();
+            if(!empty($orderList)){
+                foreach ($orderList as $val){
+                    $this->load->library('Soma/Api_idistribute');
+                    $staff = $this->api_idistribute->get_saler_info($val['inter_id'], $val['openid']);
+                    if(!empty($staff)){
+                        $saler_type = isset($staff['typ']) && ! empty($staff['typ']) ? $staff['typ'] : '';
+                        $saler_id = isset($staff['info']['saler']) && ! empty($staff['info']['saler']) ? $staff['info']['saler'] : 0;
+                        if($saler_type == 'FANS' && $val['fans_saler_id'] == $saler_id){
+                            $problemOrders[] = [
+                                'inter_id' => $val['inter_id'],
+                                'order_id' => $val['order_id'],
+                                'openid' => $val['openid'],
+                                'fans_saler_id' => $val['fans_saler_id'],
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        $content = json_encode($problemOrders);
+        $handler = new StreamHandler(APPPATH . 'logs/soma/cron/fansalerorders.log', \Monolog\Logger::DEBUG);
+        $this->monoLog->setHandlers(array($handler));
+        $this->monoLog->info($content);
+    }
+
 }

@@ -745,9 +745,9 @@ class PackageService extends BaseService
         }
 
         //二维码
-        $dir = str_replace('system', '', BASEPATH);
-        $this->getCI()->load->helper('phpqrcode');
-        $uploadUrl = $dir.'/www_front/public/soma/qrcode/';
+        //$dir = str_replace('system', '', BASEPATH);
+        //$this->getCI()->load->helper('phpqrcode');
+        //$uploadUrl = $dir.'/www_front/public/soma/qrcode/';
 
         //首页二维码
         $indexUrl = site_url('soma/package/index?'. http_build_query([
@@ -999,6 +999,8 @@ class PackageService extends BaseService
             $result = array_values($productsList);
         }
 
+        $total = count($result);
+
         //销量
         $this->getCI()->load->helpers('soma/math');
         if($sort == 1){
@@ -1037,7 +1039,7 @@ class PackageService extends BaseService
 
         $result =  [
             'products' => $result,
-            'total' => count($productsList),
+            'total' => $total,
             'theme' => json_decode($themeConfig, true),
             'attach' => [
                 'index' => $indexUrl
@@ -1201,6 +1203,32 @@ class PackageService extends BaseService
             'brandname' => $this->getCI()->session->tempdata('theme_brandname'),
         ];
 
+    }
+
+
+    /**
+     * 获取商品关联酒店列表
+     * @param $productId
+     * @return array
+     * @author liguanglong  <liguanglong@mofly.cn>
+     */
+    public function getProductHotels($productId){
+
+        /** @var \Product_package_model $productPackageModel */
+        $this->getCI()->load->model('soma/Product_package_model', 'productPackageModel');
+        /** @var \Hotel_model $hotelModel */
+        $this->getCI()->load->model( 'hotel/Hotel_model', 'hotelModel' );
+
+        $productPackageModel = $this->getCI()->productPackageModel;
+        $hotelModel = $this->getCI()->hotelModel;
+
+        $result = [];
+        $extraInfo = $productPackageModel->getProductExtra($this->getCI()->inter_id, $productId);
+        if(!empty($extraInfo)){
+            $result = $hotelModel->get_hotel_by_ids($this->getCI()->inter_id, $extraInfo[0]['hotel_ids_str']);
+        }
+
+        return $result;
     }
 
 }

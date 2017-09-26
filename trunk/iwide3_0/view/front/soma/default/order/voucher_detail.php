@@ -9,7 +9,7 @@
             <p class="txt_r"><?php echo $detail['status']; ?></p>
         </div>
         <div class="item bd">
-            <div class="img"><img class="lazy" src="<?php echo base_url('public/soma/images/default2.jpg'); ?>" data-original="<?php echo $item['face_img'];?>" /></div>
+            <div class="img"><img class="lazy" src="<?php echo get_cdn_url('public/soma/images/default2.jpg'); ?>" data-original="<?php echo $item['face_img'];?>" /></div>
             <p class="txtclip h30"><?php echo $item['name'] ?></p>
             <p class="txtclip color_555"><?php echo $voucher_detail['name']; ?></p>
             <p class="txtclip color_main"><span class="h24">惊喜价</span><span class="y h30"><?php echo $item['price_package']?></span></p>
@@ -30,7 +30,7 @@
             <div class="coupon2">
             	<div class="item">
                 	<div class="webkitbox itemhead">
-                    	<div class="icon"><img class="lazy" src="<?php echo base_url('public/soma/images/default2.jpg')?>" data-original="<?php echo $v['logo_url']?>" /></div>
+                    	<div class="icon"><img class="lazy" src="<?php echo get_cdn_url('public/soma/images/default2.jpg')?>" data-original="<?php echo $v['logo_url']?>" /></div>
                         <div>
                         	<div><?php echo $v['title'];?></div>
                             <div class="h20 color_888">使用说明：<?php echo $v['description'];?></div>

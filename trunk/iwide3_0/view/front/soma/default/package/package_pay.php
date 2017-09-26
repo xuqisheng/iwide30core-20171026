@@ -483,13 +483,13 @@ if( !isset($buy_default)) $buy_default= 1; //默认买几个？
         <div style="text-align:justify; line-height:1.5">
             <p class="color_main"><?php echo $lang->line('buy_tip');?></p>
             <p><?php echo $lang->line('buy_tip_one');?></p>
-            <p><img src="<?php echo base_url('public/soma/images/step1.jpg');?>"></p>
+            <p><img src="<?php echo get_cdn_url('public/soma/images/step1.jpg');?>"></p>
             <p><?php echo $lang->line('buy_tip_two');?></p>
-            <p><img src="<?php echo base_url('public/soma/images/step2.jpg');?>"></p>
+            <p><img src="<?php echo get_cdn_url('public/soma/images/step2.jpg');?>"></p>
             <p><?php echo $lang->line('buy_tip_three');?> </p>
-            <p><img src="<?php echo base_url('public/soma/images/step3.jpg');?>"></p>
+            <p><img src="<?php echo get_cdn_url('public/soma/images/step3.jpg');?>"></p>
             <p><?php echo $lang->line('buy_tip_four');?></p>
-            <p><img src="<?php echo base_url('public/soma/images/step4.jpg');?>"></p>
+            <p><img src="<?php echo get_cdn_url('public/soma/images/step4.jpg');?>"></p>
         </div>
     </div>
     <div class="pull_close color_fff h36"><em class="iconfont">&#xe612;</em></div>
@@ -1334,18 +1334,18 @@ $(function(){
 });
 </script>
 <!-- add by fsy0718 at 2017/06/23 邮寄 -->
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.core.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.widget.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.scroller.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.listbase.city.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.list.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.widget.ios.js');?>"></script>
-<script src="<?php echo base_url('public/soma/calendar/mobiscroll.i18n.zh.js');?>"></script>
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.animation.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.widget.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.widget.ios.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.scroller.css');?>" rel="stylesheet" type="text/css">
-<link href="<?php echo base_url('public/soma/calendar/mobiscroll.scroller.ios.css');?>" rel="stylesheet" type="text/css">
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.core.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.scroller.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.listbase.city.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.list.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.ios.js');?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.i18n.zh.js');?>"></script>
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.animation.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.widget.ios.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.scroller.css');?>" rel="stylesheet" type="text/css">
+<link href="<?php echo get_cdn_url('public/soma/calendar/mobiscroll.scroller.ios.css');?>" rel="stylesheet" type="text/css">
 <script>
 var $addAddressBtn = $('#add_mail_address')
 var $addressId = $('input[name="addressID"]')

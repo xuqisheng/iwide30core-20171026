@@ -10,8 +10,8 @@
      <meta name="apple-mobile-web-app-status-bar-style" content="black">
      <meta name="apple-mobile-web-app-capable" content="yes">
      <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-     <link rel="stylesheet" type="text/css" href="<?php echo refer_res('app.css', 'SOMAGIFT') ?>"/>
-     <link rel="stylesheet" type="text/css" href="<?php echo refer_res('light.css', 'SOMAGIFT') ?>"/>
+     <link rel="stylesheet" type="text/css" href="<?php echo refer_res('app.css', 'SOMA', 'manifest.json', 'gift') ?>"/>
+     <link rel="stylesheet" type="text/css" href="<?php echo refer_res('light.css', 'SOMA', 'manifest.json', 'gift') ?>"/>
      <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
      <title>二维码礼包详情</title>
  </head>
@@ -29,8 +29,8 @@
          token: <?php echo json_encode($token)?>
      }
  </script>
- <script type=text/javascript src="<?php echo refer_res('manifest.js', 'SOMAGIFT') ?>"></script>
- <script type=text/javascript src="<?php echo refer_res('vendor.js', 'SOMAGIFT') ?>"></script>
- <script type=text/javascript src="<?php echo refer_res('app.js', 'SOMAGIFT') ?>"></script>
+ <script type=text/javascript src="<?php echo refer_res('manifest.js', 'SOMA', 'manifest.json', 'gift') ?>"></script>
+ <script type=text/javascript src="<?php echo refer_res('vendor.js', 'SOMA', 'manifest.json', 'gift') ?>"></script>
+ <script type=text/javascript src="<?php echo refer_res('app.js', 'SOMA', 'manifest.json', 'gift') ?>"></script>
  </body>
  </html>

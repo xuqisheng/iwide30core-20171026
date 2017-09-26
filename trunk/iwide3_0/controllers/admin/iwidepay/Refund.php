@@ -70,7 +70,7 @@ class Refund extends MY_Admin
         $list = $this->iwidepay_refund_model->get_refund($select,$filter,'','');
 
         $module = array('hotel'=>'订房','soma'=>'商城','vip'=>'会员','okpay'=>'快乐付','dc'=>'在线点餐','ticket' => '预约核销','base_pay' => '基础月费');
-        $refund_status = array('0'=>'--','1'=>'成功','2'=>'失败','3'=>'异常','4' => '失败');
+        $refund_status = array('0'=>'--','1'=>'成功','2'=>'退款中','3'=>'退款中','4' => '失败');
         $type = array('0'=>'--','1'=>'原路退回','2'=>'已结清全额退款','3'=>'部分原路退回','4'=>'已结清部分退款');
 
         if ($list)

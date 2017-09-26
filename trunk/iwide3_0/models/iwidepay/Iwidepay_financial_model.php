@@ -89,7 +89,7 @@ class Iwidepay_financial_model extends MY_Model
      */
     public function debt_order($start_time,$end_time)
     {
-        $sql = "SELECT * FROM ".self::TAB_IWIDEPAY_DEBT_RD." WHERE status = 1 AND order_type IN('order','base_pay','refund','orderReward','extraReward')";
+        $sql = "SELECT * FROM ".self::TAB_IWIDEPAY_DEBT_RD." WHERE status = 1 AND order_type IN('order','base_pay','refund','orderReward','extra_dist')";
         $sql .= " AND (up_time >= '{$start_time}' AND up_time <= '{$end_time}')";
         $data = $this->db_read()->query($sql)->result_array();
         return $data;
@@ -145,7 +145,7 @@ class Iwidepay_financial_model extends MY_Model
         $sql = "SELECT DR.*,H.name as hotel_name,P.name FROM ".self::TAB_IWIDEPAY_DEBT_RD." AS DR
                 LEFT JOIN iwide_hotels as H ON H.inter_id = DR.inter_id AND H.hotel_id = DR.hotel_id
                 LEFT JOIN iwide_publics as P ON P.inter_id = DR.inter_id
-                WHERE DR.status = 1 AND DR.order_type IN('order','base_pay','refund','orderReward','extraReward')";
+                WHERE DR.status = 1 AND DR.order_type IN('order','base_pay','refund','orderReward','extra_dist')";
         $sql .= " AND {$where}";
         $data = $this->db_read()->query($sql)->result_array();
         return $data;
@@ -158,7 +158,7 @@ class Iwidepay_financial_model extends MY_Model
      */
     public function sum_settlement($record_id)
     {
-        $sql = "SELECT id,type FROM ".self::TAB_IWIDEPAY_SETTLE." WHERE record_id = ? ";
+        $sql = "SELECT id,type,inter_id,hotel_id FROM ".self::TAB_IWIDEPAY_SETTLE." WHERE record_id = ? ";
         $data = $this->db_read()->query($sql,$record_id)->result_array();
         return $data;
     }
@@ -173,6 +173,76 @@ class Iwidepay_financial_model extends MY_Model
     {
         $sql = "SELECT `name` FROM iwide_hotels  WHERE inter_id = '{$inter_id}' AND hotel_id = '{$hotel_id}'";
         $data = $this->db_read()->query($sql)->row_array();
+        return $data;
+    }
+
+    /**
+     * 获取门店结余记录
+     * @param $inter_id
+     * @param $hotel_id
+     * @param $set_id
+     * @return
+     */
+    public function balance_order($inter_id,$hotel_id,$set_id)
+    {
+        $sql = "SELECT DR.*,H.name as hotel_name,P.name FROM `iwide_iwidepay_debt_record` as DR
+                LEFT JOIN iwide_hotels as H ON H.inter_id = DR.inter_id AND H.hotel_id = DR.hotel_id
+                LEFT JOIN iwide_publics as P ON P.inter_id = DR.inter_id
+                WHERE DR.`inter_id` = '{$inter_id}' AND DR.hotel_id = '{$hotel_id}' AND DR.set_id = '{$set_id}'
+                AND DR.module = 'balance' AND DR.status = 0 AND DR.amount > 0 ORDER BY DR.id DESC ";
+        $data = $this->db_read()->query($sql)->row_array();
+        return $data;
+    }
+
+    /**
+     * 获取 当天结余记录
+     * @param $start_time
+     * @param $end_time
+     * @return
+     */
+    public function balance_record($start_time,$end_time)
+    {
+        $sql = "SELECT * FROM iwide_iwidepay_debt_record WHERE `module` = 'balance' AND  status = 0 AND amount > 0 ";
+        $sql .= " AND (add_time >= '{$start_time}' AND add_time <= '{$end_time}')";
+        $data = $this->db_read()->query($sql)->result_array();
+        return $data;
+    }
+
+    /**
+     * 财务对账单结余记录
+     * @param $select
+     * @param $where_arr
+     * @return
+     */
+    public function financial_balance_order($select,$where_arr)
+    {
+        $sql = "SELECT {$select},H.name AS hotel_name,P.name FROM `iwide_iwidepay_debt_record` AS DR";
+        $sql .= " LEFT JOIN iwide_hotels as H ON H.inter_id = DR.inter_id AND H.hotel_id = DR.hotel_id";
+        $sql .= " LEFT JOIN iwide_publics as P ON P.inter_id = DR.inter_id";
+
+        $sql .= " WHERE DR.module = 'balance' AND DR.status = 0 AND DR.amount > 0";
+        if (!empty($where_arr['inter_id']) && $where_arr['inter_id'] != 'ALL_PRIVILEGES')
+        {
+            $sql .= " AND DR.inter_id = '{$where_arr['inter_id']}'";
+        }
+        if (!empty($where_arr['hotel_id']))
+        {
+            $sql .= " AND DR.hotel_id IN ({$where_arr['hotel_id']})";
+        }
+
+        if (!empty($where_arr['start_time']))
+        {
+            $sql .= " AND DR.add_time >= '{$where_arr['start_time']}'";
+        }
+
+        if (!empty($where_arr['end_time']))
+        {
+            $sql .= " AND DR.add_time <= '{$where_arr['end_time']} 23:59:60'";
+        }
+
+        $sql .= " GROUP BY DR.inter_id,DR.hotel_id";
+        $sql .= " ORDER BY DR.id DESC";
+        $data = $this->db_read()->query($sql)->result_array();
         return $data;
     }
 

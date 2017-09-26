@@ -303,6 +303,10 @@ class FrontConst extends BaseConst
             'common'  => array(
                 'member',
             ),
+            'keys' => array(
+                'packages',
+                'room_empty_alert',
+            ),
             'mul_arr' => array(
                 'rooms' => array(
                     'keys' => array(

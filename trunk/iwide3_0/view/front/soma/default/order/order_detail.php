@@ -1,5 +1,103 @@
 <body>
+<style type="text/css">
+    .jfk-express-area {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,.5);
+        z-index: 999999;
+        display: none;
+    }
+
+    .jfk-express-area__wrap {
+        position: absolute;
+        width: 90%;
+        left: 5%;
+        top: 10%;
+        height: 80%;
+        z-index: 999;
+        background-color: #fff;
+        padding: 5%;
+        overflow: hidden;
+        border-radius: 4px;
+    }
+
+    .jfk-express-area__title {
+        font-size: 14px;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .jfk-express-area__list {
+        margin-bottom: 100px;
+    }
+
+    .jfk-express-area__list--item {
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .jfk-express-area__content {
+        position: absolute;
+        width:  90%;
+        left: 5%;
+        top: 42px;
+        height: 100%;
+        z-index: 999;
+        background-color: #fff;
+        overflow-y: scroll;
+    }
+
+    .jfk-express-area__btn {
+        position: absolute;
+        width: 100%;
+        height: 50px;
+        line-height: 50px;
+        left: 0;
+        bottom: 0;
+        background-color: #ff9900;
+        text-align: center;
+        color: #fff;
+        font-size: 15px;
+        z-index: 999;
+    }
+    .jfk-express-area__list--img {
+        width: 100%;
+    }
+</style>
 <div class="pageloading"><p class="isload"><?php echo $lang->line('loading');?></p></div>
+
+<div class="jfk-express-area">
+
+    <div class="jfk-express-area__wrap">
+        <div class="jfk-express-area__title">
+            冰皮邮寄条款：
+        </div>
+        <div class="jfk-express-area__content">
+        <ul class="jfk-express-area__list">
+            <li class="jfk-express-area__list--item">
+                1.请详细阅读顺丰冷运到货范围（或咨询顺丰客服95338），不到的地区请勿兑换。
+            </li>
+
+            <li class="jfk-express-area__list--item">
+                2.生鲜产品一经寄出，概不接受拒收、转寄、更改配送地址。由个人原因造成的冰皮配送延误或品质损坏，由客户自行承担损失。
+            </li>
+
+              <li class="jfk-express-area__list--item">
+               3.收货后如不食用必须冷藏。
+            </li>
+     
+            <li class="jfk-express-area__list--item">
+                <img src="<?php echo get_cdn_url('public/soma/images/post.jpeg'); ?>"  class="jfk-express-area__list--img">
+            </li>
+        </ul>
+        </div>
+        <div class="jfk-express-area__btn">确定并邮寄</div>
+    </div>
+    
+</div>
 <script>
 wx.config({
     debug: false,
@@ -428,8 +526,30 @@ if($giftSendOrderDetail){
 
 <script>
 <?php if( $is_show_mail==TRUE ): ?>
-var span = '<a class="btn_void h24 xs" href="<?php echo $mail_url; ?>" style="margin-right:8px;"><?php echo $lang->line('by_mail');?></a>';
+var span = '<a class="btn_void h24 xs jfk_express_btn" href="<?php echo $mail_url; ?>" style="margin-right:8px;"><?php echo $lang->line('by_mail');?></a>';
 $("#operation").append(span);
+var productId = "<?php echo $orderDetail['items'][0]['product_id'];?>";
+console.log(productId)
+$('.jfk_express_btn').on('click', function(ev) {
+    ev.preventDefault();
+    var href = $('.jfk_express_btn').attr('href');
+    if (productId) {
+        if (productId === '138236' || productId === '138215' || "<?php echo ENVIRONMENT ?>" == 'development') {
+            $('.jfk-express-area').show().off().on('click', function() {
+                $('.jfk-express-area').hide();
+            });
+            $('.jfk-express-area__btn').off().on('click', function(ev) {
+                event.stopPropagation();
+                window.location.href = href;
+            });
+        } else {
+             window.location.href = href;
+        }
+    } else {
+        window.location.href = href;
+    }
+
+})
 <?php endif; ?>
 
 <?php if( $group_url && $group_qty>=2 ): ?>

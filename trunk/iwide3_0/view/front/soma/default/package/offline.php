@@ -1,6 +1,6 @@
 <body>
-<script src="<?php echo base_url('public/soma/scripts/imgscroll.js'); ?>"></script>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js'); ?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/imgscroll.js'); ?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js'); ?>"></script>
 <script>
     wx.config({
         debug: false,
@@ -53,7 +53,7 @@
                     <?php } ?>
                 <?php else: ?>
                     <a class="slideson ui_img_auto_cut">
-                        <img src="<?php echo base_url('public/soma/images/default.jpg'); ?>"/>
+                        <img src="<?php echo get_cdn_url('public/soma/images/default.jpg'); ?>"/>
                     </a>
                 <?php endif; ?>
             </div>

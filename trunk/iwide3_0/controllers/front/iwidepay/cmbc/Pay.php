@@ -10,6 +10,21 @@ class Pay extends MY_Controller {
 		$this->load->library('IwidePay/IwidePayService',null,'IwidePayApi');
 	}
 
+    //民生服务器升级过程中间友情提示页面
+    public function temp_pay_show(){
+        // 2017-09-21 0点-1点服务器升级，展示友情提示页面
+        if(time()>=strtotime('2017-09-21 00:00:00')&&time()<=strtotime('2017-09-21 01:00:00')){
+            $data = array();
+            $this->load->model('iwidepay/IwidePay_configs_model');
+            $conf = $this->IwidePay_configs_model->get_configs_by_interid('jinfangka',1,'cmbcpay_shutdown','iwidepay');
+            if(!empty($conf)&&$conf['value']==1){
+                $this->load->view('iwidepay/default/temp_pay_show',$data);
+                return true;
+            }
+        }
+        return false;
+    }
+
 	public function hotel_pay(){
     		$arr = array(
             'commodityName' => '测试产品',
@@ -52,6 +67,9 @@ class Pay extends MY_Controller {
 
     //订房支付
     public function hotel_order(){
+        if($this->temp_pay_show()){
+            return;
+        }
         //统计探针
         $this->load->library('MYLOG');
         $inter_id = $this->input->get ( 'id', true );
@@ -124,9 +142,11 @@ class Pay extends MY_Controller {
                     $data ['fail_url'] .= '&fro='.$orderid . '&type=' . $order_details ['price_type'].'&lsaler='.$order_details['link_saler'];
                     $data ['success_url'] = 'http://'.$public['domain']. '/index.php/hotel/hotel/orderdetail?id=' . $inter_id . '&oid=' . $order_details ['id'].'&lsaler='.$order_details['link_saler'];
                     $cmbc_chnl_id = $this->Iwidepay_model->get_cmbc_chnl_id($inter_id);
+                    $commodityName = $order_details ['hname'] . ' - ' .$order_details ['first_detail'] ['roomname'];
+                    $subMerName = !empty($order_details ['hname'])?$order_details ['hname']:$public['name'];
                     $jsApiArr = array(
                         'subChnlMerNo' => $cmbc_chnl_id,
-                        'commodityName' => $order_details ['hname'] . ' - ' .$order_details ['first_detail'] ['roomname'],
+                        'commodityName' => $this->do_string($commodityName),
                         'openid' => $openid,
                         'orderDate' => date('Ymd'),
                         'orderNo' => $pay_orderid,
@@ -135,7 +155,7 @@ class Pay extends MY_Controller {
                         'transAmt' => $order_details ['price'] * 100,
                         'transId' => '10',
                         'subMerNo'=> IwidePayConfig::MERNO,
-                        'subMerName'=> $order_details ['hname'],
+                        'subMerName'=> $this->do_string($subMerName,20),
                         // 'version' => 'V2.0',
                         'returnUrl' => site_url ( 'hotel/hotel/orderdetail' ) . '?id=' . $inter_id ,
                         );
@@ -161,6 +181,9 @@ class Pay extends MY_Controller {
 
     //商城支付
     public function soma_pay(){
+        if($this->temp_pay_show()){
+            return;
+        }
         $this->load->somaDatabase($this->db_soma);
         $this->load->somaDatabaseRead($this->db_soma_read);
 
@@ -195,11 +218,16 @@ class Pay extends MY_Controller {
                     $business_type= '月饼';
 
                 $settle_type= $this->Sales_order_model->get_settle_label();  //各种结算方式中文标识：普通购买|拼团购买
-                $order_desc= $public['name']. '_';
-                $order_desc.= array_key_exists($order_detail['business'], $business_type)? $business_type[$order_detail['business']]: '';
-                $order_desc.= array_key_exists($order_detail['settlement'], $settle_type)? $settle_type[$order_detail['settlement']]: '';
-                $order_desc.= '#'. $order_id;
-
+                
+                // $order_desc= $public['name']. '_';
+                // $order_desc.= array_key_exists($order_detail['business'], $business_type)? $business_type[$order_detail['business']]: '';
+                // $order_desc.= array_key_exists($order_detail['settlement'], $settle_type)? $settle_type[$order_detail['settlement']]: '';
+                // $order_desc.= '#'. $order_id;
+                // 获取商品名称
+                $this->load->model('soma/Sales_item_package_model');
+                $orderItems = $this->Sales_item_package_model->get_order_items_byIds($order_id, $order_detail['business'], $inter_id);
+                $order_desc = !empty($orderItems) ? $orderItems[0]['name'] : '';
+                
                 // if( $order_detail['settlement']== Sales_order_model::SETTLE_KILLSEC ){
                 //     //对于秒杀限定其支付有效期
                 //     $this->wxpay_model->setParameter("time_expire", date('YmdHis')+ 300);
@@ -272,9 +300,11 @@ class Pay extends MY_Controller {
             $data['fail_url'] .= !empty($furl['query'])?'?'.$furl['query']:'';
             $cmbc_chnl_id = $this->Iwidepay_model->get_cmbc_chnl_id($inter_id);
             $hotel_info = $this->Iwidepay_model->get_hotel_info($order_detail['hotel_id']);
+            $commodityName = $this->do_string($order_desc);
+            $subMerName = !empty($hotel_info['name'])?$hotel_info['name']:$public['name'];
             $jsApiArr = array(
                 'subChnlMerNo' => $cmbc_chnl_id,
-                'commodityName' => $order_desc,
+                'commodityName' => $commodityName,
                 'openid' => $openid,
                 'orderDate' => date('Ymd'),
                 'orderNo' => $wx_order_id,
@@ -283,7 +313,7 @@ class Pay extends MY_Controller {
                 'transAmt' => $order_detail['grand_total']* 100,
                 'transId' => '10',
                 'subMerNo'=> IwidePayConfig::MERNO,
-                'subMerName'=> !empty($hotel_info['name'])?$hotel_info['name']:$public['name'],
+                'subMerName'=> $this->do_string($subMerName,20),
                 // 'version' => 'V2.0',
                 'returnUrl' => Soma_const_url::inst()->get_url('soma/consumer/my_shipping_list', array('id'=> $inter_id ) ) ,
                 );
@@ -309,6 +339,9 @@ class Pay extends MY_Controller {
 
     //快乐付分账拉起支付
     public function okpay_pay(){
+        if($this->temp_pay_show()){
+            return;
+        }
         //统计探针
         $this->load->library('MYLOG');
         $inter_id = $this->input->get ( 'id', true );
@@ -361,9 +394,11 @@ class Pay extends MY_Controller {
                 $data ['fail_url'] = 'http://'.$public['domain']. '/index.php/okpay/okpay/pay_error?id=' . $inter_id.'&t='.$identity.'&oid='. $this->input->get('oid');
                 $data ['success_url'] = 'http://'.$public['domain']. '/index.php/okpay/okpay/pay_success?id=' . $inter_id . '&t='. $identity.'&oid='. $this->input->get('oid');
                 $cmbc_chnl_id = $this->Iwidepay_model->get_cmbc_chnl_id($inter_id);
+                $commodityName = '快乐付';
+                $subMerName = !empty($order_details['hotel_name'])?$order_details['hotel_name']:$public['name'];
                 $jsApiArr = array(
                     'subChnlMerNo' => $cmbc_chnl_id,
-                    'commodityName' => '快乐付',
+                    'commodityName' => $commodityName,
                     'openid' => $openid,
                     'orderDate' => date('Ymd'),
                     'orderNo' => $out_trade_no,
@@ -372,7 +407,7 @@ class Pay extends MY_Controller {
                     'transAmt' => $order_details ['pay_money'] * 100,
                     'transId' => '10',
                     'subMerNo'=> IwidePayConfig::MERNO,
-                    'subMerName'=> $order_details['hotel_name'],
+                    'subMerName'=> $this->do_string($subMerName,20),
                     // 'version' => 'V2.0',
                     'returnUrl' => site_url('okpay/okpay/pay_show'),
                     );
@@ -391,6 +426,9 @@ class Pay extends MY_Controller {
 
     //新版會員支付方法
     public function vip_pay(){
+        if($this->temp_pay_show()){
+            return;
+        }
         $orderId = $this->input->get('orderId')?(int)$this->input->get('orderId'):0;
         $token = $this->get_Member_Token();
         //获取验证的
@@ -443,10 +481,12 @@ class Pay extends MY_Controller {
                 exit('程序错误，微信支付失败');
             }
             $cmbc_chnl_id = $this->Iwidepay_model->get_cmbc_chnl_id($inter_id);
+            $commodityName = '订单号码：'.$order_info['order_num'].'会员充值';
+            $subMerName = $public['name'];
             //组装请求支付参数
             $jsApiArr = array(
                 'subChnlMerNo' => $cmbc_chnl_id,
-                'commodityName' => '订单号码：'.$order_info['order_num'].'会员充值',
+                'commodityName' => $this->do_string($commodityName),
                 'openid' => $openid,
                 'orderDate' => date('Ymd'),
                 'orderNo' => $order_info['order_num'],
@@ -455,7 +495,7 @@ class Pay extends MY_Controller {
                 'transAmt' => $order_info ['pay_money'] * 100,
                 'transId' => '10',
                 'subMerNo'=> IwidePayConfig::MERNO,
-                'subMerName'=> $public['name'],
+                'subMerName'=> $this->do_string($subMerName,20),
                 // 'version' => 'V2.0',
                 'returnUrl' => site_url('membervip/depositcard/nopay'),
                 );
@@ -486,6 +526,9 @@ class Pay extends MY_Controller {
 
       //快乐送，门票拉起分账拉起支付
     public function dc_pay(){
+        if($this->temp_pay_show()){
+            return;
+        }
         //统计探针
         $this->load->library('MYLOG');
         $inter_id = $this->input->get ( 'id', true );
@@ -549,9 +592,11 @@ class Pay extends MY_Controller {
             $order_desc= $shop['shop_name'];
             $cmbc_chnl_id = $this->Iwidepay_model->get_cmbc_chnl_id($inter_id);
             $hotel_info = $this->Iwidepay_model->get_hotel_info($order_details['hotel_id']);
+            $commodityName = $this->do_string($order_desc);
+            $subMerName = !empty($hotel_info['name'])?$hotel_info['name']:$public['name'];
             $jsApiArr = array(
                 'subChnlMerNo' => $cmbc_chnl_id,
-                'commodityName' => $order_desc,
+                'commodityName' => $commodityName,
                 'openid' => $openid,
                 'orderDate' => date('Ymd'),
                 'orderNo' => $order_details['order_sn'],
@@ -560,7 +605,7 @@ class Pay extends MY_Controller {
                 'transAmt' => $order_details ['sub_total'] * 100,
                 'transId' => '10',
                 'subMerNo'=> IwidePayConfig::MERNO,
-                'subMerName'=> !empty($hotel_info['name'])?$hotel_info['name']:$public['name'],
+                'subMerName'=> $this->do_string($subMerName,20),
                 // 'version' => 'V2.0',
                 'returnUrl' => site_url('roomservice/roomservice/order_detail'),
                 );
@@ -578,6 +623,9 @@ class Pay extends MY_Controller {
     //预约核销拉起分账拉起支付 BY 沙沙 Date:2017-08-16
     public function ticket_pay()
     {
+        if($this->temp_pay_show()){
+            return;
+        }
         //统计探针
         $this->load->library('MYLOG');
         $inter_id = $this->input->get ( 'id', true );
@@ -680,9 +728,11 @@ class Pay extends MY_Controller {
             $order_desc= $shop['shop_name'];
             $cmbc_chnl_id = $this->Iwidepay_model->get_cmbc_chnl_id($inter_id);
             $hotel_info = $this->Iwidepay_model->get_hotel_info($order_detail['hotel_id']);
+            $commodityName = $this->do_string($order_desc);
+            $subMerName = !empty($hotel_info['name'])?$hotel_info['name']:$public['name'];
             $jsApiArr = array(
                 'subChnlMerNo' => $cmbc_chnl_id,
-                'commodityName' => $order_desc,
+                'commodityName' => $commodityName,
                 'openid' => $openid,
                 'orderDate' => date('Ymd'),
                 'orderNo' => $order_detail['order_no'],
@@ -691,7 +741,7 @@ class Pay extends MY_Controller {
                 'transAmt' => $order_detail ['pay_fee'] * 100,
                 'transId' => '10',
                 'subMerNo'=> IwidePayConfig::MERNO,
-                'subMerName'=> !empty($hotel_info['name'])?$hotel_info['name']:$public['name'],
+                'subMerName'=> $this->do_string($subMerName,20),
                 // 'version' => 'V2.0',
                 'returnUrl' => 'http://'.$public['domain']. '/index.php/wxpayreturn/roomservice_rtn/'.$inter_id,
             );
@@ -703,6 +753,20 @@ class Pay extends MY_Controller {
         }
         $data ['jsApiParameters'] = $parameters;
         $this->load->view ( 'pay/default/wxpay', $data );
+    }
+
+    /**
+     * [sub_string 字符串特殊字符替换，长度截取函数]
+     * @param  [type] $str [待处理的字符串]
+     * @param  [type] $length [截取的长度]
+     * @return [type]      [description]
+     */
+    protected function do_string($str,$length=32){
+        $str_arr = array('%','&','+');
+        foreach ($str_arr as $key => $value) {
+            $str = str_replace($value,'',$str);
+        }
+        return mb_substr($str, 0,$length,'utf-8');
     }
 
     /**

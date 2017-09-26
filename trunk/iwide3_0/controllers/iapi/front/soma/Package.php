@@ -262,9 +262,11 @@ class Package extends MY_Front_Soma_Iapi
         $publicInfo = ['name' => data_get($this->public, 'name')];
 
         //酒店信息
-        $this->load->model('hotel/Hotel_model', 'hotelModel');
-        $hotelInfo = $this->hotelModel->get_hotel_detail($productDetail['inter_id'], $productDetail['hotel_id']);
         $qrCode = null;
+        $hotelInfo = PackageService::getInstance()->getProductHotels($productDetail['product_id']);
+        if(!empty($hotelInfo)){
+            $hotelInfo = $hotelInfo[0];
+        }
         try{
             $qrCode = WxService::getInstance()->getQrcode(WxService::QR_CODE_SOMA_PUBLIC)->getData();
         }
@@ -415,30 +417,11 @@ class Package extends MY_Front_Soma_Iapi
         $page_size    = $this->input->get('page_size', null, 20);
         $page         = $this->input->get('page', null, 1);
 
-        if ($show_ads_cat == MY_Model_Soma::STATUS_TRUE) {
-            //首页广告图
-            $this->load->model('soma/Adv_model', 'ads_model');
-            $page_data['advs'] = $this->ads_model->get_ads_by_category($this->inter_id);
-
-            //分类
-            $this->load->model('soma/Category_package_model', 'categoryModel');
-            $filter = [
-                'inter_id' => $this->inter_id,
-                'status' => MY_Model_Soma::STATUS_TRUE
-            ];
-            $option = [
-                'limit' => null,
-                'orderBy' => 'cat_sort desc',
-            ];
-            $page_data['categories'] = $this->categoryModel->get(array_keys($filter), array_values($filter), '*', $option);
-        }
-
-
         //多店铺
         $ticketId = PackageService::getInstance()->getParams()['tkid'];
+        $advs = $catIds = [];
         $pIds = [];
         if ($ticketId) {
-
             //获取产品id列表
             $serviceName = $this->serviceName(Product_Service::class);
             $serviceAlias = $this->serviceAlias(Product_Service::class);
@@ -453,8 +436,50 @@ class Package extends MY_Front_Soma_Iapi
             if (isset($ticketDetail['theme_path']) && $ticketDetail['theme_path']) {
                 $this->theme = $ticketDetail['theme_path'];
             }
-        }
+            //门店轮播图
+            if (isset($ticketDetail['block_arr']) && $ticketDetail['block_arr']) {
+                if(!empty($ticketDetail['block_arr'])){
+                    foreach ($ticketDetail['block_arr'] as $val){
+                        $advs[] = [
+                            'logo' => $val['block_img'],
+                            'link' => preg_replace("'&(amp|#38);'i", '&', strip_tags($val['block_link']))
+                        ];
+                    }
+                }
+            }
+            //门店商品分类
+            if (isset($ticketDetail['product_ids']) && $ticketDetail['product_ids']) {
+                $product_ids = json_decode($ticketDetail['product_ids'], true);
+                if(!empty($product_ids)){
+                    $catIds = array_keys($product_ids);
+                }
+            }
 
+        }
+        else{
+            //首页广告图
+            $this->load->model('soma/Adv_model', 'ads_model');
+            $advs = $this->ads_model->get_ads_by_category($this->inter_id);
+        }
+        $page_data['advs']  = $advs;
+
+
+        //分类
+        if ($show_ads_cat == MY_Model_Soma::STATUS_TRUE) {
+            $this->load->model('soma/Category_package_model', 'categoryModel');
+            $filter = [
+                'inter_id' => $this->inter_id,
+                'status' => MY_Model_Soma::STATUS_TRUE
+            ];
+            if(!empty($catIds)){
+                $filter['cat_id'] = $catIds;
+            }
+            $option = [
+                'limit' => null,
+                'orderBy' => 'cat_sort desc',
+            ];
+            $page_data['categories'] = $this->categoryModel->get(array_keys($filter), array_values($filter), '*', $option);
+        }
 
         //商品
         $this->load->model('soma/Product_package_model', 'productPackageModel');
@@ -1418,7 +1443,6 @@ class Package extends MY_Front_Soma_Iapi
     }
 
 
-
     /**
      * 用户是否已经关注该公众号，并返回公众号二维码
      * @SWG\Get(
@@ -1470,6 +1494,67 @@ class Package extends MY_Front_Soma_Iapi
         ];
 
         $this->json(BaseConst::OPER_STATUS_SUCCESS, '', $res);
+    }
+
+
+    /**
+     *
+     * 返回定制雅高门店定制皮肤参数
+     * @SWG\Get(
+     *     tags={"package"},
+     *     path="/package/accor_info",
+     *     summary="返回定制雅高门店定制皮肤参数，并返回公众号二维码",
+     *     description="返回定制雅高门店定制皮肤参数，并返回公众号二维码",
+     *     operationId="accor_info",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *         description="门店id",
+     *         in="query",
+     *         name = "tkid",
+     *         required=true,
+     *         type="string"
+     *     ),
+     *     @SWG\Response(
+     *         response="200",
+     *         description="successful operation",
+     *         @SWG\Schema(
+     *              type="object",
+     *              @SWG\Property(
+     *                  property="tkid",
+     *                  description="门店id",
+     *                  type="string",
+     *              ),
+     *              @SWG\Property(
+     *                  property="hotel",
+     *                  description="酒店名",
+     *                  type="string",
+     *              ),
+     *             @SWG\Property(
+     *                  property="brandname",
+     *                  description="品牌名",
+     *                  type="string",
+     *              ),
+     *         )
+     *     )
+     * )
+     */
+    public function get_accor_info(){
+
+        $result = [];
+
+        $this->load->config('soma_theme_config.php');
+        $configInterIds = $this->config->item('inter_id');
+        $items = empty($configInterIds[$this->inter_id]) ? [] : $configInterIds[$this->inter_id];
+        if(!empty($items)){
+            foreach ($items as $val){
+                if($val['tkid'] == $this->input->get('tkid')){
+                    $result = $val;
+                    break;
+                }
+            }
+        }
+
+        $this->out_put_msg(FrontConst::OPER_STATUS_SUCCESS, '', $result);
     }
 
 }

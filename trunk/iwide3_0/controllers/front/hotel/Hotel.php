@@ -9,23 +9,8 @@ class Hotel extends MY_Front_Hotel {
 	function __construct() {
 		parent::__construct ();
 
-		$this->load->model ( 'wx/Access_token_model' );
-		$this->common_show ['signPackage'] = $this->Access_token_model->getSignPackage ( $this->inter_id );
-		$this->common_show ['pagetitle'] = $this->public ['name'];
-		$this->share ['title'] = $this->public ['name'] . '-微信订房';
-		$slink = $_SERVER ['HTTP_HOST'] . $_SERVER ['REQUEST_URI'];
-		if (strpos ( $slink, '?' ))
-			$slink = $slink . "&id=" . $this->inter_id;
-		else
-			$slink = $slink . "?id=" . $this->inter_id;
-		$this->share ['link'] = $slink;
-		$this->share ['imgUrl'] = 'http://7n.cdn.iwide.cn/public/uploads/201609/qf051934149038.jpg';
-		$this->share ['desc'] = $this->public ['name'] . '欢迎您使用微信订房,享受快捷服务...';
-		$this->share ['type'] = '';
-		$this->share ['dataUrl'] = '';
 		$this->common_show ['csrf_token'] = $this->security->get_csrf_token_name ();
 		$this->common_show ['csrf_value'] = $this->security->get_csrf_hash ();
-		$this->common_show ['share'] = $this->share;
 		$this->common_show ['url_param'] = $this->url_param;
 		$this->common_show ['inter_id'] = $this->inter_id;
 		$this->common_show ['csrf_token_arr'] = array(

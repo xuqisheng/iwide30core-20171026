@@ -48,13 +48,38 @@ class Check extends MY_Controller {
             $ok = $this->redis_proxy->setNX ( $key, $value );
         }elseif($type == 'delete' ){
             $ok = $this->redis_proxy->del ( $key );
+        }elseif ($type == 'get') {
+            $ok = $this->redis_proxy->get( $key );
+        }elseif ($type == 'update') {
+            $ok = $this->redis_proxy->set( $key, $value );
         }
         return $ok;
     }
 
+    /**
+     * [check_key 检测此前是否有脚本未正常执行完成]
+     */
+    protected function check_key(){
+    	// 先检查key是否存在
+    	$val = $this->redis_lock('get','IWIDEPAY_EXECUTE_SORT');
+    	if(!empty($val)){
+    		$this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',0);
+    		MYLOG::w('err:前一天的脚本未正常执行完成', 'iwidepay_check');
+            exit('前一天的脚本未正常执行完成');
+    	}
+    	$this->load->library('IwidePay/IwidePayExecute',null,'IwidePayExecute');
+        $key = $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::CHECK_SYNCHRO_SORT);
+        if(!$key){
+            MYLOG::w('err:redis key IWIDEPAY_EXECUTE_SORT set fail', 'iwidepay_check');
+            exit('redis key IWIDEPAY_EXECUTE_SORT set fail');
+        }
+    }
+
+
     //同步订单状态
     public function synchro(){
     	$this->check_arrow();
+    	$this->check_key();
     	// 上锁
     	$ok = $this->redis_lock();
         if(!$ok){
@@ -113,6 +138,8 @@ class Check extends MY_Controller {
 
         //释放锁
         $this->redis_lock('delete');
+        //执行顺序+1
+        $this->redis_lock('update','IWIDEPAY_EXECUTE_SORT',IwidePayExecute::CHECK_SYNCHRO_SORT+1);
         MYLOG::w('info:结束订单状态同步的脚本', 'iwidepay_check');
         echo '订单状态同步完毕';
     }
@@ -323,6 +350,7 @@ class Check extends MY_Controller {
 			foreach ($data as $key => $value) {
 				//今天核销的不同步
 				if(strtotime($value['bill_time'])>=strtotime(date('Y-m-d 00:00:00'))){
+					unset($data[$key]);
 					continue;
 				}
 

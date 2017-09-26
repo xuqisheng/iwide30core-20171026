@@ -45,7 +45,7 @@ wx.ready(function(){
 	?>
 	    <a class="item" href="<?php echo $v['link'];?>">
 	    	<div class=" squareimg">
-		    	<img src="<?php echo base_url('public/soma/images/default2.jpg');?>" data-original="<?php echo $v['logo'];?>" class="lazy"/>
+		    	<img src="<?php echo get_cdn_url('public/soma/images/default2.jpg');?>" data-original="<?php echo $v['logo'];?>" class="lazy"/>
 		    </div>
 	    </a>
 	<?php endforeach;else:?>

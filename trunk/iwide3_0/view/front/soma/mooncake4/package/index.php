@@ -1,5 +1,5 @@
 <body>
-<script src="<?php echo base_url('public/soma/scripts/jquery.touchwipe.min.js'); ?>"></script>
+<script src="<?php echo get_cdn_url('public/soma/scripts/jquery.touchwipe.min.js'); ?>"></script>
 <div class="pageloading"><p class="isload"></p></div>
 <script>
     var package_obj = {

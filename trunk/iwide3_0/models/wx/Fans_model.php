@@ -81,9 +81,14 @@ class Fans_model extends CI_Model {
             $condition .=" AND t1.nickname like '%$keyword%'";
         }
 
+        if(isset($offset['hotel_id'])){
+            $condition .=" AND t2.hotel_id = '{$offset['hotel_id']}'";
+        }
+
         $condition .=' GROUP BY t1.id';
 
-        if(!empty($offset)){
+        $limit = '';
+        if(isset($offset['page']) && isset($offset['nums'])){
             $page = $offset['page'];
             $nums = $offset['nums'];
             $total = ($offset['page']-1)*$offset['nums'];
@@ -160,7 +165,7 @@ class Fans_model extends CI_Model {
     }
 
 
-    public function count_hotel_fans($inter_id){
+    function count_hotel_fans($inter_id){
 
         $db = $this->load->database('iwide_r1',true);
 
@@ -176,7 +181,7 @@ class Fans_model extends CI_Model {
     }
 
 
-    public function  lastday_cancel($inter_id,$today,$last_day){
+    function  lastday_cancel($inter_id,$today,$last_day){
 
         $db = $this->load->database('iwide_r1',true);
 
@@ -196,16 +201,16 @@ class Fans_model extends CI_Model {
 
     }
 
-    public function distributed_fans($inter_id,$distribute=1){
+    function distributed_fans($inter_id,$distribute=1){
 
         $db = $this->load->database('iwide_r1',true);
 
         $sql = "
         SELECT
-          count(1) total,c1.hotel_id
+          count(*) total,c1.hotel_id
         FROM
           (SELECT
-              t2.hotel_id
+              t2.*
           FROM
               `iwide_fans_subs` t1,
               `iwide_hotel_staff` t2
@@ -225,6 +230,268 @@ class Fans_model extends CI_Model {
         ";
 
         $res = $db->query($sql)->result_array($sql);
+
+        return $res;
+
+    }
+
+
+    function total_fans($inter_id,$params=array()){
+
+        $db = $this->load->database('iwide_r1',true);
+
+        $db->select('*');
+        $db->select("count(id) total");
+        $db->from(self::TAB_FANS_SUBS);
+        $cur_status = isset($params['cur_status'])?$params['cur_status']:1;
+
+        if(isset($params['hotel_id']))$db->where('hotel_id',$params['hotel_id']);
+
+        if(isset($params['startdate'])){
+            $db->where('event_time >',$params['startdate']);
+        }
+
+        if(isset($params['enddate'])){
+            $db->where('event_time <',$params['enddate']);
+        }
+
+        $db->where('inter_id',$inter_id);
+
+        $db->group_by('cur_status');
+        $db->order_by('event_time');
+
+        $result = $db->get()->result_array();
+
+        $res = array(
+            'total'=>0,
+            'cancel'=>0
+        );
+
+        if(!empty($result)){
+            foreach($result as $arr){
+                if($arr['cur_status']==1){
+                    $res['total'] = $arr['total'];
+                }else{
+                    $res['cancel'] = $arr['total'];
+                }
+            }
+        }
+
+        return $res;
+
+
+    }
+
+
+
+    function count_con_fans($inter_id,$params=array(),$type="hotel",$source = ''){
+
+        $db = $this->load->database('iwide_r1',true);
+        $order_by = 'id DESC';
+
+        if($type=='date'){
+            $db->select("DATE_FORMAT(event_time,'%Y-%m-%d') date");
+            $group_by = 'date';
+            $order_by = "date ASC";
+        }elseif($type=='hotel'){
+            $db->select("hotel_id");
+            $group_by = 'hotel_id';
+        }
+
+        $db->select("count(id) total");
+
+        $db->from(self::TAB_FANS_SUBS);
+        $cur_status = isset($params['cur_status'])?$params['cur_status']:1;
+
+        if(isset($params['hotel_id']))$db->where('hotel_id',$params['hotel_id']);
+
+        if(isset($params['startdate'])){
+            $db->where('event_time >',"{$params['startdate']}");
+        }
+
+        if(isset($params['enddate'])){
+            $db->where('event_time <',"{$params['enddate']}");
+        }
+
+        if($source == -1){
+            $db->where('source <=',0);
+        }elseif($source == 1){
+            $db->where('source >',0);
+        }
+
+        $db->where('inter_id',$inter_id);
+        $db->where('cur_status',$cur_status);
+
+        $db->order_by($order_by);
+        $db->group_by($group_by);
+
+        $res = $db->get()->result_array();
+
+        if(!empty($res)){
+            $result = array();
+            foreach($res as $temp){
+                if($type=='hotel'){
+                    $result[$temp['hotel_id']]['total'] = $temp['total'];
+                    $result[$temp['hotel_id']]['hotel_id'] = $temp['hotel_id'];
+                }else{
+                    $result[$temp['date']]['total'] = $temp['total'];
+                    $result[$temp['date']]['date'] = $temp['date'];
+                }
+            }
+            $res = $result;
+        }
+
+        return $res;
+
+
+    }
+
+
+    function dis_fans($inter_id,$params,$type='hotel',$distribute = 1){
+
+        $db = $this->load->database('iwide_r1',true);
+        $con = '';
+        $order_by = '';
+
+        if($type=='hotel'){
+            $select = "SELECT count(t1.id) total,t1.hotel_id ";
+            $group = " GROUP BY t1.hotel_id";
+        }else{
+            $select = "SELECT count(t1.id) total,DATE_FORMAT(t1.event_time,'%Y-%m-%d') date ";
+            $group = " GROUP BY date";
+            $order_by = " ORDER BY date ASC";
+        }
+
+        if(isset($params['startdate']) && isset($params['enddate'])){
+            $con = " AND t1.event_time > '{$params['startdate']}' AND t1.event_time < '{$params['enddate']}'";
+        }
+
+        $cur_status = isset($params['cur_status'])?$params['cur_status']:1;
+        $con .= " AND t1.cur_status = {$cur_status}";
+
+        if($distribute==1){
+            $con .= " AND t2.is_distributed = 1";
+        }else{
+            $con .= " AND t2.is_distributed != 1";
+        }
+
+        $sql = $select."
+            FROM
+                `iwide_fans_subs` t1,
+                `iwide_hotel_staff` t2
+            WHERE
+                t1.inter_id = '{$inter_id}'
+            AND
+                t1.inter_id = t2.inter_id
+            AND
+                t1.source > 0
+            AND
+                t1.source = t2.qrcode_id
+            ".$con.$group.$order_by;
+
+        $res =  $db->query($sql)->result_array();
+
+        if(!empty($res)){
+            $result = array();
+            foreach($res as $temp){
+                if($type=='hotel'){
+                    $result[$temp['hotel_id']]['total'] = $temp['total'];
+                    $result[$temp['hotel_id']]['hotel_id'] = $temp['hotel_id'];
+                }else{
+                    $result[$temp['date']]['total'] = $temp['total'];
+                    $result[$temp['date']]['date'] = $temp['date'];
+                }
+            }
+            $res = $result;
+        }
+
+        return $res;
+
+    }
+
+
+
+    function dept_fans($inter_id,$params,$cur_status = 1){
+
+        $db = $this->load->database('iwide_r1',true);
+
+        $select = "SELECT count(t1.id) total,t2.master_dept,DATE_FORMAT(t1.event_time,'%Y-%m-%d') date ";
+        $group = " GROUP BY date,t2.master_dept";
+        $order_by = " ORDER BY date ASC";
+
+        if(isset($params['startdate']) && isset($params['enddate'])){
+            $con = " AND t1.event_time > '{$params['startdate']}' AND t1.event_time < '{$params['enddate']}'";
+        }
+
+        $con .= " AND t1.cur_status = {$cur_status}";
+
+        if(isset($params['hotel_id'])){
+            $con .= " AND t1.hotel_id = {$params['hotel_id']}";
+        }
+
+        $sql = $select."
+            FROM
+                `iwide_fans_subs` t1,
+                `iwide_hotel_staff` t2
+            WHERE
+                t1.inter_id = '{$inter_id}'
+            AND
+                t1.inter_id = t2.inter_id
+            AND
+                t1.source > 0
+            AND
+                t1.source = t2.qrcode_id
+            AND
+                t2.master_dept !=''
+            ".$con.$group.$order_by;
+
+        $res =  $db->query($sql)->result_array();
+
+        return $res;
+
+    }
+
+
+    function getarticlesummary($inter_id){
+
+        $ci =& get_instance();
+        $ci->load->helper('common');
+        $ci->load->library('Cache/Redis_proxy',array(
+            'not_init'=>FALSE,
+            'module'=>'common',
+            'refresh'=>FALSE,
+            'environment'=>ENVIRONMENT
+        ),'redis_proxy');
+
+        $redis=$ci->redis_proxy;
+
+        $key = 'wx_article_'.$inter_id;
+
+        $res = $redis->hGetAll($key);
+
+        return $res;
+
+    }
+
+
+    function setarticlesummary($inter_id,$date='',$data=array()){
+
+        $ci =& get_instance();
+        $ci->load->helper('common');
+        $ci->load->library('Cache/Redis_proxy',array(
+            'not_init'=>FALSE,
+            'module'=>'common',
+            'refresh'=>FALSE,
+            'environment'=>ENVIRONMENT
+        ),'redis_proxy');
+
+        $redis=$ci->redis_proxy;
+
+        $key = 'wx_article_'.$inter_id;
+
+        $data = json_encode($data);
+
+        $res = $redis->hSet($key, $date, $data);
 
         return $res;
 

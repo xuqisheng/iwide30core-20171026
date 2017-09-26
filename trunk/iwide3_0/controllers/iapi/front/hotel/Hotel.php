@@ -98,7 +98,7 @@ class Hotel extends MY_Front_Hotel_Iapi {
 			unset($data['s']);
         	$this->out_put_msg(1,'',$data,'hotel/hotel/saveorder');
 		}else{
-        	$this->out_put_msg(2,$data['errmsg'],'','hotel/hotel/saveorder');
+        	$this->out_put_msg(3,$data['errmsg'],'','hotel/hotel/saveorder');
 		}
 	}
 	function add_hotel_collection() {
@@ -106,7 +106,7 @@ class Hotel extends MY_Front_Hotel_Iapi {
 		if($data>0){
         	$this->out_put_msg(1,'已收藏',array('mid'=>$data),'hotel/hotel/add_hotel_collection');
 		}else{
-        	$this->out_put_msg(2,'收藏失败','','hotel/hotel/add_hotel_collection');
+        	$this->out_put_msg(3,'收藏失败','','hotel/hotel/add_hotel_collection');
 		}
 	}
 	function clear_visited_hotel() {

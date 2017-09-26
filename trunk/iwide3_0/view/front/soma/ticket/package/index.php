@@ -81,7 +81,7 @@
         <?php foreach( $products as $k=>$v ):?>
             <div class="bg_fff containers m_b_12 clearfix">
                 <a href="">
-                    <div class="con_img"><img src="<?php echo isset($v['face_img']) ? $v['face_img'] : base_url('public/soma/images/default.jpg'); ?>"></div>
+                    <div class="con_img"><img src="<?php echo isset($v['face_img']) ? $v['face_img'] : get_cdn_url('public/soma/images/default.jpg'); ?>"></div>
                     <div class="contents">
                         <div class="cont_title text_ellipsis"><?php echo $v['name'];?></div>
                         <div class="cont_txt"><?php echo $v['hotel_name'];?></div>

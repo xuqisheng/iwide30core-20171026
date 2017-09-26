@@ -1,10 +1,10 @@
 <?php
 class Roomservice_Orders_Model extends MY_Model{
-	function __construct() {
-		parent::__construct ();
-	}
+    function __construct() {
+        parent::__construct ();
+    }
 
-	const TAB_ORDERS = 'roomservice_orders';
+    const TAB_ORDERS = 'roomservice_orders';
     const TAB_ORDERS_ITEM = 'roomservice_orders_item';
 
     //订单状态
@@ -45,28 +45,28 @@ class Roomservice_Orders_Model extends MY_Model{
         4   =>  '威富通',
     );
 
-	public function get_resource_name()
-	{
-		return 'Roomservice_Orders_Model';
-	}
+    public function get_resource_name()
+    {
+        return 'Roomservice_Orders_Model';
+    }
 
-	public static function model($className=__CLASS__)
-	{
-		return parent::model($className);
-	}
+    public static function model($className=__CLASS__)
+    {
+        return parent::model($className);
+    }
 
-	/**
-	 * @return string the associated database table name
-	 */
-	public function table_name()
-	{
-		return self::TAB_ORDERS;
-	}
+    /**
+     * @return string the associated database table name
+     */
+    public function table_name()
+    {
+        return self::TAB_ORDERS;
+    }
 
-	public function table_primary_key()
-	{
-		return 'id';
-	}
+    public function table_primary_key()
+    {
+        return 'id';
+    }
 
     /**
      * 后台管理的表格中要显示哪些字段
@@ -93,8 +93,8 @@ class Roomservice_Orders_Model extends MY_Model{
 
     /**
      * 获取某一页的数据，同时返回记录总数
-     * @access 	public
-     * @return 	int
+     * @access  public
+     * @return  int
      */
     public function get_page(array $filter,  $page, $page_size, $order_by=array()){
         $where= $this->gen_where_sql($filter);
@@ -105,8 +105,8 @@ class Roomservice_Orders_Model extends MY_Model{
 
     /**
      * 获取指定条件的记录总数
-     * @access 	public
-     * @return 	int
+     * @access  public
+     * @return  int
      */
     public function get_count($filter = NULL, $where = NULL) {
         //条件
@@ -121,8 +121,8 @@ class Roomservice_Orders_Model extends MY_Model{
 
     /**
      * 获取指定条件的记录列表
-     * @access 	public
-     * @return 	int
+     * @access  public
+     * @return  int
      */
     public function get_list(array $filter = NULL, $page = 0, $page_size = 0, array $order_by = NULL,$where = NULL){
         //条件
@@ -141,9 +141,9 @@ class Roomservice_Orders_Model extends MY_Model{
     }
     /**
      * 创建查询条件sql语句
-     * @access 	public
-     * @param 	array	$filter 需要操作的数组
-     * @return 	string
+     * @access  public
+     * @param   array   $filter 需要操作的数组
+     * @return  string
      */
     public function gen_where_sql($filter){
         $arr_where = array();
@@ -201,8 +201,8 @@ class Roomservice_Orders_Model extends MY_Model{
 
     /**
      * 获取某一页的数据，同时返回记录总数
-     * @access 	public
-     * @return 	int
+     * @access  public
+     * @return  int
      */
     public function get_page_ticket(array $filter,  $page, $page_size, $order_by=array()){
         $where= $this->ticket_where_sql($filter);
@@ -213,8 +213,8 @@ class Roomservice_Orders_Model extends MY_Model{
 
     /**
      * 获取指定条件的记录总数
-     * @access 	public
-     * @return 	int
+     * @access  public
+     * @return  int
      */
     public function get_count_ticket($filter = NULL, $where = NULL) {
         //条件
@@ -229,8 +229,8 @@ class Roomservice_Orders_Model extends MY_Model{
 
     /**
      * 获取指定条件的记录列表
-     * @access 	public
-     * @return 	int
+     * @access  public
+     * @return  int
      */
     public function get_list_ticket(array $filter = NULL, $page = 0, $page_size = 0, array $order_by = NULL,$where = NULL){
         //条件
@@ -251,9 +251,9 @@ class Roomservice_Orders_Model extends MY_Model{
 
     /**
      * 创建查询条件sql语句
-     * @access 	public
-     * @param 	array	$filter 需要操作的数组
-     * @return 	string
+     * @access  public
+     * @param   array   $filter 需要操作的数组
+     * @return  string
      */
     public function ticket_where_sql($filter){
         $arr_where = array();
@@ -307,9 +307,9 @@ class Roomservice_Orders_Model extends MY_Model{
 
     /**
      * 创建排序sql语句
-     * @access 	public
-     * @param 	array	$data 需要操作的数组
-     * @return 	string
+     * @access  public
+     * @param   array   $data 需要操作的数组
+     * @return  string
      */
     public function gen_order_by_sql($data){
         $arr_order_by = '';
@@ -322,10 +322,10 @@ class Roomservice_Orders_Model extends MY_Model{
 
     /**
      * 取得列表限定记录数
-     * @access 	public
-     * @param   string		$page 当前页数
-     * @param   boolean		$page_size	偏移量
-     * @return  string		拼装的sql语句
+     * @access  public
+     * @param   string      $page 当前页数
+     * @param   boolean     $page_size  偏移量
+     * @return  string      拼装的sql语句
      */
     public function gen_limit($page, $page_size){
         $page = intval($page);

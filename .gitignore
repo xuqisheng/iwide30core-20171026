@@ -8,3 +8,5 @@ config/
 .DS_Store
 */.svn/*.db
 .svn/*.db
+.tags*
+.gitignore
