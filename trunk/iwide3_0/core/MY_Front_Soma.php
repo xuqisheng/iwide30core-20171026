@@ -123,7 +123,7 @@ class MY_Front_Soma extends MY_Front
     public $statis_code = '';
     public $sign_update_code = '';
     //商城读取vue目录
-    public $path = 'somacom';
+    public $path = 'soma_com';
 
     /**
      * 例如，雅斯特酒店不叫储值，叫雅币
@@ -211,7 +211,7 @@ class MY_Front_Soma extends MY_Front
                     if($val['tkid'] == $this->input->get('tkid')){
                         $_GET['brandname'] = $val['brandname'];
                         $this->version = 2;
-                        $this->path = 'somaccor';
+                        $this->path = 'soma_accor';
                         break;
                     }
                 }

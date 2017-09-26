@@ -27,7 +27,8 @@ class Vapi extends MY_Admin_Iapi
         $this->admin_profile = $this->session->userdata['admin_profile'];
 
         $this->hotels =  $this->session->get_admin_hotels();
-        $this->hotel_ids  = explode(",",$this->hotels);
+        if(!empty($this->hotels))
+            $this->hotel_ids  = explode(",",$this->hotels);
 
     }
 

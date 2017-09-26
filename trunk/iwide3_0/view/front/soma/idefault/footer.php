@@ -65,5 +65,6 @@
             //[<sign_update_code>]
             <?php echo isset($statistics_js) ? $statistics_js :'' ;?>
         </script>
+
     </body>
 </html>
